@@ -572,7 +572,7 @@ CVEC.TEST.SCALARS := function(p,d)
 end;
 
 CVEC.TEST.MATMUL := function(p,d)
-  local a,aold,b,bold,c1,c2,c3,c4,ca,cb,f,fc,i,l,lev,q,r,s,t;
+  local a,aold,b,bold,c1,c2,c3,c4,c5,c6,ca,cb,f,fc,i,l,lev,q,r,s,t;
   if p^d > MAXSIZE_GF_INTERNAL then
       Error("Test is only for finite fields implemented in GAP");
       return;
@@ -610,10 +610,23 @@ CVEC.TEST.MATMUL := function(p,d)
   c3 := a * b;
   UnGreaseMat(b);
   fc := ca![1];
-  lev := fc![8];
-  fc![8] := 0;
+  lev := b!.greasehint;
+  b!.greasehint := 0;   # do not grease
   c4 := a * b;
-  fc![8] := lev;
+  b!.greasehint := lev;
+  c5 := 0*[1..Length(a)+1];
+  Unbind(c5[1]);
+  for i in [1..Length(a)] do
+      c5[i+1] := a[i] * b;
+  od;
+  c5 := CVEC.CMatMaker(c5,cb);
+  GreaseMat(b);
+  c6 := 0*[1..Length(a)+1];
+  Unbind(c6[1]);
+  for i in [1..Length(a)] do
+      c6[i+1] := a[i] * b;
+  od;
+  c6 := CVEC.CMatMaker(c6,cb);
 
   if List(c1,FFEList) <> List(c2,x->List(x,y->y)) then
       Print("Alarm p=",p," d=",d," std matmul            \n");
@@ -626,6 +639,14 @@ CVEC.TEST.MATMUL := function(p,d)
   if c1 <> c4 then
       Print("Alarm p=",p," d=",d," ungreased matmul            \n");
       Error("You can inspect c1, c2, c3, c4");
+  fi;
+  if c1 <> c5 then
+      Print("Alarm p=",p," d=",d," ungreased vec*mat             \n");
+      Error("You can inspect c1, c2, c3, c4, c5");
+  fi;
+  if c1 <> c6 then
+      Print("Alarm p=",p," d=",d," greased vec*mat             \n");
+      Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
 end;
 

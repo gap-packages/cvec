@@ -865,7 +865,7 @@ InstallMethod( CSca, "for a list of coefficients and a cvecclass",
         Error("CSca: not a class of finite field scalars"); 
         return fail;
     fi;
-    v := CVEC.New(c);
+    v := CVEC.NEW(c);
     CVEC.INTREP_TO_CSCA(l,v);
     MakeImmutable(v);
     return v;
@@ -1449,7 +1449,7 @@ InstallOtherMethod( ZeroImmutable, "for a cmat",
   function(m)
     local i,l,res,v;
     l := [];
-    v := CVEC.New(m!.vecclass);
+    v := CVEC.NEW(m!.vecclass);
     MakeImmutable(v);
     for i in [2..m!.len+1] do
         l[i] := v;
@@ -1464,7 +1464,7 @@ InstallOtherMethod( ZeroMutable, "for a cmat",
     local i,l;
     l := [];
     for i in [2..m!.len+1] do
-        l[i] := CVEC.New(m!.vecclass);
+        l[i] := CVEC.NEW(m!.vecclass);
     od;
     return CVEC.CMatMaker(l,m!.vecclass);
   end);
@@ -1486,7 +1486,7 @@ InstallOtherMethod( OneMutable, "for a cmat",
         Error("OneMutable: cmat is not square");
         return fail;
     fi;
-    v := CVEC.New(m!.vecclass);
+    v := CVEC.NEW(m!.vecclass);
     l := 0*[1..m!.len+1];
     one := One(m!.scaclass);
     for i in [1..m!.len] do
@@ -1595,7 +1595,7 @@ InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
 InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
   [IsCVecRep, IsCMatRep and IsMatrix],
   function(v,m)
-    local i,res,vcl;
+    local i,res,vcl,s,z;
     vcl := CVEC.CVecClass(v);
     if not(IsIdenticalObj(vcl![5],m!.scaclass)) then
         Error("\\*: incompatible base fields");
@@ -1603,10 +1603,8 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
     if Length(v) <> m!.len then
         Error("\\*: lengths not equal");
     fi;
-    res := CVEC.New(m!.vecclass);  # the result
-    for i in [1..Length(v)] do
-        AddRowVector(res,m!.rows[i+1],v[i]);
-    od;
+    res := CVEC.NEW(m!.vecclass);  # the result
+    CVEC.PROD_CVEC_CMAT_NOGREASE(res,v,m!.rows);
     if not(IsMutable(v)) then
         MakeImmutable(res);
     fi;
@@ -1624,16 +1622,8 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
     if Length(v) <> m!.len then
         Error("\\*: lengths not equal");
     fi;
-    res := CVEC.New(m!.vecclass);  # the result
-    l := m!.greaselev;
-    pos := 1;
-    for i in [1..m!.greaseblo] do
-        val := CVEC.EXTRACT(v,pos,l);
-        if val <> 0 then
-            AddRowVector(res,m!.greasetab[i][m!.spreadtab[val+1]]);
-        fi;
-        pos := pos + l;
-    od;
+    res := CVEC.NEW(m!.vecclass);  # the result
+    CVEC.PROD_CVEC_CMAT_GREASED(res,v,m!.greasetab,m!.spreadtab,m!.greaselev);
     if not(IsMutable(v)) then
         MakeImmutable(res);
     fi;

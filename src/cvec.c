@@ -2548,6 +2548,59 @@ STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
     return 0L;
 }
 
+STATIC Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
+/* Note that m is the list of vectors with first component unbound. */
+{
+    PREPARE_clfi(u,ucl,ufi);
+    PREPARE_cl(v,vcl);
+    PREPARE_d(ufi);
+    Int k = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+    Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
+    Word *uu = DATA_CVEC(u);
+    Word *vv = DATA_CVEC(v);
+    register Int i;
+
+    if (d == 1) {
+        Int s;
+        for (i = 1;i <= k;i++) {
+            s = CVEC_Itemp(ufi,vv,i);
+            if (s) ADDMUL_INL(uu,DATA_CVEC(ELM_PLIST(m,i+1)),ufi,s,wordlen);
+        }
+    } else {   /* d > 1 */
+        for (i = 1;i <= k;i++) {
+            CVEC_Itemq(ufi,vv,i);
+            if (sclen != 1 || scbuf[0] != 0) 
+                ADDMUL_INT(u, ucl, ufi, ELM_PLIST(m,i+1), d, scbuf, 0, wordlen);
+        }
+    }
+    return 0L;
+}
+
+STATIC Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
+                                  Obj spreadtab, Obj glev)
+{
+    PREPARE_clfi(u,ucl,ufi);
+    PREPARE_cl(v,vcl);
+    Int k = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+    Int lev = INT_INTOBJ(glev);
+    Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
+    Word *uu = DATA_CVEC(u);
+    register Int i;
+    register Int pos;
+    register Obj w;
+    register Word val;
+
+    for (i = 1,pos = 1;pos <= k;pos += lev,i++) {
+        val = INT_INTOBJ(EXTRACT(self, v, INTOBJ_INT(pos), glev));
+        if (val != 0) {
+            val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
+            w = ELM_PLIST(ELM_PLIST(mgreasetab,i),val);
+            ADD2_INL(uu,DATA_CVEC(w),ufi,wordlen);
+        }
+    }
+    return 0;
+}
+
 STATIC Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab, 
                                   Obj spreadtab, Obj len, Obj glev)
 {  /* See mult. routine "for two cmats, second one greased" in cvec.gi */
@@ -2897,6 +2950,14 @@ static StructGVarFunc GVarFuncs [] = {
   { "FILL_GREASE_TAB", 6, "li, i, l, tab, tablen, offset",
      FILL_GREASE_TAB,
      "cvec.c:FILL_GREASE_TAB" },
+
+  { "PROD_CVEC_CMAT_NOGREASE", 3, "u, v, m",
+    PROD_CVEC_CMAT_NOGREASE,
+    "cvec.c:PROD_CVEC_CMAT_NOGREASE" },
+
+  { "PROD_CVEC_CMAT_GREASED", 5, "u, v, mgreasetab, spreadtab, glev",
+    PROD_CVEC_CMAT_GREASED,
+    "cvec.c:PROD_CVEC_CMAT_GREASED" },
 
   { "PROD_CMAT_CMAT_GREASED", 6, "l, m, ngreasetab, spreadtab, len, glev",
     PROD_CMAT_CMAT_GREASED,

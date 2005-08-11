@@ -9,3 +9,4 @@ ReadPackage("cvec","gap/cvec.gi");
 ReadPackage("cvec","gap/matrix.gi");
 ReadPackage("cvec","gap/test.gi");
 
+ReadPackage("cvec","gap/ex.g");
