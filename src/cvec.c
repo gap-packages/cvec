@@ -2274,8 +2274,9 @@ STATIC Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
     Word res = 0UL;
     Word *p = DATA_CVEC(v) + (i / elsperword) * d;
     Int rest = i % elsperword;
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
 
-    if (i+1+l > INT_INTOBJ(ELM_PLIST(cl,IDX_len))) overflow = 1;
+    if (((i+l-1)/elsperword)*d >= wordlen) overflow = 1;
     /* In that case we do not look over the last word, fortunately, this
      * can only happen in the ugly cases and we only have to skip the
      * second step. */
@@ -2420,8 +2421,9 @@ STATIC Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
     Int i = INT_INTOBJ(ii)-1;  /* 0 based from here */
     Int l = INT_INTOBJ(ll);
     Int rest = i % elsperword;
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
 
-    if (i+1+l > INT_INTOBJ(ELM_PLIST(cl,IDX_len))) 
+    if (((i+l-1)/elsperword)*d >= wordlen) 
         VecEx_overflow = 1;
         /* In that case we do not look over the last word, fortunately, this
          * can only happen in the ugly cases and we only have to skip the
