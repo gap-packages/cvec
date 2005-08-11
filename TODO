@@ -1,0 +1,70 @@
+Tasks to do:
+
+> * ADDMUL2, ADDMUL3 (for AddRowVector and SumRowVector)
+> * GET_ELM, ASS_ELM
+> * FFE_TO_INT
+> * FIRST_NONZERO
+> * COMPARE
+> * GAP-Ebene:
+>   - AddRowVector, MulRowVector, +, *, ConvertToVectorRep,
+>     ConvertToIntRep, PositionNonZero, 
+>     (Mutability beachten!)
+>   - Assignment, Elementzugriff, <, =
+>   Characteristic
+>   DegreeFFE
+>   BaseField
+>   PrintObj und Display fuer Koerper, Klassen und Vektoren
+
+>   Skalare
+    
+> * Matrizen auf GAP-Ebene
+>   Kreation, 
+>   Add, 
+>   Remove, 
+>   Zeilenzugriff (R/W), 
+>   Append, 
+>   Concatenation,
+>   Slicing, 
+>   IsBound, 
+>   Unbind (nur am Ende), 
+> * ViewObj, PrintObj, Display
+>   Addition, Negation, Subtraktion,
+>   Multiplikation mit Skalaren
+
+> * vector * matrix
+
+> * Greasing-Helper (C)
+> * Matrix Multiplikation auf GAP-Ebene mit grease
+> * Matrix Multiplikation, wenn noch nicht gegreased
+  * Vector * Matrix in C
+
+  * SLICE(v,w,start,end,dest)
+  * Slicing, Slicing-Assignment auf GAP-Ebene
+
+  * Extrep (C), I/O
+
+  * RankMat testen
+  * SemiEchelonMat and friends testen
+  * matrix.g{d,i} durchschauen auf Benutzbarkeit
+  * DeterminantMat testen
+
+  * C-Mtx-Binaer-Format Lesen/Schreiben
+
+  * IsMutable-Durchgang durch cvec.gi
+
+  * Beweis, dass keine CHANGED_BAGs fehlen
+  * Speed von Matrix Mult auf Pentium 4 testen
+
+  * GAP-Lib: MutableCopyMat, GF, LargeGaloisField --> operationen --> 4.4
+  * Weitere Wurzeln, Sqrt in Ordnung bringen
+  * Dokumentation
+
+  ? ADDMUL3 auf GAP-Ebene fuer \- ?
+  ? DistanceVecFFE ?
+  ? NumberFFVector ?
+  ? CVec Creationsmethode von Liste unserer Skalare
+  ? Append und Concatenation fuer CVecs
+  ? Sort fuer CMats?, 
+
+  * Debug
+
