@@ -1653,7 +1653,9 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
         lev := n!.greasehint;
         if lev = 0 or n!.len * (q-1) * lev <= (n!.len + vcl![1]![9]) * q then   
             # no greasing at all!
-            CVEC.PROD_CMAT_CMAT_NOGREASE(l,m!.rows,n!.rows);
+            CVEC.PROD_CMAT_CMAT_NOGREASE2(l,m!.rows,n!.rows);
+            # we use version 2, which unpacks full rows of m instead of
+            # extracting single field entries.
         else
             spreadtab := CVEC.MakeSpreadTab(vcl![1]![1],    # p
                                             vcl![1]![2],    # d,

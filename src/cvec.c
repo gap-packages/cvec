@@ -2967,6 +2967,10 @@ static StructGVarFunc GVarFuncs [] = {
     PROD_CMAT_CMAT_NOGREASE,
     "cvec.c:PROD_CMAT_CMAT_NOGREASE" },
 
+  { "PROD_CMAT_CMAT_NOGREASE2", 3, "l, m, n",
+    PROD_CMAT_CMAT_NOGREASE2,
+    "cvec.c:PROD_CMAT_CMAT_NOGREASE2" },
+
   { "PROD_CMAT_CMAT_WITHGREASE", 6, "l, m, n, greasetab, spreadtab, glev",
     PROD_CMAT_CMAT_WITHGREASE,
     "cvec.c:PROD_CMAT_CMAT_WITHGREASE" },
