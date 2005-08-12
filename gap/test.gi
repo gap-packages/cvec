@@ -682,6 +682,26 @@ CVEC.TEST.SLICE := function(p,d)
   od;
 end;
 
+CVEC.TEST.IO := function(p,d)
+  local l,m,mm,n,q;
+  q := p^d;
+  m := CVEC.RandomMat(Random([50..100]),Random([50..100]),p,d);
+  n := CVEC.RandomMat(Random([50..100]),Random([50..100]),p,d);
+  CVEC.WriteMatToFile("TEMP_MATRIX_CAN_BE_REMOVED",m);
+  mm := CVEC.ReadMatFromFile("TEMP_MATRIX_CAN_BE_REMOVED");
+  if m <> mm then
+      Error("Alarm p=",p," d=",d," IO, you can inspect m and mm");
+  fi;
+  IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED");
+  CVEC.WriteMatsToFile("TEMP_MATRIX_CAN_BE_REMOVED.",[m,n]);
+  l := CVEC.ReadMatsFromFile("TEMP_MATRIX_CAN_BE_REMOVED.");
+  if l = fail or l[1] <> m or l[2] <> n then
+      Error("Alarm p=",p," d=",d," IO, you can inspect m, n and l");
+  fi;
+  IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED.1");
+  IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED.2");
+end;
+
 CVEC.TEST.DOALL := function()
   local inf;
   inf := InfoLevel(InfoWarning);
@@ -737,6 +757,7 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.SLICE(3,3);
   Print("Testing SLICE 2^4 (bitsperel=1)...\r");
   CVEC.TEST.SLICE(2,4);
+  CVEC.TEST.ALLCHEAP("IO", CVEC.TEST.IO);
   SetInfoLevel(InfoWarning,inf);
 end;
 

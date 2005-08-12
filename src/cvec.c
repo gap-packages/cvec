@@ -20,6 +20,7 @@ const char * Revision_pl_c =
 
 /* Our basic unit is a C unsigned long: */
 typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
+#define Word32 UInt4
 
 #define WORDALLONE (~(0UL))
 #define BYTESPERWORD sizeof(Word)
@@ -153,6 +154,12 @@ STATIC Obj TEST_ASSUMPTIONS(Obj self)
 #else
     return INTOBJ_INT(0);
 #endif
+#ifdef SYS_IS_64_BIT
+    if (sizeof(Word) != 8) return INTOBJ_INT(5);
+#else
+    if (sizeof(Word) != 4) return INTOBJ_INT(6);
+#endif
+    if (sizeof(Word32) != 4) return INTOBJ_INT(7);
 }
 
 STATIC Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
@@ -180,6 +187,7 @@ STATIC Obj FINALIZE_FIELDINFO(Obj self, Obj f)
     PREPARE_bpe(f);
     PREPARE_epw(f);
 
+    /* GARBAGE COLLECTION POSSIBLE */
     s = NEW_STRING(sizeof(Word) * 4);
     po = (Word *) CHARS_STRING(s);
     if (p & 1) {   /* Odd characteristic */
@@ -261,6 +269,7 @@ STATIC Obj NEW(Obj self, Obj cl)
     Obj type = ELM_PLIST(cl,IDX_type);
 
     si = sizeof(Word) * INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+    /* GARBAGE COLLECTION POSSIBLE */
     v = NewBag( T_DATOBJ, sizeof( Obj ) + si );
     if (v == 0L) {
         return OurErrorBreakQuit("CVEC.NEW: Cannot allocate memory");
@@ -540,6 +549,7 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
         if (size > 0) {    /* we want to create scalars: */
             register Obj tmp;
             for (j = 1;j <= len;j++) {
+                /* GARBAGE COLLECTION POSSIBLE */
                 tmp = NEW(self,sca);
                 if (tmp == 0) return 0L;
                 SET_ELM_PLIST(l,j,tmp);
@@ -1987,6 +1997,7 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
 
         if (size >= 1) {   /* The field has more than 65536 elements */
             /* Let's allocate a new scalar first: */
+            /* GARBAGE COLLECTION POSSIBLE */
             tmp = NEW(self,ELM_PLIST(cl,IDX_scaclass));
             /* Here, a garbage collection might occur, however, all our
              * variables survive this, as they are pointers to master
@@ -2217,6 +2228,7 @@ STATIC Obj CSCA_INV2(Obj self, Obj u, Obj v)
         /* First copy to scbuf because invert_Fq destroys original: */
         memcpy(scbuf,vd,sizeof(Word)*d);
         /* Now we need space, allocate a bag: */
+        /* GARBAGE COLLECTION POSSIBLE */
         tmp = NewBag(T_DATOBJ,sizeof(Int)*(d+1)*5);
         if (tmp == 0) {
             return OurErrorBreakQuit(
@@ -2729,6 +2741,7 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
         Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
         if (d == 1) {
             /* A temporary buffer */
+            /* GARBAGE COLLECTION POSSIBLE */
             buf = NEW_PLIST( T_PLIST, k );
             SET_LEN_PLIST( buf, k );
             for (j = 2;j <= t+1;j++) {
@@ -2746,6 +2759,7 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
         } else {
             /* A temporary buffer */
             if (size < 2) {
+                /* GARBAGE COLLECTION POSSIBLE */
                 buf = NEW_PLIST( T_PLIST, k );
                 SET_LEN_PLIST( buf, k );
                 for (j = 2;j <= t+1;j++) {
@@ -2761,6 +2775,7 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
                     }
                 }
             } else {
+                /* GARBAGE COLLECTION POSSIBLE */
                 buf = NEW_PLIST( T_PLIST, k*d );
                 SET_LEN_PLIST( buf, k*d );
                 for (j = 2;j <= t+1;j++) {
@@ -2914,6 +2929,249 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
     }
     return 0L;
 }
+
+STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
+{
+    PREPARE_clfi(v,cl,fi);
+    PREPARE_d(fi);
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+
+    /* Unfortunately there are four cases: LITTLE/BIG ENDIAN, 32bit/64bit: */
+#ifndef SYS_IS_64_BIT
+    /* Here we assume 32bit, see TEST_ASSUMPTIONS. */
+
+    /* To get rid of a warning: */
+    d=d;
+
+    /* GARBAGE COLLECTION POSSIBLE */
+    GrowString(s,wordlen*BYTESPERWORD);
+    SET_LEN_STRING(s,wordlen*BYTESPERWORD);
+
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+    /* We are on a little endian machine, we just copy: */
+    memcpy(CHARS_STRING(s),DATA_CVEC(v),wordlen*BYTESPERWORD);
+# else
+    /* Big endian machine, swap bytes: */
+    register unsigned char *p;
+    register unsigned char *q;
+    /* Do a byte copy: */
+    p = (unsigned char *) DATA_CVEC(v);
+    q = (unsigned char *) CHARS_STRING(s);
+    while (--wordlen >= 0) {
+        q[3] = p[0];
+        q[2] = p[1];
+        q[1] = p[2];
+        q[0] = p[3];
+        p += 4;
+        q += 4;
+    }
+# endif
+    
+#else
+    /* From here on 64bit machine, we need some more variables: */
+    PREPARE_epw(fi);
+    PREPARE_bpe(fi);
+    Int len = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+    /* How would things be in a 32bit world? */
+    Int elsperword32 = elsperword/2;
+    /* note that elsperword is always even on 64bit machines! */
+    Word wordlen32 = (len + elsperword32 - 1)/elsperword32;
+    Word mask = (1UL << (elsperword32 * bitsperel))-1;
+    register Word *p;
+    register Word wo;
+    register int shift = elsperword32 * bitsperel;
+    register int k;
+
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+    /* We are on a little endian machine, we copy, but have to
+     * work for upper halves and lower halves separatedly. */
+
+    register Word32 *q;
+
+    wordlen /= d;   /* We remember the factor d ourselves! */
+
+    /* GARBAGE COLLECTION POSSIBLE */
+    GrowString(s,wordlen32*4*d);
+    SET_LEN_STRING(s,wordlen32*4*d);
+
+    if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
+    p = DATA_CVEC(v);
+    q = (Word32 *) CHARS_STRING(s);
+    while (--wordlen >= 0) {
+        for (k = d-1;k >= 0;k--) {
+            wo = *p++;
+            *q = (Word32) (wo & mask);
+            q[d] = (Word32) (wo >> shift);
+            q++;
+        }
+        q += d;   /* Skip upper halves in result */
+    }
+    if (wordlen32 & 1 != 0) {  /* Handle last half of word: */
+        for (k = d-1;k >= 0;k--)
+            *q++ = (Word32) (*p++ & mask);
+    }
+# else
+    /* Big endian machine with 64 bit, now it becomes ugly! */
+    /* We have to work for upper halves and lower halves separatedly and
+     * to swap bytes around! */
+
+    register Word32 wo32;
+    register unsigned char *q;
+    
+    wordlen /= d;   /* We remember the factor d ourselves! */
+    
+    /* GARBAGE COLLECTION POSSIBLE */
+    GrowString(s,wordlen32*4*d);
+    SET_LEN_STRING(s,wordlen32*4*d);
+
+    if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
+    p = DATA_CVEC(v);
+    q = (unsigned char *) CHARS_STRING(s);
+    while (--wordlen >= 0) {
+        for (k = d-1;k >= 0;k--) {
+            wo = *p++;
+            wo32 = (Word32) (wo & mask);
+            *q = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[1] = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[2] = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[3] = (unsigned char) (wo32 & 0xff);
+            q += d * 4;
+            wo32 = (Word32) (wo >> shift);
+            *q = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[1] = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[2] = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[3] = (unsigned char) (wo32 & 0xff);
+            q -= d * 4 - 4;
+        }
+        q += d*4;   /* Skip upper halves in result */
+    }
+    if (wordlen32 & 1 != 0) {  /* Handle last half of word: */
+        for (k = d-1;k >= 0;k--) {
+            wo32 = (Word32) (*p++ & mask);
+            *q = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[1] = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[2] = (unsigned char) (wo32 & 0xff); wo32 >>= 8;
+            q[3] = (unsigned char) (wo32 & 0xff);
+            q += 4;
+        }
+    }
+# endif
+#endif
+    return 0L;
+}
+
+STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
+{
+    PREPARE_clfi(v,cl,fi);
+    PREPARE_d(fi);
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+
+    /* Unfortunately there are four cases: LITTLE/BIG ENDIAN, 32bit/64bit: */
+#ifndef SYS_IS_64_BIT
+    /* Here we assume 32bit, see TEST_ASSUMPTIONS. */
+
+    /* To get rid of a warning: */
+    d=d;
+
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+    /* We are on a little endian machine, we just copy: */
+    memcpy(DATA_CVEC(v),CHARS_STRING(s),wordlen*BYTESPERWORD);
+# else
+    /* Big endian machine, swap bytes: */
+    register unsigned char *p;
+    register unsigned char *q;
+    /* Do a byte copy: */
+    p = (unsigned char *) CHARS_STRING(s);
+    q = (unsigned char *) DATA_CVEC(v);
+    while (--wordlen >= 0) {
+        q[3] = p[0];
+        q[2] = p[1];
+        q[1] = p[2];
+        q[0] = p[3];
+        p += 4;
+        q += 4;
+    }
+# endif
+    
+#else
+    /* From here on 64bit machine, we need some more variables: */
+    PREPARE_epw(fi);
+    PREPARE_bpe(fi);
+    Int len = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+    /* How would things be in a 32bit world? */
+    Int elsperword32 = elsperword/2;
+    /* note that elsperword is always even on 64bit machines! */
+    Word wordlen32 = (len + elsperword32 - 1)/elsperword32;
+    register Word *q;
+    register int shift = elsperword32 * bitsperel;
+    register int k;
+
+# if __BYTE_ORDER == __LITTLE_ENDIAN
+    /* We are on a little endian machine, we copy, but have to
+     * work for upper halves and lower halves separatedly. */
+
+    register Word32 *p;
+
+    wordlen /= d;   /* We remember the factor d ourselves! */
+
+    if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
+    p = (Word32 *) CHARS_STRING(s);
+    q = DATA_CVEC(v);
+    while (--wordlen >= 0) {
+        for (k = d-1;k >= 0;k--) {
+            *q++ = (((Word)(p[d])) << shift) | (Word) (*p);
+            p++;
+        }
+        p += d;   /* Skip upper halves in result */
+    }
+    if (wordlen32 & 1 != 0) {  /* Handle last half of word: */
+        for (k = d-1;k >= 0;k--)
+            *q++ = (Word) (*p++);
+    }
+# else
+    /* Big endian machine with 64 bit, now it becomes ugly! */
+    /* We have to work for upper halves and lower halves separatedly and
+     * to swap bytes around! */
+
+    register Word32 wo32;
+    register unsigned char *p;
+    register Word wo;
+    
+    wordlen /= d;   /* We remember the factor d ourselves! */
+    
+    if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
+    p = (unsigned char *) CHARS_STRING(s);
+    q = DATA_CVEC(v);
+    while (--wordlen >= 0) {
+        for (k = d-1;k >= 0;k--) {
+            wo = ( ( ( ( ( (Word)(p[3]) << 8)
+                         | (Word)(p[2]) ) << 8)
+                     | (Word)(p[1]) ) << 8)
+                 | (Word)(p[0]);
+            p += d * 4;
+            wo |= ( ( ( ( ( ( (Word)(p[3]) << 8)
+                            | (Word)(p[2]) ) << 8)
+                        | (Word)(p[1]) ) << 8)
+                    | (Word)(p[0]) ) << shift;
+            p -= d * 4 - 4;
+            *q++ = wo;
+        }
+        p += d*4;   /* Skip upper halves in result */
+    }
+    if (wordlen32 & 1 != 0) {  /* Handle last half of word: */
+        for (k = d-1;k >= 0;k--) {
+            *q++ = ( ( ( ( ( (Word)(p[3]) << 8)
+                           | (Word)(p[2]) ) << 8)
+                       | (Word)(p[1]) ) << 8)
+                   | (Word)(p[0]);
+            p += 4;
+        }
+    }
+# endif
+#endif
+    return 0L;
+}
+
 
 /* We really do not want to use the following: */
 #if 0
@@ -3107,6 +3365,14 @@ static StructGVarFunc GVarFuncs [] = {
   { "SLICE", 5, "src, dst, srcpos, len, dstpos",
     SLICE,
     "cvec.c:SLICE" },
+
+  { "CVEC_TO_EXTREP", 2, "v, s",
+    CVEC_TO_EXTREP,
+    "cvec.c:CVEC_TO_EXTREP" },
+
+  { "EXTREP_TO_CVEC", 2, "s, v",
+    EXTREP_TO_CVEC,
+    "cvec.c:EXTREP_TO_CVEC" },
 
 #if 0
   { "DONOTUSEMEDONOTUSEME", 0, "",

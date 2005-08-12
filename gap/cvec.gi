@@ -22,6 +22,12 @@ if (not IsBound(CVEC)) and
   LoadDynamicModule(Filename(DirectoriesPackagePrograms("cvec"), "cvec.so"));
 fi;
 
+#############################################################################
+## Info Class:
+#############################################################################
+
+SetInfoLevel(InfoCVec,1);
+
 
 #############################################################################
 ## The technical stuff for typing:
@@ -2053,7 +2059,187 @@ CVEC.OptimizeGreaseHint := function(m,nr)
   #Print("OptimizeGreaseHint: ",li," ==> ",m!.greasehint,"\n");
 end;
 
-  
+#############################################################################
+# I/O for Matrices:
+#############################################################################
+
+CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN := function(n)
+  local i,s;
+  s := "        ";
+  for i in [1..8] do
+      s[i] := CHAR_INT(RemInt(n,256));
+      n := QuoInt(n,256);
+  od;
+  return s;
+end;
+
+CVEC.WriteMat := function(f,m)
+  local buf,c,chead,dhead,header,i,magic,phead,rhead;
+  if not(IsFile(f)) then
+      Error("CVEC.WriteMat: first argument must be a file");
+      return fail;
+  fi;
+  if not(IsCMatRep(m)) then
+      Error("CVEC.WriteMat: second argument must be a cmat");
+      return fail;
+  fi;
+  c := m!.vecclass;
+  Info(InfoCVec,2,"CVEC.WriteMat: Writing ",m!.len,"x",c![2]," matrix over GF(",
+       c![1]![1],",",c![1]![2],")");
+  # Make the header:
+  magic := "GAPCMat1";
+  phead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(c![1]![1]);
+  dhead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(c![1]![2]);
+  rhead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(m!.len);
+  chead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(c![2]);
+  header := Concatenation(magic,phead,dhead,rhead,chead);
+  if IO.Write(f,header) <> 40 then
+      Info(InfoCVec,1,"CVEC.WriteMat: Write error during writing of header");
+      return fail;
+  fi;
+  buf := "";  # will be made longer automatically
+  for i in [1..m!.len] do
+      CVEC.CVEC_TO_EXTREP(m!.rows[i+1],buf);
+      if IO.Write(f,buf) <> Length(buf) then
+          Info(InfoCVec,1,"CVEC.WriteMat: Write error");
+          return fail;
+      fi;
+  od;
+  return true;
+end;
+
+CVEC.WriteMatToFile := function(fn,m)
+  local f;
+  f := IO.File(fn,"w");
+  if f = fail then
+      Info(InfoCVec,1,"CVEC.WriteMatToFile: Cannot create file");
+      return fail;
+  fi;
+  if CVEC.WriteMat(f,m) = fail then return fail; fi;
+  if IO.Close(f) = fail then
+      Info(InfoCVec,1,"CVEC.WriteMatToFile: Cannot close file");
+      return fail;
+  fi;
+  return true;
+end;
+
+CVEC.WriteMatsToFile := function(fnpref,l)
+  local i;
+  if not(IsString(fnpref)) then
+      Error("CVEC.WriteMatsToFile: fnpref must be a string");
+      return fail;
+  fi;
+  if not(IsList(l)) then
+      Error("CVEC.WriteMatsToFile: l must be list");
+      return fail;
+  fi;
+  for i in [1..Length(l)] do
+      if CVEC.WriteMatToFile(Concatenation(fnpref,String(i)),l[i]) = fail then
+          return fail;
+      fi;
+  od;
+  return true;
+end;
+
+CVEC.STRING_LITTLE_ENDIAN_TO_64BIT_NUMBER := function(s)
+  local i,n;
+  n := 0;
+  for i in [8,7..1] do
+      n := n * 256 + INT_CHAR(s[i]);
+  od;
+  return n;
+end;
+
+CVEC.ReadMat := function(f)
+  local buf,c,cols,d,header,i,len,m,p,rows;
+  if not(IsFile(f)) then
+      Error("CVEC.ReadMat: first argument must be a file");
+      return fail;
+  fi;
+  header := IO.Read(f,40);
+  if Length(header) < 40 then
+      Info(InfoCVec,1,"CVEC.ReadMat: Cannot read header");
+      return fail;
+  fi;
+
+  # Check and process the header:
+  if header{[1..8]} <> "GAPCMat1" then
+      Info(InfoCVec,1,"CVEC.ReadMat: Magic of header incorrect");
+      return fail;
+  fi;
+  p := CVEC.STRING_LITTLE_ENDIAN_TO_64BIT_NUMBER(header{[9..16]});
+  d := CVEC.STRING_LITTLE_ENDIAN_TO_64BIT_NUMBER(header{[17..24]});
+  rows := CVEC.STRING_LITTLE_ENDIAN_TO_64BIT_NUMBER(header{[25..32]});
+  cols := CVEC.STRING_LITTLE_ENDIAN_TO_64BIT_NUMBER(header{[33..40]});
+  Info(InfoCVec,2,"CVEC.ReadMat: Reading ",rows,"x",cols," matrix over GF(",
+       p,",",d,")");
+   
+  c := CVEC.NewCVecClass(p,d,cols);
+  m := CVEC.ZeroMat(rows,c);
+  buf := "";  # will be made longer automatically
+  if rows > 0 then
+      CVEC.CVEC_TO_EXTREP(m!.rows[2],buf);   # to get the length right
+      len := Length(buf);
+  else
+      len := 0;
+  fi;
+
+  for i in [1..rows] do
+      buf := IO.Read(f,len);
+      if len <> Length(buf) then
+          Info(InfoCVec,1,"CVEC.ReadMat: Read error");
+          Error();
+          return fail;
+      fi;
+      CVEC.EXTREP_TO_CVEC(buf,m!.rows[i+1]);
+  od;
+  return m;
+end;
+
+CVEC.ReadMatFromFile := function(fn)
+  local f,m;
+  f := IO.File(fn,"r");
+  if f = fail then
+      Info(InfoCVec,1,"CVEC.ReadMatFromFile: Cannot open file");
+      return fail;
+  fi;
+  m := CVEC.ReadMat(f);
+  if m = fail then return fail; fi;
+  IO.Close(f);
+  return m;
+end;
+
+CVEC.ReadMatsFromFile := function(fnpref)
+  local f,i,l,m;
+  if not(IsString(fnpref)) then
+      Error("CVEC.ReadMatsFromFile: fnpref must be a string");
+      return fail;
+  fi;
+  f := IO.File(Concatenation(fnpref,"1"),"r");
+  if f = fail then
+      Error("CVEC.ReadMatsFromFile: no matrices there");
+      return fail;
+  else
+      IO.Close(f);
+  fi;
+  l := [];
+  i := 1;
+  while true do
+      f := IO.File(Concatenation(fnpref,String(i)),"r");
+      if f = fail then break; fi;
+      IO.Close(f);
+      m := CVEC.ReadMatFromFile(Concatenation(fnpref,String(i)));
+      if m = fail then
+          return fail;
+      else
+          Add(l,m);
+          i := i + 1;
+      fi;
+  od;
+  return l;
+end;
+
+      
 # Utilities:
 
 CVEC.MatToCMat := function(m,p,d)
