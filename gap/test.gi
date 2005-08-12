@@ -630,19 +630,19 @@ CVEC.TEST.MATMUL := function(p,d)
 
   if List(c1,FFEList) <> List(c2,x->List(x,y->y)) then
       Print("Alarm p=",p," d=",d," std matmul            \n");
-      Error("You can inspect c1, c2, c3, c4");
+      Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c3 then
       Print("Alarm p=",p," d=",d," greased matmul            \n");
-      Error("You can inspect c1, c2, c3, c4");
+      Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c4 then
       Print("Alarm p=",p," d=",d," ungreased matmul            \n");
-      Error("You can inspect c1, c2, c3, c4");
+      Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c5 then
       Print("Alarm p=",p," d=",d," ungreased vec*mat             \n");
-      Error("You can inspect c1, c2, c3, c4, c5");
+      Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c6 then
       Print("Alarm p=",p," d=",d," greased vec*mat             \n");
@@ -650,6 +650,37 @@ CVEC.TEST.MATMUL := function(p,d)
   fi;
 end;
 
+CVEC.TEST.SLICE := function(p,d)
+  local c,srcpos,len,dstpos,l,one,q,s,v,w;
+  q := p^d;
+  l := 256;
+  c := CVEC.NewCVecClass(p,d,l);
+  v := CVec(0*[1..l]+1,c);
+  one := v[1];
+  Print("\n");
+  for srcpos in [1..l] do
+      Print("srcpos=",srcpos," (256)\r");
+      for len in [1..l-srcpos+1] do
+          for dstpos in [1..l-len+1] do
+              w := CVEC.New(c);
+              CVEC.SLICE(v,w,srcpos,len,dstpos);
+              if PositionNonZero(w) <> dstpos or
+                 PositionLastNonZero(w) <> dstpos+len-1 then
+                  Print("Alarm p=",p," d=",d," srcpos=",srcpos," len=",len,
+                        " dstpos=",dstpos,"                  \n");
+                  Error("You can inspect v and w");
+              fi;
+              for s in [dstpos..dstpos+len-1] do
+                  if w[s] <> one then
+                      Print("Alarm p=",p," d=",d," srcpos=",srcpos," len=",len,
+                            " dstpos=",dstpos,"                  \n");
+                      Error("You can inspect v and w");
+                  fi;
+              od;
+          od;
+      od;
+  od;
+end;
 
 CVEC.TEST.DOALL := function()
   local inf;
@@ -680,6 +711,32 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.MATMUL(31,3);
   Print("Testing MATMUL 257^1...\r");
   CVEC.TEST.MATMUL(257,1);
+  Print("Testing SLICE 2^1 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE(2,1);
+  Print("Testing SLICE 3^1 (bitsperel=3)...\r");
+  CVEC.TEST.SLICE(3,1);
+  Print("Testing SLICE 5^1 (bitsperel=4)...\r");
+  CVEC.TEST.SLICE(5,1);
+  Print("Testing SLICE 11^1 (bitsperel=5)...\r");
+  CVEC.TEST.SLICE(11,1);
+  Print("Testing SLICE 19^1 (bitsperel=6)...\r");
+  CVEC.TEST.SLICE(19,1);
+  Print("Testing SLICE 37^1 (bitsperel=7)...\r");
+  CVEC.TEST.SLICE(37,1);
+  Print("Testing SLICE 101^1 (bitsperel=8)...\r");
+  CVEC.TEST.SLICE(101,1);
+  Print("Testing SLICE 2^2 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE(2,2);
+  Print("Testing SLICE 3^2 (bitsperel=3)...\r");
+  CVEC.TEST.SLICE(3,2);
+  Print("Testing SLICE 5^2 (bitsperel=4)...\r");
+  CVEC.TEST.SLICE(5,2);
+  Print("Testing SLICE 2^3 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE(2,3);
+  Print("Testing SLICE 3^3 (bitsperel=3)...\r");
+  CVEC.TEST.SLICE(3,3);
+  Print("Testing SLICE 2^4 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE(2,4);
   SetInfoLevel(InfoWarning,inf);
 end;
 

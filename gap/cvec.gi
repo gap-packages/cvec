@@ -53,6 +53,10 @@ end;
 ## Administration of field info and cvec class data:
 #############################################################################
 
+# If you want to change the 1024 limit below, please also change
+# the macro MAXDEGREE in cvec.c!
+CVEC.MAXDEGREE := 1024;
+
 CVEC.BestGreaseTab :=
   [ ,            # q=1
     8,           # q=2
@@ -87,10 +91,8 @@ CVEC.NewCVecClass := function(p,d,len)
       Error("CVEC.NewCVecClass: Degree must be positive."); 
       return fail;
   fi;
-  # If you want to change the 1024 limit below, please also change
-  # the macro MAXDEGREE in cvec.c!
-  if d >= 1024 then 
-      Error("CVEC.NewCVecClass: Degree must be <= 1024."); 
+  if d >= CVEC.MAXDEGREE then 
+      Error("CVEC.NewCVecClass: Degree must be < ",CVEC.MAXDEGREE,"."); 
       return fail;
   fi;
   if not(IsPrime(p)) then 
@@ -850,6 +852,82 @@ InstallMethod( BaseField, "for cvecs", [IsCVecRep],
     fi;
   end);
     
+# Slicing:
+
+CVEC.Slice := function(src,dst,srcpos,len,dstpos)
+  local cdst,csrc;
+  csrc := CVEC.CVecClass(src);
+  cdst := CVEC.CVecClass(dst);
+  if not(IsIdenticalObj(csrc![1],cdst![1])) then
+      Error("CVEC.Slice: vectors not over common field");
+      return;
+  fi;
+  if srcpos < 1 or srcpos+len-1 > csrc![2] or len <= 0 then
+      Error("CVEC.Slice: source area not valid");
+      return;
+  fi;
+  if dstpos < 1 or dstpos+len-1 > cdst![2] then
+      Error("CVEC.Slice: destination area not valid");
+      return;
+  fi;
+  CVEC.SLICE(src,dst,srcpos,len,dstpos);
+end;
+
+InstallOtherMethod( \{\}, "for a cvec and a range", [IsCVecRep, IsRangeRep],
+  function(v,r)
+    # note that ranges in IsRangeRep always have length at least 2!
+    local c,cl,first,inc,last,len,w;
+    first := r[1];
+    last := r[Length(r)];
+    inc := (last-first)/(Length(r)-1);
+    if inc <> 1 then
+        Error("CVEC.{} : slicing only for ranges with increment 1 available");
+        return;
+    fi;
+    cl := CVEC.CVecClass(v);
+    len := last+1-first;
+    c := CVEC.NewCVecClass(cl![1]![1],cl![1]![2],len);
+    w := CVEC.NEW(c);
+    CVEC.SLICE(v,w,first,len,1);
+    if not(IsMutable(v)) then
+        MakeImmutable(w);
+    fi;
+    return w;
+  end);
+
+InstallOtherMethod( \{\}, "for a cvec and a list", 
+  [IsCVecRep, IsHomogeneousList],
+  function(v,l)
+    local c,cl,first,inc,last,len,w;
+    if Length(l) = 0 then
+        first := 1;
+        last := 0;
+    elif Length(l) = 1 then
+        first := l[1];
+        last := l[1];
+    else
+        first := l[1];
+        last := l[Length(l)];
+        inc := (last-first)/(Length(l)-1);
+        if not(IsRange(l)) or inc <> 1 then
+          Error("CVEC.{} : slicing only for ranges with increment 1 available");
+          return;
+        fi;
+    fi;
+    cl := CVEC.CVecClass(v);
+    len := last+1-first;
+    c := CVEC.NewCVecClass(cl![1]![1],cl![1]![2],len);
+    w := CVEC.NEW(c);
+    if len > 0 then CVEC.SLICE(v,w,first,len,1); fi;
+    if not(IsMutable(v)) then
+        MakeImmutable(w);
+    fi;
+    return w;
+  end);
+
+# Note that slicing assignment is intentionally not supported, because
+# this will usually be used only by inefficient code. Use CVEC.Slice
+# or even CVEC.SLICE instead.
 
 #############################################################################
 # Scalars:
@@ -1256,7 +1334,129 @@ InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value",
     return CVEC.CMatMaker(l,cl);
   end);
 
+# Some methods to make special matrices:
+
+CVEC.ZeroMat := function(arg)
+  local c,d,i,l,p,x,y;
+  if Length(arg) = 2 then
+      y := arg[1];
+      c := arg[2];   # this must be a cvec class
+      if not(IsInt(y)) and not(IsCVecClass(c)) then
+          Error("Usage: CVEC.ZeroMat( rows, cvecclass)");
+          return;
+      fi;
+  elif Length(arg) = 4 then
+      y := arg[1];
+      x := arg[2];
+      p := arg[3];
+      d := arg[4];
+      if not(IsInt(y) and y >= 0) or
+         not(IsInt(x) and x >= 0) or
+         not(IsPosInt(p) and IsPrime(p)) or
+         not(IsPosInt(d) and d < CVEC.MAXDEGREE) then
+          Error("Usage: CVEC.ZeroMat( rows, cols, p, d )");
+          return;
+      fi;
+      c := CVEC.NewCVecClass(p,d,x);
+  else
+      Error("Usage: CVEC.ZeroMat( rows, [ cvecclass | cols, p, d ] )");
+      return;
+  fi;
+  l := 0*[1..y+1];
+  Unbind(l[1]);
+  for i in [1..y] do
+      l[i+1] := CVEC.NEW(c);
+  od;
+  return CVEC.CMatMaker(l,c);
+end;
+
+CVEC.IdentityMat := function(arg)
+  local c,d,i,l,p,y;
+  if Length(arg) = 1 then
+      c := arg[1];   # this must be a cvec class
+      if not(IsCVecClass(c)) then
+          Error("Usage: CVEC.IdentityMat(cvecclass)");
+          return;
+      fi;
+  elif Length(arg) = 3 then
+      y := arg[1];
+      p := arg[2];
+      d := arg[3];
+      if not(IsInt(y) and y >= 0) or
+         not(IsPosInt(p) and IsPrime(p)) or
+         not(IsPosInt(d) and d < CVEC.MAXDEGREE) then
+          Error("Usage: CVEC.IdentityMat( rows, p, d )");
+          return;
+      fi;
+      c := CVEC.NewCVecClass(p,d,y);
+  else
+      Error("Usage: CVEC.IdentityMat( [ cvecclass | rows, p, d ] )");
+      return;
+  fi;
+  l := 0*[1..y+1];
+  Unbind(l[1]);
+  for i in [1..y] do
+      l[i+1] := CVEC.NEW(c);
+      l[i+1][i] := 1;   # note that this works for all fields!
+  od;
+  return CVEC.CMatMaker(l,c);
+end;
+
+CVEC.RandomMat := function(arg)
+  local c,d,i,j,l,li,p,q,x,y;
+  if Length(arg) = 2 then
+      y := arg[1];
+      c := arg[2];   # this must be a cvec class
+      if not(IsInt(y)) and not(IsCVecClass(c)) then
+          Error("Usage: CVEC.RandomMat( rows, cvecclass)");
+          return;
+      fi;
+      d := c![1]![2];   # used later on
+      q := c![1]![3];  
+  elif Length(arg) = 4 then
+      y := arg[1];
+      x := arg[2];
+      p := arg[3];
+      d := arg[4];
+      q := p^d;
+      if not(IsInt(y) and y >= 0) or
+         not(IsInt(x) and x >= 0) or
+         not(IsPosInt(p) and IsPrime(p)) or
+         not(IsPosInt(d) and d < CVEC.MAXDEGREE) then
+          Error("Usage: CVEC.RandomMat( rows, cols, p, d )");
+          return;
+      fi;
+      c := CVEC.NewCVecClass(p,d,x);
+  else
+      Error("Usage: CVEC.RandomMat( rows, [ cvecclass | cols, p, d ] )");
+      return;
+  fi;
+  l := 0*[1..y+1];
+  Unbind(l[1]);
+  if c![1]![13] <= 1 then    # q is an immediate integer
+      li := 0*[1..x];
+      for i in [1..y] do
+          l[i+1] := CVEC.NEW(c);
+          for j in [1..x] do
+              li[j] := Random([0..q-1]);
+          od;
+          CVEC.INTREP_TO_CVEC(li,l[i+1]);
+      od;
+  else    # big scalars!
+      li := 0*[1..x*d];
+      for i in [1..y] do
+          l[i+1] := CVEC.NEW(c);
+          for j in [1..x*d] do
+              li[j] := Random([0..p-1]);
+          od;
+          CVEC.INTREP_TO_CVEC(li,l[i+1]);
+      od;
+  fi;
+  return CVEC.CMatMaker(l,c);
+end;
+
 # PostMakeImmutable to make subobjects immutable:
+
 InstallMethod( PostMakeImmutable, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     MakeImmutable(m!.rows);
@@ -1332,6 +1532,19 @@ InstallOtherMethod( \{\}, "for a cmat, and a list",
     return CMat(l,m!.vecclass,false);
   end);
 
+InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
+  [IsCMatRep and IsMatrix, IsHomogeneousList, IsCMatRep and IsMatrix],
+  function(m,l,n)
+    local i;
+    if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
+        Error("{}:= : cmats not compatible");
+        return;
+    fi;
+    for i in [1..Length(l)] do
+        m!.rows[l[i]+1] := n!.rows[i+1];
+    od;
+  end);
+
 InstallOtherMethod( Length, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m) return m!.len; end);
@@ -1387,6 +1600,29 @@ InstallOtherMethod( UNB_LIST, "for a cmat and a position",
     fi;
   end);
 
+CVEC.CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
+  local i;
+  if not(IsIdenticalObj(src!.scaclass,dst!.scaclass)) then
+      Error("CVEC.CopySubmatrix: cmats not over common field");
+      return;
+  fi;
+  if Length(srcli) <> Length(dstli) then
+      Error("CVEC.CopySubmatrix: line lists do not have equal lengths");
+      return;
+  fi;
+  if srcpos < 1 or srcpos+len-1 > src!.vecclass![2] or len <= 0 then
+      Error("CVEC.CopySubmatrix: source area not valid");
+      return;
+  fi;
+  if dstpos < 1 or dstpos+len-1 > dst!.vecclass![2] then
+      Error("CVEC.CopySubmatrix: destination area not valid");
+      return;
+  fi;
+  for i in [1..Length(srcli)] do
+      CVEC.SLICE(src!.rows[srcli[i]+1],dst!.rows[dstli[i]+1],
+                 srcpos,len,dstpos);
+  od;
+end;
 
 # Arithmetic for matrices:
 

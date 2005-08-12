@@ -2787,6 +2787,133 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
     return 0L;
 }
 
+/* Our contribution to slicing: */
+
+STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
+/* No checks are done at all. src and dst must be cvecs over the same field and
+ * 1 <= frompos <= frompos+len-1 <= Length(src) and
+ * 1 <= topos   <= topos+len-1   <= Length(dst) must hold. */
+{
+    PREPARE_clfi(src,cl,fi);
+    PREPARE_d(fi);
+    PREPARE_epw(fi);
+    PREPARE_bpe(fi);
+    Word stamask,endmask,upmask,domask,kupmask,kdomask;
+    Int stanr,endnr,shiftl,shiftr;
+    Int fr = INT_INTOBJ(srcpos)-1;   /* from here on zero based! */
+    Int to = INT_INTOBJ(dstpos)-1;
+    Int le = INT_INTOBJ(len);
+
+    /* A hint: 
+     * If you want to understand this, first read the case "shiftl=0", which
+     * basically means, that source and target are word-aligned. Then look
+     * at the general case. */
+
+    /* Some precalculations: */
+    shiftl = (to-fr) % elsperword;
+    if (shiftl < 0) shiftl += elsperword;
+    if (shiftl == 0) {  /* this is the easy case */
+        stanr = elsperword - (fr % elsperword);
+        if (stanr > le) stanr = le;
+        if (stanr*bitsperel == 8*BYTESPERWORD)
+            stamask = WORDALLONE;
+        else
+            stamask = ((1UL << (stanr*bitsperel))-1) 
+                                  << ((fr % elsperword) * bitsperel);
+        endnr = (fr+le) % elsperword;
+        endmask = (1UL << (endnr*bitsperel))-1;
+        {
+            register Word *v = DATA_CVEC(src) + (fr/elsperword)*d;
+            register Word *w = DATA_CVEC(dst) + (to/elsperword)*d;
+            register Int i;
+
+            /* We do the start bit in any case, even if stanr = elsperword! */
+            for (i = d;i > 0;i--,v++,w++) 
+                *w = (*w & (~stamask)) | (*v & stamask);
+            le -= stanr;
+
+            /* The following is the code to move one word at the position
+             * pointed to by v to its destination: */
+            while (le >= elsperword) {
+                for (i = d;i > 0;i--,v++,w++) *w = *v;
+                le -= elsperword;
+            }
+            
+            /* Finally maybe we have to do the rest: */
+            if (le > 0) 
+                for (i = d;i > 0;i--,v++,w++) 
+                    *w = (*w & (~endmask)) | (*v & endmask);
+        }
+    } else {   /* shiftl != 0 : the hard case */
+        shiftr = elsperword-shiftl;
+        shiftl *= bitsperel;
+        shiftr *= bitsperel;
+        kdomask = ((1UL << shiftl)-1);
+        upmask = kdomask << shiftr;
+        kdomask = ~kdomask;
+        domask = (1UL << shiftr)-1;
+        kupmask = ~(domask << shiftl);
+        stanr = elsperword - (fr % elsperword);
+        if (stanr > le) stanr = le;
+        if (stanr*bitsperel == 8*BYTESPERWORD)
+            stamask = WORDALLONE;
+        else
+            stamask = ((1UL << (stanr*bitsperel))-1) 
+                                  << ((fr % elsperword) * bitsperel);
+        endnr = (fr+le) % elsperword;
+        endmask = (1UL << (endnr*bitsperel))-1;
+
+        {
+            register Word *v = DATA_CVEC(src) + (fr/elsperword)*d;
+            register Word *w = DATA_CVEC(dst) + (to/elsperword)*d;
+            register Int i;
+            register Word wo;
+            Word mask;
+
+            /* Handle the case that position to is only hit by the upper
+             * part of the Word containing fr. In that case we have to
+             * decrement w by d Words. In that case the first few commands
+             * do not write because of the "if (wo)" clause. */
+            if ((fr % elsperword) * bitsperel >= shiftr) w -= d; 
+            
+            /* We do the start bit in any case, even if stanr = elsperword! */
+            for (i = d;i > 0;i--,v++,w++) {
+                mask = domask & stamask;
+                wo = (*v & mask) << shiftl;
+                if (wo) *w = (*w & (~(mask << shiftl))) | wo;
+                mask = upmask & stamask;
+                wo = (*v & mask) >> shiftr;
+                if (wo) w[d] = (w[d] & (~(mask >> shiftr))) | wo;
+            }
+            le -= stanr;
+
+            /* The following is the code to move one word at the position
+             * pointed to by v to its destination: */
+            while (le >= elsperword) {
+                for (i = d;i > 0;i--,v++,w++) {
+                    wo = (*v & domask) << shiftl;
+                    if (wo) *w = (*w & kupmask) | wo;
+                    wo = (*v & upmask) >> shiftr;
+                    if (wo) w[d] = (w[d] & kdomask) | wo;
+                }
+                le -= elsperword;
+            }
+            
+            /* Finally maybe we have to do the rest: */
+            if (le > 0) {
+                for (i = d;i > 0;i--,v++,w++) {
+                    mask = domask & endmask;
+                    wo = (*v & mask) << shiftl;
+                    if (wo) *w = (*w & (~(mask << shiftl))) | wo;
+                    mask = upmask & endmask;
+                    wo = (*v & mask) >> shiftr;
+                    if (wo) w[d] = (w[d] & (~(mask >> shiftr))) | wo;
+                }
+            }
+        }
+    }
+    return 0L;
+}
 
 /* We really do not want to use the following: */
 #if 0
@@ -2976,6 +3103,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "PROD_CMAT_CMAT_WITHGREASE", 6, "l, m, n, greasetab, spreadtab, glev",
     PROD_CMAT_CMAT_WITHGREASE,
     "cvec.c:PROD_CMAT_CMAT_WITHGREASE" },
+
+  { "SLICE", 5, "src, dst, srcpos, len, dstpos",
+    SLICE,
+    "cvec.c:SLICE" },
 
 #if 0
   { "DONOTUSEMEDONOTUSEME", 0, "",
