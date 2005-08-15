@@ -1,0 +1,19 @@
+<!-- 
+
+  gaplib.xml            cvec package documentation           Max Neunhoeffer
+
+         Copyright (C) 2005, Lehrstuhl D für Mathematik, RWTH-Aachen
+
+This chapter explains what parts of the GAP library do work well with
+compressed vectors and matrices and what parts don't.
+
+-->
+
+<Chapter Label="gaplib">
+<Heading>Cooperation with the &GAP; library</Heading>
+
+Here comes text.<P/>
+
+<!-- ############################################################ -->
+
+</Chapter>

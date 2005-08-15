@@ -1,0 +1,536 @@
+<!-- 
+
+  datastrucs.xml          cvec package documentation           Max Neunhoeffer
+
+         Copyright (C) 2005, Lehrstuhl D für Mathematik, RWTH-Aachen
+
+This chapter describes the data structures.
+
+-->
+
+<Chapter Label="datastrucs">
+<Heading>The Data Structures</Heading>
+
+This chapter describes all the data structures used in this package. We
+start with a section on finite fields and what is already there in the
+&GAP; kernel and library. Then we describe compressed vectors, large
+scalars and compressed matrices.
+
+<Section Label="finfields">
+<Heading>Finite field elements</Heading>
+
+Throughout the package, elements in the field <M>GF(p)</M> of <M>p</M>
+elements are represented by numbers <M>0,1,\ldots,p-1</M> and arithmetic
+is just the standard arithmetic in the integers modulo <M>p</M>.<P/>
+
+Bigger finite fields are done by calculating in the polynomial ring
+<M>GF(p)[x]</M> in one indeterminate <M>x</M> modulo a certain irreducible
+polynomial. By convention, we use the so-called <Q>Conway polynomials</Q>
+(see
+<URL>http://www.math.rwth-aachen.de:8001/~Frank.Luebeck/data/ConwayPol/index.html</URL>) 
+for this purpose, because they provide a standard way of embedding finite
+fields into their extension fields. Because Conway polynomials are monic, 
+we can store coset representatives by storing polynomials of degree less
+than <M>d</M>, where <M>d</M> is the degree of the finite field over its
+prime field.<P/>
+
+As of this writing, &GAP; has another implementation of finite field
+elements built into its kernel, which stores finite field elements by
+storing the discrete logarithm with respect to a primitive root of the
+field. Although this is nice and efficient for small finite fields, it
+becomes unhandy for larger finite fields, because one needs a lookup table of
+length <M>p^d</M> for doing efficient addition. The &GAP; implementation
+thus is limited to fields with less than or equal to <M>65536</M> elements.
+<P/>
+
+For those finite fields implemented in &GAP; we use those elements as
+scalars for our vectors. Conversion between the internal format used in
+the compressed vectors and the &GAP; representation is done via table
+lookup. For larger finite fields, this package provides
+an implementation that uses the above mentioned approach with polynomial
+arithmetic. See Section <Ref Sect="cscas"/> for details.<P/>
+</Section>
+
+<Section Label="cvecs">
+<Heading>Compressed Vectors in Memory</Heading>
+
+<Subsection>
+<Heading>Packing of prime field elements</Heading>
+
+For this section, we assume that the base field is <M>GF(p^d)</M>, the
+finite field with <M>p^d</M> elements, where <M>p</M> is a prime and
+<M>d</M> is a positive integer. This is realized as a field extension
+of degree <M>d</M> over the prime field <M>GF(p)</M> using the Conway
+polynomial <M>c \in GF(p)[x]</M>. We always represent field elements
+of <M>GF(p^d)</M> by polynomials
+<Math>a = \sum_{i=0}^{d-1} a_i x^i</Math>
+where the coefficients <M>a_i</M> are in <M>GF(p)</M>. Because <M>c</M>
+is monic, this gives a one-to-one correspondance between polynomials
+and finite field elements.<P/>
+
+The memory layout for compressed vectors is determined by two important
+constants, depending only on <M>p</M> and the word length of the
+machine. The word length is 4 bytes on 32bit machines (for example
+on the i386 architecture) and 8 bytes on 64bit machines (for example
+on the AMD64 architecture). More concretely, a <Q><C>Word</C></Q> is an
+<C>unsigned long int</C> in C and the length of a <C>Word</C> is 
+<C>sizeof(unsigned long int)</C>.<P/>
+
+Those constants are <C>bitsperel</C> (bits per prime field element)
+and <C>elsperword</C> (prime field elements per <C>Word</C>).
+<C>bitsperel</C> is <M>1</M> for <M>p=2</M> and otherwise the smallest
+integer, such that <M>2^bitsperel > 2\cdot p-1</M>. This means, that
+we can store the numbers from <M>0</M> to <M>2\cdot p - 1</M> in
+<C>bitsperel</C> bits. <C>elsperword</C> is <M>32/bitsperel</M> rounded
+down to the next integer and multiplied by <M>2</M> if the length of a
+<C>Word</C> is <M>8</M>. Note that we thus store as many prime field
+elements as possible into one <C>Word</C>, however, on 64bit machines
+we store only twice as much as would fit into 32bit, even if we could
+pack one more into a <C>Word</C>. This has technical reasons to make
+conversion between different architectures more efficient.<P/>
+
+These definitions imply that we can put <C>elsperword</C> prime field
+elements into one <C>Word</C>. We do this by using the <C>bitsperel</C>
+least significant bits in the <C>Word</C> for the first prime field
+element, using the next <C>bitsperel</C> bits for the next prime field
+element and so on. Here is an example that shows how the <M>6</M> finite
+field elements <M>0,1,2,3,4,5</M> of <M>GF(11)</M> are stored in that
+order in one 32bit <C>Word</C>.
+<C>bitsperel</C> is here <M>4</M>, because 
+<M>2^4 &lt; 2\cdot 11 - 1 = 21 &lt; 2^5</M>. Therefore <C>elsperword</C>
+is <M>6</M> on a 32bit machine.
+
+<Example>
+ most significant xx|.....|.....|.....|.....|.....|..... least significant
+                  00|00101|00100|00011|00010|00001|00000 
+                    |    5|    4|    3|    2|    1|    0
+</Example>
+
+Here is another example that shows how the <M>20</M> finite field elements
+<M>0,1,2,0,0,0,1,1,1,2,2,2,0,1,2,2,1,0,2,2</M> of <M>GF(3)</M> are stored 
+in that order in one 64bit <C>Word</C>. 
+<C>bitsperel</C> is here <M>3</M>, because 
+<M>2^2 &lt; 2\cdot 3 - 1 = 5 &lt; 2^3</M>. Therefore <C>elsperword</C>
+is <M>20</M> on a 32bit machine. Remember, that we only put twice as 
+many elements in one 64bit <C>Word</C> than we could in one 32bit
+<C>Word</C>!
+
+<Example>
+ xxxx..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!
+ 0000010010000001010010001000010010010001001001000000000010001000
+       2  2  0  1  2  2  1  0  2  2  2  1  1  1  0  0  0  2  1  0
+</Example>
+
+(The exclamation marks mark the right hand side of the prime field
+elements.)<P/>
+
+Note that different architectures store their <C>Word</C>s in a
+different byte order in memory (<Q>endianess</Q>). We do <E>not</E>
+specify how the data is distributed into bytes here! All access is via
+<C>Word</C>s and their arithmetic (shifting, addition, multiplication,
+etc.). See Section <Ref Sect="extrep"/> for a discussion of this with
+respect to our external representation.<P/>
+
+</Subsection>
+
+<Subsection>
+<Heading>Extension Fields</Heading>
+
+Now that we have seen how prime field elements are packed into
+<C>Word</C>s, we proceed to the description how compressed vectors are
+stored over arbitrary extension fields:<P/>
+
+Assume a compressed vector has length <M>l</M> with <M>l \geq 0</M>. If
+<M>d=1</M> (prime field), it just uses <M>elsperword/l</M> <C>Word</C>s
+(division rounded up to the next integer), where the first <C>Word</C>
+stores the leftmost <C>elsperword</C> field elements in the first
+<C>Word</C> as described above and so on. This means, that the very
+first field element is stored in the least significant bits of the first
+<C>Word</C>. <P/>
+
+In the extension field case <M>GF(p^d)</M>, a vector of length <M>l</M>
+uses <M>(elsperword/l)*d</M> <C>Word</C>s (division rounded up to the next
+integer), where the first <M>d</M> <C>Word</C>s store the leftmost
+<C>elsperword</C> field elements. The very first word stores all the
+constant coefficients of the polynomials representing the first
+<C>elsperword</C> field elements in their order from left to right,
+the second <C>Word</C> stores the coefficients of <M>x^1</M> and so 
+on until the <M>d</M>'th <C>Word</C>, which stores the coefficients
+of <M>x^{d-1}</M>. Unused entries behind the end of the actual vector
+data within the last <C>Word</C> has to be zero!.<P/>
+
+The following example shows, how the <M>9</M> field elements
+<M>x^2+x+1</M>, <M>x^2+2x+2</M>, <M>x^2+3x+3</M>, <M>x^2+4x+4</M>, 
+<M>2x^2+x</M>, <M>2x^2+3x+1</M>, <M>2x^2+4x+2</M>, <M>3x^2+1</M>,
+and <M>4x^2+x+3</M> of <M>GF(5^3)</M> occurring in a vector of length 
+<M>9</M> in that order are stored on a 32bit machine:
+
+<Example>
+ ^^^ lower memory addresses ^^^
+            ....|....|....|....|....|....|....|....  (least significant bit)
+ 1st Word:  0001|0010|0001|0000|0100|0011|0010|0001| (first
+ 2nd Word:  0000|0100|0011|0001|0100|0011|0010|0001|     8 field
+ 3rd Word:  0011|0010|0010|0010|0001|0001|0001|0001|        elements)
+ ---------------------------------------------------
+ 4th Word:  0000|0000|0000|0000|0000|0000|0000|0011| (second
+ 5th Word:  0000|0000|0000|0000|0000|0000|0000|0001|     8 field
+ 6th Word:  0000|0000|0000|0000|0000|0000|0000|0100|        elements)
+ VVV higher memory addresses VVV
+</Example>
+
+A <Q><C>cvec</C></Q> (one of our compressed vectors) is a &GAP; 
+<Q>Data object</Q> (that is with <C>TNUM</C> equal to <C>T&uscore;DATOBJ</C>). 
+The first machine word in its bag is a pointer to its type, from the second
+machine word on the <C>Word</C>s containing the above data are stored.
+The bag is exactly long enough to hold the type pointer and the data
+<C>Word</C>s.<P/>
+
+</Subsection>
+
+<Subsection>
+<Heading>How is information about the base field stored?</Heading>
+
+But how does the system know, over which field the vector is and how long 
+it is? The type of a &GAP; object consists of <M>3</M> pieces: A family, 
+a bit list (for the filters), and one &GAP; object for <Q>defining
+data</Q>. The additional information about the vector is stored in the
+third piece, the defining data, and is called a <Q><C>cvecclass</C></Q>.<P/>
+
+A <C>cvecclass</C> is a positional object with <M>5</M>
+components:
+
+<Table Align="ll">
+<Caption>Components of a <C>cvecclass</C></Caption>
+<Row>
+<Item>Position</Item><Item>Content</Item>
+</Row>
+<HorLine/>
+<Row>
+<Item>1</Item><Item>a <C>fieldinfo</C> object, see below</Item>
+</Row>
+<Row>
+<Item>2</Item><Item>the length of the vector as immediate &GAP; integer</Item>
+</Row>
+<Row>
+<Item>3</Item><Item>the number of <C>Word</C>s used as immediate &GAP;
+integer</Item>
+</Row>
+<Row>
+<Item>4</Item><Item>a &GAP; type used to create new vectors</Item>
+</Row>
+<Row>
+<Item>5</Item><Item>a &GAP; object for the base field</Item>
+</Row>
+</Table>
+In position 5 we have just the &GAP; finite field object <C>GF(p,d)</C> for
+the case that <M>p^d \leq 65536</M> and the corresponding <C>cscaclass</C>
+(see Section <Ref Sect="cscas"/>) otherwise.<P/>
+
+The field is described by the &GAP; object in position 1, a so-called
+<C>fieldinfo</C> object, which is described in the following table:
+
+<Table Align="ll">
+<Caption>Components of a <C>fieldinfo</C></Caption>
+<Row>
+<Item><E>Position</E></Item><Item><E>Content</E></Item>
+</Row>
+<HorLine/>
+<Row>
+<Item>1</Item><Item><M>p</M> as an immediate &GAP; integer</Item>
+</Row>
+<Row>
+<Item>2</Item><Item><M>d</M> as an immediate &GAP; integer</Item>
+</Row>
+<Row>
+<Item>3</Item><Item><M>q=p^d</M> as a &GAP; integer</Item>
+</Row>
+<Row>
+<Item>4</Item><Item>a &GAP; string containing the coefficients of the
+                    Conway Polynomial as unsigned int []</Item>
+</Row>
+<Row>
+<Item>5</Item><Item>number of bits per element of the prime field
+(<C>bitsperel</C>)</Item>
+</Row>
+<Row>
+<Item>6</Item><Item>prime field elements per <C>Word</C>
+(<C>elsperword</C>)</Item>
+</Row>
+<Row>
+<Item>7</Item><Item>a &GAP; string containing C data for internal use</Item>
+</Row>
+<Row>
+<Item>8</Item><Item>the best grease level (see Section <Ref
+Sect="Greasing"/>)</Item>
+</Row>
+<Row>
+<Item>9</Item><Item>the length of a grease table using best grease</Item>
+</Row>
+<Row>
+<Item>10</Item><Item>a filter list for the creation of new vectors over
+this field</Item>
+</Row>
+<Row>
+<Item>11</Item><Item>a table for <M>GF(q)</M> to <C>[0..q-1]</C> conversion
+if <M>q \leq 65536</M></Item>
+</Row>
+<Row>
+<Item>12</Item><Item>a table for <C>[0..q-1]</C> to <M>GF(q)</M> conversion
+if <M>q \leq 65536</M></Item>
+</Row>
+<Row>
+<Item>13</Item><Item>0 for <M>q \leq 65536</M>, otherwise 1 if <M>q</M> is
+a &GAP; immediate integer and 2 if not</Item>
+</Row>
+<Row>
+<Item>14</Item><Item>the scalars family</Item>
+</Row>
+</Table>
+Note that &GAP; has a family for all finite field elements of a given
+characteristic <M>p</M>, vectors over a finite field are then in the
+collections family of that family and matrices are in the collections
+family of the collections family of the scalars family. We use the same
+families in the same way for compressed vectors and matrices for fields
+with less than or equal to <M>65536</M> elements. For larger finite fields,
+we create a new family for each field (see Section <Ref
+Sect="cscas"/>).<P/>
+
+</Subsection>
+
+<Subsection>
+<Heading>Limits that follow from the Data Format</Heading>
+
+The following limits come from the above mentioned data format or other
+internal restrictions (an
+<Q>immediate integer</Q> in &GAP; can take values between <M>2^{-28}</M>
+and <M>(2^{28})-1</M> inclusively on 32bit machines and between
+<M>2^{-60}</M> and <M>(2^{60})-1</M> on 64bit machines):
+
+<List>
+<Item> The prime <M>p</M> must be an immediate integer. </Item>
+<Item> The degree <M>d</M> must be smaller than <M>1024</M> (this limit
+is arbitrarily chosen at the moment and could be increased easily).</Item>
+<Item> The Conway polynomial must be known to &GAP;. </Item>
+<Item> The length of a vector must be an immediate integer. </Item>
+</List>
+
+</Subsection>
+
+</Section>
+
+<Section Label="cscas">
+<Heading>Large Scalars</Heading>
+
+Large scalars (<C>csca</C>s) are internally represented nearly as
+vectors of length <M>1</M>. That is, they are &GAP; data objects
+containing a pointer to their type and <M>d</M> <C>Word</C>s containing
+the coefficients of the representing polynomial, starting with the
+constant coefficient. The coefficients are stored in the least
+significant bits of the <C>Word</C>s, as would the coefficients of a
+vector of length <M>1</M>. <P/>
+
+Note that this is not very memory efficient for large extensions
+in small characteristic, because every prime field element uses a
+<C>Word</C>. For such cases one would better use another data format.<P/>
+
+The type of a large scalar has as its <Q>defining data</Q> a so-called
+<C>cscaclass</C>, which is similar to a <C>cvecclass</C>
+(see Section <Ref Sect="cvecs"/>). However, the length field contains
+the value <M>-1</M> and from position 5 on there are differences.
+Here is a table describing the contents of a <C>cscaclass</C>:
+
+<Table Align="ll">
+<Caption>Components of a <C>cscaclass</C></Caption>
+<Row>
+<Item>Position</Item><Item>Content</Item>
+</Row>
+<HorLine/>
+<Row>
+<Item>1</Item><Item>a <C>fieldinfo</C> object, see Section <Ref
+Sect="cvecs"/></Item>
+</Row>
+<Row>
+<Item>2</Item><Item><M>-1</M> as immediate &GAP; integer</Item>
+</Row>
+<Row>
+<Item>3</Item><Item>the number of <C>Word</C>s used as immediate &GAP;
+integer, which is <M>d</M> here</Item>
+</Row>
+<Row>
+<Item>4</Item><Item>a &GAP; type used to create new scalars</Item>
+</Row>
+<Row>
+<Item>5</Item><Item>the zero <C>csca</C></Item>
+</Row>
+<Row>
+<Item>6</Item><Item>the one <C>csca</C></Item>
+</Row>
+<Row>
+<Item>7</Item><Item><M>s</M> from <M>q-1 = s \cdot 2^{T+1}</M>
+(used for taking square roots)</Item>
+</Row>
+<Row>
+<Item>8</Item><Item><M>T</M> from <M>q-1 = s \cdot 2^{T+1}</M></Item>
+</Row>
+<Row>
+<Item>9</Item><Item>the <C>csca</C> represented by <M>x</M>, which is a
+primitive root</Item>
+</Row>
+<Row>
+<Item>10</Item><Item>a list of <M>(x^s)^(2^i)</M> for <M>0 \leq i \leq T</M>
+</Item>
+</Row>
+</Table>
+In position 1 there is a <C>fieldinfo</C> entry exactly as described in
+Section <Ref Sect="cvecs"/> for <C>cvecs</C>.
+</Section>
+
+<Section Label="cmats">
+<Heading>Compressed Matrices</Heading>
+
+The implementation of <C>cmats</C> (compressed matrices) is done mainly
+on the &GAP; level without using too many C parts. Only the time critical parts
+for some operations for matrices are done in the kernel.<P/>
+
+A <C>cmat</C> object is a positional object with at least the following 
+components:
+
+<Table Align="ll">
+<Caption>Components of a <C>cmat</C> object</Caption>
+<Row>
+<Item>Component name</Item><Item>Content</Item>
+</Row>
+<HorLine/>
+<Row>
+<Item><C>len</C></Item><Item>the number of rows, can be <M>0</M></Item>
+</Row>
+<Row>
+<Item><C>vecclass</C></Item><Item>a <C>cvecclass</C> object describing
+the class of rows</Item>
+</Row>
+<Row>
+<Item><C>scaclass</C></Item><Item>a <C>cscaclass</C> object describing
+the class of scalars</Item>
+</Row>
+<Row>
+<Item><C>rows</C></Item><Item>a list containing the rows of the matrix,
+which are <C>cvec</C>s</Item>
+</Row>
+<Row>
+<Item><C>greasehint</C></Item><Item>the recommended greasing level</Item>
+</Row>
+</Table>
+The <C>cvecclass</C> in the component <C>vecclass</C> determines the
+number of columns of the matrix by the length of the rows.<P/>
+
+The length of the list in component <C>rows</C> is
+<C>len+1</C>, because the first position is unbound such that the type
+of the list <C>rows</C> can always be computed efficiently. The
+rows are then stored in positions 2 to <C>len+1</C>.<P/>
+
+The component <C>greasehint</C> contains the greasing level 
+for the next matrix multiplication, in which this matrix occurs as the 
+factor on the right hand side (if greasing is worth the effort, see
+Section <Ref Sect="grease"/>).<P/>
+
+A <C>cmat</C> can be <Q>pre-greased</Q>, which just means, that a certain
+number of linear combinations of its rows is already precomputed (see
+Section <Ref Sect="grease"/>). In that case, the object is in the 
+additional filter <C>HasGreaseTab</C> and the following components
+are bound additionally:
+
+<Table Align="ll">
+<Caption>Additional components of a <C>cmat</C> object when pre-greased
+</Caption>
+<Row>
+<Item>Component name</Item><Item>Content</Item>
+</Row>
+<HorLine/>
+<Row>
+<Item><C>greaselev</C></Item><Item>the grease level</Item>
+</Row>
+<Row>
+<Item><C>greasetab</C></Item><Item>the grease table, a list of lists
+of <C>cvecs</C></Item>
+</Row>
+<Row>
+<Item><C>greaseblo</C></Item><Item>the number of greasing blocks</Item>
+</Row>
+<Row>
+<Item><C>spreadtab</C></Item><Item>a lookup table for indexing the right
+linear combination</Item>
+</Row>
+</Table>
+
+</Section>
+
+<Section Label="extrep">
+<Heading>External Representation of Matrices on Storage</Heading>
+
+<Subsection>
+<Heading>Byte ordering and word length</Heading>
+
+This section describes the external representation of matrices. A special
+data format is needed here, because of differences between computer
+architectures with respect to word length (32bit/64bit) and endianess.
+The term <Q>endianess</Q> refers to the fact, that different architectures
+store their long words in a different way in memory, namely they order the
+bytes that together make up a long word in different orders.<P/>
+
+The external representation is the same as the internal format of
+a 32bit machine with little endianess, which means, that the lower
+significant bytes of a <C>Word</C> are stored in lower addresses. The
+reasons for this decision are firstly that 64bit machines can do the bit
+shifting to convert between internal and externel representation easier
+using their wide registers, and secondly, that the nowadays most popular
+architectures i386 and AMD64 use both little endianess, such that
+conversion is only necessary on a minority of machines.<P/>
+</Subsection>
+
+<Subsection>
+<Heading>The header of a <C>cmat</C> file</Heading>
+
+The header of a <C>cmat</C> file consists of 5 words of 64bit each, that
+are stored in little endian byte order:
+
+<Table Align="l">
+<Caption>Header of a <C>cmat</C> file</Caption>
+<Row>
+<Item>the magic value <Q><C>GAPCMat1</C></Q> as ASCII letters (8 bytes) in this
+order</Item>
+</Row>
+<Row>
+<Item>the value of <M>p</M> to describe the base field</Item>
+</Row>
+<Row>
+<Item>the value of <M>d</M> to describe the base field</Item>
+</Row>
+<Row>
+<Item>the number of rows of the matrix</Item>
+</Row>
+<Row>
+<Item>the number of columns of the matrix</Item>
+</Row>
+</Table>
+
+After these <M>40</M> bytes follow the data words as described above
+using little endian 32bit <C>Word</C>s as in the internal representation
+on 32bit machines.<P/>
+
+Note that the decision to put not more than twice as many prime field
+elements into a 64bit <C>Word</C> than would fit into a 32bit <C>Word</C>
+makes the conversion between internal and external representation much
+easier to implement.
+</Subsection>
+</Section>
+
+<!-- ############################################################ -->
+
+</Chapter>
+
+<!-- 
+Some typing convenience for THE editor vim:
+:imap <C> <C></C>+=+<left><left><left><left><left><left><left>
+:imap <M> <M></M>+=+<left><left><left><left><left><left><left>
+:imap !<space> <esc>/+=+<cr>xxxi
+-->

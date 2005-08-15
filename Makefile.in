@@ -31,7 +31,9 @@ static:
 
 doc: doc/manual.six
 
-doc/manual.six: doc/main.xml doc/cvec.xml
+doc/manual.six: doc/cvec.xml doc/intro.xml doc/datastrucs.xml doc/scalars.xml \
+		doc/vectors.xml doc/matrices.xml doc/performance.xml \
+		doc/gaplib.xml doc/examples.xml
 	($(GAPPATH)/bin/gap.sh makedoc.g)
 
 clean:

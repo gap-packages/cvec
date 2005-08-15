@@ -61,6 +61,10 @@ DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ##  ![2]: length of vectors
 ##  ![3]: wordlen of vectors
 ##  ![4]: starting type (mutable version) for new vectors in this class
+## for q <= MAXSIZE_GF_INTERNAL:
+##  ![5]: GF(p,d)
+## otherwise:
+##  ![5]: the corresponding cscaclass
 
 
 #############################################################################

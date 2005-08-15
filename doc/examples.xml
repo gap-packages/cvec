@@ -1,0 +1,19 @@
+<!-- 
+
+  examples.xml            cvec package documentation           Max Neunhoeffer
+
+         Copyright (C) 2005, Lehrstuhl D für Mathematik, RWTH-Aachen
+
+This chapter gives examples for the usage of compressed matrices and
+vectors.
+
+-->
+
+<Chapter Label="examples">
+<Heading>Examples</Heading>
+
+Here comes text.<P/>
+
+<!-- ############################################################ -->
+
+</Chapter>

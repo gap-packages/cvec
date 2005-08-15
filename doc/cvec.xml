@@ -29,7 +29,15 @@ Germany
     <Email>max.neunhoeffer@math.rwth-aachen.de</Email>
     <Homepage>http://www.math.rwth-aachen.de/&tilde;Max.Neunhoeffer</Homepage>
     </Author>
-    <Date>May 2005</Date>
+    <Date>August 2005</Date>
+
+<Copyright>
+  &copyright; 2005 by Max Neunhöffer<P/>
+
+  This package may be distributed under the terms and conditions of the
+  GNU Public License Version 2 or higher.
+</Copyright>
+
 </TitlePage>
 
 <!--  TableOfContents  . . . . . .  generate a table of contents   -->
@@ -37,7 +45,15 @@ Germany
 
 <!--  The only chapter of the book  --> 
 <Body>
-<#Include SYSTEM "main.xml">
+<#Include SYSTEM "intro.xml">
+<#Include SYSTEM "install.xml">
+<#Include SYSTEM "datastrucs.xml">
+<#Include SYSTEM "scalars.xml">
+<#Include SYSTEM "vectors.xml">
+<#Include SYSTEM "matrices.xml">
+<#Include SYSTEM "performance.xml">
+<#Include SYSTEM "gaplib.xml">
+<#Include SYSTEM "examples.xml">
 </Body>
 
 <!--  We do not need a bibliography  -->

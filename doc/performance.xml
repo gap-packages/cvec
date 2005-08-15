@@ -1,0 +1,19 @@
+<!-- 
+
+  performance.xml        cvec package documentation           Max Neunhoeffer
+
+         Copyright (C) 2005, Lehrstuhl D für Mathematik, RWTH-Aachen
+
+This chapter explains what to do to get the best performance out of this
+package. Also a few "do nots" are covered.
+
+-->
+
+<Chapter Label="performance">
+<Heading>Performance</Heading>
+
+Here comes text.<P/>
+
+<!-- ############################################################ -->
+
+</Chapter>

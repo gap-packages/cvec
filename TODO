@@ -7,6 +7,8 @@ Tasks to do:
   * Beweis, dass keine CHANGED_BAGs fehlen
   * GAP-Lib: GF, LargeGaloisField --> operationen --> 4.4
   * Documentation
+  * TransposedMat
+  * InverseMat
 
 Future plans:
 
