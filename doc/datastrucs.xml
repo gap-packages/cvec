@@ -329,6 +329,8 @@ constant coefficient. The coefficients are stored in the least
 significant bits of the <C>Word</C>s, as would the coefficients of a
 vector of length <M>1</M>. <P/>
 
+<C>csca</C> as are <E>immutable by convention</E>.<P/>
+
 Note that this is not very memory efficient for large extensions
 in small characteristic, because every prime field element uses a
 <C>Word</C>. For such cases one would better use another data format.<P/>
@@ -530,7 +532,8 @@ easier to implement.
 
 <!-- 
 Some typing convenience for THE editor vim:
-:imap <C> <C></C>+=+<left><left><left><left><left><left><left>
-:imap <M> <M></M>+=+<left><left><left><left><left><left><left>
+:imap !C <C></C>+=+<left><left><left><left><left><left><left>
+:imap !M <M></M>+=+<left><left><left><left><left><left><left>
+:imap !Q <Q></Q>+=+<left><left><left><left><left><left><left>
 :imap !<space> <esc>/+=+<cr>xxxi
 -->

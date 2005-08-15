@@ -56,8 +56,7 @@ Germany
 <#Include SYSTEM "examples.xml">
 </Body>
 
-<!--  We do not need a bibliography  -->
-<!-- <Bibliography Databases="edim"/>-->
+<Bibliography Databases="cvec"/>
 
 <!--  And finally an index as well   -->
 <TheIndex/>

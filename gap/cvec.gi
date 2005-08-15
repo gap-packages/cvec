@@ -965,7 +965,7 @@ InstallMethod( CSca, "for a list of coefficients and a csca",
     return v;
   end);
 
-InstallMethod( CSca, "for a list of coefficients and a cvecclass",
+InstallMethod( CSca, "for a list of coefficients and two integers",
   [IsList, IsPosInt, IsPosInt],
   function(l,p,d)
     local v;
@@ -1095,6 +1095,22 @@ InstallOtherMethod( ZeroImmutable, "for a csca", [IsScalar and IsCScaRep],
   vcl := CVEC.CVecClass(v);
   return vcl![5];
 end);
+InstallOtherMethod( ZeroSameMutability, "for a cscaclass", 
+  [IsCVecClass],
+  function(vcl)
+    if vcl![2] <> -1 then
+        Error("ZeroSameMutability: not defined for a cvec class");
+    fi;
+  return vcl![5];
+end);
+InstallOtherMethod( ZeroImmutable, "for a cscaclass", 
+  [IsCVecClass],
+  function(vcl)
+    if vcl![2] <> -1 then
+        Error("ZeroImmutable: not defined for a cvec class");
+    fi;
+  return vcl![5];
+end);
 
 # One:
 
@@ -1215,7 +1231,6 @@ InstallOtherMethod( PrimitiveRoot, "for a csca class", [IsCVecClass],
   fi;
   return c![9];
 end);
-
 InstallOtherMethod( PrimitiveRoot, "for a csca", [IsScalar and IsCScaRep],
   function(x)
   local xcl;
@@ -1417,6 +1432,7 @@ CVEC.RandomMat := function(arg)
           Error("Usage: CVEC.RandomMat( rows, cvecclass)");
           return;
       fi;
+      x := c![2];
       d := c![1]![2];   # used later on
       q := c![1]![3];  
   elif Length(arg) = 4 then

@@ -11,7 +11,24 @@ This chapter covers compressed vectors.
 <Chapter Label="vectors">
 <Heading>Vectors</Heading>
 
-Here comes text.<P/>
+<Section>
+<Heading>Access to the base field</Heading>
+
+<ManSection>
+<Meth Name="BaseField" Arg="v" Label="cvec"/>
+<Returns>Returns the base field of <A>v</A>.
+</Returns>
+<Description>
+    For a <C>cvec</C> <A>v</A>. For <M>q=p^d \leq 65536</M> this returns
+    the &GAP; object <C>GF(p,d)</C>. For larger finite fields this
+    uses the &GAP; library to form a field object, which basically only
+    knows its <C>Size</C> and finiteness, <C>Zero</C> and <C>One</C>.
+    One can probably not do much more with this. Probably one can form
+    a polynomial ring over it.
+</Description>
+</ManSection>
+
+</Section>
 
 <!-- ############################################################ -->
 
