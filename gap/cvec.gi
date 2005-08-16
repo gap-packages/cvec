@@ -537,9 +537,9 @@ function(m)
 end);
 
 
-#######################################
-# Now to the installation of methods: #
-#######################################
+#################################################
+# Now to the installation of methods for cvecs: #
+#################################################
 
 # Length:
 
@@ -770,6 +770,11 @@ InstallMethod( CVec, "for a homogeneous list and two posints",
     v := CVEC.NEW(c);
     CVEC.INTREP_TO_CVEC(l,v);
     return v;
+  end);
+InstallMethod( CVec, "for a cvec class",
+  [IsCVecClass],
+  function(c)
+    return CVEC.NEW(c);
   end);
 InstallMethod( CVec, "for a homogeneous list and a cvec class",
   [IsHomogeneousList, IsCVecClass],

@@ -11,6 +11,181 @@ This chapter covers compressed vectors.
 <Chapter Label="vectors">
 <Heading>Vectors</Heading>
 
+See Section <Ref Sect="cvecs"/> for a documentation of the data format
+of <C>cvec</C>s and its restrictions.<P/>
+
+<Section>
+<Heading>Creation</Heading>
+
+Note that many functions described later in this chapter implicitly 
+create new <C>cvec</C>s, such that it is usually only in the beginning
+of a calculation necessary to create <C>cvec</C>s explicitly.
+
+<ManSection>
+<Oper Name="CVec" Arg="arg"/>
+<Returns>a new mutable <C>cvec</C></Returns>
+<Description>
+    Creates a new <C>cvec</C>. See the method descriptions for details.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVec" Arg="cvecclass" Label="cvecclass"/>
+<Returns>a new mutable <C>cvec</C></Returns>
+<Description>
+    <A>cvecclass</A> must be a <C>cvecclass</C>. Creates a new
+    <C>cvec</C> containing only zeroes. For an explanation of the term
+    <C>cvecclass</C> see Section <Ref Sect="cvecs"/> and 
+    <Ref Oper="CVecClass"/>. 
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVec" Arg="coeffs, cvecclass" Label="coeffl_cvecclass"/>
+<Returns>a new mutable <C>cvec</C></Returns>
+<Description>
+    This method takes a coefficient list and a <C>cvecclass</C>
+    as arguments. Assume the vector will be over <M>GF(p,d)</M> with
+    <M>q=p^d</M>. For the coefficient list <A>coeffs</A> there exist
+    several possibilities, partially depending on the base field size. 
+    If <M>q=p^d \leq 65536</M>, the easiest way is to use &GAP; finite
+    field elements, which will be put into the new vector in the same 
+    order. If <M>d=1</M>, one can always use &GAP; immediate integers
+    between <M>0</M> and <M>p-1</M>, the vector will then contain the 
+    corresponding cosets in <M>GF(p)=Z/pZ</M>. If <M>q</M> is small enough
+    to be a &GAP; immediate integer, then one can use &GAP; immediate
+    integers that are equal to the <M>p</M>-adic expansion using the
+    coefficients of the representing polynomial as coefficients. That is,
+    if an element in <M>GF(p,d)</M> is represented by the polynomial
+    <M>\sum_{{i=0}}^{{d-1}} a_i x^i</M> with <M>a_i \in \{0,\ldots,p-1\}</M>,
+    then one has to put <M>\sum_{{i=0}}^{{d-1}} a_i p^i</M> as integer into 
+    the coefficient list <A>coeffs</A>. If <M>q</M> is larger, then
+    <A>coeffs</A> is a list of length <M>d</M> times the length of the
+    new <C>cvec</C> and contains for each field element of <M>GF(p,d)</M> 
+    in the vector its <M>d</M> coefficients of the representing polynomial.
+    As of this writing, a list of <C>csca</C>s is not supported as
+    first argument, which might change over time.<P/>
+    For an explanation of the term <C>cvecclass</C> see Section <Ref
+    Sect="cvecs"/> and <Ref Oper="CVecClass"/>. Of course, the length of
+    the list <A>coeffs</A> must match the length of the vector given in the
+    <C>cvecclass</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVec" Arg="coeffs, p, d" Label="coeffl_p_d"/>
+<Returns>a new mutable <C>cvec</C></Returns>
+<Description>
+    This method takes a coefficient list and two positive integers
+    <A>p</A> and <A>d</A> as arguments. A new <C>cvec</C> over <M>GF(p,d)</M>
+    will be created. Let <M>q := p^d</M>.<P/>
+    For a description of the possible values of the coefficient list 
+    <A>coeffs</A> see the description of the method <Ref Meth="CVec"
+    Label="coeffl_cvecclass"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVec" Arg="v" Label="compvec"/>
+<Returns>a new <C>cvec</C></Returns>
+<Description>
+    <A>v</A> must be a &GAP; compressed vector either over <M>GF(2)</M> or
+    <M>GF(p,d)</M> with <M>p^d \leq 256</M>. Creates a new
+    <C>cvec</C> containing the same numbers as <A>v</A> over the field
+    which the <C>Field</C> operation returns for <A>v</A>.
+</Description>
+</ManSection>
+
+After having encountered the concept of a <C>cvecclass</C> already
+a few times it is time to learn how to create one. The following
+operation is used first to create new <C>cvecclass</C>es and second
+to ask a <C>cvec</C> for its class. In addition, it is used for
+<C>csca</C>s.
+
+<ManSection>
+<Oper Name="CVecClass" Arg="arg"/>
+<Returns>a <C>cvecclass</C></Returns>
+<Description>
+Creates new <C>cvecclass</C>es and asks <C>csca</C>s and <C>cvec</C>s
+for their class. See the following method descriptions for details.
+For an explanation of the term <C>cvecclass</C> see Section <Ref
+Sect="cvecs"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVecClass" Arg="p, d, l"/>
+<Returns>a <C>cvecclass</C> or a <C>cscaclass</C></Returns>
+<Description>
+All three arguments must be integers. The arguments <A>p</A> and <A>d</A>
+must be positive and describe the base field <M>GF(p,d)</M>. The third
+argument must either be positive, in which case the method returns
+the <C>cvecclass</C> of vectors over <M>GF(p,d)</M> of length <A>l</A>,
+or equal to <M>-1</M>, in which case the method returns the class of
+<C>csca</C>s in <M>GF(p,d)</M>. Note that this is also possible to
+do for <M>p^d \leq 65536</M>, although this probably will not make much
+sense, as &GAP; finite field elements will be more efficient in nearly
+all applications.<P/>
+For an explanation of the term <C>cvecclass</C> and its data structure
+see Section <Ref Sect="cvecs"/>, for <C>cscaclass</C> see Section
+<Ref Sect="cscas"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVecClass" Arg="v"/>
+<Returns>a <C>cvecclass</C> or a <C>cscaclass</C></Returns>
+<Description>
+The argument <A>v</A> must either be a <C>cvec</C> or a <C>csca</C>.
+The method returns the corresponding <C>cvecclass</C> or <C>cscaclass</C>
+respectively.
+For an explanation of the term <C>cvecclass</C> and its data structure
+see Section <Ref Sect="cvecs"/>, for <C>cscaclass</C> see Section
+<Ref Sect="cscas"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ZeroSameMutability" Arg="v" Label="cvec"/>
+<Returns>The zero <C>cvec</C> in the same <C>cvecclass</C> as <A>v</A>.
+</Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ZeroMutable" Arg="v" Label="cvec"/>
+<Returns>A mutable copy of the zero <C>cvec</C> in the same <C>cvecclass</C> 
+as <A>c</A>.
+</Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C>.
+</Description>
+</ManSection>
+
+</Section>
+
+<Section>
+<Heading>Element access and unpacking</Heading>
+
+</Section>
+
+<Section>
+<Heading>Arithmetic</Heading>
+
+<Subsection>
+<Heading>Handling of scalars in arithmetic operations</Heading>
+
+</Subsection>
+
+</Section>
+
+<Section>
+<Heading>Slicing</Heading>
+
+</Section>
+
 <Section>
 <Heading>Access to the base field</Heading>
 
@@ -23,7 +198,7 @@ This chapter covers compressed vectors.
     the &GAP; object <C>GF(p,d)</C>. For larger finite fields this
     uses the &GAP; library to form a field object, which basically only
     knows its <C>Size</C> and finiteness, <C>Zero</C> and <C>One</C>.
-    One can probably not do much more with this. Probably one can form
+    One can probably not do much more with this. One can form
     a polynomial ring over it.
 </Description>
 </ManSection>

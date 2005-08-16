@@ -36,11 +36,11 @@ to create <C>csca</C>s explicitly.
 <Description>
     This method takes a coefficient list and a <C>cscaclass</C>
     as arguments. The coefficient list <A>coeffs</A> must be
-    <M>[a_0,\ldots,a_{d-1}]</M> if the new finite field element is
-    represented by the polynomial <M>\sum_{i=0}^{d-1} a_i x^i</M>,
+    <M>[a_0,\ldots,a_{{d-1}}]</M> if the new finite field element is
+    represented by the polynomial <M>\sum_{{i=0}}^{{d-1}} a_i x^i</M>,
     where the <M>a_i</M> are integers between <M>0</M> and <M>p-1</M>.
     For an explanation of the term <C>cscaclass</C> see Section <Ref
-    Sect="cscas"/> and <Ref Oper="NewCVecClass"/>.
+    Sect="cscas"/> and <Ref Oper="CVecClass"/>.
 </Description>
 </ManSection>
 
@@ -52,8 +52,8 @@ to create <C>csca</C>s explicitly.
     This method takes a coefficient list and a <C>csca</C> as arguments.
     It creates a new <C>csca</C> from the same class as <A>csca</A>
     using the coefficient list <A>coeffs</A>. The coefficient list
-    <A>coeffs</A> must be <M>[a_0,\ldots,a_{d-1}]</M> if the new finite field
-    element is represented by the polynomial <M>\sum_{i=0}^{d-1} a_i
+    <A>coeffs</A> must be <M>[a_0,\ldots,a_{{d-1}}]</M> if the new finite field
+    element is represented by the polynomial <M>\sum_{{i=0}}^{{d-1}} a_i
     x^i</M>, where the <M>a_i</M> are integers between <M>0</M> and
     <M>p-1</M>.
 </Description>
@@ -68,60 +68,60 @@ to create <C>csca</C>s explicitly.
     <A>d</A> as arguments.
     It creates a new <C>csca</C> in the field <M>GF(<A>p</A>,<A>d</A>)</M>
     using the coefficient list <A>coeffs</A>. The coefficient list
-    <A>coeffs</A> must be <M>[a_0,\ldots,a_{d-1}]</M> if the new finite field
-    element is represented by the polynomial <M>\sum_{i=0}^{d-1} a_i
+    <A>coeffs</A> must be <M>[a_0,\ldots,a_{{d-1}}]</M> if the new finite field
+    element is represented by the polynomial <M>\sum_{{i=0}}^{{d-1}} a_i
     x^i</M>, where the <M>a_i</M> are integers between <M>0</M> and
     <M>p-1</M>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="ZeroSameMutability" Arg="c" Label="csca"/>
-<Returns>The zero <C>csca</C> in the same <C>cscaclass</C> as <A>c</A>.
+<Meth Name="ZeroSameMutability" Arg="s" Label="csca"/>
+<Returns>The zero <C>csca</C> in the same <C>cscaclass</C> as <A>s</A>.
 </Returns>
 <Description>
-<A>c</A> must be a <C>csca</C> or a <C>cscaclass</C>.
+<A>s</A> must be a <C>csca</C> or a <C>cscaclass</C>.
 Note that all <C>csca</C>s are by convention immutable.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="ZeroImmutable" Arg="c" Label="csca"/>
-<Returns>The zero <C>csca</C> in the same <C>cscaclass</C> as <A>c</A>.
+<Meth Name="ZeroImmutable" Arg="s" Label="csca"/>
+<Returns>The zero <C>csca</C> in the same <C>cscaclass</C> as <A>s</A>.
 </Returns>
 <Description>
-<A>c</A> must be a <C>csca</C> or a <C>cscaclass</C>.
+<A>s</A> must be a <C>csca</C> or a <C>cscaclass</C>.
 Note that all <C>csca</C>s are by convention immutable.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="OneSameMutability" Arg="c" Label="csca"/>
-<Returns>The one <C>csca</C> in the same <C>cscaclass</C> as <A>c</A>.
+<Meth Name="OneSameMutability" Arg="s" Label="csca"/>
+<Returns>The one <C>csca</C> in the same <C>cscaclass</C> as <A>s</A>.
 </Returns>
 <Description>
-<A>c</A> must be a <C>csca</C> or a <C>cscaclass</C>.
+<A>s</A> must be a <C>csca</C> or a <C>cscaclass</C>.
 Note that all <C>csca</C>s are by convention immutable.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="OneImmutable" Arg="c" Label="csca"/>
-<Returns>The one <C>csca</C> in the same <C>cscaclass</C> as <A>c</A>.
+<Meth Name="OneImmutable" Arg="s" Label="csca"/>
+<Returns>The one <C>csca</C> in the same <C>cscaclass</C> as <A>s</A>.
 </Returns>
 <Description>
-<A>c</A> must be a <C>csca</C> or a <C>cscaclass</C>.
+<A>s</A> must be a <C>csca</C> or a <C>cscaclass</C>.
 Note that all <C>csca</C>s are by convention immutable.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="PrimitiveRoot" Arg="c" Label="csca"/>
+<Meth Name="PrimitiveRoot" Arg="s" Label="csca"/>
 <Returns>The <C>csca</C> represented by the polynomial <M>x</M> in the 
-same <C>cscaclass</C> as <A>c</A>.
+same <C>cscaclass</C> as <A>s</A>.
 </Returns>
 <Description>
-<A>c</A> must be a <C>csca</C> or a <C>cscaclass</C>.
+<A>s</A> must be a <C>csca</C> or a <C>cscaclass</C>.
 The definition of Conway polynomials ensures that the returned element
 is a primitive root.
 Note that all <C>csca</C>s are by convention immutable.

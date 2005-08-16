@@ -1,5 +1,6 @@
 Tasks to do:
 
+  * CVecClass as a constructor operation also for scalars
   * Concatenation fuer CVecs
   * matrix.g{d,i} look through for usability
   * test DeterminantMat
@@ -9,6 +10,8 @@ Tasks to do:
   * Documentation
   * TransposedMat
   * InverseMat
+  * PrimitiveRoot for d=1 ==> factorize p-1 and search
+  * Cleanup of "Hacks" and "Utilities" in cvec.gi
 
 Future plans:
 
@@ -23,6 +26,7 @@ Possibly not to do:
   * ADDMUL3 auf GAP-Ebene fuer \- ?
   * C-Mtx-binary-format R/W
   * Append for CVecs
+  * Resize for CVecs
 
 Done:
 
@@ -65,3 +69,4 @@ Done:
   * RankMat testen
   * SemiEchelonMat and friends testen
   * GAP-Lib: MutableCopyMat, 
+  * CVec Method for only a cvecclass in addition to CVEC.New

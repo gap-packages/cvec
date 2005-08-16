@@ -63,7 +63,7 @@ finite field with <M>p^d</M> elements, where <M>p</M> is a prime and
 of degree <M>d</M> over the prime field <M>GF(p)</M> using the Conway
 polynomial <M>c \in GF(p)[x]</M>. We always represent field elements
 of <M>GF(p^d)</M> by polynomials
-<Math>a = \sum_{i=0}^{d-1} a_i x^i</Math>
+<Math>a = \sum_{{i=0}}^{{d-1}} a_i x^i</Math>
 where the coefficients <M>a_i</M> are in <M>GF(p)</M>. Because <M>c</M>
 is monic, this gives a one-to-one correspondance between polynomials
 and finite field elements.<P/>
@@ -98,7 +98,7 @@ field elements <M>0,1,2,3,4,5</M> of <M>GF(11)</M> are stored in that
 order in one 32bit <C>Word</C>.
 <C>bitsperel</C> is here <M>4</M>, because 
 <M>2^4 &lt; 2\cdot 11 - 1 = 21 &lt; 2^5</M>. Therefore <C>elsperword</C>
-is <M>6</M> on a 32bit machine.
+is <M>5</M> on a 32bit machine.
 
 <Example>
  most significant xx|.....|.....|.....|.....|.....|..... least significant
@@ -156,7 +156,7 @@ constant coefficients of the polynomials representing the first
 <C>elsperword</C> field elements in their order from left to right,
 the second <C>Word</C> stores the coefficients of <M>x^1</M> and so 
 on until the <M>d</M>'th <C>Word</C>, which stores the coefficients
-of <M>x^{d-1}</M>. Unused entries behind the end of the actual vector
+of <M>x^{{d-1}}</M>. Unused entries behind the end of the actual vector
 data within the last <C>Word</C> has to be zero!.<P/>
 
 The following example shows, how the <M>9</M> field elements
@@ -302,9 +302,9 @@ Sect="cscas"/>).<P/>
 
 The following limits come from the above mentioned data format or other
 internal restrictions (an
-<Q>immediate integer</Q> in &GAP; can take values between <M>2^{-28}</M>
-and <M>(2^{28})-1</M> inclusively on 32bit machines and between
-<M>2^{-60}</M> and <M>(2^{60})-1</M> on 64bit machines):
+<Q>immediate integer</Q> in &GAP; can take values between <M>2^{{-28}}</M>
+and <M>(2^{{28}})-1</M> inclusively on 32bit machines and between
+<M>2^{{-60}}</M> and <M>(2^{{60}})-1</M> on 64bit machines):
 
 <List>
 <Item> The prime <M>p</M> must be an immediate integer. </Item>
@@ -368,18 +368,18 @@ integer, which is <M>d</M> here</Item>
 <Item>6</Item><Item>the one <C>csca</C></Item>
 </Row>
 <Row>
-<Item>7</Item><Item><M>s</M> from <M>q-1 = s \cdot 2^{T+1}</M>
+<Item>7</Item><Item><M>s</M> from <M>q-1 = s \cdot 2^{{T+1}}</M>
 (used for taking square roots)</Item>
 </Row>
 <Row>
-<Item>8</Item><Item><M>T</M> from <M>q-1 = s \cdot 2^{T+1}</M></Item>
+<Item>8</Item><Item><M>T</M> from <M>q-1 = s \cdot 2^{{T+1}}</M></Item>
 </Row>
 <Row>
 <Item>9</Item><Item>the <C>csca</C> represented by <M>x</M>, which is a
 primitive root</Item>
 </Row>
 <Row>
-<Item>10</Item><Item>a list of <M>(x^s)^(2^i)</M> for <M>0 \leq i \leq T</M>
+<Item>10</Item><Item>a list of <M>(x^s)^{{2^i}}</M> for <M>0 \leq i \leq T</M>
 </Item>
 </Row>
 </Table>
@@ -535,5 +535,6 @@ Some typing convenience for THE editor vim:
 :imap !C <C></C>+=+<left><left><left><left><left><left><left>
 :imap !M <M></M>+=+<left><left><left><left><left><left><left>
 :imap !Q <Q></Q>+=+<left><left><left><left><left><left><left>
+:imap !A <A></A>+=+<left><left><left><left><left><left><left>
 :imap !<space> <esc>/+=+<cr>xxxi
 -->
