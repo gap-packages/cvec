@@ -157,7 +157,16 @@ see Section <Ref Sect="cvecs"/>, for <C>cscaclass</C> see Section
 <ManSection>
 <Meth Name="ZeroMutable" Arg="v" Label="cvec"/>
 <Returns>A mutable copy of the zero <C>cvec</C> in the same <C>cvecclass</C> 
-as <A>c</A>.
+as <A>v</A>.
+</Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ShallowCopy" Arg="v" Label="cvec"/>
+<Returns>A mutable copy of <A>v</A>.
 </Returns>
 <Description>
 <A>v</A> must be a <C>cvec</C>.
@@ -174,11 +183,112 @@ as <A>c</A>.
 <Section>
 <Heading>Arithmetic</Heading>
 
-<Subsection>
+Of course, the standard arithmetic infix operations <M>+</M>, <M>-</M> and
+<M>*</M> (for vectors and scalars) work as expected by using the  
+methods below. We start this section with a subsection on the usage of
+scalars in arithmetic operations involving vectors.
+
+<Subsection Label="scahandl">
 <Heading>Handling of scalars in arithmetic operations</Heading>
 
+In all places (like in <C>\*</C>) where vectors and scalars occur, the
+following conventions apply to scalars:<P/>
+
+&GAP; finite field elements can be used as scalars as long as the vectors
+are over a field <M>GF(p,d)</M> with <M>p^d \leq 65536</M>.<P/> 
+
+Integers between <M>0</M> and <M>p-1</M> (inclusively) can always be used as
+scalars representing prime field elements via the isomorphism 
+<M>GF(p)=Z/pZ</M>, also for extension fields. Larger integers than
+<M>p-1</M>, as long as they are &GAP; immediate integers, are interpreted 
+as the <M>p</M>-adic expansion of the coefficient list of the polynomial
+representing the scalar. Note that this usage of immediate integers
+differs from the standard list arithmetic in &GAP; because multiplication
+with the integer <M>n</M> not necessarily means the same than <M>n</M> times
+addition! Larger integers than immediate integers are not supported.<P/>
+
+Of course, <C>csca</C>s can always be used as scalars in arithmetic operations.
 </Subsection>
 
+<ManSection>
+<Meth Name="\+" Arg="v, w" Label="cvec_cvec"/>
+<Returns>The sum <M><A>v</A>+<A>w</A></M> as a new <C>cvec</C>.</Returns>
+<Description>
+    For two <C>cvec</C>s <A>v</A> and <A>w</A>. Works as expected.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="\-" Arg="v, w" Label="cvec_cvec"/>
+<Returns>The difference <M><A>v</A>-<A>w</A></M> as a new <C>cvec</C>.</Returns>
+<Description>
+    For two <C>cvec</C>s <A>v</A> and <A>w</A>. Works as expected.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="AdditiveInverseSameMutability" Arg="v" Label="cvec"/>
+<Returns>The additive inverse of <A>v</A> as a new <C>cvec</C>.</Returns>
+<Description>
+For a <C>cvec</C> <A>v</A>. Works as expected.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="AdditiveInverseMutable" Arg="v" Label="cvec"/>
+<Returns>The additive inverse of <A>v</A> as a new mutable <C>cvec</C>.
+</Returns>
+<Description>
+For a <C>cvec</C> <A>v</A>. Works as expected.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="\*" Arg="v, s" Label="cvec_sca"/>
+<Meth Name="\*" Arg="s, v" Label="sca_cvec"/>
+<Returns>The scalar multiple <A>s</A><M>\cdot</M><A>v</A>.</Returns>
+<Description>
+    For a <C>cvec</C> <A>v</A> and a scalar <A>s</A>. For the format
+    of the scalar see <Ref Subsect="scahandl"/>. Works as expected.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="AddRowVector" Arg="v, w, s" Label="cvec_cvec_sca"/>
+<Meth Name="AddRowVector" Arg="v, w, s, fr, to" Label="cvec_cvec_sca_pos_pos"/>
+<Returns>nothing</Returns>
+<Description>
+    <A>v</A> and <A>w</A> must be <C>cvec</C>s over the same field with
+    equal length, <A>s</A> a scalar (see Subsection <Ref Subsect="scahandl"/>)
+    and <A>v</A> must be mutable.
+    Adds <A>s</A><M>\cdot</M><A>w</A> to <A>v</A> modifying <A>v</A>. If
+    <A>fr</A> and <A>to</A> are given, they give a hint, that <A>w</A> is
+    zero outside positions <A>fr</A> to <A>to</A> (inclusively). The method
+    can, if it chooses so, save time by not computing outside that range.
+    In fact, the implemented method restricts the operation to the
+    <C>Word</C>s involved.<P/>
+    If either <A>fr</A> or <A>to</A> is <M>0</M> it defaults to <M>1</M> and
+    <C>Length(v)</C> respectively.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="MultRowVector" Arg="v, s" Label="cvec_sca"/>
+<Meth Name="AddRowVector" Arg="v, s, fr, to" Label="cvec_sca_pos_pos"/>
+<Returns>nothing</Returns>
+<Description>
+    <A>v</A> must be a mutable <C>cvec</C> and <A>s</A> a scalar (see
+    Subsection <Ref Subsect="scahandl"/>).
+    Multiplys <A>v</A> by <A>s</A> modifying <A>v</A>. If
+    <A>fr</A> and <A>to</A> are given, they give a hint, that <A>v</A> is
+    zero outside positions <A>fr</A> to <A>to</A> (inclusively). The method
+    can, if it chooses so, save time by not computing outside that range.
+    In fact, the implemented method restricts the operation to the
+    <C>Word</C>s involved.<P/>
+    If either <A>fr</A> or <A>to</A> is <M>0</M> it defaults to <M>1</M> and
+    <C>Length(v)</C> respectively.
+</Description>
+</ManSection>
 </Section>
 
 <Section>
