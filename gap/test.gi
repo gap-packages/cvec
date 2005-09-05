@@ -702,6 +702,34 @@ CVEC.TEST.IO := function(p,d)
   IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED.2");
 end;
 
+CVEC.TEST.PROD_COEFFS_CVEC_PRIMEFIELD := function(p,d)
+  local a,b,c,cc,cl,h,i,j,l1,l2,m,n,u;
+  if d > 1 then
+      Error("Only implemented for prime fields!");
+      return;
+  fi;
+  l1 := Random(50,100);
+  l2 := Random(50,100);
+  m := CVEC.RandomMat(Random(50,100),l1,p,d);
+  n := CVEC.RandomMat(Random(50,100),l2,p,d);
+  cl := CVEC.NewCVecClass(p,d,l1+l2-1);
+  u := CVEC.New(cl);
+  h := CVEC.New(cl);
+  for i in [1..Length(m)] do
+      a := FFEList(m[i]);
+      for j in [1..Length(n)] do
+          CVEC.PROD_COEFFS_CVEC_PRIMEFIELD(u,m[i],n[j],h);
+          b := FFEList(n[j]);
+          c := FFEList(u);
+          CVEC.MAKEZERO(u);
+          cc := ProductCoeffs(a,b);
+          if c <> cc then
+              Error("Alarm p=",p," you can inspect a, b, c, and cc");
+          fi;
+      od;
+  od;
+end;
+
 CVEC.TEST.DOALL := function()
   local inf;
   inf := InfoLevel(InfoWarning);

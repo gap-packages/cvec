@@ -1,5 +1,12 @@
 Tasks to do:
 
+  * TransposedMat
+  * InverseMat
+  * PrimitiveRoot for d=1 ==> factorize p-1 and search
+  * Generic Sequential access, at least for prime field
+  * folding for polynomial code
+  * * mod cp, at least over prime field
+  * other polynomials than conway
   * CVecClass as a constructor operation also for scalars
   * Concatenation fuer CVecs
   * matrix.g{d,i} look through for usability
@@ -8,10 +15,9 @@ Tasks to do:
   * Beweis, dass keine CHANGED_BAGs fehlen
   * GAP-Lib: GF, LargeGaloisField --> operationen --> 4.4
   * Documentation
-  * TransposedMat
-  * InverseMat
-  * PrimitiveRoot for d=1 ==> factorize p-1 and search
   * Cleanup of "Hacks" and "Utilities" in cvec.gi
+  * Sort out finite field business: own Cscas?
+  * Resize of vectors / locked vectors?
 
 Future plans:
 

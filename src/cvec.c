@@ -257,6 +257,73 @@ Obj INIT_SMALL_GFQ_TABS(Obj self, Obj pp, Obj dd, Obj qq, Obj tab1, Obj tab2,
     return 0L;
 }
 
+  /**********************/
+ /* Sequential access: */
+/**********************/
+
+typedef struct SeqAcc {
+    Int d;
+    Int bitsperel;
+    Int elsperword;
+    Int pos;     /* one based */
+    Word mask;   /* to extract */
+    Int bitpos;
+    Int offset;  /* in words */
+} seqaccess;
+
+/* For the following macros sa is *seqaccess, v is *Word, off is Int, s is Int,
+ * which is a prime field scalar. */
+
+/* Gets a prime field component: */
+#define GET_VEC_ELM(sa,w,off) \
+  (((w)[(sa)->offset+off] & (sa)->mask) >> (sa)->bitpos)
+
+/* Sets a prime field component: */
+#define SET_VEC_ELM(sa,w,off,s) \
+  (((w)[((sa)->offset)+(off)])) = \
+  ((((w)[((sa)->offset)+(off)]) & (~((sa)->mask))) | (s << ((sa)->bitpos)))
+
+/* Moves the sequential access struct left (down): */
+#define STEP_LEFT(sa) \
+  (sa)->pos--; \
+  if ((sa)->bitpos > 0) { \
+      (sa)->bitpos -= (sa)->bitsperel; \
+      (sa)->mask >>= (sa)->bitsperel; \
+  } else { \
+      (sa)->bitpos += (sa)->bitsperel*((sa)->elsperword-1); \
+      (sa)->mask <<= (sa)->bitsperel*((sa)->elsperword-1); \
+      (sa)->offset -= (sa)->d; \
+  }
+
+/* Moves the sequential access struct right (up): */
+#define STEP_RIGHT(sa) \
+  (sa)->pos++; \
+  if ((sa)->bitpos < (sa)->bitsperel*((sa)->elsperword-1)) { \
+      (sa)->bitpos += (sa)->bitsperel; \
+      (sa)->mask <<= (sa)->bitsperel; \
+  } else { \
+      (sa)->bitpos -= (sa)->bitsperel*((sa)->elsperword-1); \
+      (sa)->mask >>= (sa)->bitsperel*((sa)->elsperword-1); \
+      (sa)->offset += (sa)->d; \
+  }
+
+/* Initializes the sequential access struct, v is a cvec: */
+INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
+{
+    PREPARE_clfi(v,cl,fi);
+    PREPARE_d(fi);
+    PREPARE_bpe(fi);
+    PREPARE_epw(fi);
+    
+    sa->d = d;
+    sa->bitsperel = bitsperel;
+    sa->elsperword = elsperword;
+    sa->pos = pos;
+    sa->offset = d*((pos-1) / elsperword);
+    sa->bitpos = ((pos-1)%elsperword) * bitsperel;
+    sa->mask = ((1UL << bitsperel)-1) << sa->bitpos;
+}
+
 
   /*******************************************************/
  /* Interfacing stuff for the objects to the GAP level: */
@@ -2806,8 +2873,8 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
 
 STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
 /* No checks are done at all. src and dst must be cvecs over the same field and
- * 1 <= frompos <= frompos+len-1 <= Length(src) and
- * 1 <= topos   <= topos+len-1   <= Length(dst) must hold. */
+ * 1 <= srcpos <= srcpos+len-1 <= Length(src) and
+ * 1 <= dstpos <= dstpos+len-1 <= Length(dst) must hold. */
 {
     PREPARE_clfi(src,cl,fi);
     PREPARE_d(fi);
@@ -2895,10 +2962,10 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
             for (i = d;i > 0;i--,v++,w++) {
                 mask = domask & stamask;
                 wo = (*v & mask) << shiftl;
-                if (wo) *w = (*w & (~(mask << shiftl))) | wo;
+                *w = (*w & (~(mask << shiftl))) | wo;
                 mask = upmask & stamask;
                 wo = (*v & mask) >> shiftr;
-                if (wo) w[d] = (w[d] & (~(mask >> shiftr))) | wo;
+                w[d] = (w[d] & (~(mask >> shiftr))) | wo;
             }
             le -= stanr;
 
@@ -2907,9 +2974,9 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
             while (le >= elsperword) {
                 for (i = d;i > 0;i--,v++,w++) {
                     wo = (*v & domask) << shiftl;
-                    if (wo) *w = (*w & kupmask) | wo;
+                    *w = (*w & kupmask) | wo;
                     wo = (*v & upmask) >> shiftr;
-                    if (wo) w[d] = (w[d] & kdomask) | wo;
+                    w[d] = (w[d] & kdomask) | wo;
                 }
                 le -= elsperword;
             }
@@ -2919,10 +2986,10 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
                 for (i = d;i > 0;i--,v++,w++) {
                     mask = domask & endmask;
                     wo = (*v & mask) << shiftl;
-                    if (wo) *w = (*w & (~(mask << shiftl))) | wo;
+                    *w = (*w & (~(mask << shiftl))) | wo;
                     mask = upmask & endmask;
                     wo = (*v & mask) >> shiftr;
-                    if (wo) w[d] = (w[d] & (~(mask >> shiftr))) | wo;
+                    w[d] = (w[d] & (~(mask >> shiftr))) | wo;
                 }
             }
         }
@@ -3172,6 +3239,63 @@ STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
     return 0L;
 }
 
+Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h)
+/* All foour must be cvecs over the same (prime) field. The length of
+ * u and h must be the same as the length of v plus length of w - 1. 
+ * h is overwritten. u is overwritten but has to be zero beforehand! */
+{
+    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w) || !IS_CVEC(h)) {
+        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
+                   "no cvecs");
+    }
+    {
+        seqaccess sa;
+        PREPARE_clfi(u,ucl,fi);
+        PREPARE_clfi(v,vcl,vfi);
+        PREPARE_clfi(w,wcl,wfi);
+        PREPARE_clfi(h,hcl,hfi);
+        PREPARE_epw(fi);
+        Word *vv = DATA_CVEC(v);
+        Word *uu = DATA_CVEC(u);
+        Word *hh = DATA_CVEC(h);
+        Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
+        void *dummy;
+        register Int i;
+        register Int imodepw;
+        register Word s;
+        Int m = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+        Int n = INT_INTOBJ(ELM_PLIST(wcl,IDX_len));
+        hfi = hfi;  /* to get rid of a warning */
+
+        if (m > n) {   /* Switch v and w */
+            dummy = v; v = w; w = dummy;
+            vv = DATA_CVEC(v);
+            dummy = vcl; vcl = wcl; wcl = dummy;
+            dummy = vfi; vfi = wfi; wfi = dummy;
+            m += n; n = m - n; m = m - n;
+        }
+
+        INIT_SEQ_ACCESS(&sa, v, 1);
+        MAKEZERO(self,h);
+        for (i = 1,imodepw = 0;i <= m;i++) {
+            SLICE(self,w,h,INTOBJ_INT(1L),INTOBJ_INT(n),INTOBJ_INT(i));
+            s = GET_VEC_ELM(&sa,vv,0);
+            ADDMUL_INL(uu,hh,fi,s,wordlen);
+            SET_VEC_ELM(&sa,DATA_CVEC(h),0,0);  /* cleanup */
+            STEP_RIGHT(&sa);
+
+            /* Take a shortcut if we can skip words: */
+            imodepw++;
+            if (imodepw >= elsperword) {
+                imodepw = 0;
+                wordlen--;
+                uu++;
+                hh++;
+            }
+        }
+    }
+    return 0L;
+}
 
 /* We really do not want to use the following: */
 #if 0
@@ -3373,6 +3497,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "EXTREP_TO_CVEC", 2, "s, v",
     EXTREP_TO_CVEC,
     "cvec.c:EXTREP_TO_CVEC" },
+
+  { "PROD_COEFFS_CVEC_PRIMEFIELD", 4, "u, v, w, h",
+    PROD_COEFFS_CVEC_PRIMEFIELD,
+    "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD" },
 
 #if 0
   { "DONOTUSEMEDONOTUSEME", 0, "",
