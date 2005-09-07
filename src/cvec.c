@@ -3240,7 +3240,7 @@ STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
 }
 
 Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h)
-/* All foour must be cvecs over the same (prime) field. The length of
+/* All four must be cvecs over the same (prime) field. The length of
  * u and h must be the same as the length of v plus length of w - 1. 
  * h is overwritten. u is overwritten but has to be zero beforehand! */
 {
@@ -3251,9 +3251,8 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h)
     {
         seqaccess sa;
         PREPARE_clfi(u,ucl,fi);
-        PREPARE_clfi(v,vcl,vfi);
-        PREPARE_clfi(w,wcl,wfi);
-        PREPARE_clfi(h,hcl,hfi);
+        PREPARE_cl(v,vcl);
+        PREPARE_cl(w,wcl)
         PREPARE_epw(fi);
         Word *vv = DATA_CVEC(v);
         Word *uu = DATA_CVEC(u);
@@ -3265,13 +3264,11 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h)
         register Word s;
         Int m = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
         Int n = INT_INTOBJ(ELM_PLIST(wcl,IDX_len));
-        hfi = hfi;  /* to get rid of a warning */
 
         if (m > n) {   /* Switch v and w */
             dummy = v; v = w; w = dummy;
             vv = DATA_CVEC(v);
             dummy = vcl; vcl = wcl; wcl = dummy;
-            dummy = vfi; vfi = wfi; wfi = dummy;
             m += n; n = m - n; m = m - n;
         }
 
@@ -3292,6 +3289,57 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h)
                 uu++;
                 hh++;
             }
+        }
+    }
+    return 0L;
+}
+
+Obj PROD_COEFFS_MOD_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h, Obj c)
+/* All five must be cvecs over the same (prime) field with equal length d.
+ * h and w are overwritten! u is overwritten but has to be zero beforehand! 
+ * Calculates v*w mod c where v and w represent polynomials of degree < d
+ * and c represents a monic polynomial of degree d. Note that c contains
+ * the additive inverses of the coefficients! */
+{
+    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w) || !IS_CVEC(h) ||
+        !IS_CVEC(c)) {
+        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_MOD_PRIMEFIELD: "
+                   "no cvecs");
+    }
+    {
+        seqaccess sa,sa2;
+        PREPARE_clfi(u,ucl,fi);
+        PREPARE_cl(v,vcl);
+        Word *vv = DATA_CVEC(v);
+        Word *ww = DATA_CVEC(v);
+        Word *uu = DATA_CVEC(u);
+        Word *hh = DATA_CVEC(h);
+        Word *cc = DATA_CVEC(c);
+        Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
+        register Int i;
+        register Word s;
+        Int d = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+
+        INIT_SEQ_ACCESS(&sa, v, 1);
+        INIT_SEQ_ACCESS(&sa2, w, d);  /* this we need for the dropout */
+        MAKEZERO(self,h);
+        /* Do the first step: */
+        s = GET_VEC_ELM(&sa,vv,0);
+        ADDMUL_INL(uu,ww,fi,s,wordlen);
+        for (i = 2;i < d;i++) {
+            /* First multiply w by x mod c: */
+            SLICE(self,w,h,INTOBJ_INT(1L),INTOBJ_INT(d-1),INTOBJ_INT(2));
+            /* Note: position zero of h is always equal to zero! */
+            s = GET_VEC_ELM(&sa2,ww,0);  /* highest coefficient */
+            if (s == 0) {
+                memcpy(ww,hh,sizeof(Word)*wordlen);
+            } else {
+                MUL2_INL(ww,cc,fi,s,wordlen);
+                ADD2_INL(ww,hh,fi,wordlen);
+            }
+            STEP_RIGHT(&sa);
+            s = GET_VEC_ELM(&sa,vv,0);
+            ADDMUL_INL(uu,ww,fi,s,wordlen);
         }
     }
     return 0L;
@@ -3501,6 +3549,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "PROD_COEFFS_CVEC_PRIMEFIELD", 4, "u, v, w, h",
     PROD_COEFFS_CVEC_PRIMEFIELD,
     "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD" },
+
+  { "PROD_COEFFS_MOD_CVEC_PRIMEFIELD", 5, "u, v, w, h, c",
+    PROD_COEFFS_MOD_CVEC_PRIMEFIELD,
+    "cvec.c:PROD_COEFFS_MOD_CVEC_PRIMEFIELD" },
 
 #if 0
   { "DONOTUSEMEDONOTUSEME", 0, "",
