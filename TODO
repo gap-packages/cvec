@@ -1,3 +1,16 @@
+[] liefert neue CScas fuer q>65536 ==> insbesondere d=1
+Assignment fuer Vektoren OK?
+Inverse fuer d=1 testen (mod p)
+Inverse fuer d>1 testen, debuggen
+neue Methoden: Polynomdiv, euklid. algorithmus, invertieren
+CSca methoden korrekt: *, /, ^-1
+Scalartests zum Laufen bringen
+polynomarith mit worten fuer prime field els raus
+wurzeln besser
+aus/einpacken
+
+
+
 Tasks to do:
 
   * TransposedMat

@@ -33,6 +33,8 @@ DeclareRepresentation( "IsCMatRep", IsComponentObjectRep, [] );
 
 DeclareRepresentation( "IsCVecFieldInfo", IsPositionalObjectRep, [] );
 ## Such an object holds the following information:
+## We use the same symbolic names for these indices as exported from cvec.c
+## in the CVEC record: CVEC.IDX_p and so on:
 ##  ![1] : p: cardinality of prime field
 ##  ![2] : d: degree of extension over prime field
 ##  ![3] : q=p^d as GAP integer
@@ -57,14 +59,27 @@ DeclareRepresentation( "IsCVecFieldInfo", IsPositionalObjectRep, [] );
 ##         GAP library
 
 DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
+## We use the same symbolic names for these indices as exported from cvec.c
+## in the CVEC record: CVEC.IDX_fieldinfo and so on:
 ##  ![1]: field info (see above) for base field
 ##  ![2]: length of vectors
 ##  ![3]: wordlen of vectors
 ##  ![4]: starting type (mutable version) for new vectors in this class
-## for q <= MAXSIZE_GF_INTERNAL:
 ##  ![5]: GF(p,d)
-## otherwise:
-##  ![5]: the corresponding cscaclass
+##  ![6]: the class of the corresponding scalars, that is for (p,1,d)
+##  From here on we only have values for d=1 and otherwise fail:
+##  ![7]:  the starting type (immutable version) for new vectors
+##         that are used for scalars of GF(p,l) in this class
+##  ![8]:  the zero scalar of GF(p,l)
+##  ![9]:  the one scalar of GF(p,l)
+##  ![10]: the primitive root of GF(p,l)  (represented by x)
+##  ![11]: rootinfo for taking roots, a list, see Sqrt and friends
+##  ![12]: a dummy scalar used for overwriting during multiplication
+##  again for d=1:
+##  ![13]: for d=1 if GF(p,d) is used: conway-Polynomial as compressed 
+##         vector over GF(p) or fail otherwise
+##  
+
 
 
 #############################################################################

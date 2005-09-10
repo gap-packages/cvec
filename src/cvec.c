@@ -41,8 +41,9 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
  /* Macros to access the data types: */
 /************************************/
 
-/* Do not change the following without changing cvec.g{d,i} which contains
- * these numbers explicitly! */
+/* The following positions are exported into the record CVEC for use
+ * within the GAP part: If you add a position, please document it
+ * in gap/cvec.gd and export it in InitLibrary! */
 
 #define IDX_p 1
 #define IDX_d 2
@@ -57,14 +58,21 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define IDX_tab1 11
 #define IDX_tab2 12
 #define IDX_size 13
+#define IDX_scafam 14
 
 #define IDX_fieldinfo 1
 #define IDX_len 2
 #define IDX_wordlen 3
 #define IDX_type 4
-#define IDX_scaclass 5
-#define IDX_zero 5
-#define IDX_one 6
+#define IDX_GF 5
+#define IDX_scaclass 6
+#define IDX_scatype 7
+#define IDX_zero 8
+#define IDX_one 9
+#define IDX_primroot 10
+#define IDX_rootinfo 11
+#define IDX_dummy 12
+#define IDX_cpcompr 13
 
 #define OFF_mask 0
 #define OFF_offset 1
@@ -329,11 +337,10 @@ INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
  /* Interfacing stuff for the objects to the GAP level: */
 /*******************************************************/
 
-STATIC Obj NEW(Obj self, Obj cl)
+STATIC Obj NEW(Obj self, Obj cl, Obj type)
 {
     Obj v;
     Int si;
-    Obj type = ELM_PLIST(cl,IDX_type);
 
     si = sizeof(Word) * INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
     /* GARBAGE COLLECTION POSSIBLE */
@@ -617,7 +624,7 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
             register Obj tmp;
             for (j = 1;j <= len;j++) {
                 /* GARBAGE COLLECTION POSSIBLE */
-                tmp = NEW(self,sca);
+                tmp = NEW(self,sca,ELM_PLIST(sca,IDX_scatype));
                 if (tmp == 0) return 0L;
                 SET_ELM_PLIST(l,j,tmp);
                 CHANGED_BAG(l);   /* This seems to be necessary, since every
@@ -705,7 +712,8 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
     return 0L;
 }
 
-
+/* FIXME: rausrausraus */
+#if 0
 STATIC Obj CSCA_TO_INTREP(Obj self,Obj v,Obj l)
 /* This function returns the scalar in its integer representation. This
  * means, that a list of the coefficients in GF(p) of the residue class
@@ -757,6 +765,7 @@ STATIC Obj INTREP_TO_CSCA(Obj self,Obj l,Obj v)
     for (i = 1;i <= d;i++) *pw++ = (Word) INT_INTOBJ(ELM_PLIST(l,i));
     return 0L;
 }
+#endif
 
 Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
 /* Transforms a list of integers between 0 and q-1 into FFEs. */
@@ -1227,7 +1236,7 @@ static INLINE void CVEC_Itemq(Obj fi, Word *v, Int i)
     }
 }
 
-static INLINE void CVEC_AssItemp(Obj fi, Word *v, Int i, Int *sc)
+static INLINE void CVEC_AssItemp(Obj fi, Word *v, Int i, Word sc)
 {
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
@@ -1235,7 +1244,7 @@ static INLINE void CVEC_AssItemp(Obj fi, Word *v, Int i, Int *sc)
     i--;   /* we are now 1 based */
     v += i / elsperword;
     register Int shift = bitsperel * (i % elsperword);
-    *v = (*v & (WORDALLONE ^ (maskp << shift))) | (((Word) *sc) << shift);
+    *v = (*v & (WORDALLONE ^ (maskp << shift))) | (sc << shift);
 }
 
 static INLINE void CVEC_AssItemq(Obj fi, Word *v, Int i, Int *sc)
@@ -1420,225 +1429,15 @@ static INLINE Int mulmodp(Int a, Int b, Int p)
     return (Int)( (((long long)a) * b) % p);
 }
 
-static INLINE Int poldiv(Int p, Int *a, Int dega, Int *b, Int degb, 
-                                Int *q, Int *degq)
-/* Does a polynomial division. a is destroyed, in the end, the remainder is
- * in a. a, b, and q must point to memory areas with at least dega+1
- * words. Returns the degree of r. dega must be bigger or equal to degb. 
- * Degree -1 for r means r=0. */
+static Obj CSCA_INV_PRIMEFIELD(Obj self, Obj u, Obj v)
 {
-    register Int sh;
-    register Int i;
-    register Int j;
-    register Int quot;
-    register Int tmp;
-
-    if (b[degb] == 1) i = 1; else i = invert_modp(b[degb],p);
-    sh = dega-degb;
-    *degq = sh;
-    while (sh >= 0) {
-        if (i == 1) quot = a[degb+sh]; else quot = mulmodp(a[degb+sh],i,p);
-        q[sh] = quot;
-        if (quot == 1) {
-            for (j = 0;j <= degb;j++) {
-                tmp = a[j+sh]-b[j];
-                a[j+sh] = (tmp < 0 ? tmp+p : tmp);
-            }
-        } else {
-            for (j = 0;j <= degb;j++) {
-                tmp = a[j+sh]-mulmodp(quot,b[j],p);
-                a[j+sh] = (tmp < 0 ? tmp+p : tmp);
-            }
-        }
-        sh--;
-        while (sh >= 0 && a[degb+sh] == 0) q[sh--] = 0;
-    }
-    /* Calculate the degree of the remainder: */
-    for (dega = degb-1;dega >= 0 && a[dega] == 0;dega--);
-    return dega;
+    PREPARE_clfi(u,cl,fi);
+    PREPARE_p(fi);
+    *(DATA_CVEC(u)) = (Word) invert_modp((Int) *(DATA_CVEC(v)),p);
+    return 0L;
 }
 
-static INLINE Int add_Fq(Int p, Int *b, Int degb, Int *a, Int dega)
-/* Addition for scalars. Add a and b and change b to the sum. Returns degb. */
-{
-    register Int i;
-    register Int tmp;
-    if (dega > degb) {
-        for (i = dega;i > degb;i--) b[i] = a[i];
-        degb = dega;
-    } else if (dega < degb) {
-        /* degb stays, only add */
-        i = dega;
-    } else { /* dega == degb */
-        /* We handle this case specially: */
-        degb = -2;   /* changed later */
-        for (i = 0;i <= dega;i++) {
-            tmp = b[i] + a[i];
-            if ( (b[i] = (tmp >= p ? tmp-p : tmp)) != 0 ) degb = i;
-        }
-        return degb;
-    }
-    while (i >= 0) {
-        tmp = b[i] + a[i];
-        b[i--] = (tmp >= p ? tmp-p : tmp);
-    }
-    return degb;
-}
-
-static INLINE Int addmul_Fq(Int p, Int *b, Int degb, Int *a, Int dega, Int s)
-/* Addition plus multiplication by prime field elements for scalars. 
- * Add s*a and b and change b to the sum. Returns degb. Do not use for s==0! */
-{
-    register Int i;
-    register Int tmp;
-    if (dega > degb) {
-        for (i = dega;i > degb;i--) b[i] = mulmodp(a[i],s,p);
-        degb = dega;
-    } else if (dega < degb) {
-        /* degb stays, only add */
-        i = dega;
-    } else { /* dega == degb */
-        /* We handle this case specially: */
-        degb = -2;   /* changed later */
-        for (i = dega;i >= 0;i--) {
-            tmp = b[i] + mulmodp(a[i],s,p);
-            if ( (b[i] = (tmp >= p ? tmp-p : tmp)) != 0 && i > degb) 
-                degb = i;
-        }
-        return degb;
-    }
-    while (i >= 0) {
-        tmp = b[i] + mulmodp(a[i],s,p);
-        b[i--] = (tmp >= p ? tmp-p : tmp);
-    }
-    return degb;
-}
-
-static INLINE Int sub_Fq(Int p, Int *b, Int degb, Int *a, Int dega)
-/* Subtraction for scalars. Subtract a from b and change b to the difference. 
- * Return the new degb. */
-{
-    register Int i;
-    register Int tmp;
-    if (dega > degb) {
-        for (i = dega;i > degb;i--) b[i] = (a[i] ? p-a[i] : 0);
-        degb = dega;
-    } else if (dega < degb) {
-        /* degb stays, only subtract */
-        i = dega;
-    } else { /* dega == degb */
-        /* We handle this case specially: */
-        degb = -2;   /* changed later */
-        for (i = dega;i >= 0;i--) {
-            tmp = b[i] - a[i];
-            if ( (b[i] = (tmp < 0 ? tmp+p : tmp)) != 0 && i > degb) 
-                degb = i;
-        }
-        return degb;
-    }
-    while (i >= 0) {
-        tmp = b[i] - a[i];
-        b[i--] = (tmp < 0 ? tmp+p : tmp);
-    }
-    return degb;
-}
-
-static INLINE Int mulmod_Fq(Int p, Int d, Int *cp, Int *c,
-                            Int *a, Int dega, Int *b, Int degb)
-/* Multiplies a with b mod cp, stores the result in c. Destroys b. Do not
- * call with either polynomial being zero. Returns the new degc. */
-{
-    register Int tmp;
-    Int degc;
-    Int j;
-    register Int i;
-    Int degcp;    /* This is actually the degree of x^d-cp */
-
-    /* Determine the degree of the Conway polynomial: */
-    for (degcp = d-1;degcp >= 0 && cp[degcp] == 0;degcp--);
-
-    /* First multiply b by the prime field component of a and store the
-     * result to c: */
-    if (a[0] == 0) 
-        degc = -1;
-    else {
-        for (i = 0;i <= degb;i++) c[i] = mulmodp(a[0],b[i],p);
-        degc = degb;
-    }
-
-    /* Now go through a and first multiply b by x (mod cp) and then add
-     * a[j] * b to c: */
-    for (j = 1;j <= dega;j++) {
-        /* Multiply b by x mod cp: */
-        if (degb < d-1) {   /* Luckily, we only have to shift! */
-            for (i = degb;i >= 0;i--) b[i+1] = b[i];
-            b[0] = 0;
-            degb++;
-        } else {    /* Otherwise, something drops out at the top */
-            tmp = b[d-1];  /* This drops out */
-            for (i = d-1;i >= 0;i--) b[i+1] = b[i];
-            b[0] = 0;
-            /* Now add the tmp multiple of cp: */
-            if (tmp) degb = addmul_Fq(p,b,degb,cp,degcp,tmp);
-        }
-        /* Now add the a[j] multiple of the current b: */
-        if (a[j]) degc = addmul_Fq(p,c,degc,b,degb,a[j]);
-    }
-    return degc;
-}
-
-static INLINE Int *invert_Fq(Int p, Int d, Int *cp,
-                             Int *x, Int *y, Int degy, 
-                             Int *a, Int *b, Int *c, Int *q)
-{
-    /* This does an euclidean algorithm to invert y (is destroyed!). The
-     * algorithm is exactly the same as in invert_modp with the same
-     * names of variables. cp is the Conway polynomial (not destroyed,
-     * actually each coefficient is inverted and the upper 1 is missing).
-     * x, y, q, a, and b are pointers to usable memory areas of length
-     * d+1 words. The return value ret points to the result with its degree
-     * being in ret[d]. 
-     * Do not call this with the zero polynomial in y or cp! */
-    Int i;   /* A counter */
-    Int degx,dega,degb,degc,degq;
-    Int *dummy;
-    Int j;
-
-    /* First copy the conway polynomial into place: */
-    x[d] = 1;
-    for (i = 0;i < d;i++) x[i] = (cp[i] ? p-cp[i] : 0);
-    degx = d;
-
-    /* Now initialise a and b: */
-    a[0] = 0;
-    dega = -1;
-    b[0] = 1;
-    degb = 0;
-
-    while (1) {
-        degx = poldiv(p,x,degx,y,degy,q,&degq);
-        /* Now we want: (a,b) := (b,a-q*b), so we change a and swap: */
-        degc = mulmod_Fq(p,d,cp,c,b,degb,q,degq);
-           /* Note that this destroys q! */
-        dega = sub_Fq(p,a,dega,c,degc);
-        /* Now swap: */
-        dummy = a; a = b; b = dummy;
-        i = dega; dega = degb; degb = i;
-        /* We have reached a unit and need no longer divide */
-        if (degx == 0) { 
-            /* Now invert x[0] mod p and multiply b by it: */
-            j = invert_modp(x[0],p);
-            b[d] = degb;
-            for (i = 0;i <= degb;i++) b[i] = mulmodp(j,b[i],p);
-            return b;
-        }
-        /* (x,y) := (y,x) because the remainder is in x. */
-        dummy = x; x = y; y = dummy;
-        i = degx; degx = degy; degy = i;
-    }
-}
-
-/* Now some functions to put this up to the GAP level, here 
+/* Now some functions to put vector arithmetic up to the GAP level, here 
  * is an overview. Note that scalar multiplication with non-
  * prime-field values is implemented only here!             
  * For all of the following functions u,v, and w must be vectors over the
@@ -1730,8 +1529,19 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
     PREPARE_p(fi);
 
     if (IS_CVEC(s)) {   /* One of "our" scalars. */
+        seqaccess sa;
         PREPARE_d(fi);
         Word *ss = DATA_CVEC(s);
+        Word *sss = scbuf;
+        register Int i;
+
+        /* Copy prime field elements into words: */
+        INIT_SEQ_ACCESS(&sa, s, 1);
+        *sss++ = GET_VEC_ELM(&sa,ss,0);
+        for (i = 0;i < d;i++) {
+            STEP_RIGHT(&sa);
+            *sss++ = GET_VEC_ELM(&sa,ss,0);
+        }
         /* Find length of scalar: */
         for (sclen = d-1;sclen > 1 && ss[sclen] == 0;sclen--);
         return ss;
@@ -2028,7 +1838,7 @@ STATIC Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
         for (j = sclen;j < d;scbuf[j++] = 0) ;
          
         if (d == 1)
-            CVEC_AssItemp(fi, DATA_CVEC(v), i, sc);
+            CVEC_AssItemp(fi, DATA_CVEC(v), i, (Word) (*sc));
         else
             CVEC_AssItemq(fi, DATA_CVEC(v), i, sc);
     }
@@ -2056,6 +1866,7 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
         Int s;
         Int *sc;
         Obj tmp;
+        Obj sca;
 
         /* Check bounds: */
         if (i < 1 || i > INT_INTOBJ(ELM_PLIST(cl,IDX_len))) {
@@ -2065,7 +1876,8 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
         if (size >= 1) {   /* The field has more than 65536 elements */
             /* Let's allocate a new scalar first: */
             /* GARBAGE COLLECTION POSSIBLE */
-            tmp = NEW(self,ELM_PLIST(cl,IDX_scaclass));
+            sca = ELM_PLIST(cl,IDX_scaclass);
+            tmp = NEW(self,sca,ELM_PLIST(sca,IDX_scatype));
             /* Here, a garbage collection might occur, however, all our
              * variables survive this, as they are pointers to master
              * pointers! */
@@ -2220,9 +2032,11 @@ STATIC Obj CVEC_ISZERO(Obj self, Obj u)
 
 /* Some methods for scalars: */
 
-STATIC Obj CSCA_MUL3(Obj self, Obj u, Obj v, Obj w)
+/* FIXME: rausrausraus */
+#ifdef NOTDEFINED
+STATIC Obj CSCA_MUL3(Obj self, Obj u, Obj v, Obj w, Obj h)
 {
-    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
+    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w) || !IS_CVEC(h)) {
         return OurErrorBreakQuit("CVEC.CSCA_MUL3: no cvecs");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
@@ -2319,6 +2133,7 @@ STATIC Obj CSCA_INV2(Obj self, Obj u, Obj v)
         }
     }
 }
+#endif
 
 STATIC Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
 /* Extracts ll field elements from the vector self at position ii into
@@ -3311,7 +3126,7 @@ Obj PROD_COEFFS_MOD_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h, Obj c)
         PREPARE_clfi(u,ucl,fi);
         PREPARE_cl(v,vcl);
         Word *vv = DATA_CVEC(v);
-        Word *ww = DATA_CVEC(v);
+        Word *ww = DATA_CVEC(w);
         Word *uu = DATA_CVEC(u);
         Word *hh = DATA_CVEC(h);
         Word *cc = DATA_CVEC(c);
@@ -3326,7 +3141,7 @@ Obj PROD_COEFFS_MOD_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h, Obj c)
         /* Do the first step: */
         s = GET_VEC_ELM(&sa,vv,0);
         ADDMUL_INL(uu,ww,fi,s,wordlen);
-        for (i = 2;i < d;i++) {
+        for (i = 2;i <= d;i++) {
             /* First multiply w by x mod c: */
             SLICE(self,w,h,INTOBJ_INT(1L),INTOBJ_INT(d-1),INTOBJ_INT(2));
             /* Note: position zero of h is always equal to zero! */
@@ -3398,7 +3213,7 @@ static StructGVarFunc GVarFuncs [] = {
     INIT_SMALL_GFQ_TABS,
     "cvec.c:INIT_SMALL_GFQ_TABS" },
 
-  { "NEW", 1, "class",
+  { "NEW", 2, "class, type",
     NEW,
     "cvec.c:NEW" },
 
@@ -3422,6 +3237,8 @@ static StructGVarFunc GVarFuncs [] = {
     CVEC_TO_FFELI,
     "cvec.c:CVEC_TO_FFELI" },
 
+/* FIXME: rausrausraus */
+#if 0
   { "CSCA_TO_INTREP", 2, "v, l",
     CSCA_TO_INTREP,
     "cvec.c:CSCA_TO_INTREP" },
@@ -3429,6 +3246,7 @@ static StructGVarFunc GVarFuncs [] = {
   { "INTREP_TO_CSCA", 2, "l, v",
     INTREP_TO_CSCA,
     "cvec.c:INTREP_TO_CSCA" },
+#endif
 
   { "INTLI_TO_FFELI", 2, "c, l",
     INTLI_TO_FFELI,
@@ -3486,13 +3304,20 @@ static StructGVarFunc GVarFuncs [] = {
     CVEC_ISZERO,
     "cvec.c:CVEC_ISZERO" },
 
-  { "CSCA_MUL3", 3, "u, v, w",
+  /* FIXME: rausrausraus */
+#if 0
+  { "CSCA_MUL3", 4, "u, v, w, h",
     CSCA_MUL3,
     "cvec.c:CSCA_MUL3" },
 
   { "CSCA_INV2", 2, "u, v",
     CSCA_INV2,
     "cvec.c:CSCA_INV2" },
+#endif
+
+  { "CSCA_INV_PRIMEFIELD", 2, "u, v",
+    CSCA_INV_PRIMEFIELD,
+    "cvec.c:CSCA_INV_PRIMEFIELD" },
 
   { "EXTRACT", 3, "v, i, l",
     EXTRACT,
@@ -3593,7 +3418,38 @@ static Int InitLibrary ( StructInitInfo *module )
                  GVarFuncs[i].args, GVarFuncs[i].handler ) );
     }
     AssPRec(tmp, RNamName("BYTESPERWORD"), INTOBJ_INT(BYTESPERWORD));
-    
+    AssPRec(tmp, RNamName("MAXDEGREE"), INTOBJ_INT(MAXDEGREE));
+
+    /* Export position numbers: */
+    AssPRec(tmp, RNamName("IDX_p"), INTOBJ_INT(IDX_p));
+    AssPRec(tmp, RNamName("IDX_d"), INTOBJ_INT(IDX_d));
+    AssPRec(tmp, RNamName("IDX_q"), INTOBJ_INT(IDX_q));
+    AssPRec(tmp, RNamName("IDX_conway"), INTOBJ_INT(IDX_conway));
+    AssPRec(tmp, RNamName("IDX_bitsperel"), INTOBJ_INT(IDX_bitsperel));
+    AssPRec(tmp, RNamName("IDX_elsperword"), INTOBJ_INT(IDX_elsperword));
+    AssPRec(tmp, RNamName("IDX_wordinfo"), INTOBJ_INT(IDX_wordinfo));
+    AssPRec(tmp, RNamName("IDX_bestgrease"), INTOBJ_INT(IDX_bestgrease));
+    AssPRec(tmp, RNamName("IDX_greasetabl"), INTOBJ_INT(IDX_greasetabl));
+    AssPRec(tmp, RNamName("IDX_filts"), INTOBJ_INT(IDX_filts));
+    AssPRec(tmp, RNamName("IDX_tab1"), INTOBJ_INT(IDX_tab1));
+    AssPRec(tmp, RNamName("IDX_tab2"), INTOBJ_INT(IDX_tab2));
+    AssPRec(tmp, RNamName("IDX_size"), INTOBJ_INT(IDX_size));
+    AssPRec(tmp, RNamName("IDX_scafam"), INTOBJ_INT(IDX_scafam));
+    AssPRec(tmp, RNamName("IDX_cpcompr"), INTOBJ_INT(IDX_cpcompr));
+
+    AssPRec(tmp, RNamName("IDX_fieldinfo"), INTOBJ_INT(IDX_fieldinfo));
+    AssPRec(tmp, RNamName("IDX_len"), INTOBJ_INT(IDX_len));
+    AssPRec(tmp, RNamName("IDX_wordlen"), INTOBJ_INT(IDX_wordlen));
+    AssPRec(tmp, RNamName("IDX_type"), INTOBJ_INT(IDX_type));
+    AssPRec(tmp, RNamName("IDX_GF"), INTOBJ_INT(IDX_GF));
+    AssPRec(tmp, RNamName("IDX_scaclass"), INTOBJ_INT(IDX_scaclass));
+    AssPRec(tmp, RNamName("IDX_scatype"), INTOBJ_INT(IDX_scatype));
+    AssPRec(tmp, RNamName("IDX_zero"), INTOBJ_INT(IDX_zero));
+    AssPRec(tmp, RNamName("IDX_one"), INTOBJ_INT(IDX_one));
+    AssPRec(tmp, RNamName("IDX_primroot"), INTOBJ_INT(IDX_primroot));
+    AssPRec(tmp, RNamName("IDX_rootinfo"), INTOBJ_INT(IDX_rootinfo));
+    AssPRec(tmp, RNamName("IDX_dummy"), INTOBJ_INT(IDX_dummy));
+
     /*ImportFuncFromLibrary( "IsCVecRep", &IsCVecRep );*/
 
     gvar = GVarName("CVEC");
