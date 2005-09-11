@@ -319,6 +319,10 @@ CVEC.NewCVecClass := function(p,d,len)
   SetDataType(ty,cl);
   Objectify(NewType(CVecClassFamily,IsCVecClass),cl);
 
+  # Until now, the position of q in CVEC.q might have changed, because
+  # we called ourselves in between, therefore
+  pos := Position(CVEC.q,q);
+
   # Put it into the cache:
   pos2 := PositionSorted(CVEC.lens[pos],len);
   Add(CVEC.lens[pos],len,pos2);
@@ -1144,13 +1148,18 @@ InstallOtherMethod( IsZero, "for cscas",
 InstallOtherMethod( \*, "for cscas",
   [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep], 
   function(v,w)
-  local u,vcl,ww;
+  local d,u,vcl,ww;
   vcl := CVEC.CVecClass(v);
   if vcl![CVEC.IDX_dummy] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
   u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
-  ww := ShallowCopy(w);
-  CVEC.PROD_COEFFS_MOD_CVEC_PRIMEFIELD(u,v,ww,
-                       vcl![CVEC.IDX_dummy][1],vcl![CVEC.IDX_cpcompr]);
+  d := vcl![CVEC.IDX_len];
+  if d = 1 then
+      CVEC.CSCA_MUL_PRIMEFIELD(u,v,w);
+  else
+      ww := ShallowCopy(w);
+      CVEC.PROD_COEFFS_MOD_CVEC_PRIMEFIELD(u,v,ww,
+                           vcl![CVEC.IDX_dummy][1],vcl![CVEC.IDX_cpcompr]);
+  fi;
   return u;
 end);
 
@@ -1177,7 +1186,7 @@ CVEC.CSCA_INV := function(v)
   fi;
   
   # Prepare helper elements:
-  x := vcl![CVEC.IDX_dummy][1];
+  x := vcl![CVEC.IDX_dummy][1];  # Note that [1] is used for multiplication
   y := vcl![CVEC.IDX_dummy][2];
   a := vcl![CVEC.IDX_dummy][3];
   b := vcl![CVEC.IDX_dummy][4];
@@ -1201,78 +1210,52 @@ CVEC.CSCA_INV := function(v)
   # We need an "Extra-Wurst" for the first step, since the Conway-Polynomial
   # has degree d and thus does not fit into a coefficient list of d els:
   CVEC.MAKEZERO(dum);
-  CVEC.SLICE(v,dum,1,degy-1,d-degy+1);
-  fa := v[degy]^-1;
+  CVEC.SLICE(v,dum,1,degy-1,d-degy+2);
+  fa := -v[degy]^-1;
   CVEC.ADDMUL(x,dum,fa,0,0);
   dega := d+2-degy;
   CVEC.ASS_CVEC(a,dega,fa);
   degx := CVEC.POSITION_LAST_NONZERO_CVEC(x);
   CVEC.COPY(v,y);
-  Print("a=");Display(a);Print(dega,"\n");
-  Print("b=");Display(b);Print(degb,"\n");
-  Print("x=");Display(x);Print(degx,"\n");
-  Print("y=");Display(y);Print(degy,"\n");
   if degx < degy then
       dummy := x; x := y; y := dummy;
       dummy := degx; degx := degy; degy := dummy;
       dummy := a; a := b; b := dummy;
       dummy := dega; dega := degb; degb := dummy;
   fi;
-  Print("a=");Display(a);Print(dega,"\n");
-  Print("b=");Display(b);Print(degb,"\n");
-  Print("x=");Display(x);Print(degx,"\n");
-  Print("y=");Display(y);Print(degy,"\n");
   PolDiv := function(a,dega,b,degb,q,dum)
     # Does a polynomial division. a is destroyed, in the end, the remainder is
     # in a. a, b, and q must all be vectors over GF(p) of length d. Returns
     # the degree of r, -1 means r=0. The quotient is in q.
     local fa,i;
     CVEC.MAKEZERO(q);
-    i := -b[degb]^-1;
+    i := b[degb]^-1;
     while dega >= degb do
-  Print("a=");Display(a);Print(dega,"\n");
-  Print("b=");Display(b);Print(degb,"\n");
         CVEC.MAKEZERO(dum);
         CVEC.SLICE(b,dum,1,degb,dega-degb+1);
         fa := a[dega]*i;
-        Display(dum);
-        CVEC.ADDMUL(a,dum,fa,0,0);
-        Print(fa,"\n");
-        Display(a);
+        CVEC.ADDMUL(a,dum,-fa,0,0);
         CVEC.ASS_CVEC(q,dega-degb+1,fa);
-        Display(q);
         dega := CVEC.POSITION_LAST_NONZERO_CVEC(a);
-        Print(dega,"\n");
     od;
     return dega;
   end;
 
   while true do
-  Print("a=");Display(a);Print(dega,"\n");
-  Print("b=");Display(b);Print(degb,"\n");
-  Print("x=");Display(x);Print(degx,"\n");
-  Print("y=");Display(y);Print(degy,"\n");
       degx := PolDiv(x,degx,y,degy,q,dum);
-  Print("a=");Display(a);Print(dega,"\n");
-  Print("b=");Display(b);Print(degb,"\n");
-  Print("x=");Display(x);Print(degx,"\n");
-  Print("y=");Display(y);Print(degy,"\n");
       # Now we want: (a,b) := (b,a-q*b), so we change a and swap:
+      CVEC.MAKEZERO(dum);
       CVEC.PROD_COEFFS_MOD_CVEC_PRIMEFIELD(dum,b,q,dum2,cp);
       CVEC.ADDMUL(a,dum,p-1,0,0);
-      # Now swap:
-      dummy := a; a := b; b := dummy;
-      dummy := dega; dega := degb; degb := dummy;
-  Print("a=");Display(a);Print(dega,"\n");
-  Print("b=");Display(b);Print(degb,"\n");
-  Print("x=");Display(x);Print(degx,"\n");
-  Print("y=");Display(y);Print(degy,"\n");
       if degx = 0 then
           # Now invert x[1] mod p and multiply b by it: 
-          CVEC.MUL1(b,x[1]^-1,0,0);
+          CVEC.MUL1(b,y[1]^-1,0,0);
           CVEC.COPY(b,u);
           return u;
       fi;
+      # Now swap:
+      dummy := a; a := b; b := dummy;
+      dummy := dega; dega := degb; degb := dummy;
       dummy := x; x := y; y := dummy;
       dummy := degx; degx := degy; degy := dummy;
   od;

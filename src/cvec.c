@@ -426,9 +426,9 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
             if (d == 1) {
                 register Word y;
                 register Word w = 0;
-                Int i;
-                for (i = 1;i <= len;i++) {
-                    if (i % elsperword == 1) w = *pw++;
+                Int i,ii;
+                for (i = 1,ii = elsperword;i <= len;i++,ii++) {
+                    if (ii == elsperword) { w = *pw++; ii = 0; }
                     y = w & maskp;
                     w >>= bitsperel;
                     SET_ELM_PLIST(l,i,INTOBJ_INT((Int) y));
@@ -647,9 +647,9 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
                     register Word y;
                     register Word w = 0;
                     PREPARE_tab2(fi);
-                    register Int i;
-                    for (i = 1;i <= len;i++) {
-                        if (i % elsperword == 1) w = *pw++;
+                    register Int i,ii;
+                    for (i = 1,ii = elsperword;i <= len;i++,ii++) {
+                        if (ii == elsperword) { w = *pw++; ii = 0; }
                         y = w & maskp;
                         w >>= bitsperel;
                         SET_ELM_PLIST(l,i,ELM_PLIST(tab2,(Int) y+1));
@@ -659,9 +659,9 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
                     register Word w = 0;
                     register Obj o;
                     register Int *da;
-                    register Int i;
-                    for (i = 1;i <= len;i++) {
-                        if (i % elsperword == 1) w = *pw++;
+                    register Int i,ii;
+                    for (i = 1,ii = elsperword;i <= len;i++,ii++) {
+                        if (ii == elsperword) { w = *pw++; ii = 0; }
                         y = w & maskp;
                         w >>= bitsperel;
                         o = ELM_PLIST(l,i);
@@ -692,8 +692,9 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
                     }
                 } else {   /* size >= 1, we write our scalars: */
                     register Obj o;
-                    register Int *da;
+                    register Word *da;
                     for (i = 0;i < len;i++) {
+                        seqaccess sa;
                         shift = (i % elsperword) * bitsperel;
                         if (shift == 0) pw += d;
                         o = ELM_PLIST(l,i+1);
@@ -702,8 +703,12 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
                               "CVEC_TO_FFELI: Illegal object in list" );
                         }
                         da = DATA_CVEC(o);
-                        for (j = 0;j < d;j++)
-                            da[j] = (Int)((pw[j] >> shift) & maskp);
+                        INIT_SEQ_ACCESS(&sa,o,1);
+                        SET_VEC_ELM(&sa,da,0,(pw[0] >> shift) & maskp);
+                        for (j = 1;j < d;j++) {
+                            STEP_RIGHT(&sa);
+                            SET_VEC_ELM(&sa,da,0,(pw[j] >> shift) & maskp);
+                        }
                     }
                 }
             }
@@ -1429,6 +1434,14 @@ static INLINE Int mulmodp(Int a, Int b, Int p)
     return (Int)( (((long long)a) * b) % p);
 }
 
+static Obj CSCA_MUL_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
+{
+    PREPARE_clfi(u,cl,fi);
+    PREPARE_p(fi);
+    *(DATA_CVEC(u)) = (Word) mulmodp( *(DATA_CVEC(v)), *(DATA_CVEC(w)), p);
+    return 0L;
+}
+
 static Obj CSCA_INV_PRIMEFIELD(Obj self, Obj u, Obj v)
 {
     PREPARE_clfi(u,cl,fi);
@@ -1899,7 +1912,15 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
                 for (s = 0,i = d-1;i >= 0;i--) s = s * p + scbuf[i];
                 return ELM_PLIST(tab2,s+1);
             } else {
-                memcpy(DATA_CVEC(tmp),scbuf,sizeof(Int)*d);
+                Word *w = DATA_CVEC(tmp);
+                seqaccess sa;
+
+                INIT_SEQ_ACCESS(&sa, tmp, 1);
+                SET_VEC_ELM(&sa,w,0,scbuf[0]);
+                for (i = 1;i < d;i++) {
+                    STEP_RIGHT(&sa);
+                    SET_VEC_ELM(&sa,w,0,scbuf[i]);
+                }
                 return tmp;
             }
         }
@@ -3314,6 +3335,10 @@ static StructGVarFunc GVarFuncs [] = {
     CSCA_INV2,
     "cvec.c:CSCA_INV2" },
 #endif
+
+  { "CSCA_MUL_PRIMEFIELD", 3, "u, v, w",
+    CSCA_MUL_PRIMEFIELD,
+    "cvec.c:CSCA_MUL_PRIMEFIELD" },
 
   { "CSCA_INV_PRIMEFIELD", 2, "u, v",
     CSCA_INV_PRIMEFIELD,
