@@ -34,7 +34,7 @@ DeclareRepresentation( "IsCMatRep", IsComponentObjectRep, [] );
 DeclareRepresentation( "IsCVecFieldInfo", IsPositionalObjectRep, [] );
 ## Such an object holds the following information:
 ## We use the same symbolic names for these indices as exported from cvec.c
-## in the CVEC record: CVEC.IDX_p and so on:
+## in the CVEC record: CVEC_IDX_p and so on:
 ##  ![1] : p: cardinality of prime field
 ##  ![2] : d: degree of extension over prime field
 ##  ![3] : q=p^d as GAP integer
@@ -60,7 +60,7 @@ DeclareRepresentation( "IsCVecFieldInfo", IsPositionalObjectRep, [] );
 
 DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ## We use the same symbolic names for these indices as exported from cvec.c
-## in the CVEC record: CVEC.IDX_fieldinfo and so on:
+## in the CVEC record: CVEC_IDX_fieldinfo and so on:
 ##  ![1]: field info (see above) for base field
 ##  ![2]: length of vectors
 ##  ![3]: wordlen of vectors

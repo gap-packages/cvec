@@ -12,7 +12,7 @@
 InstallMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     local i,mi;
-    mi := Minimum(m!.len,m!.vecclass![CVEC.IDX_len]);
+    mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
     i := 1;
     while i <= mi do
         if PositionNonZero(m!.rows[i+1]) < i or
@@ -33,7 +33,7 @@ InstallMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
 InstallMethod( IsUpperTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     local i,mi;
-    mi := Minimum(m!.len,m!.vecclass![CVEC.IDX_len]);
+    mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
     i := 1;
     while i <= mi do
         if PositionNonZero(m!.rows[i+1]) < i then
@@ -53,7 +53,7 @@ InstallMethod( IsUpperTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
 InstallMethod( IsLowerTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     local i,mi;
-    mi := Minimum(m!.len,m!.vecclass![CVEC.IDX_len]);
+    mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
     i := 1;
     while i <= mi do
         if PositionLastNonZero(m!.rows[i+1]) > i then
@@ -166,8 +166,8 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
     heads   := ListWithIdenticalEntries( ncols, 0 );
     vectors := CMat([],mat!.vecclass);
     
-    cl := CVEC.NewCVecClass( mat!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_p], 
-                             mat!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_d],
+    cl := CVEC.NewCVecClass( mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p], 
+                             mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
                              nrows );
     zv := CVEC.NEW(cl);
     T := CMat([],cl);

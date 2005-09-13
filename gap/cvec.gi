@@ -57,10 +57,6 @@ end;
 ## Administration of field info and cvec class data:
 #############################################################################
 
-# If you want to change the 1024 limit below, please also change
-# the macro MAXDEGREE in cvec.c!
-CVEC.MAXDEGREE := 1024;
-
 CVEC.BestGreaseTab :=
   [ ,            # q=1
     8,           # q=2
@@ -120,17 +116,17 @@ CVEC.NewCVecClass := function(p,d,len)
   pos := Position(CVEC.q,q);
   if pos = fail then
       l := [];    # Here we collect the information
-      l[CVEC.IDX_p] := p;
-      l[CVEC.IDX_d] := d;
-      l[CVEC.IDX_q] := q;
-      l[CVEC.IDX_size] := size;
+      l[CVEC_IDX_p] := p;
+      l[CVEC_IDX_d] := d;
+      l[CVEC_IDX_q] := q;
+      l[CVEC_IDX_size] := size;
 
       # We have to make the new field info structure:
       po := -CoefficientsOfLaurentPolynomial(ConwayPolynomial(p,d));
       if po[2] <> 0 then Error("Unexpected case #1"); fi;
       po := List(po[1],IntFFE);
       s := CVEC.COEFF_LIST_TO_C(po,"");
-      l[CVEC.IDX_conway] := s;
+      l[CVEC_IDX_conway] := s;
       
       # Bits per element, will be increased in the following loop:
       if IsOddInt(p) then
@@ -143,7 +139,7 @@ CVEC.NewCVecClass := function(p,d,len)
           bitsperel := bitsperel + 1;
           j := QuoInt(j,2);
       od;
-      l[CVEC.IDX_bitsperel] := bitsperel;
+      l[CVEC_IDX_bitsperel] := bitsperel;
 
       # Prime field elements per Word:
       # Note that for 64 bit machines we always put only twice as much
@@ -154,7 +150,7 @@ CVEC.NewCVecClass := function(p,d,len)
       if CVEC.BYTESPERWORD = 8 then
           elsperword := elsperword * 2;
       fi;
-      l[CVEC.IDX_elsperword] := elsperword;
+      l[CVEC_IDX_elsperword] := elsperword;
 
       # Set up best greasing level:
       if q <= 16 and IsBound(CVEC.BestGreaseTab[q]) then
@@ -167,14 +163,14 @@ CVEC.NewCVecClass := function(p,d,len)
           bestgrease := 0;  # no grease
           greasetabl := 0;
       fi;
-      l[CVEC.IDX_bestgrease] := bestgrease;
-      l[CVEC.IDX_greasetabl] := greasetabl; 
+      l[CVEC_IDX_bestgrease] := bestgrease;
+      l[CVEC_IDX_greasetabl] := greasetabl; 
 
       # Now the starting filter list:
       filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
                IsCopyable and CanEasilyCompareElements;
       # Note that IsMutable is added below, when we create the vector type
-      l[CVEC.IDX_filts] := filts;
+      l[CVEC_IDX_filts] := filts;
 
       # FIXME: use official families???
       if q <= MAXSIZE_GF_INTERNAL then
@@ -186,7 +182,7 @@ CVEC.NewCVecClass := function(p,d,len)
           SetIsUFDFamily(scafam,true);
           # Zero and One are set later, where they are created!
       fi;
-      l[CVEC.IDX_scafam] := scafam;
+      l[CVEC_IDX_scafam] := scafam;
 
       # Now for small finite fields two tables for conversion:
       if q <= MAXSIZE_GF_INTERNAL then
@@ -197,15 +193,15 @@ CVEC.NewCVecClass := function(p,d,len)
           tab1 := [];
           tab2 := [];
       fi;
-      l[CVEC.IDX_tab1] := tab1;
-      l[CVEC.IDX_tab2] := tab2;
+      l[CVEC_IDX_tab1] := tab1;
+      l[CVEC_IDX_tab2] := tab2;
 
       # Now l is ready!
       #l := [p,d,q,s,bitsperel,elsperword,0,bestgrease,greasetabl,filts,
       #      tab1,tab2,size,scafam];
       Objectify(NewType(CVecFieldInfoFamily,IsCVecFieldInfo),l);
 
-      # Do the internal part: This does index CVEC.IDX_wordinfo:
+      # Do the internal part: This does index CVEC_IDX_wordinfo:
       CVEC.FINALIZE_FIELDINFO(l);
 
       pos := PositionSorted(CVEC.q,q);
@@ -214,9 +210,9 @@ CVEC.NewCVecClass := function(p,d,len)
       Add(CVEC.lens,[],pos);
       Add(CVEC.classes,[],pos);
   else   # pos <> fail
-      elsperword := CVEC.F[pos]![CVEC.IDX_elsperword];  # for later use
-      filts := CVEC.F[pos]![CVEC.IDX_filts];            # for later use
-      scafam := CVEC.F[pos]![CVEC.IDX_scafam];          # for later use
+      elsperword := CVEC.F[pos]![CVEC_IDX_elsperword];  # for later use
+      filts := CVEC.F[pos]![CVEC_IDX_filts];            # for later use
+      scafam := CVEC.F[pos]![CVEC_IDX_scafam];          # for later use
   fi;
 
 #disabled:  # If q > MAXSIZE_GF_INTERNAL make sure, that the corresponding scalar 
@@ -250,13 +246,13 @@ CVEC.NewCVecClass := function(p,d,len)
 #disabled:          # CVEC.MAKEZERO(z);
 #disabled:          # this is unnecessary, since GASMAN returns empty bags
 #disabled:          MakeImmutable(z);
-#disabled:          scaclass![CVEC.IDX_zero] := z;
+#disabled:          scaclass![CVEC_IDX_zero] := z;
 #disabled:          o := CVEC.NEW(scaclass);
 #disabled:          li := 0*[1..d];
 #disabled:          li[1] := 1;
 #disabled:          CVEC.INTREP_TO_CSCA(li,o);
 #disabled:          MakeImmutable(o);
-#disabled:          scaclass![CVEC.IDX_one] := o;
+#disabled:          scaclass![CVEC_IDX_one] := o;
 #disabled:          
 #disabled:          # Put zero and one into the scalars family:
 #disabled:          SetZero(scafam,z);
@@ -268,10 +264,10 @@ CVEC.NewCVecClass := function(p,d,len)
 #disabled:              li[1] := 0;
 #disabled:              li[2] := 1;
 #disabled:              CVEC.INTREP_TO_CSCA(li,z);
-#disabled:              scaclass![CVEC.IDX_primroot] := z;
-#disabled:              scaclass![CVEC.IDX_roottab] := [z^s];
-#disabled:              for i in [1..T] do Add(scaclass![CVEC.IDX_roottab],
-#disabled:                                     scaclass![CVEC.IDX_roottab][i]^2); od;
+#disabled:              scaclass![CVEC_IDX_primroot] := z;
+#disabled:              scaclass![CVEC_IDX_roottab] := [z^s];
+#disabled:              for i in [1..T] do Add(scaclass![CVEC_IDX_roottab],
+#disabled:                                     scaclass![CVEC_IDX_roottab][i]^2); od;
 #disabled:          # for degree 1 we do not search for a primitive root here
 #disabled:          # this we do, when the first square root has to be taken!
 #disabled:          fi;
@@ -286,27 +282,27 @@ CVEC.NewCVecClass := function(p,d,len)
 
   # Build the class object, note that we need elsperword and filts from above:
   cl := [];
-  cl[CVEC.IDX_fieldinfo] := CVEC.F[pos];
-  cl[CVEC.IDX_len] := len;
+  cl[CVEC_IDX_fieldinfo] := CVEC.F[pos];
+  cl[CVEC_IDX_len] := len;
   wordlen := d * (QuoInt( len + elsperword - 1, elsperword ));
-  cl[CVEC.IDX_wordlen] := wordlen;
+  cl[CVEC_IDX_wordlen] := wordlen;
   ty := NewType(CollectionsFamily(scafam),filts and IsMutable);
-  cl[CVEC.IDX_type] := ty;
-  cl[CVEC.IDX_GF] := GF(p,d);
-  cl[CVEC.IDX_zero] := fail;
-  cl[CVEC.IDX_one] := fail;
-  cl[CVEC.IDX_primroot] := fail;
-  cl[CVEC.IDX_rootinfo] := fail;
-  cl[CVEC.IDX_dummy] := fail;
-  cl[CVEC.IDX_cpcompr] := fail;
+  cl[CVEC_IDX_type] := ty;
+  cl[CVEC_IDX_GF] := GF(p,d);
+  cl[CVEC_IDX_zero] := fail;
+  cl[CVEC_IDX_one] := fail;
+  cl[CVEC_IDX_primroot] := fail;
+  cl[CVEC_IDX_rootinfo] := fail;
+  cl[CVEC_IDX_dummy] := fail;
+  cl[CVEC_IDX_cpcompr] := fail;
   # Now do things different in extension fields:
   if d > 1 then
-      cl[CVEC.IDX_scatype] := fail;
+      cl[CVEC_IDX_scatype] := fail;
       c := CVEC.NewCVecClass(p,1,d);   # for the scalars class
       CVEC.MAKE_ZERO_ONE_PRIMROOT(c);  # create a few elements
   else
-      cl[CVEC.IDX_scatype] := NewType(scafam,filts and IsScalar and IsCScaRep);
-      SetDataType(cl[CVEC.IDX_scatype],cl);
+      cl[CVEC_IDX_scatype] := NewType(scafam,filts and IsScalar and IsCScaRep);
+      SetDataType(cl[CVEC_IDX_scatype],cl);
       if len = 1 then   # we are our own scalars!
           c := cl;
       else
@@ -314,7 +310,7 @@ CVEC.NewCVecClass := function(p,d,len)
           CVEC.MAKE_ZERO_ONE_PRIMROOT(c);  # create a few elements
       fi;
   fi;
-  cl[CVEC.IDX_scaclass] := c;
+  cl[CVEC_IDX_scaclass] := c;
 
   SetDataType(ty,cl);
   Objectify(NewType(CVecClassFamily,IsCVecClass),cl);
@@ -342,20 +338,15 @@ InstallMethod( CVecClass, "for a cvec", [IsCVecRep],
     return DataType(TypeObj(v));
   end);
 
-CVEC.CVecClass := function(v)
-  # Returns the class of the vector or scalar
-  return DataType(TypeObj(v));
-end;
-
 CVEC.New := function(arg)
   local c,p,d,l,v;
   if Length(arg) = 1 then
       c := arg[1];
       if IsCVecRep(c) then
-          c := CVEC.CVecClass(c);
+          c := DataType(TypeObj(c));
       fi;
       if IsCVecClass(c) then
-          v := CVEC.NEW(c,c![CVEC.IDX_type]);
+          v := CVEC.NEW(c,c![CVEC_IDX_type]);
           return v;
       fi;
   elif Length(arg) = 3 then
@@ -365,7 +356,7 @@ CVEC.New := function(arg)
       if IsInt(p) and IsPrime(p) and p > 0 and IsInt(d) and d >= 1 and
          IsInt(l) and l >= 1 then
           c := CVEC.NewCVecClass(p,d,l);
-          v := CVEC.NEW(c,c![CVEC.IDX_type]);
+          v := CVEC.NEW(c,c![CVEC_IDX_type]);
           return v;
       fi;
   fi;
@@ -378,26 +369,26 @@ end;
 
 InstallMethod( ViewObj, "for a cvec field info", [IsCVecFieldInfo], 
 function(f)
-  Print("<cvec-fieldinfo p=",f![CVEC.IDX_p],
-        " d=",f![CVEC.IDX_d]," q=",f![CVEC.IDX_q],
-        " bpl=",f![CVEC.IDX_bitsperel]," epw=",f![CVEC.IDX_elsperword],
-        " grease=",f![CVEC.IDX_bestgrease],
-        " gtablen=",f![CVEC.IDX_greasetabl],">");
+  Print("<cvec-fieldinfo p=",f![CVEC_IDX_p],
+        " d=",f![CVEC_IDX_d]," q=",f![CVEC_IDX_q],
+        " bpl=",f![CVEC_IDX_bitsperel]," epw=",f![CVEC_IDX_elsperword],
+        " grease=",f![CVEC_IDX_bestgrease],
+        " gtablen=",f![CVEC_IDX_greasetabl],">");
 end);
 
 InstallMethod( ViewObj, "for a cvec class", [IsCVecClass], 
 function(c)
   local f;
-  f := c![CVEC.IDX_fieldinfo];
-  Print("<cvec-class field=GF(",f![CVEC.IDX_p],",",f![CVEC.IDX_d],
-        ") len=",c![CVEC.IDX_len]," wordlen=",c![CVEC.IDX_wordlen],">");
+  f := c![CVEC_IDX_fieldinfo];
+  Print("<cvec-class field=GF(",f![CVEC_IDX_p],",",f![CVEC_IDX_d],
+        ") len=",c![CVEC_IDX_len]," wordlen=",c![CVEC_IDX_wordlen],">");
 end);
 
 InstallMethod( ViewObj, "for a csca", [IsCVecRep and IsCScaRep and IsScalar],
 function(v)
   local c,d,i,l,written;
-  c := CVEC.CVecClass(v);
-  d := c![CVEC.IDX_len];    # the degree
+  c := DataType(TypeObj(v));
+  d := c![CVEC_IDX_len];    # the degree
   l := 0*[1..d];
   CVEC.CVEC_TO_INTREP(v,l);
   Print("<csca ");
@@ -417,14 +408,14 @@ function(v)
       fi;
   od;
   if not(written) then Print("0"); fi;
-  Print("+(pol) in GF(",c![CVEC.IDX_fieldinfo]![CVEC.IDX_p],",",d,")>");
+  Print("+(pol) in GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",d,")>");
 end);
 
 InstallMethod( String, "for a csca", [IsCVecRep and IsCScaRep and IsScalar],
 function(v)
   local c,d,i,l,written,res;
-  c := CVEC.CVecClass(v);
-  d := c![CVEC.IDX_len];    # the degree
+  c := DataType(TypeObj(v));
+  d := c![CVEC_IDX_len];    # the degree
   l := 0*[1..d];
   CVEC.CVEC_TO_INTREP(v,l);
   res := "<csca ";
@@ -448,7 +439,7 @@ function(v)
   od;
   if not(written) then Append(res,"0"); fi;
   Append(res,"+(pol) in GF(");
-  Append(res,String(c![CVEC.IDX_fieldinfo]![CVEC.IDX_p]));
+  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]));
   Append(res,",");
   Append(res,String(d));
   Append(res,")>");
@@ -458,12 +449,12 @@ end);
 InstallMethod( ViewObj, "for a cvec", [IsCVecRep], 
 function(v)
   local c;
-  c := CVEC.CVecClass(v);
+  c := DataType(TypeObj(v));
   Print("<");
   if not(IsMutable(v)) then Print("immutable "); fi;
-  Print("cvec over GF(",c![CVEC.IDX_fieldinfo]![CVEC.IDX_p],",",
-        c![CVEC.IDX_fieldinfo]![CVEC.IDX_d],") of length ",
-        c![CVEC.IDX_len],">");
+  Print("cvec over GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],") of length ",
+        c![CVEC_IDX_len],">");
 end);
 
 InstallMethod( ViewObj, "for a cmat", [IsCMatRep and IsMatrix],
@@ -473,23 +464,23 @@ function(m)
   Print("<");
   if not(IsMutable(m)) then Print("immutable "); fi;
   if HasGreaseTab(m) then Print("greased "); fi;
-  Print("cmat ",m!.len,"x",c![CVEC.IDX_len]," over GF(",
-        c![CVEC.IDX_fieldinfo]![CVEC.IDX_p],",",
-        c![CVEC.IDX_fieldinfo]![CVEC.IDX_d],")>");
+  Print("cmat ",m!.len,"x",c![CVEC_IDX_len]," over GF(",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],")>");
 end);
 
 InstallMethod( PrintObj, "for a cvec class", [IsCVecClass], 
 function(c)
-  Print("CVEC.NewCVecClass(",c![CVEC.IDX_fieldinfo]![CVEC.IDX_p],",",
-        c![CVEC.IDX_fieldinfo]![CVEC.IDX_d],",",c![CVEC.IDX_len],")");
+  Print("CVEC.NewCVecClass(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],",",c![CVEC_IDX_len],")");
 end);
 
 InstallMethod( PrintObj, "for a csca", [IsCVecRep and IsCScaRep and IsScalar],
 function(v)
   local c,d,l,p;
-  c := CVEC.CVecClass(v);
-  p := c![CVEC.IDX_fieldinfo]![CVEC.IDX_p];    # the characteristic
-  d := c![CVEC.IDX_len];    # the degree
+  c := DataType(TypeObj(v));
+  p := c![CVEC_IDX_fieldinfo]![CVEC_IDX_p];    # the characteristic
+  d := c![CVEC_IDX_len];    # the degree
   l := 0*[1..d];
   CVEC.CVEC_TO_INTREP(v,l);
   Print("CSca(",l,",",p,",",d,")");
@@ -498,25 +489,25 @@ end);
 InstallMethod( PrintObj, "for a cvec", [IsCVecRep], 
 function(v)
   local l,c,i;
-  c := CVEC.CVecClass(v);
+  c := DataType(TypeObj(v));
   Print("CVec([");
-  if c![CVEC.IDX_fieldinfo]![CVEC.IDX_size] = 0 then   # GAP FFEs
+  if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
       l := FFEList(v);
       for i in l do Print(i,","); od;
   else
       l := Unpack(v);
       for i in l do Print(i,","); od;
   fi;
-  Print("],",c![CVEC.IDX_fieldinfo]![CVEC.IDX_p],",",
-        c![CVEC.IDX_fieldinfo]![CVEC.IDX_d],")");
+  Print("],",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],")");
 end);
 
 InstallMethod( String, "for a cvec", [IsCVecRep], 
 function(v)
   local l,c,i,res;
-  c := CVEC.CVecClass(v);
+  c := DataType(TypeObj(v));
   res := "CVec([";
-  if c![CVEC.IDX_fieldinfo]![CVEC.IDX_size] = 0 then   # GAP FFEs
+  if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
       l := FFEList(v);
       for i in l do Append(res,String(i)); Append(res,","); od;
   else
@@ -524,9 +515,9 @@ function(v)
       for i in l do Append(res,String(i)); Append(res,","); od;
   fi;
   Append(res,"],");
-  Append(res,String(c![CVEC.IDX_fieldinfo]![CVEC.IDX_p]));
+  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]));
   Append(res,",");
-  Append(res,String(c![CVEC.IDX_fieldinfo]![CVEC.IDX_d]));
+  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_d]));
   Append(res,")");
   return res;
 end);
@@ -546,13 +537,13 @@ CVEC.CharactersForDisplay := ".123456789abcdefghijklmnopqrstuvwxyz";
 InstallMethod( Display, "for a cvec", [IsCVecRep], 
 function(v)
   local i,l,c,q,lo;
-  c := CVEC.CVecClass(v);
+  c := DataType(TypeObj(v));
   Print("[");
-  q := c![CVEC.IDX_fieldinfo]![CVEC.IDX_q];
+  q := c![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
   if q <= 36 then
       l := Unpack(v);
       Print(CVEC.CharactersForDisplay{l+1},"]\n");
-  elif c![CVEC.IDX_fieldinfo]![CVEC.IDX_size] = 1 then
+  elif c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 1 then
       l := Unpack(v);
       lo := LogInt(q,10)+2;   # This is the number of digits needed plus 1
       for i in l do Print(String(i,lo)); od;
@@ -585,7 +576,7 @@ end);
 
 InstallOtherMethod( Length, "for cvecs", [IsCVecRep], 
 function(v)
-  return CVEC.CVecClass(v)![CVEC.IDX_len];
+  return DataType(TypeObj(v))![CVEC_IDX_len];
 end);
 
 # AddRowVector(v,w [,s][,fr,to]) where s is integer or FFE:
@@ -649,8 +640,8 @@ InstallOtherMethod( MultRowVector, "for cvecs",
 InstallOtherMethod( \+, "for cvecs", [IsCVecRep, IsCVecRep],
   function(v,w)
     local u,vcl;
-    vcl := CVEC.CVecClass(v);
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC.ADD3(u,v,w);
     if not(IsMutable(v)) or not(IsMutable(w)) then MakeImmutable(u); fi;
     return u;
@@ -661,9 +652,9 @@ InstallOtherMethod( \+, "for cvecs", [IsCVecRep, IsCVecRep],
 InstallOtherMethod( \-, "for cvecs", [IsCVecRep, IsCVecRep],
   function(v,w)
     local u,vcl,p;
-    vcl := CVEC.CVecClass(v);
-    p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC.COPY(v,u);
     CVEC.ADDMUL(u,w,p-1,0,0);
     if not(IsMutable(v)) or not(IsMutable(w)) then MakeImmutable(u); fi;
@@ -675,18 +666,18 @@ InstallOtherMethod( \-, "for cvecs", [IsCVecRep, IsCVecRep],
 InstallOtherMethod( AdditiveInverseMutable, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl,p;
-    vcl := CVEC.CVecClass(v);
-    p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC.MUL2(u,v,p-1);
     return u;
   end);
 InstallOtherMethod( AdditiveInverseSameMutability, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl,p;
-    vcl := CVEC.CVecClass(v);
-    p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC.MUL2(u,v,p-1);
     if not(IsMutable(v)) then MakeImmutable(u); fi;
     return u;
@@ -696,8 +687,8 @@ InstallOtherMethod( AdditiveInverseSameMutability, "for cvecs", [IsCVecRep],
 
 CVEC.VECTOR_TIMES_SCALAR := function(v,s)
     local u,vcl;
-    vcl := CVEC.CVecClass(v);
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC.MUL2(u,v,s);
     if not(IsMutable(v)) then MakeImmutable(u); fi;
     return u;
@@ -770,8 +761,8 @@ InstallOtherMethod( PositionNot, "for cvecs",
 InstallOtherMethod( ShallowCopy, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl;
-    vcl := CVEC.CVecClass(v);
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC.COPY(v,u);
     return u;
   end);
@@ -781,8 +772,8 @@ InstallOtherMethod( ShallowCopy, "for cvecs", [IsCVecRep],
 InstallOtherMethod( ZeroMutable, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl;
-    vcl := CVEC.CVecClass(v);
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     #CVEC.MAKEZERO(u);
     # Not necessary, since GASMAN only returns empty bags
     return u;
@@ -790,8 +781,8 @@ InstallOtherMethod( ZeroMutable, "for cvecs", [IsCVecRep],
 InstallOtherMethod( ZeroSameMutability, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl;
-    vcl := CVEC.CVecClass(v);
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+    vcl := DataType(TypeObj(v));
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     #CVEC.MAKEZERO(u);
     # not necessary, since GASMAN only returns empty bags
     if not(IsMutable(v)) then
@@ -811,20 +802,20 @@ InstallMethod( CVec, "for a homogeneous list and two posints",
     else
         c := CVEC.NewCVecClass(p,d,Length(l)/d);
     fi;
-    v := CVEC.NEW(c,c![CVEC.IDX_type]);
+    v := CVEC.NEW(c,c![CVEC_IDX_type]);
     CVEC.INTREP_TO_CVEC(l,v);
     return v;
   end);
 InstallMethod( CVec, "for a cvec class",
   [IsCVecClass],
   function(c)
-    return CVEC.NEW(c,c![CVEC.IDX_type]);
+    return CVEC.NEW(c,c![CVEC_IDX_type]);
   end);
 InstallMethod( CVec, "for a homogeneous list and a cvec class",
   [IsHomogeneousList, IsCVecClass],
   function(l,c)
     local v;
-    v := CVEC.NEW(c,c![CVEC.IDX_type]);
+    v := CVEC.NEW(c,c![CVEC_IDX_type]);
     CVEC.INTREP_TO_CVEC(l,v);
     return v;
   end);
@@ -836,7 +827,7 @@ InstallOtherMethod( CVec, "for a compressed gf2 vector",
     Add(v,fail);   # this unpacks
     Unbind(v[Length(v)]);  
     c := CVEC.NewCVecClass(2,1,Length(v));
-    w := CVEC.NEW(c,c![CVEC.IDX_type]);
+    w := CVEC.NEW(c,c![CVEC_IDX_type]);
     CVEC.INTREP_TO_CVEC(v,w);
     return w;
   end);
@@ -849,7 +840,7 @@ InstallOtherMethod( CVec, "for a compressed 8bit vector",
     Add(v,fail);   # this unpacks
     Unbind(v[Length(v)]);  
     c := CVEC.NewCVecClass(pd[1],Length(pd),Length(v));
-    w := CVEC.NEW(c,c![CVEC.IDX_type]);
+    w := CVEC.NEW(c,c![CVEC_IDX_type]);
     CVEC.INTREP_TO_CVEC(v,w);
     return w;
   end);
@@ -859,9 +850,9 @@ InstallOtherMethod( CVec, "for a compressed 8bit vector",
 InstallMethod( Unpack, "for cvecs", [IsCVecRep],
   function(v)
     local l,vcl;
-    vcl := CVEC.CVecClass(v);
-    if vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_size] = 2 then
-        l := 0 * [1..vcl![CVEC.IDX_len]*vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_d]];
+    vcl := DataType(TypeObj(v));
+    if vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 2 then
+        l := 0 * [1..vcl![CVEC_IDX_len]*vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d]];
            # length * d
     else
         l := 0*[1..Length(v)];
@@ -873,7 +864,7 @@ InstallMethod( Unpack, "for cvecs", [IsCVecRep],
 InstallMethod( FFEList, "for cvecs", [IsCVecRep],
   function(v)
     local vcl,l,i;
-    vcl := CVEC.CVecClass(v);
+    vcl := DataType(TypeObj(v));
     l := 0*[1..Length(v)];
     CVEC.CVEC_TO_FFELI(v,l);
     return l;
@@ -884,23 +875,23 @@ InstallMethod( FFEList, "for cvecs", [IsCVecRep],
 InstallOtherMethod( Characteristic, "for cvecs", [IsCVecRep],
   function(v)
     local c;
-    c := CVEC.CVecClass(v);
-    return c![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
+    c := DataType(TypeObj(v));
+    return c![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
   end);
     
 InstallOtherMethod( DegreeFFE, "for cvecs", [IsCVecRep],
   function(v)
     local c;
-    c := CVEC.CVecClass(v);
-    return c![CVEC.IDX_fieldinfo]![CVEC.IDX_d];
+    c := DataType(TypeObj(v));
+    return c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
   end);
     
 InstallMethod( BaseField, "for cvecs", [IsCVecRep],
   function(v)
     local c,p,d;
-    c := CVEC.CVecClass(v);
-    p := c![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-    d := c![CVEC.IDX_fieldinfo]![CVEC.IDX_d];
+    c := DataType(TypeObj(v));
+    p := c![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    d := c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
     return GF(p,d);
   end);
     
@@ -908,18 +899,18 @@ InstallMethod( BaseField, "for cvecs", [IsCVecRep],
 
 CVEC.Slice := function(src,dst,srcpos,len,dstpos)
   local cdst,csrc;
-  csrc := CVEC.CVecClass(src);
-  cdst := CVEC.CVecClass(dst);
-  if not(IsIdenticalObj(csrc![CVEC.IDX_fieldinfo],
-                        cdst![CVEC.IDX_fieldinfo])) then
+  csrc := DataType(TypeObj(src));
+  cdst := DataType(TypeObj(dst));
+  if not(IsIdenticalObj(csrc![CVEC_IDX_fieldinfo],
+                        cdst![CVEC_IDX_fieldinfo])) then
       Error("CVEC.Slice: vectors not over common field");
       return;
   fi;
-  if srcpos < 1 or srcpos+len-1 > csrc![CVEC.IDX_len] or len <= 0 then
+  if srcpos < 1 or srcpos+len-1 > csrc![CVEC_IDX_len] or len <= 0 then
       Error("CVEC.Slice: source area not valid");
       return;
   fi;
-  if dstpos < 1 or dstpos+len-1 > cdst![CVEC.IDX_len] then
+  if dstpos < 1 or dstpos+len-1 > cdst![CVEC_IDX_len] then
       Error("CVEC.Slice: destination area not valid");
       return;
   fi;
@@ -937,11 +928,11 @@ InstallOtherMethod( \{\}, "for a cvec and a range", [IsCVecRep, IsRangeRep],
         Error("CVEC.{} : slicing only for ranges with increment 1 available");
         return;
     fi;
-    cl := CVEC.CVecClass(v);
+    cl := DataType(TypeObj(v));
     len := last+1-first;
-    c := CVEC.NewCVecClass(cl![CVEC.IDX_fieldinfo]![CVEC.IDX_p],
-                           cl![CVEC.IDX_fieldinfo]![CVEC.IDX_d],len);
-    w := CVEC.NEW(c,c![CVEC.IDX_type]);
+    c := CVEC.NewCVecClass(cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
+                           cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],len);
+    w := CVEC.NEW(c,c![CVEC_IDX_type]);
     CVEC.SLICE(v,w,first,len,1);
     if not(IsMutable(v)) then
         MakeImmutable(w);
@@ -968,11 +959,11 @@ InstallOtherMethod( \{\}, "for a cvec and a list",
           return;
         fi;
     fi;
-    cl := CVEC.CVecClass(v);
+    cl := DataType(TypeObj(v));
     len := last+1-first;
-    c := CVEC.NewCVecClass(cl![CVEC.IDX_fieldinfo]![CVEC.IDX_p],
-                           cl![CVEC.IDX_fieldinfo]![CVEC.IDX_d],len);
-    w := CVEC.NEW(c,c![CVEC.IDX_type]);
+    c := CVEC.NewCVecClass(cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
+                           cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],len);
+    w := CVEC.NEW(c,c![CVEC_IDX_type]);
     if len > 0 then CVEC.SLICE(v,w,first,len,1); fi;
     if not(IsMutable(v)) then
         MakeImmutable(w);
@@ -994,52 +985,52 @@ CVEC.MAKE_ZERO_ONE_PRIMROOT := function(cl)
   # Makes the zero, the one, and the primitive root, once they are needed
   # cl is a cvecclass with d=1
   local cpcompr,d,p,po;
-  p := cl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-  d := cl![CVEC.IDX_len];
-  cl![CVEC.IDX_zero] := CVEC.NEW(cl,cl![CVEC.IDX_scatype]);
-  cl![CVEC.IDX_one] := CVEC.NEW(cl,cl![CVEC.IDX_scatype]);
-  CVEC.ASS_CVEC(cl![CVEC.IDX_one],1,1);
+  p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+  d := cl![CVEC_IDX_len];
+  cl![CVEC_IDX_zero] := CVEC.NEW(cl,cl![CVEC_IDX_scatype]);
+  cl![CVEC_IDX_one] := CVEC.NEW(cl,cl![CVEC_IDX_scatype]);
+  CVEC.ASS_CVEC(cl![CVEC_IDX_one],1,1);
   if d > 1 then
-      cl![CVEC.IDX_primroot] := CVEC.NEW(cl,cl![CVEC.IDX_scatype]);
-      CVEC.ASS_CVEC(cl![CVEC.IDX_primroot],2,1);
+      cl![CVEC_IDX_primroot] := CVEC.NEW(cl,cl![CVEC_IDX_scatype]);
+      CVEC.ASS_CVEC(cl![CVEC_IDX_primroot],2,1);
   else
       # FIXME: find primitive root of Z/pZ
-      cl![CVEC.IDX_primroot] := fail;
+      cl![CVEC_IDX_primroot] := fail;
   fi;
   # Three dummies:
-  cl![CVEC.IDX_dummy] := [CVEC.NEW(cl,cl![CVEC.IDX_scatype]),
-                          CVEC.NEW(cl,cl![CVEC.IDX_scatype]),
-                          CVEC.NEW(cl,cl![CVEC.IDX_scatype]),
-                          CVEC.NEW(cl,cl![CVEC.IDX_scatype]),
-                          CVEC.NEW(cl,cl![CVEC.IDX_scatype]),
-                          CVEC.NEW(cl,cl![CVEC.IDX_scatype]),
-                          CVEC.NEW(cl,cl![CVEC.IDX_scatype])];
-  cpcompr := CVEC.NEW(cl,cl![CVEC.IDX_scatype]);
+  cl![CVEC_IDX_dummy] := [CVEC.NEW(cl,cl![CVEC_IDX_scatype]),
+                          CVEC.NEW(cl,cl![CVEC_IDX_scatype]),
+                          CVEC.NEW(cl,cl![CVEC_IDX_scatype]),
+                          CVEC.NEW(cl,cl![CVEC_IDX_scatype]),
+                          CVEC.NEW(cl,cl![CVEC_IDX_scatype]),
+                          CVEC.NEW(cl,cl![CVEC_IDX_scatype]),
+                          CVEC.NEW(cl,cl![CVEC_IDX_scatype])];
+  cpcompr := CVEC.NEW(cl,cl![CVEC_IDX_scatype]);
   po := -CoefficientsOfLaurentPolynomial(ConwayPolynomial(p,d));
   if po[2] <> 0 then Error("Unexpected case #2"); fi;
   po := List(po[1]{[1..d]},IntFFE);
   CVEC.INTREP_TO_CVEC(po,cpcompr);
-  cl![CVEC.IDX_cpcompr] := cpcompr;
-  #scafam := cl![CVEC.IDX_fieldinfo]![CVEC.IDX_scafam];
+  cl![CVEC_IDX_cpcompr] := cpcompr;
+  #scafam := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam];
   # FIXME: Necessary?
-  #SetZero(scafam,cl![CVEC.IDX_zero]);
-  #SetOne(scafam,cl![CVEC.IDX_one]);
+  #SetZero(scafam,cl![CVEC_IDX_zero]);
+  #SetOne(scafam,cl![CVEC_IDX_one]);
 end;
 
 InstallMethod( CSca, "for a list of coefficients and a cvecclass",
   [IsList, IsCVecClass],
   function(l,c)
     local v;
-    if c![CVEC.IDX_fieldinfo]![CVEC.IDX_d] <> 1 or 
-       c![CVEC.IDX_len] <> Length(l) then 
+    if c![CVEC_IDX_fieldinfo]![CVEC_IDX_d] <> 1 or 
+       c![CVEC_IDX_len] <> Length(l) then 
         Error("CSca: not over prime field or length of coefficient list wrong");
         return fail;
     fi;
-    if c![CVEC.IDX_zero] = fail then
+    if c![CVEC_IDX_zero] = fail then
         CVEC.MAKE_ZERO_ONE_PRIMROOT(c);
     fi;
     # Now go on:
-    v := CVEC.NEW(c,c![CVEC.IDX_scatype]);
+    v := CVEC.NEW(c,c![CVEC_IDX_scatype]);
     CVEC.INTREP_TO_CVEC(l,v);
     return v;
   end);
@@ -1048,11 +1039,11 @@ InstallMethod( CSca, "for a list of coefficients and a csca",
   [IsList, IsCVecRep and IsCScaRep and IsScalar],
   function(l,s)
     local v,c;
-    c := CVEC.CVecClass(s);
-    if c![CVEC.IDX_zero] = fail then
+    c := DataType(TypeObj(s));
+    if c![CVEC_IDX_zero] = fail then
         CVEC.MAKE_ZERO_ONE_PRIMROOT(c);
     fi;
-    v := CVEC.NEW(c,c![CVEC.IDX_scatype]);
+    v := CVEC.NEW(c,c![CVEC_IDX_scatype]);
     CVEC.INTREP_TO_CVEC(l,v);
     return v;
   end);
@@ -1062,11 +1053,11 @@ InstallMethod( CSca, "for a list of coefficients and two integers",
   function(l,p,d)
     local v,c;
     c := CVEC.NewCVecClass(p,1,d);
-    if c![CVEC.IDX_zero] = fail then
+    if c![CVEC_IDX_zero] = fail then
         CVEC.MAKE_ZERO_ONE_PRIMROOT(c);
     fi;
     # Now go on:
-    v := CVEC.NEW(c,c![CVEC.IDX_scatype]);
+    v := CVEC.NEW(c,c![CVEC_IDX_scatype]);
     CVEC.INTREP_TO_CVEC(l,v);
     return v;
   end);
@@ -1074,11 +1065,12 @@ InstallMethod( CSca, "for a list of coefficients and two integers",
 # Addition of scalars:
 
 InstallOtherMethod( \+, "for cscas", 
-  [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep],
+  [IsCVecRep and IsScalar and IsCScaRep and IsFFE, 
+   IsCVecRep and IsScalar and IsCScaRep and IsFFE],
   function(v,w)
   local u,vcl;
-  vcl := CVEC.CVecClass(v);
-  u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
+  vcl := DataType(TypeObj(v));
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
   CVEC.ADD3(u,v,w);
   return u;
 end);
@@ -1086,12 +1078,13 @@ end);
 # Subtraction of scalars:
 
 InstallOtherMethod( \-, "for cscas", 
-  [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep],
+  [IsCVecRep and IsScalar and IsCScaRep and IsFFE, 
+   IsCVecRep and IsScalar and IsCScaRep and IsFFE],
   function(v,w)
   local u,vcl,p;
-  vcl := CVEC.CVecClass(v);
-  p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-  u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
+  vcl := DataType(TypeObj(v));
+  p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
   CVEC.COPY(v,u);
   CVEC.ADDMUL(u,w,p-1,0,0);
   return u;
@@ -1103,9 +1096,9 @@ InstallOtherMethod( AdditiveInverseSameMutability, "for a csca",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local u,vcl,p;
-  vcl := CVEC.CVecClass(v);
-  u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
-  p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
+  vcl := DataType(TypeObj(v));
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
+  p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
   CVEC.MUL2(u,v,p-1);
   return u;
 end);
@@ -1113,9 +1106,9 @@ InstallOtherMethod( AdditiveInverseImmutable, "for a csca",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local u,vcl,p;
-  vcl := CVEC.CVecClass(v);
-  u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
-  p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
+  vcl := DataType(TypeObj(v));
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
+  p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
   CVEC.MUL2(u,v,p-1);
   return u;
 end);
@@ -1126,8 +1119,8 @@ InstallOtherMethod( ShallowCopy, "for cscas",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
     local u,vcl;
-    vcl := CVEC.CVecClass(v);
-    u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
+    vcl := DataType(TypeObj(v));
+    u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
     CVEC.COPY(v,u);
     return u;
   end);
@@ -1135,10 +1128,12 @@ InstallOtherMethod( ShallowCopy, "for cscas",
 # Comparison of scalars:
 
 InstallOtherMethod( \=, "for cscas", 
-  [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep],
+  [IsCVecRep and IsScalar and IsCScaRep and IsFFE, 
+   IsCVecRep and IsScalar and IsCScaRep and IsFFE],
    CVEC.CVEC_EQ );
 InstallOtherMethod( \<, "for cscas", 
-  [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep],
+  [IsCVecRep and IsScalar and IsCScaRep and IsFFE, 
+   IsCVecRep and IsScalar and IsCScaRep and IsFFE],
    CVEC.CVEC_LT );
 InstallOtherMethod( IsZero, "for cscas", 
   [IsCVecRep and IsScalar and IsCScaRep], CVEC.CVEC_ISZERO);
@@ -1146,33 +1141,68 @@ InstallOtherMethod( IsZero, "for cscas",
 # Multiplication of scalars:
 
 InstallOtherMethod( \*, "for cscas",
-  [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep], 
+  [IsCVecRep and IsScalar and IsCScaRep and IsFFE, 
+   IsCVecRep and IsScalar and IsCScaRep and IsFFE], 
   function(v,w)
   local d,u,vcl,ww;
-  vcl := CVEC.CVecClass(v);
-  if vcl![CVEC.IDX_dummy] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
-  d := vcl![CVEC.IDX_len];
+  vcl := DataType(TypeObj(v));
+  if vcl![CVEC_IDX_dummy] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
+  d := vcl![CVEC_IDX_len];
   if d = 1 then
       CVEC.CSCA_MUL_PRIMEFIELD(u,v,w);
   else
       ww := ShallowCopy(w);
       CVEC.PROD_COEFFS_MOD_CVEC_PRIMEFIELD(u,v,ww,
-                           vcl![CVEC.IDX_dummy][1],vcl![CVEC.IDX_cpcompr]);
+                           vcl![CVEC_IDX_dummy][1],vcl![CVEC_IDX_cpcompr]);
   fi;
   return u;
 end);
 
-CVEC.CSCA_INV := function(v)
-  local PolDiv,a,b,cp,d,dega,degb,degx,degy,dum,dum2,dummy,fa,p,q,u,vcl,x,y;
-  vcl := CVEC.CVecClass(v);
-  p := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-  d := vcl![CVEC.IDX_len];
+InstallOtherMethod( ProductCoeffs, "for cvecs",
+  [IsCVecRep, IsCVecRep],
+  function(v,w)
+  local cl,u,vcl,wcl;
+  vcl := DataType(TypeObj(v));
+  wcl := DataType(TypeObj(w));
+  cl := CVEC.NewCVecClass(vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
+                          vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
+                          vcl![CVEC_IDX_len]+wcl![CVEC_IDX_len]-1);
+  u := CVEC.NEW(cl,cl![CVEC_IDX_type]);
+  CVEC.PROD_COEFFS_CVEC_PRIMEFIELD_3(u,v,w);
+  # FIXME: result might be too short, one word could be overwritten!
+  return u;
+end);
+
+CVEC.CSCA_INV_USES_KERNEL := function(v)
+  local d,degy,u,vcl;
+  vcl := DataType(TypeObj(v));
+  d := vcl![CVEC_IDX_len];
 
   degy := CVEC.POSITION_LAST_NONZERO_CVEC(v);
   if degy = 0 then return fail; fi;
 
-  u := CVEC.NEW(vcl,vcl![CVEC.IDX_scatype]);
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
+
+  if d = 1 then    # prime field large scalar, go to kernel method
+      CVEC.CSCA_INV_PRIMEFIELD(u,v);
+  else
+      CVEC.CSCA_INV_KERNEL(u,v,degy);
+  fi;
+      
+  return u;
+end;
+
+CVEC.CSCA_INV := function(v)
+  local PolDiv,a,b,cp,d,dega,degb,degx,degy,dum,dum2,dummy,fa,p,q,u,vcl,x,y;
+  vcl := DataType(TypeObj(v));
+  p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+  d := vcl![CVEC_IDX_len];
+
+  degy := CVEC.POSITION_LAST_NONZERO_CVEC(v);
+  if degy = 0 then return fail; fi;
+
+  u := CVEC.NEW(vcl,vcl![CVEC_IDX_scatype]);
 
   if d = 1 then    # prime field large scalar, go to kernel method
       CVEC.CSCA_INV_PRIMEFIELD(u,v);
@@ -1186,14 +1216,14 @@ CVEC.CSCA_INV := function(v)
   fi;
   
   # Prepare helper elements:
-  x := vcl![CVEC.IDX_dummy][1];  # Note that [1] is used for multiplication
-  y := vcl![CVEC.IDX_dummy][2];
-  a := vcl![CVEC.IDX_dummy][3];
-  b := vcl![CVEC.IDX_dummy][4];
-  q := vcl![CVEC.IDX_dummy][5];
-  dum := vcl![CVEC.IDX_dummy][6];
-  dum2 := vcl![CVEC.IDX_dummy][7];
-  cp := vcl![CVEC.IDX_cpcompr];
+  x := vcl![CVEC_IDX_dummy][1];
+  y := vcl![CVEC_IDX_dummy][2];
+  a := vcl![CVEC_IDX_dummy][3];
+  b := vcl![CVEC_IDX_dummy][4];
+  q := vcl![CVEC_IDX_dummy][5];
+  dum := vcl![CVEC_IDX_dummy][6];
+  dum2 := vcl![CVEC_IDX_dummy][7];
+  cp := vcl![CVEC_IDX_cpcompr];
   CVEC.MUL2(x,cp,p-1);
 
   # Prepare a and b: 
@@ -1244,7 +1274,6 @@ CVEC.CSCA_INV := function(v)
   while true do
       degx := PolDiv(x,degx,y,degy,q,dum);
       # Now we want: (a,b) := (b,a-q*b), so we change a and swap:
-      CVEC.MAKEZERO(dum);
       CVEC.PROD_COEFFS_MOD_CVEC_PRIMEFIELD(dum,b,q,dum2,cp);
       CVEC.ADDMUL(a,dum,p-1,0,0);
       if degx = 0 then
@@ -1264,13 +1293,14 @@ end;
 
 InstallOtherMethod( InverseSameMutability, "for a csca", 
   [IsCVecRep and IsScalar and IsCScaRep],
-  CVEC.CSCA_INV);
+  CVEC.CSCA_INV_USES_KERNEL);
 InstallOtherMethod( InverseImmutable, "for a csca", 
   [IsCVecRep and IsScalar and IsCScaRep],
-  CVEC.CSCA_INV);
+  CVEC.CSCA_INV_USES_KERNEL);
 
 InstallOtherMethod( \/, "for cscas", 
-  [IsCVecRep and IsScalar and IsCScaRep, IsCVecRep and IsScalar and IsCScaRep],
+  [IsCVecRep and IsScalar and IsCScaRep and IsFFE, 
+   IsCVecRep and IsScalar and IsCScaRep and IsFFE],
   function(v,w)
   local ww;
   ww := InverseImmutable(w);
@@ -1287,35 +1317,35 @@ InstallOtherMethod( ZeroSameMutability, "for a csca",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local u,vcl;
-  vcl := CVEC.CVecClass(v);
-  #if vcl![CVEC.IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return vcl![CVEC.IDX_zero];
+  vcl := DataType(TypeObj(v));
+  #if vcl![CVEC_IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return vcl![CVEC_IDX_zero];
 end);
 InstallOtherMethod( ZeroImmutable, "for a csca", 
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local u,vcl;
-  vcl := CVEC.CVecClass(v);
-  #if vcl![CVEC.IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return vcl![CVEC.IDX_zero];
+  vcl := DataType(TypeObj(v));
+  #if vcl![CVEC_IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return vcl![CVEC_IDX_zero];
 end);
 InstallOtherMethod( ZeroSameMutability, "for a cscaclass", 
   [IsCVecClass],
   function(vcl)
-  if vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_d] <> 1 then
+  if vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d] <> 1 then
       Error("ZeroSameMutability: not defined for a cvec class");
   fi;
-  if vcl![CVEC.IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return vcl![CVEC.IDX_zero];
+  if vcl![CVEC_IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return vcl![CVEC_IDX_zero];
 end);
 InstallOtherMethod( ZeroImmutable, "for a cscaclass", 
   [IsCVecClass],
   function(vcl)
-  if vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_d] <> 1 then
+  if vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d] <> 1 then
       Error("ZeroImmutable: not defined for a cvec class");
   fi;
-  if vcl![CVEC.IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return vcl![CVEC.IDX_zero];
+  if vcl![CVEC_IDX_zero] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return vcl![CVEC_IDX_zero];
 end);
 
 # One:
@@ -1324,33 +1354,33 @@ InstallOtherMethod( OneSameMutability, "for a csca",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local u,vcl;
-  vcl := CVEC.CVecClass(v);
-  #if vcl![CVEC.IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return vcl![CVEC.IDX_one];
+  vcl := DataType(TypeObj(v));
+  #if vcl![CVEC_IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return vcl![CVEC_IDX_one];
 end);
 InstallOtherMethod( OneImmutable, "for a csca", 
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local u,vcl;
-  vcl := CVEC.CVecClass(v);
-  #if vcl![CVEC.IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return vcl![CVEC.IDX_one];
+  vcl := DataType(TypeObj(v));
+  #if vcl![CVEC_IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return vcl![CVEC_IDX_one];
 end);
 InstallOtherMethod( OneSameMutability, "for a csca class", [IsCVecClass],
   function(c)
-    if c![CVEC.IDX_fieldinfo]![CVEC.IDX_d] <> 1 then
+    if c![CVEC_IDX_fieldinfo]![CVEC_IDX_d] <> 1 then
         Error("OneSameMutability: not defined for a cvec class");
     fi;
-    if c![CVEC.IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(c); fi;
-    return c![CVEC.IDX_one];
+    if c![CVEC_IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(c); fi;
+    return c![CVEC_IDX_one];
   end);
 InstallOtherMethod( OneImmutable, "for a csca class", [IsCVecClass],
   function(c)
-    if c![CVEC.IDX_fieldinfo]![CVEC.IDX_d] <> 1 then
+    if c![CVEC_IDX_fieldinfo]![CVEC_IDX_d] <> 1 then
         Error("OneImmutable: not defined for a cvec class");
     fi;
-    if c![CVEC.IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(c); fi;
-    return c![CVEC.IDX_one];
+    if c![CVEC_IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(c); fi;
+    return c![CVEC_IDX_one];
   end);
 
 # IsOne:
@@ -1358,9 +1388,9 @@ InstallOtherMethod( OneImmutable, "for a csca class", [IsCVecClass],
 InstallOtherMethod( IsOne, "for a csca", [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local vcl;
-  vcl := CVEC.CVecClass(v);
-  if vcl![CVEC.IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
-  return v = vcl![CVEC.IDX_one];
+  vcl := DataType(TypeObj(v));
+  if vcl![CVEC_IDX_one] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(vcl); fi;
+  return v = vcl![CVEC_IDX_one];
 end);
 
 
@@ -1370,8 +1400,8 @@ InstallOtherMethod( Characteristic, "for a csca",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local vcl;
-  vcl := CVEC.CVecClass(v);
-  return vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
+  vcl := DataType(TypeObj(v));
+  return vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
 end);
 
 # DegreeFFE:
@@ -1380,8 +1410,8 @@ InstallOtherMethod( DegreeFFE, "for a csca",
   [IsCVecRep and IsScalar and IsCScaRep],
   function(v)
   local vcl;
-  vcl := CVEC.CVecClass(v);
-  return vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_d];
+  vcl := DataType(TypeObj(v));
+  return vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
 end);
 
 # Square roots:
@@ -1395,14 +1425,14 @@ InstallOtherMethod( Sqrt, "for a csca", [IsCVecRep and IsScalar and IsCScaRep],
   function(x)
   local T,au,c,e,i,k,me,mu,ri,s,sigma,t,tau,xcl,xl,xs,xsm1d2,xsp1d2,y,z;
   # We have some precomputed values:
-  xcl := CVEC.CVecClass(x);
-  e := xcl![CVEC.IDX_one];
+  xcl := DataType(TypeObj(x));
+  e := xcl![CVEC_IDX_one];
   me := -e;
-  ri := xcl![CVEC.IDX_rootinfo];
+  ri := xcl![CVEC_IDX_rootinfo];
   if IsBound(ri[2]) then
       s := ri[2].s;
       T := ri[2].T;
-      z := xcl![CVEC.IDX_primroot];
+      z := xcl![CVEC_IDX_primroot];
       c := ri[2].c;
   else
       # FIXME: Calculation of rootinfo for 2 goes here:
@@ -1448,19 +1478,19 @@ end);
 
 InstallOtherMethod( PrimitiveRoot, "for a csca class", [IsCVecClass],
   function(c)
-  if c![CVEC.IDX_fieldinfo]![CVEC.IDX_d] <> 1 then
+  if c![CVEC_IDX_fieldinfo]![CVEC_IDX_d] <> 1 then
       Error("PrimitiveRoot: not defined for a cvec class");
   fi;
-  #if c![CVEC.IDX_primroot] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(c); fi;
-  return c![CVEC.IDX_primroot];
+  #if c![CVEC_IDX_primroot] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(c); fi;
+  return c![CVEC_IDX_primroot];
 end);
 InstallOtherMethod( PrimitiveRoot, "for a csca", 
   [IsCVecRep and IsScalar and IsCScaRep],
   function(x)
   local xcl;
-  xcl := CVEC.CVecClass(x);
-  if xcl![CVEC.IDX_primroot] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(xcl); fi;
-  return xcl![CVEC.IDX_primroot];
+  xcl := DataType(TypeObj(x));
+  if xcl![CVEC_IDX_primroot] = fail then CVEC.MAKE_ZERO_ONE_PRIMROOT(xcl); fi;
+  return xcl![CVEC_IDX_primroot];
 end);
 
 #############################################################################
@@ -1469,13 +1499,13 @@ end);
 
 InstallMethod( CMat, "for a list of cvecs and a cvec", [IsList, IsCVecRep],
   function(l,v)
-    return CMat(l,CVEC.CVecClass(v),true);
+    return CMat(l,DataType(TypeObj(v)),true);
   end);
 
 InstallMethod( CMat, "for a list of cvecs, a cvec, and a boolean value",
   [IsList, IsCVecRep, IsBool],
   function(l,v,checks)
-    return CMat(l,CVEC.CVecClass(v),checks);
+    return CMat(l,DataType(TypeObj(v)),checks);
   end);
 
 InstallMethod( CMat, "for a list of cvecs", [IsList],
@@ -1485,7 +1515,7 @@ InstallMethod( CMat, "for a list of cvecs", [IsList],
         Error("CMat: Cannot use one-argument version with empty list");
         return fail;
     fi;
-    c := CVEC.CVecClass(l[1]);
+    c := DataType(TypeObj(l[1]));
     return CMat(l,c,true);
   end);
 
@@ -1497,7 +1527,7 @@ InstallMethod( CMat, "for a list of cvecs, and a boolean value",
         Error("CMat: Cannot use two-argument version with empty list and bool");
         return fail;
     fi;
-    c := CVEC.CVecClass(l[1]);
+    c := DataType(TypeObj(l[1]));
     return CMat(l,c,checks);
   end);
 
@@ -1554,11 +1584,11 @@ CVEC.CMatMaker := function(l,cl)
     else
         m := rec(rows := l, len := 0, vecclass := cl);
     fi;
-    m.scaclass := cl![CVEC.IDX_scaclass];
-    m.greasehint := cl![CVEC.IDX_fieldinfo]![CVEC.IDX_bestgrease];   
+    m.scaclass := cl![CVEC_IDX_scaclass];
+    m.greasehint := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease];   
          # this is the current bestgrease
     ty := NewType(CollectionsFamily(CollectionsFamily(
-                        cl![CVEC.IDX_fieldinfo]![CVEC.IDX_scafam])),
+                        cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam])),
                   IsMatrix and IsOrdinaryMatrix and HasLength and
                   IsComponentObjectRep and IsCMatRep and IsMutable);
     return Objectify(ty,m);
@@ -1571,7 +1601,7 @@ InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value",
     if dochecks then
         for v in [1..Length(l)] do
             if not(IsBound(l[v])) or not(IsCVecRep(l[v])) or 
-               not(IsIdenticalObj(CVEC.CVecClass(l[v]),cl)) then
+               not(IsIdenticalObj(DataType(TypeObj(l[v])),cl)) then
                 Error("CVEC.CMat: Not all list entries are correct vectors");
                 return fail;
             fi;
@@ -1613,7 +1643,7 @@ CVEC.ZeroMat := function(arg)
   l := 0*[1..y+1];
   Unbind(l[1]);
   for i in [1..y] do
-      l[i+1] := CVEC.NEW(c,c![CVEC.IDX_type]);
+      l[i+1] := CVEC.NEW(c,c![CVEC_IDX_type]);
   od;
   return CVEC.CMatMaker(l,c);
 end;
@@ -1644,7 +1674,7 @@ CVEC.IdentityMat := function(arg)
   l := 0*[1..y+1];
   Unbind(l[1]);
   for i in [1..y] do
-      l[i+1] := CVEC.NEW(c,c![CVEC.IDX_type]);
+      l[i+1] := CVEC.NEW(c,c![CVEC_IDX_type]);
       l[i+1][i] := 1;   # note that this works for all fields!
   od;
   return CVEC.CMatMaker(l,c);
@@ -1659,9 +1689,9 @@ CVEC.RandomMat := function(arg)
           Error("Usage: CVEC.RandomMat( rows, cvecclass)");
           return;
       fi;
-      x := c![CVEC.IDX_len];
-      d := c![CVEC.IDX_fieldinfo]![CVEC.IDX_d];   # used later on
-      q := c![CVEC.IDX_fieldinfo]![CVEC.IDX_q];  
+      x := c![CVEC_IDX_len];
+      d := c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];   # used later on
+      q := c![CVEC_IDX_fieldinfo]![CVEC_IDX_q];  
   elif Length(arg) = 4 then
       y := arg[1];
       x := arg[2];
@@ -1682,11 +1712,11 @@ CVEC.RandomMat := function(arg)
   fi;
   l := 0*[1..y+1];
   Unbind(l[1]);
-  if c![CVEC.IDX_fieldinfo]![CVEC.IDX_size] <= 1 then    
+  if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] <= 1 then    
       # q is an immediate integer
       li := 0*[1..x];
       for i in [1..y] do
-          l[i+1] := CVEC.NEW(c,c![CVEC.IDX_type]);
+          l[i+1] := CVEC.NEW(c,c![CVEC_IDX_type]);
           for j in [1..x] do
               li[j] := Random([0..q-1]);
           od;
@@ -1695,7 +1725,7 @@ CVEC.RandomMat := function(arg)
   else    # big scalars!
       li := 0*[1..x*d];
       for i in [1..y] do
-          l[i+1] := CVEC.NEW(c,c![CVEC.IDX_type]);
+          l[i+1] := CVEC.NEW(c,c![CVEC_IDX_type]);
           for j in [1..x*d] do
               li[j] := Random([0..p-1]);
           od;
@@ -1717,7 +1747,7 @@ InstallMethod( PostMakeImmutable, "for a cmat", [IsCMatRep and IsMatrix],
 InstallOtherMethod( Add, "for a cmat, and a cvec",
   [IsCMatRep and IsMatrix and IsMutable, IsCVecRep],
   function(m,v)
-    if not(IsIdenticalObj(CVEC.CVecClass(v),m!.vecclass)) then
+    if not(IsIdenticalObj(DataType(TypeObj(v)),m!.vecclass)) then
         Error("Add: only correct cvecs allowed in this matrix");
         return fail;
     fi;
@@ -1727,7 +1757,7 @@ InstallOtherMethod( Add, "for a cmat, and a cvec",
 InstallOtherMethod( Add, "for a cmat, a cvec, and a position",
   [IsCMatRep and IsMatrix and IsMutable, IsCVecRep, IsPosInt],
   function(m,v,pos)
-    if not(IsIdenticalObj(CVEC.CVecClass(v),m!.vecclass)) then
+    if not(IsIdenticalObj(DataType(TypeObj(v)),m!.vecclass)) then
         Error("Add: only correct cvecs allowed in this matrix");
         return fail;
     fi;
@@ -1765,7 +1795,7 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
     if pos < 1 or pos > m!.len+1 then
         Error("\\[\\]\\:\\=: illegal position");
     fi;
-    if not(IsIdenticalObj(CVEC.CVecClass(v),m!.vecclass)) then
+    if not(IsIdenticalObj(DataType(TypeObj(v)),m!.vecclass)) then
         Error("\\[\\]\\:\\=: can only assign cvecs to cmat");
     fi;
     if pos = m!.len+1 then
@@ -1860,11 +1890,11 @@ CVEC.CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
       Error("CVEC.CopySubmatrix: line lists do not have equal lengths");
       return;
   fi;
-  if srcpos < 1 or srcpos+len-1 > src!.vecclass![CVEC.IDX_len] or len <= 0 then
+  if srcpos < 1 or srcpos+len-1 > src!.vecclass![CVEC_IDX_len] or len <= 0 then
       Error("CVEC.CopySubmatrix: source area not valid");
       return;
   fi;
-  if dstpos < 1 or dstpos+len-1 > dst!.vecclass![CVEC.IDX_len] then
+  if dstpos < 1 or dstpos+len-1 > dst!.vecclass![CVEC_IDX_len] then
       Error("CVEC.CopySubmatrix: destination area not valid");
       return;
   fi;
@@ -1935,7 +1965,7 @@ InstallOtherMethod( ZeroImmutable, "for a cmat",
   function(m)
     local i,l,res,v;
     l := [];
-    v := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC.IDX_type]);
+    v := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
     MakeImmutable(v);
     for i in [2..m!.len+1] do
         l[i] := v;
@@ -1950,7 +1980,7 @@ InstallOtherMethod( ZeroMutable, "for a cmat",
     local i,l;
     l := [];
     for i in [2..m!.len+1] do
-        l[i] := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC.IDX_type]);
+        l[i] := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
     od;
     return CVEC.CMatMaker(l,m!.vecclass);
   end);
@@ -1968,11 +1998,11 @@ InstallOtherMethod( OneMutable, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m)
     local i,l,one,v,w;
-    if m!.vecclass![CVEC.IDX_len] <> m!.len then
+    if m!.vecclass![CVEC_IDX_len] <> m!.len then
         Error("OneMutable: cmat is not square");
         return fail;
     fi;
-    v := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC.IDX_type]);
+    v := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
     l := 0*[1..m!.len+1];
     one := One(m!.scaclass);
     for i in [1..m!.len] do
@@ -2053,20 +2083,20 @@ InstallOtherMethod( IsZero, "for a cmat", [IsCMatRep and IsMatrix],
 
 InstallOtherMethod( Characteristic, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
-    return m!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
+    return m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
   end);
     
 InstallOtherMethod( DegreeFFE, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
-    return m!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_d];
+    return m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
   end);
     
 InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     local c,p,d;
     c := m!.vecclass;
-    p := c![CVEC.IDX_fieldinfo]![CVEC.IDX_p];
-    d := c![CVEC.IDX_fieldinfo]![CVEC.IDX_d];
+    p := c![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    d := c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
     # FIXME: ???
     return GF(p,d);
   end);
@@ -2079,14 +2109,14 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
   [IsCVecRep, IsCMatRep and IsMatrix],
   function(v,m)
     local i,res,vcl,s,z;
-    vcl := CVEC.CVecClass(v);
-    if not(IsIdenticalObj(vcl![CVEC.IDX_scaclass],m!.scaclass)) then
+    vcl := DataType(TypeObj(v));
+    if not(IsIdenticalObj(vcl![CVEC_IDX_scaclass],m!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
     if Length(v) <> m!.len then
         Error("\\*: lengths not equal");
     fi;
-    res := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC.IDX_type]);  # the result
+    res := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC.PROD_CVEC_CMAT_NOGREASE(res,v,m!.rows);
     if not(IsMutable(v)) then
         MakeImmutable(res);
@@ -2098,14 +2128,14 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
   [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
   function(v,m)
     local i,res,vcl,l,pos,val;
-    vcl := CVEC.CVecClass(v);
-    if not(IsIdenticalObj(vcl![CVEC.IDX_scaclass],m!.scaclass)) then
+    vcl := DataType(TypeObj(v));
+    if not(IsIdenticalObj(vcl![CVEC_IDX_scaclass],m!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
     if Length(v) <> m!.len then
         Error("\\*: lengths not equal");
     fi;
-    res := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC.IDX_type]);  # the result
+    res := CVEC.NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC.PROD_CVEC_CMAT_GREASED(res,v,m!.greasetab,m!.spreadtab,m!.greaselev);
     if not(IsMutable(v)) then
         MakeImmutable(res);
@@ -2120,19 +2150,19 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
-    if m!.vecclass![CVEC.IDX_len] <> n!.len then
+    if m!.vecclass![CVEC_IDX_len] <> n!.len then
         Error("\\*: lengths not fitting");
     fi;
     # First make a new matrix:
     l := 0*[1..m!.len+1];
     vcl := n!.vecclass;
     for i in [2..m!.len+1] do
-        l[i] := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+        l[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     od;
     Unbind(l[1]);
     res := CVEC.CMatMaker(l,n!.vecclass);
     if m!.len > 0 then
-        q := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_q];
+        q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
         lev := n!.greasehint;
         if lev = 0 or 
            n!.len * (q-1) * lev <= (n!.len + q^lev) * q then   
@@ -2142,13 +2172,13 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
             # extracting single field entries.
         else
             spreadtab := CVEC.MakeSpreadTab(
-                 vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_p],
-                 vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_d],
-                 lev, vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_bitsperel]);
-            tablen := vcl![CVEC.IDX_fieldinfo]![CVEC.IDX_q]^lev;
+                 vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
+                 vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
+                 lev, vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_bitsperel]);
+            tablen := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q]^lev;
             greasetab := 0*[1..tablen+2];
             for j in [1..tablen+2] do
-              greasetab[j] := CVEC.NEW(n!.vecclass,n!.vecclass![CVEC.IDX_type]);
+              greasetab[j] := CVEC.NEW(n!.vecclass,n!.vecclass![CVEC_IDX_type]);
             od;
             CVEC.PROD_CMAT_CMAT_WITHGREASE(l,m!.rows,n!.rows,greasetab,
                                            spreadtab,lev);
@@ -2164,14 +2194,14 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
-    if m!.vecclass![CVEC.IDX_len] <> n!.len then
+    if m!.vecclass![CVEC_IDX_len] <> n!.len then
         Error("\\*: lengths not fitting");
     fi;
     # First make a new matrix:
     l := 0*[1..m!.len+1];
     vcl := n!.vecclass;
     for i in [2..m!.len+1] do
-        l[i] := CVEC.NEW(vcl,vcl![CVEC.IDX_type]);
+        l[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
     od;
     Unbind(l[1]);
     res := CVEC.CMatMaker(l,n!.vecclass);
@@ -2193,22 +2223,22 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
 InstallOtherMethod( GreaseMat, "for a cmat",
   [IsMatrix and IsCMatRep],
   function(m)
-    if m!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_bestgrease] = 0 then
+    if m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease] = 0 then
         Info(InfoWarning,1,"GreaseMat: bestgrease is 0, we do not grease");
         return;
     fi;
-    GreaseMat(m,m!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_bestgrease]);
+    GreaseMat(m,m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease]);
   end);
 
 InstallMethod( GreaseMat, "for a cmat, and a level", 
   [IsMatrix and IsCMatRep, IsInt],
   function(m,l)
     local bitsperel,d,dim,e,f,i,j,k,mm,nrblocks,p,pot,q,tablen;
-    f := m!.vecclass![CVEC.IDX_fieldinfo];   # the field info
-    bitsperel := f![CVEC.IDX_bitsperel];
-    p := f![CVEC.IDX_p];
-    d := f![CVEC.IDX_d];
-    q := f![CVEC.IDX_q];
+    f := m!.vecclass![CVEC_IDX_fieldinfo];   # the field info
+    bitsperel := f![CVEC_IDX_bitsperel];
+    p := f![CVEC_IDX_p];
+    d := f![CVEC_IDX_d];
+    q := f![CVEC_IDX_q];
     nrblocks := QuoInt(m!.len+l-1,l);  # we do grease the last <l rows!
     tablen := q^l;  # = p^(d*l)
     m!.greaselev := l;
@@ -2218,7 +2248,7 @@ InstallMethod( GreaseMat, "for a cmat, and a level",
         m!.greasetab[i] := 0*[1..tablen+2];
         for j in [1..tablen+2] do
             m!.greasetab[i][j] := 
-                CVEC.NEW(m!.vecclass,m!.vecclass![CVEC.IDX_type]);
+                CVEC.NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
         od;
         CVEC.FILL_GREASE_TAB(m!.rows,2+(i-1)*l,l,m!.greasetab[i],tablen,1);
     od;
@@ -2284,7 +2314,7 @@ InstallMethod( UnGreaseMat, "for a cmat",
 
 CVEC.OptimizeGreaseHint := function(m,nr)
   local l,li,q;
-  q := m!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_q];
+  q := m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
   li := [QuoInt(nr*(q-1)*m!.len + (q-1),q)];
   l := 1;
   while l < 12 do
@@ -2326,18 +2356,18 @@ CVEC.WriteMat := function(f,m)
   fi;
   c := m!.vecclass;
   Info(InfoCVec,2,"CVEC.WriteMat: Writing ",m!.len,"x",
-       c![CVEC.IDX_len]," matrix over GF(",
-       c![CVEC.IDX_fieldinfo]![CVEC.IDX_p],",",
-       c![CVEC.IDX_fieldinfo]![CVEC.IDX_d],")");
+       c![CVEC_IDX_len]," matrix over GF(",
+       c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+       c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],")");
   # Make the header:
   magic := "GAPCMat1";
   phead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(
-           c![CVEC.IDX_fieldinfo]![CVEC.IDX_p]);
+           c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]);
   dhead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(
-           c![CVEC.IDX_fieldinfo]![CVEC.IDX_d]);
+           c![CVEC_IDX_fieldinfo]![CVEC_IDX_d]);
   rhead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(m!.len);
   chead := CVEC.64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(
-           c![CVEC.IDX_len]);
+           c![CVEC_IDX_len]);
   header := Concatenation(magic,phead,dhead,rhead,chead);
   if IO.Write(f,header) <> 40 then
       Info(InfoCVec,1,"CVEC.WriteMat: Write error during writing of header");
@@ -2517,11 +2547,11 @@ InstallMethod(DefaultFieldOfMatrix,
   function(m)
     local f;
     # FIXME: Return GF(p,d)???
-    if m!.vecclass![CVEC.IDX_fieldinfo]![CVEC.IDX_size] = 0 then
+    if m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then
         return m!.scaclass;
     else
-        f := FieldByGenerators([m!.scaclass![CVEC.IDX_GF]]);
-        SetSize(f,m!.scaclass![CVEC.IDX_fieldinfo]![CVEC.IDX_q]);
+        f := FieldByGenerators([m!.scaclass![CVEC_IDX_GF]]);
+        SetSize(f,m!.scaclass![CVEC_IDX_fieldinfo]![CVEC_IDX_q]);
         return f;
     fi;
   end);
