@@ -81,6 +81,19 @@ CVEC.BestGreaseTab :=
     2,           # q=16
   ];
 
+CVEC.NewCVecClassSameField := function(c,len)
+  # Creates a new class in the case that another length is already known:
+  local pos;
+  pos := Position(c![CVEC_IDX_lens],len);
+  if pos = fail then 
+      return CVEC.NewCVecClass(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
+                               c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
+                               len);
+  else
+      return c![CVEC_IDX_classes][pos];
+  fi;
+end;
+
 CVEC.NewCVecClass := function(p,d,len)
   # Creates a new class of cvecs or returns a cached one:
   local bestgrease,bitsperel,c,cl,elsperword,filts,greasetabl,j,l,po,pos,pos2,
@@ -286,7 +299,7 @@ CVEC.NewCVecClass := function(p,d,len)
   cl[CVEC_IDX_len] := len;
   wordlen := d * (QuoInt( len + elsperword - 1, elsperword ));
   cl[CVEC_IDX_wordlen] := wordlen;
-  ty := NewType(CollectionsFamily(scafam),filts and IsMutable);
+  ty := NewType(CollectionsFamily(scafam),filts and IsMutable,cl);
   cl[CVEC_IDX_type] := ty;
   cl[CVEC_IDX_GF] := GF(p,d);
   cl[CVEC_IDX_zero] := fail;
@@ -295,24 +308,25 @@ CVEC.NewCVecClass := function(p,d,len)
   cl[CVEC_IDX_rootinfo] := fail;
   cl[CVEC_IDX_dummy] := fail;
   cl[CVEC_IDX_cpcompr] := fail;
+  cl[CVEC_IDX_lens] := CVEC.lens[pos];
+  cl[CVEC_IDX_classes] := CVEC.classes[pos];
   # Now do things different in extension fields:
   if d > 1 then
       cl[CVEC_IDX_scatype] := fail;
       c := CVEC.NewCVecClass(p,1,d);   # for the scalars class
       CVEC.MAKE_ZERO_ONE_PRIMROOT(c);  # create a few elements
   else
-      cl[CVEC_IDX_scatype] := NewType(scafam,filts and IsScalar and IsCScaRep);
-      SetDataType(cl[CVEC_IDX_scatype],cl);
+      cl[CVEC_IDX_scatype] := NewType(scafam,filts and IsScalar and IsCScaRep,
+                                      cl);
       if len = 1 then   # we are our own scalars!
           c := cl;
       else
-          c := CVEC.NewCVecClass(p,1,d);
+          c := CVEC.NewCVecClass(p,1,1);
           CVEC.MAKE_ZERO_ONE_PRIMROOT(c);  # create a few elements
       fi;
   fi;
   cl[CVEC_IDX_scaclass] := c;
 
-  SetDataType(ty,cl);
   Objectify(NewType(CVecClassFamily,IsCVecClass),cl);
 
   # Until now, the position of q in CVEC.q might have changed, because
@@ -1165,12 +1179,9 @@ InstallOtherMethod( ProductCoeffs, "for cvecs",
   local cl,u,vcl,wcl;
   vcl := DataType(TypeObj(v));
   wcl := DataType(TypeObj(w));
-  cl := CVEC.NewCVecClass(vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
-                          vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
-                          vcl![CVEC_IDX_len]+wcl![CVEC_IDX_len]-1);
+  cl := CVEC.NewCVecClassSameField(vcl,vcl![CVEC_IDX_len]+wcl![CVEC_IDX_len]-1);
   u := CVEC.NEW(cl,cl![CVEC_IDX_type]);
-  CVEC.PROD_COEFFS_CVEC_PRIMEFIELD_3(u,v,w);
-  # FIXME: result might be too short, one word could be overwritten!
+  CVEC.PROD_COEFFS_CVEC_PRIMEFIELD_FAST(u,v,w);
   return u;
 end);
 

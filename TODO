@@ -1,36 +1,34 @@
+Rascher input von Steve's Skalaren
+Rascher output von Steve's Skalaren
+bequeme Methodeninstallation
+
+Grossreinemachen:
+  - Skalare raus (nur letzte Version von ProductCoeffs (primkoerper) drin
+  - cvecclasses aufraeumen
+  - input/output von Skalaren aufraeumen
+  - Wurzeln raus --> Steve
+  - Doku von Skalaren raus
+
+TODO aufraeumen:
+
 [] liefert neue CScas fuer q>65536 ==> insbesondere d=1
 Assignment fuer Vektoren OK?
-Inverse fuer d=1 testen (mod p)
-Inverse fuer d>1 testen, debuggen
-neue Methoden: Polynomdiv, euklid. algorithmus, invertieren
-CSca methoden korrekt: *, /, ^-1
-Scalartests zum Laufen bringen
-polynomarith mit worten fuer prime field els raus
-wurzeln besser
 aus/einpacken
 
 
 
 Tasks to do:
 
+  * Concatenation fuer CVecs
   * TransposedMat
   * InverseMat
-  * PrimitiveRoot for d=1 ==> factorize p-1 and search
-  * Generic Sequential access, at least for prime field
-  * folding for polynomial code
-  * * mod cp, at least over prime field
-  * other polynomials than conway
-  * CVecClass as a constructor operation also for scalars
-  * Concatenation fuer CVecs
   * matrix.g{d,i} look through for usability
   * test DeterminantMat
   * IsMutable-Durchgang durch cvec.gi
   * Beweis, dass keine CHANGED_BAGs fehlen
-  * GAP-Lib: GF, LargeGaloisField --> operationen --> 4.4
   * Documentation
   * Cleanup of "Hacks" and "Utilities" in cvec.gi
-  * Sort out finite field business: own Cscas?
-  * Resize of vectors / locked vectors?
+  * Hash-Funktionen fuer Matrizen und Vektoren (Generators?)
 
 Future plans:
 
@@ -39,6 +37,7 @@ Future plans:
   * NumberFFVector
   * Weitere Wurzeln, Sqrt in Ordnung bringen
   * CVec creation method for list of our scalars
+  * other polynomials than conway
 
 Possibly not to do:
 
@@ -46,6 +45,21 @@ Possibly not to do:
   * C-Mtx-binary-format R/W
   * Append for CVecs
   * Resize for CVecs
+  * Generic Sequential access, at least for prime field
+  * folding for polynomial code
+  * * mod cp, at least over prime field
+  * CVecClass as a constructor operation also for scalars
+  * GAP-Lib: GF, LargeGaloisField --> operationen --> 4.4
+  * Resize of vectors / locked vectors?
+  * Sort out finite field business: own Cscas?
+  * PrimitiveRoot for d=1 ==> factorize p-1 and search
+Inverse fuer d=1 testen (mod p)
+Inverse fuer d>1 testen, debuggen
+neue Methoden: Polynomdiv, euklid. algorithmus, invertieren
+CSca methoden korrekt: *, /, ^-1
+Scalartests zum Laufen bringen
+polynomarith mit worten fuer prime field els raus
+wurzeln besser
 
 Done:
 

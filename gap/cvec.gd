@@ -78,6 +78,10 @@ DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ##  again for d=1:
 ##  ![13]: for d=1 if GF(p,d) is used: conway-Polynomial as compressed 
 ##         vector over GF(p) or fail otherwise
+##  ![14]: CVEC.lens[pos] where pos = Position(CVEC.q,q)
+##  ![15]: CVEC.classes[pos] where pos = Position(CVEC.q.q)
+##         the latter are used for fast access to other cvec classes over
+##         the same field.
 ##  
 
 

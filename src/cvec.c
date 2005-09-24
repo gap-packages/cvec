@@ -73,6 +73,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define IDX_rootinfo 11
 #define IDX_dummy 12
 #define IDX_cpcompr 13
+#define IDX_lens 14
+#define IDX_classes 15
 
 #define OFF_mask 0
 #define OFF_offset 1
@@ -2707,20 +2709,14 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
 
 /* Our contribution to slicing: */
 
-STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
-/* No checks are done at all. src and dst must be cvecs over the same field and
- * 1 <= srcpos <= srcpos+len-1 <= Length(src) and
- * 1 <= dstpos <= dstpos+len-1 <= Length(dst) must hold. */
+STATIC void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
+                      Int d, Int elsperword, Int bitsperel)
 {
-    PREPARE_clfi(src,cl,fi);
-    PREPARE_d(fi);
-    PREPARE_epw(fi);
-    PREPARE_bpe(fi);
     Word stamask,endmask,upmask,domask,kupmask,kdomask;
     Int stanr,endnr,shiftl,shiftr;
-    Int fr = INT_INTOBJ(srcpos)-1;   /* from here on zero based! */
-    Int to = INT_INTOBJ(dstpos)-1;
-    Int le = INT_INTOBJ(len);
+
+    fr--;   /* from here on zero based! */
+    to--;
 
     /* A hint: 
      * If you want to understand this, first read the case "shiftl=0", which
@@ -2741,8 +2737,8 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
         endnr = (fr+le) % elsperword;
         endmask = (1UL << (endnr*bitsperel))-1;
         {
-            register Word *v = DATA_CVEC(src) + (fr/elsperword)*d;
-            register Word *w = DATA_CVEC(dst) + (to/elsperword)*d;
+            register Word *v = src + (fr/elsperword)*d;
+            register Word *w = dst + (to/elsperword)*d;
             register Int i;
 
             /* We do the start bit in any case, even if stanr = elsperword! */
@@ -2782,8 +2778,8 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
         endmask = (1UL << (endnr*bitsperel))-1;
 
         {
-            register Word *v = DATA_CVEC(src) + (fr/elsperword)*d;
-            register Word *w = DATA_CVEC(dst) + (to/elsperword)*d;
+            register Word *v = src + (fr/elsperword)*d;
+            register Word *w = dst + (to/elsperword)*d;
             register Int i;
             register Word wo;
             Word mask;
@@ -2830,9 +2826,23 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
             }
         }
     }
-    return 0L;
 }
 
+STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
+/* No checks are done at all. src and dst must be cvecs over the same field and
+ * 1 <= srcpos <= srcpos+len-1 <= Length(src) and
+ * 1 <= dstpos <= dstpos+len-1 <= Length(dst) must hold. */
+{
+    PREPARE_clfi(src,cl,fi);
+    PREPARE_d(fi);
+    PREPARE_epw(fi);
+    PREPARE_bpe(fi);
+
+    SLICE_INT(DATA_CVEC(src),DATA_CVEC(dst),INT_INTOBJ(srcpos),INT_INTOBJ(len),
+              INT_INTOBJ(dstpos),d,elsperword,bitsperel);
+    return 0L;
+}
+    
 STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
 {
     PREPARE_clfi(v,cl,fi);
@@ -3179,6 +3189,84 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD_3(Obj self, Obj u, Obj v, Obj w)
                 *uu = ADDMUL1_INL(wo3d,*uu,fi,1);
                 uu++;
                 *uu = ADDMUL1_INL(wo3u,*uu,fi,1);
+            }
+        }
+    }
+    return 0L;
+}
+
+Obj PROD_COEFFS_CVEC_PRIMEFIELD_FAST(Obj self, Obj u, Obj v, Obj w)
+/* All four must be cvecs over the same (prime) field.
+ * u is overwritten but has to be zero beforehand! 
+ * u must have length len(v)+len(w)-1 */
+{
+    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
+        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
+                   "no cvecs");
+    }
+    {
+        PREPARE_clfi(u,ucl,fi);
+        PREPARE_cl(v,vcl);
+        PREPARE_cl(w,wcl);
+        PREPARE_epw(fi);
+        PREPARE_bpe(fi);
+        Int lenv = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+        Int lenw = INT_INTOBJ(ELM_PLIST(wcl,IDX_len));
+        /* First create a table for the first elsperword-1 shifted w: */
+        Int wordlenw = INT_INTOBJ(ELM_PLIST(wcl,IDX_wordlen));
+        Int wordlenu = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
+        Int tablen = elsperword < lenv ? elsperword-1 : lenv-1; 
+                     /* Minimum */
+        Obj tmp;
+        Word *buf;
+        register Int i, imodepw, j;
+        
+        /* GARBAGE COLLECTION POSSIBLE */
+        tmp = NEW_STRING(sizeof(Word)*(wordlenw+1)*tablen);
+        if (tmp == 0L) {
+            return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
+                                     "out of memory");
+        }
+        /* done with possible garbage collections, no references stored! */
+        buf = (Word *) CHARS_STRING(tmp);
+
+        /* Now do the slicing: */
+        Word *ww = DATA_CVEC(w);
+        for (i = 0;i < tablen;i++) {
+            SLICE_INT(ww,buf + (i*(wordlenw+1)),1,lenw,i+2,
+                      1 /* ==d */, elsperword, bitsperel);
+        }
+        
+        {
+            /* Now we are ready to prepare the result: */
+            seqaccess sa;
+            Word *vv = DATA_CVEC(v);
+            Word *uu = DATA_CVEC(u);
+            register Word s;
+
+            i = 1; j = 0;  /* j is the word shift */
+            INIT_SEQ_ACCESS(&sa,v,1);
+
+            while (i <= lenv) {
+                /* Do the (unshifted) thing: */
+                s = GET_VEC_ELM(&sa,vv,0);
+                if (s) ADDMUL_INL(uu+j,ww,fi,s,wordlenw);
+
+                i++; imodepw = 1;
+                STEP_RIGHT(&sa);
+                while (i <= lenv && imodepw < elsperword) {
+                    s = GET_VEC_ELM(&sa,vv,0);
+                    if (s)
+                        ADDMUL_INL(uu+j,buf + (wordlenw+1)*(imodepw-1),fi,s,
+                            j+wordlenw+1 <= wordlenu ? wordlenw+1 : wordlenw);
+                    /* Note that we know u is long enough. If 
+                     * j+wordlenw+1 > wordlenu, then it can only be 1 more
+                     * and things in the last word of the shifted vector
+                     * cannot be significant. */
+                    i++; imodepw++;
+                    STEP_RIGHT(&sa);
+                }
+                j++;
             }
         }
     }
@@ -3592,6 +3680,10 @@ static StructGVarFunc GVarFuncs [] = {
     PROD_COEFFS_CVEC_PRIMEFIELD_3,
     "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD_3" },
 
+  { "PROD_COEFFS_CVEC_PRIMEFIELD_FAST", 3, "u, v, w",
+    PROD_COEFFS_CVEC_PRIMEFIELD_FAST,
+    "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD_3" },
+
   { "PROD_COEFFS_MOD_CVEC_PRIMEFIELD", 5, "u, v, w, h, c",
     PROD_COEFFS_MOD_CVEC_PRIMEFIELD,
     "cvec.c:PROD_COEFFS_MOD_CVEC_PRIMEFIELD" },
@@ -3656,6 +3748,8 @@ static Int InitLibrary ( StructInitInfo *module )
     CVEC_PUBLISH(IDX_size);
     CVEC_PUBLISH(IDX_scafam);
     CVEC_PUBLISH(IDX_cpcompr);
+    CVEC_PUBLISH(IDX_lens);
+    CVEC_PUBLISH(IDX_classes);
 
     CVEC_PUBLISH(IDX_fieldinfo);
     CVEC_PUBLISH(IDX_len);
