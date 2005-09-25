@@ -65,16 +65,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define IDX_wordlen 3
 #define IDX_type 4
 #define IDX_GF 5
-#define IDX_scaclass 6
-#define IDX_scatype 7
-#define IDX_zero 8
-#define IDX_one 9
-#define IDX_primroot 10
-#define IDX_rootinfo 11
-#define IDX_dummy 12
-#define IDX_cpcompr 13
-#define IDX_lens 14
-#define IDX_classes 15
+#define IDX_lens 6
+#define IDX_classes 7
 
 #define OFF_mask 0
 #define OFF_offset 1
@@ -718,61 +710,6 @@ STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
     }
     return 0L;
 }
-
-/* FIXME: rausrausraus */
-#if 0
-STATIC Obj CSCA_TO_INTREP(Obj self,Obj v,Obj l)
-/* This function returns the scalar in its integer representation. This
- * means, that a list of the coefficients in GF(p) of the residue class
- * representative modulo the (Conway-) polynomial is returned. l must be
- * a plain list of length d. */
-{
-    register Word *pw;
-    register Int i;
-
-    if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.CSCA_TO_INTREP: no csca");
-    }
-    if (!IS_PLIST(l)) {
-        return OurErrorBreakQuit("CVEC.CSCA_TO_INTREP: no plist");
-    }
-
-    PREPARE_clfi(v,cl,fi);
-    PREPARE_d(fi);
-
-    if (d != LEN_PLIST(l)) {
-        return OurErrorBreakQuit("CVEC.CSCA_TO_INTREP: length != d");
-    }
-
-    pw = DATA_CVEC(v);
-    for (i = 1;i <= d;i++) SET_ELM_PLIST(l,i,INTOBJ_INT((Int) (*pw++)));
-    return 0L;
-}
-
-STATIC Obj INTREP_TO_CSCA(Obj self,Obj l,Obj v)
-/* This function transfers data in integer representation to the scalar. This
- * means, that l is a list of d numbers between 0 and p-1. */
-{
-    register Word *pw;
-    register Int i;
-
-    if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.INTREP_TO_CSCA: no csca");
-    }
-
-    PREPARE_clfi(v,cl,fi);
-    PREPARE_d(fi);
-
-    /* Check lengths: */
-    if (!IS_PLIST(l) || d != LEN_PLIST(l)) {
-        return OurErrorBreakQuit(
-           "CVEC.INTREP_TO_CSCA: l must be a list of length d");
-    }
-    pw = DATA_CVEC(v);
-    for (i = 1;i <= d;i++) *pw++ = (Word) INT_INTOBJ(ELM_PLIST(l,i));
-    return 0L;
-}
-#endif
 
 Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
 /* Transforms a list of integers between 0 and q-1 into FFEs. */
@@ -1436,22 +1373,6 @@ static INLINE Int mulmodp(Int a, Int b, Int p)
     return (Int)( (((long long)a) * b) % p);
 }
 
-static Obj CSCA_MUL_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
-{
-    PREPARE_clfi(u,cl,fi);
-    PREPARE_p(fi);
-    *(DATA_CVEC(u)) = (Word) mulmodp( *(DATA_CVEC(v)), *(DATA_CVEC(w)), p);
-    return 0L;
-}
-
-static Obj CSCA_INV_PRIMEFIELD(Obj self, Obj u, Obj v)
-{
-    PREPARE_clfi(u,cl,fi);
-    PREPARE_p(fi);
-    *(DATA_CVEC(u)) = (Word) invert_modp((Int) *(DATA_CVEC(v)),p);
-    return 0L;
-}
-
 /* Now some functions to put vector arithmetic up to the GAP level, here 
  * is an overview. Note that scalar multiplication with non-
  * prime-field values is implemented only here!             
@@ -1543,24 +1464,6 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
     Int sc;
     PREPARE_p(fi);
 
-    if (IS_CVEC(s)) {   /* One of "our" scalars. */
-        seqaccess sa;
-        PREPARE_d(fi);
-        Word *ss = DATA_CVEC(s);
-        Word *sss = scbuf;
-        register Int i;
-
-        /* Copy prime field elements into words: */
-        INIT_SEQ_ACCESS(&sa, s, 1);
-        *sss++ = GET_VEC_ELM(&sa,ss,0);
-        for (i = 0;i < d;i++) {
-            STEP_RIGHT(&sa);
-            *sss++ = GET_VEC_ELM(&sa,ss,0);
-        }
-        /* Find length of scalar: */
-        for (sclen = d-1;sclen > 1 && ss[sclen] == 0;sclen--);
-        return ss;
-    }
     if (IS_FFE(s)) {
         PREPARE_tab1(fi);
         PREPARE_d(fi);
@@ -1574,10 +1477,48 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
             }
         } else {
             return (Int *) OurErrorBreakQuit(
-                    "CVEC.MUL*: scalar from wrong field");
+                    "prepare_scalar: scalar from wrong field");
         }
     } else if (IS_INTOBJ(s)) {
         sc = INT_INTOBJ(s);
+        /* goes on below case distinction! */
+    } else if (IS_PLIST(s)) {   /* Coefficients are either FFEs from the 
+                                   prime field or integers < p */
+        /* Note that we assume that we only see FFEs in such a list, if
+         * p < 65536 < q, such that tab1 and tab2 are created, but for the
+         * prime field for exactly this purpose here! */
+        PREPARE_tab1(fi);
+        PREPARE_d(fi);
+        Int len = LEN_PLIST(s);
+        Obj ss;
+        sclen = 0;
+        /* Note that the length can be 0 <= len <= d, which is <= MAXDEGREE */
+        if (len > d) {
+            return (Int *) OurErrorBreakQuit(
+                    "prepare_scalar: coefficient list longer than d");
+        }
+        if (len == 0) {
+            scbuf[0] = 0;
+            sclen = 1;
+            return scbuf;
+        }
+        while (sclen < len) {
+            ss = ELM_PLIST(s,sclen+1);
+            if (IS_INTOBJ(ss)) scbuf[sclen++] = INT_INTOBJ(ss);
+            else if (IS_FFE(ss) && CHAR_FF(FLD_FFE(ss)) == p &&
+                     DEGR_FF(FLD_FFE(ss)) == 1) {
+                if (VAL_FFE(ss) == 0)
+                    scbuf[sclen++] = 0L;
+                else
+                    scbuf[sclen++] = INT_INTOBJ(ELM_PLIST(tab1,VAL_FFE(ss)+1));
+            } else {
+                return (Int *) OurErrorBreakQuit(
+                       "prepare_scalar: strange object in coefficient list");
+            }
+        }
+        /* Find length of scalar: */
+        for (/* nothing here */;sclen > 1 && ss[sclen-1] == 0;sclen--);
+        return scbuf;
     } else {
         return (Int *) OurErrorBreakQuit(
                 "CVEC.MUL*: strange object as scalar");
@@ -2052,111 +1993,6 @@ STATIC Obj CVEC_ISZERO(Obj self, Obj u)
     /* Never reached: */
     return 0L;
 }
-
-/* Some methods for scalars: */
-
-/* FIXME: rausrausraus */
-#if 0
-STATIC Obj CSCA_MUL3(Obj self, Obj u, Obj v, Obj w, Obj h)
-{
-    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w) || !IS_CVEC(h)) {
-        return OurErrorBreakQuit("CVEC.CSCA_MUL3: no cvecs");
-    }
-    {  /* The PREPAREs define new variables, so we want an extra block! */
-        PREPARE_clfi(u,ucl,ufi);
-        PREPARE_clfi(v,vcl,vfi);
-        PREPARE_clfi(w,wcl,wfi);
-        PREPARE_p(ufi);
-        PREPARE_d(ufi);
-        PREPARE_cp(ufi);
-        Int *ud = (Int *) DATA_CVEC(u);
-        Int *vd = (Int *) DATA_CVEC(v);
-        Int *wd = (Int *) DATA_CVEC(w);
-        Int degu,degv,degw;
-
-        if (ufi != vfi || ufi != wfi ||
-            INT_INTOBJ(ELM_PLIST(ucl,IDX_len)) != -1 ||
-            INT_INTOBJ(ELM_PLIST(vcl,IDX_len)) != -1 ||
-            INT_INTOBJ(ELM_PLIST(wcl,IDX_len)) != -1) {
-            return OurErrorBreakQuit(
-                    "CVEC.CSCA_MUL3: incompatible or no cscas");
-        }
-        /* Determine degrees: */
-        for (degv = d-1;degv >= 0 && vd[degv] == 0;degv--) ;
-        for (degw = d-1;degw >= 0 && wd[degw] == 0;degw--) ;
-        if (degv == -1 || degw == -1) {  /* Result is zero */
-            memset(ud,0,sizeof(Word)*d);
-            return 0L;
-        }
-        /* Otherwise we have to do something: */
-        /* First copy to scbuf */
-        memcpy(scbuf,wd,sizeof(Word)*d);
-        degu = mulmod_Fq(p,d,cp,ud,vd,degv,scbuf,degw);
-        return 0L;
-    }
-}
-
-STATIC Obj CSCA_INV2(Obj self, Obj u, Obj v)
-{
-    if (!IS_CVEC(u) || !IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.CSCA_INV2: no cvecs");
-    }
-    {  /* The PREPAREs define new variables, so we want an extra block! */
-        PREPARE_clfi(u,ucl,ufi);
-        PREPARE_clfi(v,vcl,vfi);
-        PREPARE_p(ufi);
-        PREPARE_d(ufi);
-        Int *vd = (Int *) DATA_CVEC(v);
-        Int degu,degv;
-        Obj tmp;
-        Int *x,*a,*b,*c,*q;
-
-        if (ufi != vfi ||
-            INT_INTOBJ(ELM_PLIST(ucl,IDX_len)) != -1 ||
-            INT_INTOBJ(ELM_PLIST(vcl,IDX_len)) != -1) {
-            return OurErrorBreakQuit(
-                    "CVEC.CSCA_INV2: incompatible or no cscas");
-        }
-        /* Determine degrees: */
-        for (degv = d-1;degv >= 0 && vd[degv] == 0;degv--) ;
-        if (degv == -1) {  /* Result is fail */
-            return Fail;
-        }
-        if (degv == 0) {  /* A unit, easy to do: */
-            Int *ud = (Int *) DATA_CVEC(u);
-            ud[0] = invert_modp(vd[0],p);
-            memset(ud+1,0,sizeof(Word)*(d-1));
-            return u;
-        }
-        /* Otherwise we have to do something: */
-        /* First copy to scbuf because invert_Fq destroys original: */
-        memcpy(scbuf,vd,sizeof(Word)*d);
-        /* Now we need space, allocate a bag: */
-        /* GARBAGE COLLECTION POSSIBLE */
-        tmp = NewBag(T_DATOBJ,sizeof(Int)*(d+1)*5);
-        if (tmp == 0) {
-            return OurErrorBreakQuit(
-                    "CVEC.CSCA_INV2: no more memory");
-        }
-        x = (Int *) ADDR_OBJ(tmp);
-        a = x + (d+1);
-        b = a + (d+1);
-        c = b + (d+1);
-        q = c + (d+1);
-        { /* It might be, that a garbage collection has occurred, therefore,
-             we have to access the conway polynomial and the result scalar
-             anew. */
-            PREPARE_cp(ufi);
-            Int *ud = DATA_CVEC(u);
-            a = invert_Fq(p,d,cp,x,scbuf,degv,a,b,c,q);
-            degu = a[d];
-            memcpy(ud,a,sizeof(Int)*(degu+1));
-            memset(ud+(degu+1),0,sizeof(Int)*(d-degu-1));
-            return u;
-        }
-    }
-}
-#endif
 
 STATIC Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
 /* Extracts ll field elements from the vector self at position ii into
@@ -3085,117 +2921,7 @@ STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
     return 0L;
 }
 
-Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h)
-/* All four must be cvecs over the same (prime) field. The length of
- * u and h must be the same as the length of v plus length of w - 1. 
- * h is overwritten. u is overwritten but has to be zero beforehand! */
-{
-    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w) || !IS_CVEC(h)) {
-        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
-                   "no cvecs");
-    }
-    {
-        seqaccess sa;
-        PREPARE_clfi(u,ucl,fi);
-        PREPARE_cl(v,vcl);
-        PREPARE_cl(w,wcl)
-        PREPARE_epw(fi);
-        Word *vv = DATA_CVEC(v);
-        Word *uu = DATA_CVEC(u);
-        Word *hh = DATA_CVEC(h);
-        Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
-        void *dummy;
-        register Int i;
-        register Int imodepw;
-        register Word s;
-        Int m = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
-        Int n = INT_INTOBJ(ELM_PLIST(wcl,IDX_len));
-
-        if (m > n) {   /* Switch v and w */
-            dummy = v; v = w; w = dummy;
-            vv = DATA_CVEC(v);
-            dummy = vcl; vcl = wcl; wcl = dummy;
-            m += n; n = m - n; m = m - n;
-        }
-
-        INIT_SEQ_ACCESS(&sa, v, 1);
-        MAKEZERO(self,h);
-        for (i = 1,imodepw = 0;i <= m;i++) {
-            s = GET_VEC_ELM(&sa,vv,0);
-            if (s) {
-                SLICE(self,w,h,INTOBJ_INT(1L),INTOBJ_INT(n),INTOBJ_INT(i));
-                ADDMUL_INL(uu,hh,fi,s,wordlen);
-                SET_VEC_ELM(&sa,DATA_CVEC(h),0,0);  /* cleanup */
-            }
-            STEP_RIGHT(&sa);
-
-            /* Take a shortcut if we can skip words: */
-            imodepw++;
-            if (imodepw >= elsperword) {
-                imodepw = 0;
-                wordlen--;
-                uu++;
-                hh++;
-            }
-        }
-    }
-    return 0L;
-}
-
-Obj PROD_COEFFS_CVEC_PRIMEFIELD_3(Obj self, Obj u, Obj v, Obj w)
-/* All four must be cvecs over the same (prime) field.
- * u is overwritten but has to be zero beforehand! 
- * the wordlen of u must be twice as big as the wordlen of v and w. */
-{
-    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
-        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
-                   "no cvecs");
-    }
-    {
-        PREPARE_clfi(u,ucl,fi);
-        PREPARE_epw(fi);
-        PREPARE_bpe(fi);
-        Word *vv = DATA_CVEC(v);
-        Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
-        Word *ww,*uu;
-        Word wo1,wo2d,wo2u,wo3d,wo3u;
-        Word mask = (1UL << bitsperel) - 1;
-        Int shift = bitsperel * (elsperword-1);
-        Word downmask = (1UL << shift) - 1;
-        Int i,j,k;
-        Word s;
-
-        for (i = 0;i < wordlen;i++,vv++) {
-            ww = DATA_CVEC(w);
-            uu = DATA_CVEC(u)+i;
-            for (j = 0;j < wordlen;j++,ww++) {
-                wo1 = *vv;
-                wo2d = *ww;
-                wo2u = 0;
-                wo3d = 0;
-                wo3u = 0;
-                for (k = 0;k < elsperword;k++) {
-                    s = wo1 & mask;
-                    wo1 >>= bitsperel;
-                    if (s) {
-                        wo3d = ADDMUL1_INL(wo2d,wo3d,fi,s);
-                        wo3u = ADDMUL1_INL(wo2u,wo3u,fi,s);
-                    }
-                    /* Now shift wo2 one up: */
-                    wo2u = (wo2u << bitsperel) | (wo2d >> shift);
-                    wo2d = (wo2d & downmask) << bitsperel;
-                }
-                /* Finally add wo3 up to *uu: */
-                *uu = ADDMUL1_INL(wo3d,*uu,fi,1);
-                uu++;
-                *uu = ADDMUL1_INL(wo3u,*uu,fi,1);
-            }
-        }
-    }
-    return 0L;
-}
-
-Obj PROD_COEFFS_CVEC_PRIMEFIELD_FAST(Obj self, Obj u, Obj v, Obj w)
+Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
 /* All four must be cvecs over the same (prime) field.
  * u is overwritten but has to be zero beforehand! 
  * u must have length len(v)+len(w)-1 */
@@ -3273,215 +2999,6 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD_FAST(Obj self, Obj u, Obj v, Obj w)
     return 0L;
 }
 
-Obj PROD_COEFFS_MOD_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w, Obj h, Obj c)
-/* All five must be cvecs over the same (prime) field with equal length d.
- * h and w are overwritten! u is overwritten!
- * Calculates v*w mod c where v and w represent polynomials of degree < d
- * and c represents a monic polynomial of degree d. Note that c contains
- * the additive inverses of the coefficients! */
-{
-    if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w) || !IS_CVEC(h) ||
-        !IS_CVEC(c)) {
-        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_MOD_PRIMEFIELD: "
-                   "no cvecs");
-    }
-    {
-        seqaccess sa,sa2;
-        PREPARE_clfi(u,ucl,fi);
-        PREPARE_cl(v,vcl);
-        Word *vv = DATA_CVEC(v);
-        Word *ww = DATA_CVEC(w);
-        Word *uu = DATA_CVEC(u);
-        Word *hh = DATA_CVEC(h);
-        Word *cc = DATA_CVEC(c);
-        Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
-        register Int i;
-        register Word s;
-        Int d = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
-        Int limit;
-
-        limit = CVEC_Lastnzp(fi,vv,d);
-
-        INIT_SEQ_ACCESS(&sa, v, 1);
-        INIT_SEQ_ACCESS(&sa2, w, d);  /* this we need for the dropout */
-        MAKEZERO(self,h);
-        /* Do the first step: */
-        s = GET_VEC_ELM(&sa,vv,0);
-        MUL2_INL(uu,ww,fi,s,wordlen);
-        for (i = 2;i <= limit;i++) {
-            /* First multiply w by x mod c: */
-            SLICE(self,w,h,INTOBJ_INT(1L),INTOBJ_INT(d-1),INTOBJ_INT(2));
-            /* Note: position zero of h is always equal to zero! */
-            s = GET_VEC_ELM(&sa2,ww,0);  /* highest coefficient */
-            if (s == 0) {
-                memcpy(ww,hh,sizeof(Word)*wordlen);
-            } else {
-                MUL2_INL(ww,cc,fi,s,wordlen);
-                ADD2_INL(ww,hh,fi,wordlen);
-            }
-            STEP_RIGHT(&sa);
-            s = GET_VEC_ELM(&sa,vv,0);
-            ADDMUL_INL(uu,ww,fi,s,wordlen);
-        }
-    }
-    return 0L;
-}
-
-static Int PolDiv(Obj self, Obj fi, Int p, Int d, Int wordlen,
-                  Obj a, Word *aa, Int dega, Obj b, Word *bb, Int degb, 
-                  Obj q, Word *qq, Obj dum, Word *dumdum)
-{
-    /* Does a polynomial division. a is destroyed, in the end, the remainder is
-       in a. a, b, and q must all be vectors over GF(p) of length d. Returns
-       the degree of r, -1 means r=0. The quotient is in q. */
-    Int fa,i;
-    memset(qq,0,sizeof(Word)*wordlen);
-    i = invert_modp(CVEC_Itemp(fi,bb,degb),p);
-    while (dega >= degb) {
-        memset(dumdum,0,sizeof(Word)*wordlen);
-        SLICE(self,b,dum,INTOBJ_INT(1),INTOBJ_INT(degb),
-              INTOBJ_INT(dega-degb+1));
-        fa = mulmodp(CVEC_Itemp(fi,aa,dega),i,p);
-        ADDMUL_INL(aa,dumdum,fi,p-fa,wordlen);
-        CVEC_AssItemp(fi,qq,dega-degb+1,fa);
-        dega = CVEC_Lastnzp(fi,aa,d);
-    }
-    return dega;
-}
-
-Obj CSCA_INV(Obj self, Obj u, Obj v, Obj degygap)
-{
-  Obj a,b,x,y,cp,dum,dum2,q;
-  Word *vv,*aa,*bb,*cpcp,*dumdum,*dum2dum2,*uu,*qq,*xx,*yy;
-  Int dega,degb,degx,degy;
-  Obj dummy;
-  Word *dummyw;
-  Int dummyi;
-  Int fa;
-  PREPARE_clfi(v,cl,fi);
-  PREPARE_p(fi);
-  Int wordlen;
-  Int d;
-
-  d = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
-  wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
-
-  vv = DATA_CVEC(v);
-  degy = INT_INTOBJ(degygap);
-  uu = DATA_CVEC(u);
-
-  /* Note that we already know that d != 1. */
-      
-  if (degy == 1) {   /* prime field case */
-      /* We know that u is newly allocated! */
-      CVEC_AssItemp(fi,uu,1,(Word) invert_modp((Int) (*vv),p));
-      return u;
-  }
-  
-  /* Prepare helper elements: */
-  x = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),1);
-  y = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),2);
-  a = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),3);
-  b = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),4);
-  q = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),5);
-  dum = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),6);
-  dum2 = ELM_PLIST(ELM_PLIST(cl,IDX_dummy),7);
-  cp = ELM_PLIST(cl,IDX_cpcompr);
-  xx = DATA_CVEC(x);
-  yy = DATA_CVEC(y);
-  aa = DATA_CVEC(a);
-  bb = DATA_CVEC(b);
-  qq = DATA_CVEC(q);
-  dumdum = DATA_CVEC(dum);
-  dum2dum2 = DATA_CVEC(dum2);
-  cpcp = DATA_CVEC(cp);
-
-  MUL2_INL(xx,cpcp,fi,p-1,wordlen);
-
-  /* Prepare a and b: */
-  memset(aa,0,sizeof(Word)*wordlen);
-  memset(bb,0,sizeof(Word)*wordlen);
-  
-  CVEC_AssItemp(fi,bb,1,1);
-  degb = 1;
-
-  /* We keep the following invariant:
-   * x = a' * cp + a * v
-   * y = b' * cp ُ+ b * v 
-   * In the end, when y is a prime field element, b will be our inverse. */
-  
-  /* We need an "Extra-Wurst" for the first step, since the Conway-Polynomial
-   * has degree d and thus does not fit into a coefficient list of d els: */
-  memset(dumdum,0,sizeof(Word)*wordlen);
-  SLICE(self,v,dum,INTOBJ_INT(1),INTOBJ_INT(degy-1),INTOBJ_INT(d-degy+2));
-  fa = p-invert_modp(CVEC_Itemp(fi,vv,degy),p);  /* cannot be equal to p! */
-  ADDMUL_INL(xx,dumdum,fi,fa,wordlen);
-  dega = d+2-degy;
-  CVEC_AssItemp(fi,aa,dega,fa);
-  degx = CVEC_Lastnzp(fi,xx,d);
-  memcpy(yy,vv,sizeof(Word)*wordlen);
-  if (degx < degy) {
-      dummy = x; x = y; y = dummy;
-      dummyw = xx; xx = yy; yy = dummyw;
-      dummyi = degx; degx = degy; degy = dummyi;
-      dummy = a; a = b; b = dummy;
-      dummyw = aa; aa = bb; bb = dummyw;
-      dummyi = dega; dega = degb; degb = dummyi;
-  }
-
-  while (1) {
-      degx = PolDiv(self,fi,p,d,wordlen,x,xx,degx,y,yy,degy,q,qq,dum,dumdum);
-      /* Now we want: (a,b) := (b,a-q*b), so we change a and swap: */
-      PROD_COEFFS_MOD_CVEC_PRIMEFIELD(self,dum,b,q,dum2,cp);
-      ADDMUL_INL(aa,dumdum,fi,p-1,wordlen);
-      if (degx == 0) {
-          /* Now invert x[1] mod p and multiply b by it: */
-          fa = invert_modp(CVEC_Itemp(fi,yy,1),p);
-          MUL_INL(bb,fi,fa,wordlen);
-          memcpy(uu,bb,sizeof(Word)*wordlen);
-          return u;
-      }
-      /* Now swap: */
-      dummy = a; a = b; b = dummy;
-      dummyw = aa; aa = bb; bb = dummyw;
-      dummyi = dega; dega = degb; degb = dummyi;
-      dummy = x; x = y; y = dummy;
-      dummyw = xx; xx = yy; yy = dummyw;
-      dummyi = degx; degx = degy; degy = dummyi;
-  }
-  /* not reached */
-}
-
-
-/* We really do not want to use the following: */
-#if 0
-STATIC Obj DONOTUSEMEDONOTUSEME(Obj self)
-{
-    /* Please do not use this function except if you know exactly, what
-     * you are doing. */
-    extern Obj IntFF;
-
-    CharFF = NEW_PLIST( T_PLIST, 0 );
-    SET_LEN_PLIST( CharFF, 0 );
-
-    DegrFF = NEW_PLIST( T_PLIST, 0 );
-    SET_LEN_PLIST( DegrFF, 0 );
-
-    SuccFF = NEW_PLIST( T_PLIST, 0 );
-    SET_LEN_PLIST( SuccFF, 0 );
-
-    TypeFF = NEW_PLIST( T_PLIST, 0 );
-    SET_LEN_PLIST( TypeFF, 0 );
-
-    TypeFF0 = NEW_PLIST( T_PLIST, 0 );
-    SET_LEN_PLIST( TypeFF0, 0 );
-
-    IntFF = NEW_PLIST( T_PLIST, 0 );
-    SET_LEN_PLIST( IntFF, 0 );
-
-    return 0L;
-}
-#endif
 
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
@@ -3529,17 +3046,6 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_TO_FFELI", 2, "v, l",
     CVEC_TO_FFELI,
     "cvec.c:CVEC_TO_FFELI" },
-
-/* FIXME: rausrausraus */
-#if 0
-  { "CSCA_TO_INTREP", 2, "v, l",
-    CSCA_TO_INTREP,
-    "cvec.c:CSCA_TO_INTREP" },
-
-  { "INTREP_TO_CSCA", 2, "l, v",
-    INTREP_TO_CSCA,
-    "cvec.c:INTREP_TO_CSCA" },
-#endif
 
   { "INTLI_TO_FFELI", 2, "c, l",
     INTLI_TO_FFELI,
@@ -3597,29 +3103,6 @@ static StructGVarFunc GVarFuncs [] = {
     CVEC_ISZERO,
     "cvec.c:CVEC_ISZERO" },
 
-  /* FIXME: rausrausraus */
-#if 0
-  { "CSCA_MUL3", 4, "u, v, w, h",
-    CSCA_MUL3,
-    "cvec.c:CSCA_MUL3" },
-
-  { "CSCA_INV2", 2, "u, v",
-    CSCA_INV2,
-    "cvec.c:CSCA_INV2" },
-#endif
-
-  { "CSCA_MUL_PRIMEFIELD", 3, "u, v, w",
-    CSCA_MUL_PRIMEFIELD,
-    "cvec.c:CSCA_MUL_PRIMEFIELD" },
-
-  { "CSCA_INV_PRIMEFIELD", 2, "u, v",
-    CSCA_INV_PRIMEFIELD,
-    "cvec.c:CSCA_INV_PRIMEFIELD" },
-
-  { "CSCA_INV_KERNEL", 3, "u, v, degy",
-    CSCA_INV,
-    "cvec.c:CSCA_INV" },
-
   { "EXTRACT", 3, "v, i, l",
     EXTRACT,
     "cvec.c:EXTRACT" },
@@ -3672,27 +3155,9 @@ static StructGVarFunc GVarFuncs [] = {
     EXTREP_TO_CVEC,
     "cvec.c:EXTREP_TO_CVEC" },
 
-  { "PROD_COEFFS_CVEC_PRIMEFIELD", 4, "u, v, w, h",
+  { "PROD_COEFFS_CVEC_PRIMEFIELD", 3, "u, v, w",
     PROD_COEFFS_CVEC_PRIMEFIELD,
     "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD" },
-
-  { "PROD_COEFFS_CVEC_PRIMEFIELD_3", 3, "u, v, w",
-    PROD_COEFFS_CVEC_PRIMEFIELD_3,
-    "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD_3" },
-
-  { "PROD_COEFFS_CVEC_PRIMEFIELD_FAST", 3, "u, v, w",
-    PROD_COEFFS_CVEC_PRIMEFIELD_FAST,
-    "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD_3" },
-
-  { "PROD_COEFFS_MOD_CVEC_PRIMEFIELD", 5, "u, v, w, h, c",
-    PROD_COEFFS_MOD_CVEC_PRIMEFIELD,
-    "cvec.c:PROD_COEFFS_MOD_CVEC_PRIMEFIELD" },
-
-#if 0
-  { "DONOTUSEMEDONOTUSEME", 0, "",
-    DONOTUSEMEDONOTUSEME,
-    "cvec.c:DONOTUSEMEDONOTUSEME" }, 
-#endif
 
   { 0 }
 
@@ -3747,22 +3212,14 @@ static Int InitLibrary ( StructInitInfo *module )
     CVEC_PUBLISH(IDX_tab2);
     CVEC_PUBLISH(IDX_size);
     CVEC_PUBLISH(IDX_scafam);
-    CVEC_PUBLISH(IDX_cpcompr);
-    CVEC_PUBLISH(IDX_lens);
-    CVEC_PUBLISH(IDX_classes);
 
     CVEC_PUBLISH(IDX_fieldinfo);
     CVEC_PUBLISH(IDX_len);
     CVEC_PUBLISH(IDX_wordlen);
     CVEC_PUBLISH(IDX_type);
     CVEC_PUBLISH(IDX_GF);
-    CVEC_PUBLISH(IDX_scaclass);
-    CVEC_PUBLISH(IDX_scatype);
-    CVEC_PUBLISH(IDX_zero);
-    CVEC_PUBLISH(IDX_one);
-    CVEC_PUBLISH(IDX_primroot);
-    CVEC_PUBLISH(IDX_rootinfo);
-    CVEC_PUBLISH(IDX_dummy);
+    CVEC_PUBLISH(IDX_lens);
+    CVEC_PUBLISH(IDX_classes);
 
     /*ImportFuncFromLibrary( "IsCVecRep", &IsCVecRep );*/
 

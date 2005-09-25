@@ -21,7 +21,6 @@ DeclareInfoClass( "InfoCVec" );
 BindGlobal("CVecFieldInfoFamily",NewFamily("CVecFieldInfoFamily"));
 BindGlobal("CVecClassFamily",NewFamily("CVecClassFamily"));
 
-DeclareRepresentation( "IsCScaRep", IsDataObjectRep, [] );
 DeclareRepresentation( "IsCVecRep", IsDataObjectRep, [] );
 DeclareRepresentation( "IsCMatRep", IsComponentObjectRep, [] );
 
@@ -55,8 +54,7 @@ DeclareRepresentation( "IsCVecFieldInfo", IsPositionalObjectRep, [] );
 ##  ![13]: 0 for q <= MAXSIZE_GF_INTERNAL, otherwise 1 if q is an 
 ##         immediate integer, 2 else
 ##  ![14]: the scalars family, vectors get the CollectionsFamily
-##         for q <= MAXSIZE_GF_INTERNAL this is FFEFamily(p) from the 
-##         GAP library
+##         this is FFEFamily(p) from the GAP library
 
 DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ## We use the same symbolic names for these indices as exported from cvec.c
@@ -66,24 +64,10 @@ DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ##  ![3]: wordlen of vectors
 ##  ![4]: starting type (mutable version) for new vectors in this class
 ##  ![5]: GF(p,d)
-##  ![6]: the class of the corresponding scalars, that is for (p,1,d)
-##  From here on we only have values for d=1 and otherwise fail:
-##  ![7]:  the starting type (immutable version) for new vectors
-##         that are used for scalars of GF(p,l) in this class
-##  ![8]:  the zero scalar of GF(p,l)
-##  ![9]:  the one scalar of GF(p,l)
-##  ![10]: the primitive root of GF(p,l)  (represented by x)
-##  ![11]: rootinfo for taking roots, a list, see Sqrt and friends
-##  ![12]: a dummy scalar used for overwriting during multiplication
-##  again for d=1:
-##  ![13]: for d=1 if GF(p,d) is used: conway-Polynomial as compressed 
-##         vector over GF(p) or fail otherwise
-##  ![14]: CVEC.lens[pos] where pos = Position(CVEC.q,q)
-##  ![15]: CVEC.classes[pos] where pos = Position(CVEC.q.q)
+##  ![6]: CVEC.lens[pos] where pos = Position(CVEC.q,q)
+##  ![7]: CVEC.classes[pos] where pos = Position(CVEC.q.q)
 ##         the latter are used for fast access to other cvec classes over
 ##         the same field.
-##  
-
 
 
 #############################################################################
@@ -96,8 +80,6 @@ DeclareOperation( "PositionLastNonZero", [IsList] );
 # Making of vectors and matrices, conversions:
 #############################################################################
 
-DeclareOperation( "CSca", [IsList, IsObject] );
-DeclareOperation( "CSca", [IsList, IsPosInt, IsPosInt] );
 DeclareOperation( "CVec", [IsObject, IsPosInt, IsPosInt] );
 DeclareOperation( "CVec", [IsObject, IsObject] );
 DeclareOperation( "CVec", [IsObject] );

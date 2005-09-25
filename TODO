@@ -1,3 +1,32 @@
+Cases for scalars:
+ Internally handled:
+  size=0 or size=1:
+   * IsFFE and IsInternalRep direkt
+   * IsInt  (0<=s<p als ImmediateInt)
+   * IsInt  (0<=s<q als ImmediateInt)
+  size=2:
+   * IsList (of immediate Integers, 0<=c<p)
+   * IsList (of IsFFE and IsInternalRep)
+     hier ist Problem: koennte Tabellen fuer Primkoerper brauchen!
+     ==> Mache Primkoerper und tab1 und tab2, wenn p < 65536
+ ==> handle_scalar muss jeweils alles koennen, Liste darf zu kurz sein, wird
+     dann mit Nullen aufgefuellt.
+ GAP-level:
+   * IsFFE and IsInternalRep  -->  direkt
+   * IsFFE and IsZmodnZObj  -->  uebersetze in Int durch ![1]
+   * IsFFE (Steve's large scalars):
+     --> setze auf ![1] um, verschiedene Moeglichkeiten:
+     - IsGF2VectorRep --> rufe ShallowCopy und PLAIN_GF2VEC
+     - Is8bitVectorRep --> rufe ShallowCopy und PLAIN_8BITVEC
+     - Sonst:
+       . p < MAXSIZE_GF_INTERNAL --> direkt
+       . p >= --> rufe List(v->v![1])
+
+Creation of scalars:
+  \[\] for cvecs
+  Unpack
+  FFEList --> Some postprocessing in GAP necessary
+
 Rascher input von Steve's Skalaren
 Rascher output von Steve's Skalaren
 bequeme Methodeninstallation
@@ -16,6 +45,9 @@ Assignment fuer Vektoren OK?
 aus/einpacken
 
 
+Make integers as scalars behave like mod p or like p-adic expansion?
+Make CopySubmatrix an operation?
+Is -m!.rows a good way for AdditiveInverse of Matrix?
 
 Tasks to do:
 
