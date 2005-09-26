@@ -504,77 +504,6 @@ CVEC.TEST.POSITION_LAST_NONZERO_CVEC := function(p,d)
   od;
 end;
 
-CVEC.TEST.SCALARS := function(p,d)
-  local c,i,j,l,l1,l2,l3,li,q,tab2,zero;
-  q := p^d;
-  if q > MAXSIZE_GF_INTERNAL then
-      Error("Test is only for this p^d such that GF(p^d) is in GAP as FFE!");
-  fi;
-
-  # Make cvec class:
-  c := CVEC.NewCVecClass(p,d,1);
-
-  # We now have a table:
-  tab2 := ShallowCopy(c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2]);
-
-  # Make cvec class:
-  c := CVEC.NewCVecClass(p,1,d);
-
-  # Now make scalars:
-  l1 := [0..p-1];
-  l2 := [];
-  for i in [1..d] do
-      Add(l2,l1);
-  od;
-  l3 := Cartesian(l2);
-  l := List(l3,x->CSca(Reversed(x),c));
-
-  SortParallel(tab2,l);
-  
-  Print("+\c");
-  if q > 256 then
-      li := List([1..256],i->Random([1..q]));
-      Add(li,1); Add(li,2);  # check 0 and 1
-  else
-      li := [1..q];
-  fi;
-  for i in li do
-      for j in [i..q] do
-          if l[i]+l[j] <> l[Position(tab2,tab2[i]+tab2[j])] then
-              Print("\nAlarm CSCA + p=",p," d=",d," a=",l[i]," b=",l[j],"\n");
-          fi;
-      od;
-  od;
-  Print("\r");
-
-  Print("*\c");
-  for i in li do
-      for j in [i..q] do
-          if l[i]*l[j] <> l[Position(tab2,tab2[i]*tab2[j])] then
-              Print("\nAlarm CSCA * p=",p," d=",d," a=",l[i]," b=",l[j],"\n");
-          fi;
-      od;
-  od;
-  Print("\r");
-
-  Print("-\c");
-  for i in [1..q] do
-      if -l[i] <> l[Position(tab2,-tab2[i])] then
-          Print("\nAlarm CSCA ^-1 p=",p," d=",d," a=",l[i],"\n");
-      fi;
-  od;
-  Print("\r");
-
-  zero := CSca(0*[1..d],c);
-  Print("/\c");
-  for i in [1..q] do
-      if l[i] <> zero and l[i]^-1 <> l[Position(tab2,tab2[i]^-1)] then
-          Print("\nAlarm CSCA ^-1 p=",p," d=",d," a=",l[i],"\n");
-      fi;
-  od;
-  Print("\r");
-end;
-
 CVEC.TEST.MATMUL := function(p,d)
   local a,aold,b,bold,c1,c2,c3,c4,c5,c6,ca,cb,f,fc,i,l,lev,q,r,s,t;
   if p^d > MAXSIZE_GF_INTERNAL then
@@ -632,7 +561,7 @@ CVEC.TEST.MATMUL := function(p,d)
   od;
   c6 := CVEC.CMatMaker(c6,cb);
 
-  if List(c1,FFEList) <> List(c2,x->List(x,y->y)) then
+  if List(c1,Unpack) <> List(c2,x->List(x,y->y)) then
       Print("Alarm p=",p," d=",d," std matmul            \n");
       Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
@@ -720,11 +649,11 @@ CVEC.TEST.PROD_COEFFS_CVEC_PRIMEFIELD := function(p,d)
   u := CVEC.New(cl);
   h := CVEC.New(cl);
   for i in [1..Length(m)] do
-      a := FFEList(m[i]);
+      a := Unpack(m[i]);
       for j in [1..Length(n)] do
           CVEC.PROD_COEFFS_CVEC_PRIMEFIELD(u,m[i],n[j],h);
-          b := FFEList(n[j]);
-          c := FFEList(u);
+          b := Unpack(n[j]);
+          c := Unpack(u);
           CVEC.MAKEZERO(u);
           cc := ProductCoeffs(a,b);
           if c <> cc then
@@ -753,7 +682,6 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.ALLFFE("POSITION_NONZERO_CVEC",CVEC.TEST.POSITION_NONZERO_CVEC);
   CVEC.TEST.ALLFFE("POSITION_LAST_NONZERO_CVEC",
                    CVEC.TEST.POSITION_LAST_NONZERO_CVEC);
-  CVEC.TEST.ALLCHEAP("SCALARS",CVEC.TEST.SCALARS);
   CVEC.TEST.COMPRESSED_ALL("MATMUL",CVEC.TEST.MATMUL);
   Print("Testing MATMUL 2^9...\r");
   CVEC.TEST.MATMUL(2,9);

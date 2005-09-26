@@ -328,7 +328,7 @@ function(v)
   c := DataType(TypeObj(v));
   Print("CVec([");
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
-      l := FFEList(v);
+      l := Unpack(v);
       for i in l do Print(i,","); od;
   else
       l := Unpack(v);
@@ -344,7 +344,7 @@ function(v)
   c := DataType(TypeObj(v));
   res := "CVec([";
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
-      l := FFEList(v);
+      l := Unpack(v);
       for i in l do Append(res,String(i)); Append(res,","); od;
   else
       l := Unpack(v);
@@ -385,7 +385,7 @@ function(v)
       for i in l do Print(String(i,lo)); od;
       Print("]\n");
   else
-      l := FFEList(v);
+      l := Unpack(v);
       for i in l do Print(i,","); od;
       Print("]\n");
   fi;
@@ -410,11 +410,17 @@ end);
 
 CVEC.HandleScalar := function(cl,s)
   # cl is a cvecclass and s a scalar
-  local v;
+  local v,d;
   if   IsInternalRep(s) then return s;
     # Note that this case also covers integers!
   elif IsZmodnZObj(s) then return s![1];
-  elif IsGF2VectorRep(s![1]) then
+  fi;
+  # Now we have to check, whether the field element is over the right field:
+  d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+  if s![2] <> d then
+      s := FFECONWAY.WriteOverLargerField(s,d);
+  fi;
+  if IsGF2VectorRep(s![1]) then
     v := ShallowCopy(s![1]);
     PLAIN_GF2VEC(v);
     return v;
@@ -422,7 +428,7 @@ CVEC.HandleScalar := function(cl,s)
     v := ShallowCopy(s![1]);
     PLAIN_VEC8BIT(v);
     return v;
-  elif cl![CVEC_IDX_FIELDINFO]![CVEC_IDX_p] < MAXSIZE_GF_INTERNAL then
+  elif cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p] < MAXSIZE_GF_INTERNAL then
     return s![1];
   else
     return List(s![1],x->x![1]);   # this unpacks ZmodnZObjs
@@ -570,14 +576,41 @@ InstallOtherMethod( \[\]\:\=, "for a cvec, a pos, and a ffe",
   [IsCVecRep and IsMutable, IsPosInt, IsFFE], 
   function(v,pos,s)
     CVEC.ASS_CVEC(v,pos,CVEC.HandleScalar(DataType(TypeObj(v)),s));
-  );
+  end);
 InstallOtherMethod( \[\]\:\=, "for cvecs", [IsCVecRep, IsPosInt, IsInt],
   function(v,p,o) Error("cvec is immutable"); end);
 InstallOtherMethod( \[\]\:\=, "for cvecs", [IsCVecRep, IsPosInt, IsFFE],
   function(v,p,o) Error("cvec is immutable"); end);
 
-InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt], CVEC.ELM_CVEC );
-
+InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt], 
+  function(v,pos)
+    local d,fam,i,p,s,size,vcl;
+    vcl := DataType(TypeObj(v));
+    size := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
+    s := CVEC.ELM_CVEC(v,pos);
+    if size = 0 then return s; fi;
+    d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+    if d = 1 then
+        if IsFFE(s) then
+            return s;
+        else
+            p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+            return ZmodnZObj(s,p);
+        fi;
+    else
+        p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+        if p > 65536 then
+            for i in [1..d] do
+                s[i] := ZmodnZObj(s[i],p);
+            od;
+        fi;
+        ConvertToVectorRep(s,p);
+        s := [s,d,fail];
+        fam := FFEFamily(p);
+        Objectify(fam!.ConwayFldEltDefaultType,s);
+        return s;
+    fi;
+  end);
 # PositionNonZero and friends:
 
 InstallOtherMethod( PositionNonZero, "for cvecs",
@@ -697,25 +730,60 @@ InstallOtherMethod( CVec, "for a compressed 8bit vector",
 
 InstallMethod( Unpack, "for cvecs", [IsCVecRep],
   function(v)
-    local l,vcl;
+    local d,f,fam,i,l,p,q,vcl;
     vcl := DataType(TypeObj(v));
-    if vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 2 then
-        l := 0 * [1..vcl![CVEC_IDX_len]*vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d]];
-           # length * d
-    else
+    f := vcl![CVEC_IDX_fieldinfo];
+    p := f![CVEC_IDX_p];
+    d := f![CVEC_IDX_d];
+    q := f![CVEC_IDX_q];
+    if (p < MAXSIZE_GF_INTERNAL and IsSmallIntRep(q)) or d = 1 then
         l := 0*[1..Length(v)];
+    else
+        l := List([1..Length(v)],i->0*[1..d]);
     fi;
     CVEC.CVEC_TO_INTREP(v,l);
+    # Now convert things to FFEs:
+    if q < MAXSIZE_GF_INTERNAL then
+        # We return internal FFEs:
+        CVEC.INTLI_TO_FFELI(f,l);
+    elif d = 1 then
+        # We return ZmodnZObjs:
+        for i in [1..Length(l)] do
+            l[i] := ZmodnZObj(l[i],p);
+        od;
+    elif p < 256 then
+        # We build a large FFE with GF2 or 8bit coeffs
+        fam := FFEFamily(p);
+        for i in [1..Length(l)] do
+            CVEC.INTLI_TO_FFELI(f,l[i]);
+            ConvertToVectorRep(l[i],p);
+            l[i] := [l[i],d,fail];
+            Objectify(fam!.ConwayFldEltDefaultType,l[i]);
+        od;
+    else
+        # We build a large FFE with ZmodnZObj coeffs
+        fam := FFEFamily(p);
+        for i in [1..Length(l)] do
+            l[i] := [List(l[i],x->ZmodnZObj(x,p)),d,fail];
+            Objectify(fam!.ConwayFldEltDefaultType,l[i]);
+        od;
+    fi;
     return l;
   end);
 
-InstallMethod( FFEList, "for cvecs", [IsCVecRep],
+InstallMethod( IntegerRep, "for cvecs", [IsCVecRep],
   function(v)
-    local vcl,l,i;
+    local d,l,p,q,vcl;
     vcl := DataType(TypeObj(v));
-    l := 0*[1..Length(v)];
-    CVEC.CVEC_TO_FFELI(v,l);
-    # FIXME: some postprocessing will be necessary here!
+    p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+    q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+    if p < MAXSIZE_GF_INTERNAL and IsSmallIntRep(q) then
+        l := 0*[1..Length(v)];
+    else
+        l := List([1..Length(v)],i->0*[1..d]);
+    fi;
+    CVEC.CVEC_TO_INTREP(v,l);
     return l;
   end);
 
@@ -833,7 +901,7 @@ InstallOtherMethod( ProductCoeffs, "for cvecs",
       return;
   fi;
   wcl := DataType(TypeObj(w));
-  if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],wcl![CVEC_IDX_fieldinfo]) then
+  if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],wcl![CVEC_IDX_fieldinfo])) then
       Error("ProductCoeffs: Not over same field!");
   fi;
   cl := CVEC.NewCVecClassSameField(vcl,vcl![CVEC_IDX_len]+wcl![CVEC_IDX_len]-1);
@@ -1448,7 +1516,8 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
   function(v,m)
     local i,res,vcl,s,z;
     vcl := DataType(TypeObj(v));
-    if not(IsIdenticalObj(vcl![CVEC_IDX_scaclass],m!.scaclass)) then
+    if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
+                          m!.vecclass![CVEC_IDX_fieldinfo])) then
         Error("\\*: incompatible base fields");
     fi;
     if Length(v) <> m!.len then
@@ -1467,7 +1536,8 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
   function(v,m)
     local i,res,vcl,l,pos,val;
     vcl := DataType(TypeObj(v));
-    if not(IsIdenticalObj(vcl![CVEC_IDX_scaclass],m!.scaclass)) then
+    if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
+                          m!.vecclass![CVEC_IDX_fieldinfo])) then
         Error("\\*: incompatible base fields");
     fi;
     if Length(v) <> m!.len then

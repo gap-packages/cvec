@@ -87,7 +87,7 @@ DeclareOperation( "CMat", [IsList] );
 DeclareOperation( "CMat", [IsList, IsObject] );
 DeclareOperation( "CMat", [IsList, IsObject, IsBool] );
 DeclareOperation( "Unpack", [IsObject] );
-DeclareOperation( "FFEList", [IsObject] );
+DeclareOperation( "IntegerRep", [IsObject] );
 
 DeclareFilter( "HasGreaseTab" );
 DeclareOperation( "GreaseMat", [IsCMatRep, IsInt]);

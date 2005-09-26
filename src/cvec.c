@@ -382,11 +382,11 @@ STATIC Obj COPY(Obj self, Obj v, Obj w)
 
 STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
 /* This function returns the vector in its integer representation. This
- * means, that for the case that q is an immediate integer, each integer 
- * corresponds to one field entry. For bigger q, we build a list d times
- * as long, containing d little integers for each vector entry, giving
- * the coefficients of the polynomial over the prime field representing
- * the residue class. */
+ * means, that for the case that q <= 65536 or d = 1 each integer
+ * corresponds to one field entry (p-adic expansion for d>1). For bigger
+ * q (and d), we fill a list of lists of length d containing d little
+ * integers for each vector entry, giving the coefficients of the
+ * polynomial over the prime field representing the residue class. */
 {
     register Word *pw;
     Int len;
@@ -405,8 +405,7 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
         len = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
         size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
 
-        if ((size <= 1 && len != LEN_PLIST(l)) ||
-            (size >= 2 && d*len != LEN_PLIST(l))) {
+        if (LEN_PLIST(l) != len) {
             return OurErrorBreakQuit("CVEC.CVEC_TO_INTREP: different lengths");
         }
 
@@ -433,7 +432,7 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
                 register Int j;
                 register Int shift;
                 register Word y;
-                if (size <= 1) {
+                if (size <= 0) {
                     for (i = 0;i < len;i++) {
                         shift = (i % elsperword) * bitsperel;
                         if (shift == 0) pw += d;
@@ -442,13 +441,13 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
                             y = y * p + ((pw[j] >> shift) & maskp);
                         SET_ELM_PLIST(l,i+1,INTOBJ_INT((Int) y));
                     }
-                } else {   /* size == 2, we write coefficient lists */
+                } else {   /* size >= 1, we write coefficient lists */
                     for (i = 0;i < len;i++) {
+                        Obj oo = ELM_PLIST(l,i);
                         shift = (i % elsperword) * bitsperel;
                         if (shift == 0) pw += d;
-                        y = 0;
                         for (j = 0;j < d;j++)
-                            SET_ELM_PLIST(l,i*d+j+1,
+                            SET_ELM_PLIST(oo,j+1,
                                  INTOBJ_INT((Int)((pw[j] >> shift) & maskp)));
                     }
                 }
@@ -460,17 +459,16 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
 
 STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
 /* This function transfers data in integer representation to the vector. This
- * means, that for the case that q is an immediate integer, each integer 
- * corresponds to one field entry. For bigger q, we have a list d times as
- * long of little integers, such that every d numbers give the
- * coefficients of the polynomial over the prime field representing the
- * residue class. The length of the list l must correspond to the length
- * of v. As an exception, the elements in integer representation may
- * also be GAP FFEs, if those are in the same field or a subfield. */
+ * means, that for the case that q <= 65536 or d = 1, each integer
+ * corresponds to one field entry (p-adic expansion for d > 1). For
+ * bigger q (and d), we have a list of lists of length d of little
+ * integers such that every d numbers give the coefficients of the
+ * polynomial over the prime field representing the residue class.
+ * The length of the list l must correspond to the length of v. As an
+ * exception, the elements in integer representation may also be GAP
+ * FFEs, if those are in the same field or a subfield. */
 {
     register Word *pw;
-    Int len;
-    Int size;
 
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC.INTREP_TO_CVEC: no cvec");
@@ -479,21 +477,17 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
     {
       PREPARE_clfi(v,cl,fi);
       PREPARE_d(fi);
-      len = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
-      size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
+      Int len = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
       pw = DATA_CVEC(v);
 
       /* Check lengths: */
-      if (!IS_PLIST(l) || 
-          (size <= 1 && len != LEN_PLIST(l)) ||
-          (size >= 2 && len*d != LEN_PLIST(l))) {
+      if (!IS_PLIST(l) || LEN_PLIST(l) != len) {
           return OurErrorBreakQuit(
          "CVEC.INTREP_TO_CVEC: l must be a list of corresponding length to v");
       }
 
       {
           PREPARE_p(fi);
-          PREPARE_d(fi);
           PREPARE_q(fi);
           PREPARE_epw(fi);
           PREPARE_bpe(fi);
@@ -538,175 +532,52 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
               register Int shift;
               register Word y;
               register Obj o;
-              if (size <= 1) {
-                for (i = 0;i < len;i++) {
-                    shift = (i % elsperword) * bitsperel;
-                    if (shift == 0) pw += d;
-                    o = ELM_PLIST(l,i+1);
-                    if (IS_INTOBJ(o))
-                        y = (Word) INT_INTOBJ(o);
-                    else if (IS_FFE(o) && CHAR_FF(FLD_FFE(o)) == p && 
-                             (d % DEGR_FF(FLD_FFE(o)) == 0))
-                        if (VAL_FFE(o) == 0)
+              for (i = 0;i < len;i++) {
+                  shift = (i % elsperword) * bitsperel;
+                  if (shift == 0) pw += d;
+                  o = ELM_PLIST(l,i+1);
+                  if (IS_INTOBJ(o)) {
+                      y = (Word) INT_INTOBJ(o);
+                      for (j = 0;j < d;j++) {
+                          pw[j] |= ((y % p) << shift);
+                          y /= p;
+                      }
+                  } else if (IS_FFE(o) && CHAR_FF(FLD_FFE(o)) == p && 
+                           (d % DEGR_FF(FLD_FFE(o)) == 0)) {
+                      if (VAL_FFE(o) == 0)
                           y = (Word) 0;
-                        else
+                      else 
                           y = (Word) INT_INTOBJ(ELM_PLIST(tab1,
-                            (VAL_FFE(o)-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2));
-                    else {
-                        return OurErrorBreakQuit(
-                               "CVEC.INTREP_TO_CVEC: invalid object in list");
-                    }
-                    for (j = 0;j < d;j++) {
-                        pw[j] |= ((y % p) << shift);
-                        y /= p;
-                    }
-                }
-              } else {  /* size == 2 */
-                for (i = 0;i < len;i++) {
-                    shift = (i % elsperword) * bitsperel;
-                    if (shift == 0) pw += d;
-                    for (j = 0;j < d;j++) {
-                        o = ELM_PLIST(l,i*d+j+1);
-                        if (!IS_INTOBJ(o)) {
-                            return OurErrorBreakQuit(
-                               "CVEC.INTREP_TO_CVEC: invalid object in list");
-                        }
-                        y = INT_INTOBJ(o);
-                        if (y < 0 || y >= p) {
-                            return OurErrorBreakQuit(
-                               "CVEC.INTREP_TO_CVEC: invalid object in list");
-                        }
-                        pw[j] |= (y  << shift);
-                    }
-                }
+                           (VAL_FFE(o)-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2));
+                      for (j = 0;j < d;j++) {
+                          pw[j] |= ((y % p) << shift);
+                          y /= p;
+                      }
+                  } else if (IS_PLIST(o) && LEN_PLIST(o) == d) {
+                      register Obj oo;
+                      for (j = 0;j < d;j++) {
+                          oo = ELM_PLIST(o,j+1);
+                          if (IS_INTOBJ(oo))
+                              pw[j] |= INT_INTOBJ(oo) << shift;
+                              /* This should better be between 0 and p-1! */
+                          else if (IS_FFE(oo) && CHAR_FF(FLD_FFE(oo)) == p &&
+                                   d == 1) {
+                              if (VAL_FFE(oo) != 0)
+                                  pw[j] |= INT_INTOBJ(ELM_PLIST(tab1,
+                                               (VAL_FFE(oo)+1))) << shift;
+                              /* We assume that tab1 is for GF(p) here! */
+                          } else {
+                              return OurErrorBreakQuit(
+                             "CVEC.INTREP_TO_CVEC: invalid object in list");
+                          }
+                      }
+                  } else {
+                      return OurErrorBreakQuit(
+                             "CVEC.INTREP_TO_CVEC: invalid object in list");
+                  }
               }
           }
       }
-    }
-    return 0L;
-}
-
-STATIC Obj CVEC_TO_FFELI(Obj self,Obj v,Obj l)
-/* This function returns the vector in its unpacked representation. This
- * means, that for the case that q <= 65536 GAP FFEs are taken and for
- * bigger q our own scalars. In the latter case we assume that l is already
- * a list of objects of type IsCScaRep over the correct field. */
-{
-    Int len;
-    Int size;
-
-    if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.CVEC_TO_FFELI: no cvec");
-    }
-    if (!IS_PLIST(l)) {
-        return OurErrorBreakQuit("CVEC.CVEC_TO_FFELI: no plist");
-    }
-
-    {
-        register Word *pw;
-        register Int j;
-        PREPARE_clfi(v,cl,fi);
-        len = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
-        size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
-        Obj sca = ELM_PLIST(cl,IDX_scaclass);
-
-        if (len != LEN_PLIST(l)) {
-            return OurErrorBreakQuit("CVEC.CVEC_TO_FFELI: different lengths");
-        }
-
-        if (size > 0) {    /* we want to create scalars: */
-            register Obj tmp;
-            for (j = 1;j <= len;j++) {
-                /* GARBAGE COLLECTION POSSIBLE */
-                tmp = NEW(self,sca,ELM_PLIST(sca,IDX_scatype));
-                if (tmp == 0) return 0L;
-                SET_ELM_PLIST(l,j,tmp);
-                CHANGED_BAG(l);   /* This seems to be necessary, since every
-                                     single NEW can cause a GC. */
-            }
-        }
-
-        /* A garbage collection may have occurred, but all our references 
-         * are to master pointers and thus survived it. No more GC from here. */
-        pw = DATA_CVEC(v);
-        {
-            PREPARE_p(fi);
-            PREPARE_d(fi);
-            PREPARE_epw(fi);
-            PREPARE_bpe(fi);
-            PREPARE_maskp(fi);
-
-            if (d == 1) {
-                if (size == 0) {   /* GAP FFEs */
-                    register Word y;
-                    register Word w = 0;
-                    PREPARE_tab2(fi);
-                    register Int i,ii;
-                    for (i = 1,ii = elsperword;i <= len;i++,ii++) {
-                        if (ii == elsperword) { w = *pw++; ii = 0; }
-                        y = w & maskp;
-                        w >>= bitsperel;
-                        SET_ELM_PLIST(l,i,ELM_PLIST(tab2,(Int) y+1));
-                    }
-                } else {  /* Our own scalars */
-                    register Word y;
-                    register Word w = 0;
-                    register Obj o;
-                    register Int *da;
-                    register Int i,ii;
-                    for (i = 1,ii = elsperword;i <= len;i++,ii++) {
-                        if (ii == elsperword) { w = *pw++; ii = 0; }
-                        y = w & maskp;
-                        w >>= bitsperel;
-                        o = ELM_PLIST(l,i);
-                        if (!IS_CVEC(o)) {
-                            return OurErrorBreakQuit(
-                              "CVEC_TO_FFELI: Illegal object in list" );
-                        }
-                        da = DATA_CVEC(o);
-                        *da = y;
-                    }
-                }
-            } else {
-                pw -= d;   /* This is corrected at i==0! */
-                Int i;
-                register Int j;
-                register Int shift;
-                register Word y;
-
-                if (size == 0) {
-                    register PREPARE_tab2(fi);
-                    for (i = 0;i < len;i++) {
-                        shift = (i % elsperword) * bitsperel;
-                        if (shift == 0) pw += d;
-                        y = 0;
-                        for (j = d - 1;j >= 0;j--)
-                            y = y * p + ((pw[j] >> shift) & maskp);
-                        SET_ELM_PLIST(l,i+1,ELM_PLIST(tab2,(Int) y+1));
-                    }
-                } else {   /* size >= 1, we write our scalars: */
-                    register Obj o;
-                    register Word *da;
-                    for (i = 0;i < len;i++) {
-                        seqaccess sa;
-                        shift = (i % elsperword) * bitsperel;
-                        if (shift == 0) pw += d;
-                        o = ELM_PLIST(l,i+1);
-                        if (!IS_CVEC(o)) {
-                            return OurErrorBreakQuit(
-                              "CVEC_TO_FFELI: Illegal object in list" );
-                        }
-                        da = DATA_CVEC(o);
-                        INIT_SEQ_ACCESS(&sa,o,1);
-                        SET_VEC_ELM(&sa,da,0,(pw[0] >> shift) & maskp);
-                        for (j = 1;j < d;j++) {
-                            STEP_RIGHT(&sa);
-                            SET_VEC_ELM(&sa,da,0,(pw[j] >> shift) & maskp);
-                        }
-                    }
-                }
-            }
-        }
     }
     return 0L;
 }
@@ -1481,7 +1352,7 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
         }
     } else if (IS_INTOBJ(s)) {
         sc = INT_INTOBJ(s);
-        /* goes on below case distinction! */
+        /* goes on below, case distinction! */
     } else if (IS_PLIST(s)) {   /* Coefficients are either FFEs from the 
                                    prime field or integers < p */
         /* Note that we assume that we only see FFEs in such a list, if
@@ -1517,7 +1388,7 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
             }
         }
         /* Find length of scalar: */
-        for (/* nothing here */;sclen > 1 && ss[sclen-1] == 0;sclen--);
+        for (/* nothing here */;sclen > 1 && scbuf[sclen-1] == 0;sclen--);
         return scbuf;
     } else {
         return (Int *) OurErrorBreakQuit(
@@ -1820,8 +1691,6 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
         PREPARE_tab2(fi);
         Int size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
         Int s;
-        Int *sc;
-        Obj tmp;
         Obj sca;
 
         /* Check bounds: */
@@ -1829,25 +1698,22 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
             return OurErrorBreakQuit("CVEC.ELM_CVEC: out of bounds");
         }
 
-        if (size >= 1) {   /* The field has more than 65536 elements */
+        if (size >= 1 && d > 1) {  /* The field has more than 65536 elements */
             /* Let's allocate a new scalar first: */
             /* GARBAGE COLLECTION POSSIBLE */
-            sca = ELM_PLIST(cl,IDX_scaclass);
-            tmp = NEW(self,sca,ELM_PLIST(sca,IDX_scatype));
+            sca = NEW_PLIST( T_PLIST, d );
+            SET_LEN_PLIST( sca, d );
             /* Here, a garbage collection might occur, however, all our
              * variables survive this, as they are pointers to master
              * pointers! */
-        } else tmp = 0;  /* not used further, just please compiler */
+        } else sca = 0L;  /* just to please the compiler */
 
         if (d == 1) {
             s = CVEC_Itemp(fi, DATA_CVEC(v), i);
-            if (p < 65536) {   /* we do GAP FFEs */
+            if (p < 65536)    /* we do GAP FFEs */
                 return ELM_PLIST(tab2,s+1);
-            } else {
-                sc = (Int *) DATA_CVEC(tmp);
-                sc[0] = s;
-                return tmp;
-            }
+            else
+                return INTOBJ_INT(s);
         } else {
             CVEC_Itemq(fi, DATA_CVEC(v), i);
             if (size == 0) {
@@ -1855,16 +1721,14 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
                 for (s = 0,i = d-1;i >= 0;i--) s = s * p + scbuf[i];
                 return ELM_PLIST(tab2,s+1);
             } else {
-                Word *w = DATA_CVEC(tmp);
-                seqaccess sa;
-
-                INIT_SEQ_ACCESS(&sa, tmp, 1);
-                SET_VEC_ELM(&sa,w,0,scbuf[0]);
-                for (i = 1;i < d;i++) {
-                    STEP_RIGHT(&sa);
-                    SET_VEC_ELM(&sa,w,0,scbuf[i]);
+                if (p < 65536) {
+                    for (i = 0;i < d;i++)
+                        SET_ELM_PLIST(sca, i+1, ELM_PLIST(tab2,scbuf[i]+1));
+                } else {
+                    for (i = 0;i < d;i++)
+                        SET_ELM_PLIST(sca, i+1, INTOBJ_INT(scbuf[i]));
                 }
-                return tmp;
+                return sca;
             }
         }
     }
@@ -3042,10 +2906,6 @@ static StructGVarFunc GVarFuncs [] = {
   { "INTREP_TO_CVEC", 2, "l, v",
     INTREP_TO_CVEC,
     "cvec.c:INTREP_TO_CVEC" },
-
-  { "CVEC_TO_FFELI", 2, "v, l",
-    CVEC_TO_FFELI,
-    "cvec.c:CVEC_TO_FFELI" },
 
   { "INTLI_TO_FFELI", 2, "c, l",
     INTLI_TO_FFELI,
