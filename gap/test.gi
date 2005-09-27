@@ -91,10 +91,21 @@ CVEC.TEST.ALLFFE := function(name,func)
           d := d + 1;
       until p^d > MAXSIZE_GF_INTERNAL;
       p := NextPrimeInt(p);
-      CVEC.ClearCache();
   od;
 end;
          
+CVEC.TEST.ALLCONWAY := function(name,func)
+  local d,l,p;
+  p := ConwayPolynomial(2,2);
+  for p in Filtered([2..Length(CONWAYPOLDATA)],i->IsBound(CONWAYPOLDATA[i])) do
+      l := Length(CONWAYPOLDATA[p]);
+      for d in Filtered([1..l],i->IsBound(CONWAYPOLDATA[p][i])) do
+          Print("Testing ",name," p=",p," d=",d," ...\r");
+          func(p,d);
+      od;
+  od;
+end;
+
 CVEC.TEST.INTFFE_CONVERSION := function(p,d)
   local c,l,q;
   q := p^d;
@@ -663,6 +674,90 @@ CVEC.TEST.PROD_COEFFS_CVEC_PRIMEFIELD := function(p,d)
   od;
 end;
 
+CVEC.TEST.SCALAR_IN := function(p,d)
+  local c,i,l,limit,q,tab2,v,z,zz;
+  c := CVEC.NewCVecClass(p,d,1);
+  v := CVec(c);
+  z := Z(p,d);
+  q := p^d;
+  limit := 1000;
+  if q <= MAXSIZE_GF_INTERNAL then
+      tab2 := c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2];
+      zz := One(z);
+      for i in [1..q-1] do
+          zz := zz*z;
+          v[1] := zz;
+          l := IntegerRep(v);
+          if zz <> tab2[l[1]+1] then
+              Error("Alarm p=",p," d=",d," you can inspect zz, v, and l");
+          fi;
+      od;
+  elif d = 1 then
+      for i in [0..limit] do
+          v[1] := ZmodnZObj(i,p);
+          l := IntegerRep(v);
+          if l[1] <> i then
+              Error("Alarm p=",p," d=",d," you can inspect i, v, and l");
+          fi;
+      od;
+  elif p < 65536 then
+      zz := One(z);
+      for i in [1..limit] do
+          zz := zz * z;
+          v[1] := zz;
+          l := IntegerRep(v);
+          if List(zz![1],IntFFE) <> l[1] then
+              Error("Alarm p=",p," d=",d," you can inspect i, zz, v, and l");
+          fi;
+      od;
+  else
+      zz := One(z);
+      for i in [1..limit] do
+          zz := zz * z;
+          v[1] := zz;
+          l := IntegerRep(v);
+          if List(zz![1],x->x![1]) <> l[1] then
+              Error("Alarm p=",p," d=",d," you can inspect i, zz, v, and l");
+          fi;
+      od;
+  fi;
+end;
+
+CVEC.TEST.SCALAR_OUT := function(p,d)
+  local c,i,limit,q,v,z,zz;
+  c := CVEC.NewCVecClass(p,d,1);
+  v := CVec(c);
+  z := Z(p,d);
+  q := p^d;
+  limit := 1000;
+  zz := One(z);
+  for i in [1..limit] do
+      zz := zz * z;
+      v[1] := zz;
+      if zz <> v[1] then
+          Error("Alarm p=",p," d=",d," you can inspect i, zz, and v");
+      fi;
+  od;
+end;
+
+CVEC.TEST.SCALAR_UNPACK := function(p,d)
+  local c,i,limit,q,v,z,zz;
+  c := CVEC.NewCVecClass(p,d,1);
+  v := CVec(c);
+  z := Z(p,d);
+  q := p^d;
+  limit := 1000;
+  zz := One(z);
+  for i in [1..limit] do
+      zz := zz * z;
+      v[1] := zz;
+      if [zz] <> Unpack(v) then
+          Error("Alarm p=",p," d=",d," you can inspect i, zz, and v");
+      fi;
+  od;
+end;
+
+      
 CVEC.TEST.DOALL := function()
   local inf;
   inf := InfoLevel(InfoWarning);
@@ -718,6 +813,27 @@ CVEC.TEST.DOALL := function()
   Print("Testing SLICE 2^4 (bitsperel=1)...\r");
   CVEC.TEST.SLICE(2,4);
   CVEC.TEST.ALLCHEAP("IO", CVEC.TEST.IO);
+  CVEC.TEST.ALLCONWAY("SCALAR_IN", CVEC.TEST.SCALAR_IN);
+  Print("Testing SCALAR_IN 65537^1...\r");
+  CVEC.TEST.SCALAR_IN(65537,1);
+  Print("Testing SCALAR_IN 65537^2...\r");
+  CVEC.TEST.SCALAR_IN(65537,2);
+  Print("Testing SCALAR_IN 65537^3...\r");
+  CVEC.TEST.SCALAR_IN(65537,3);
+  CVEC.TEST.ALLCONWAY("SCALAR_OUT", CVEC.TEST.SCALAR_OUT);
+  Print("Testing SCALAR_OUT 65537^1...\r");
+  CVEC.TEST.SCALAR_OUT(65537,1);
+  Print("Testing SCALAR_OUT 65537^2...\r");
+  CVEC.TEST.SCALAR_OUT(65537,2);
+  Print("Testing SCALAR_OUT 65537^3...\r");
+  CVEC.TEST.SCALAR_OUT(65537,3);
+  CVEC.TEST.ALLCONWAY("SCALAR_UNPACK", CVEC.TEST.SCALAR_UNPACK);
+  Print("Testing SCALAR_UNPACK 65537^1...\r");
+  CVEC.TEST.SCALAR_UNPACK(65537,1);
+  Print("Testing SCALAR_UNPACK 65537^2...\r");
+  CVEC.TEST.SCALAR_UNPACK(65537,2);
+  Print("Testing SCALAR_UNPACK 65537^3...\r");
+  CVEC.TEST.SCALAR_UNPACK(65537,3);
   SetInfoLevel(InfoWarning,inf);
 end;
 

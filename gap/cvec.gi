@@ -175,7 +175,8 @@ CVEC.NewCVecClass := function(p,d,len)
       l[CVEC_IDX_filts] := filts;
 
       # We use the "official" families:
-      l[CVEC_IDX_scafam] := FFEFamily(p);
+      scafam := FFEFamily(p);
+      l[CVEC_IDX_scafam] := scafam;
 
       # Now for small finite fields two tables for conversion:
       if q <= MAXSIZE_GF_INTERNAL then
@@ -736,14 +737,14 @@ InstallMethod( Unpack, "for cvecs", [IsCVecRep],
     p := f![CVEC_IDX_p];
     d := f![CVEC_IDX_d];
     q := f![CVEC_IDX_q];
-    if (p < MAXSIZE_GF_INTERNAL and IsSmallIntRep(q)) or d = 1 then
+    if q <= MAXSIZE_GF_INTERNAL or d = 1 then
         l := 0*[1..Length(v)];
     else
         l := List([1..Length(v)],i->0*[1..d]);
     fi;
     CVEC.CVEC_TO_INTREP(v,l);
     # Now convert things to FFEs:
-    if q < MAXSIZE_GF_INTERNAL then
+    if q <= MAXSIZE_GF_INTERNAL then
         # We return internal FFEs:
         CVEC.INTLI_TO_FFELI(f,l);
     elif d = 1 then
@@ -751,7 +752,7 @@ InstallMethod( Unpack, "for cvecs", [IsCVecRep],
         for i in [1..Length(l)] do
             l[i] := ZmodnZObj(l[i],p);
         od;
-    elif p < 256 then
+    elif p < MAXSIZE_GF_INTERNAL then
         # We build a large FFE with GF2 or 8bit coeffs
         fam := FFEFamily(p);
         for i in [1..Length(l)] do
@@ -778,7 +779,7 @@ InstallMethod( IntegerRep, "for cvecs", [IsCVecRep],
     p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
     d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
     q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
-    if p < MAXSIZE_GF_INTERNAL and IsSmallIntRep(q) then
+    if q <= MAXSIZE_GF_INTERNAL or d = 1 then
         l := 0*[1..Length(v)];
     else
         l := List([1..Length(v)],i->0*[1..d]);
@@ -996,9 +997,11 @@ CVEC.CMatMaker := function(l,cl)
     # Makes a new CMat, given a list l with a hole in the first place
     local m,ty;
     if Length(l) > 0 then
-        m := rec(rows := l, len := Length(l)-1, vecclass := cl);
+        m := rec(rows := l, len := Length(l)-1, vecclass := cl,
+                 scaclass := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_GF]);
     else
-        m := rec(rows := l, len := 0, vecclass := cl);
+        m := rec(rows := l, len := 0, vecclass := cl,
+                 scaclass := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_GF]);
     fi;
     m.greasehint := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease];   
          # this is the current bestgrease

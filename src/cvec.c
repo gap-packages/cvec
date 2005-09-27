@@ -443,7 +443,7 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
                     }
                 } else {   /* size >= 1, we write coefficient lists */
                     for (i = 0;i < len;i++) {
-                        Obj oo = ELM_PLIST(l,i);
+                        Obj oo = ELM_PLIST(l,i+1);
                         shift = (i % elsperword) * bitsperel;
                         if (shift == 0) pw += d;
                         for (j = 0;j < d;j++)
