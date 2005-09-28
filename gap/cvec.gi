@@ -1510,6 +1510,53 @@ InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
     return c![CVEC_IDX_fieldinfo]![CVEC_IDX_GF];
   end);
     
+# The making of good hash functions:
+
+CVEC.HashFunctionForGF2Vectors := function(v,hashlen,bytelen)
+  return HASHKEY_BAG(v,101,8,bytelen) mod hashlen + 1;
+end;
+
+CVEC.HashFunctionFor8BitVectors := function(v,hashlen,bytelen)
+  return HASHKEY_BAG(v,101,12,bytelen) mod hashlen + 1;
+end;
+
+CVEC.HashFunctionForCVecs := function(v,hashlen,bytelen)
+  return HASHKEY_BAG(v,101,4,bytelen);
+end;
+
+CVEC.MakeHashFunction := function(p,hashlen)
+  local bytelen,i,q,qq;
+  if IsGF2VectorRep(p) then
+      bytelen := QuoInt(Length(p)+7,8);
+      if bytelen = 0 then
+          Error("vector too short!");
+      fi;
+      return x->HashFunctionForGF2Vectors(x,hashlen,bytelen);
+  elif Is8BitVectorRep(p) then
+      q := Q_VEC8BIT(p);
+      qq := q;
+      i := 0;
+      while qq <= 256 do
+          qq := qq * q;
+          i := i + 1;
+      od;
+      # i is now the number of field elements per byte
+      bytelen := QuoInt(Length(p)+i-1,i);
+      if bytelen = 0 then
+          Error("vector too short!");
+      fi;
+      return x->HashFunctionFor8BitVectors(x,hashlen,bytelen);
+  elif IsCVecRep(p) then
+      c := CVecClass(p);
+      bytelen := c![CVEC_IDX_wordlen] * CVEC.BYTESPERWORD;
+      return x->HasFunctionForCVecs(x,hashlen,bytelen);
+
+  else
+      Error("No hash function for objects like ",p," available!");
+  fi;
+end;
+
+
 #############################################################################
 # Arithmetic between vectors and matrices, especially multiplication:
 #############################################################################
