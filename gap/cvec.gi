@@ -378,11 +378,11 @@ function(v)
   Print("[");
   q := c![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
   if q <= 36 then
-      l := Unpack(v);
+      l := IntegerRep(v);
       Print(CVEC.CharactersForDisplay{l+1},"]\n");
   elif c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 1 then
       l := Unpack(v);
-      lo := LogInt(q,10)+2;   # This is the number of digits needed plus 1
+      lo := LogInt(q,10)+7;   # This is the number of digits needed plus 6
       for i in l do Print(String(i,lo)); od;
       Print("]\n");
   else
@@ -956,12 +956,6 @@ InstallMethod( CMat, "for a list of cvecs and a cvecclass",
     return CMat(l,c,true);
   end);
 
-InstallMethod( CMat, "for a list of cvecs, a cvecclass, and a boolean value", 
-  [IsList, IsCVecClass, IsBool],
-  function(l,c,checks)
-    return CMat(l,c,checks);
-  end);
-
 InstallMethod( CMat, "for a compressed GF2 matrix",
   [IsList and IsGF2MatrixRep],
   function(m)
@@ -1521,17 +1515,17 @@ CVEC.HashFunctionFor8BitVectors := function(v,hashlen,bytelen)
 end;
 
 CVEC.HashFunctionForCVecs := function(v,hashlen,bytelen)
-  return HASHKEY_BAG(v,101,4,bytelen);
+  return HASHKEY_BAG(v,101,4,bytelen) mod hashlen + 1;
 end;
 
 CVEC.MakeHashFunction := function(p,hashlen)
-  local bytelen,i,q,qq;
+  local bytelen,c,i,q,qq;
   if IsGF2VectorRep(p) then
       bytelen := QuoInt(Length(p)+7,8);
       if bytelen = 0 then
           Error("vector too short!");
       fi;
-      return x->HashFunctionForGF2Vectors(x,hashlen,bytelen);
+      return x->CVEC.HashFunctionForGF2Vectors(x,hashlen,bytelen);
   elif Is8BitVectorRep(p) then
       q := Q_VEC8BIT(p);
       qq := q;
@@ -1545,12 +1539,11 @@ CVEC.MakeHashFunction := function(p,hashlen)
       if bytelen = 0 then
           Error("vector too short!");
       fi;
-      return x->HashFunctionFor8BitVectors(x,hashlen,bytelen);
+      return x->CVEC.HashFunctionFor8BitVectors(x,hashlen,bytelen);
   elif IsCVecRep(p) then
       c := CVecClass(p);
       bytelen := c![CVEC_IDX_wordlen] * CVEC.BYTESPERWORD;
-      return x->HasFunctionForCVecs(x,hashlen,bytelen);
-
+      return x->CVEC.HashFunctionForCVecs(x,hashlen,bytelen);
   else
       Error("No hash function for objects like ",p," available!");
   fi;
