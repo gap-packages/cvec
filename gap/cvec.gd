@@ -89,6 +89,9 @@ DeclareOperation( "CMat", [IsList, IsObject, IsBool] );
 DeclareOperation( "Unpack", [IsObject] );
 DeclareOperation( "IntegerRep", [IsObject] );
 
+DeclareOperation( "CVecNumber", [IsInt, IsCVecClass] );
+DeclareOperation( "CVecNumber", [IsInt, IsPosInt, IsPosInt, IsPosInt] );
+
 DeclareFilter( "HasGreaseTab" );
 DeclareOperation( "GreaseMat", [IsCMatRep, IsInt]);
 DeclareOperation( "UnGreaseMat", [IsCMatRep]);

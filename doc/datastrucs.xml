@@ -318,75 +318,6 @@ is arbitrarily chosen at the moment and could be increased easily).</Item>
 
 </Section>
 
-<Section Label="cscas">
-<Heading>Large Scalars</Heading>
-
-Large scalars (<C>csca</C>s) are internally represented nearly as
-vectors of length <M>1</M>. That is, they are &GAP; data objects
-containing a pointer to their type and <M>d</M> <C>Word</C>s containing
-the coefficients of the representing polynomial, starting with the
-constant coefficient. The coefficients are stored in the least
-significant bits of the <C>Word</C>s, as would the coefficients of a
-vector of length <M>1</M>. <P/>
-
-<C>csca</C> as are <E>immutable by convention</E>.<P/>
-
-Note that this is not very memory efficient for large extensions
-in small characteristic, because every prime field element uses a
-<C>Word</C>. For such cases one would better use another data format.<P/>
-
-The type of a large scalar has as its <Q>defining data</Q> a so-called
-<C>cscaclass</C>, which is similar to a <C>cvecclass</C>
-(see Section <Ref Sect="cvecs"/>). However, the length field contains
-the value <M>-1</M> and from position 5 on there are differences.
-Here is a table describing the contents of a <C>cscaclass</C>:
-
-<Table Align="ll">
-<Caption>Components of a <C>cscaclass</C></Caption>
-<Row>
-<Item>Position</Item><Item>Content</Item>
-</Row>
-<HorLine/>
-<Row>
-<Item>1</Item><Item>a <C>fieldinfo</C> object, see Section <Ref
-Sect="cvecs"/></Item>
-</Row>
-<Row>
-<Item>2</Item><Item><M>-1</M> as immediate &GAP; integer</Item>
-</Row>
-<Row>
-<Item>3</Item><Item>the number of <C>Word</C>s used as immediate &GAP;
-integer, which is <M>d</M> here</Item>
-</Row>
-<Row>
-<Item>4</Item><Item>a &GAP; type used to create new scalars</Item>
-</Row>
-<Row>
-<Item>5</Item><Item>the zero <C>csca</C></Item>
-</Row>
-<Row>
-<Item>6</Item><Item>the one <C>csca</C></Item>
-</Row>
-<Row>
-<Item>7</Item><Item><M>s</M> from <M>q-1 = s \cdot 2^{{T+1}}</M>
-(used for taking square roots)</Item>
-</Row>
-<Row>
-<Item>8</Item><Item><M>T</M> from <M>q-1 = s \cdot 2^{{T+1}}</M></Item>
-</Row>
-<Row>
-<Item>9</Item><Item>the <C>csca</C> represented by <M>x</M>, which is a
-primitive root</Item>
-</Row>
-<Row>
-<Item>10</Item><Item>a list of <M>(x^s)^{{2^i}}</M> for <M>0 \leq i \leq T</M>
-</Item>
-</Row>
-</Table>
-In position 1 there is a <C>fieldinfo</C> entry exactly as described in
-Section <Ref Sect="cvecs"/> for <C>cvecs</C>.
-</Section>
-
 <Section Label="cmats">
 <Heading>Compressed Matrices</Heading>
 
@@ -411,8 +342,8 @@ components:
 the class of rows</Item>
 </Row>
 <Row>
-<Item><C>scaclass</C></Item><Item>a <C>cscaclass</C> object describing
-the class of scalars</Item>
+<Item><C>scaclass</C></Item><Item>a <C>cscaclass</C> object holding
+    a reference to <C>GF(p,d)</C></Item>
 </Row>
 <Row>
 <Item><C>rows</C></Item><Item>a list containing the rows of the matrix,

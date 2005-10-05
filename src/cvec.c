@@ -647,6 +647,68 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
     return 0L;
 }
 
+STATIC Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
+{
+    PREPARE_clfi(v,cl,fi);
+    PREPARE_epw(fi);
+    PREPARE_bpe(fi);
+    PREPARE_maskp(fi);
+    PREPARE_p(fi);
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+    Word *vv = DATA_CVEC(v);
+    Word wo;
+    Word res;
+    Int i,j;
+    Int shift;
+
+    for (i = 1;i <= wordlen;i++) {
+        wo = *vv++;
+        res = 0;
+        shift = bitsperel * (elsperword-1);
+        for (j = elsperword;j > 0;j--,shift -= bitsperel)
+            res = res * p + ((wo >> shift) & maskp);
+        if (split == True) {
+            SET_ELM_PLIST(l,2*i-1,
+                 INTOBJ_INT(res & ((1 << (4*BYTESPERWORD)) - 1L)));
+            SET_ELM_PLIST(l,2*i,
+                 INTOBJ_INT(res >> (4*BYTESPERWORD)));
+        } else {
+            SET_ELM_PLIST(l,i,INTOBJ_INT((Int) res));
+        }
+    } 
+    return 0L;
+}
+
+STATIC Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
+{
+    PREPARE_clfi(v,cl,fi);
+    PREPARE_epw(fi);
+    PREPARE_bpe(fi);
+    PREPARE_p(fi);
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+    Word *vv = DATA_CVEC(v);
+    Word wo;
+    Word res;
+    Int i,j;
+    Int shift;
+
+    for (i = 1;i <= wordlen;i++) {
+        if (split == True) {
+            res = (Word) INT_INTOBJ(ELM_PLIST(l,2*i-1)) +
+                  (((Word) INT_INTOBJ(ELM_PLIST(l,2*i))) << (4*BYTESPERWORD));
+        } else {
+            res = INT_INTOBJ(ELM_PLIST(l,i));
+        }
+        shift = 0;
+        for (j = elsperword;j > 0;j--,shift += bitsperel) {
+            wo |= (res % p) << shift;
+            res /= p;
+        }
+        *vv++ = wo;;
+    } 
+    return 0L;
+}
+
   /*******************/
  /* The arithmetic: */
 /*******************/
@@ -2914,6 +2976,14 @@ static StructGVarFunc GVarFuncs [] = {
   { "FFELI_TO_INTLI", 2, "c, l",
     FFELI_TO_INTLI,
     "cvec.c:FFELI_TO_INTLI" },
+
+  { "CVEC_TO_NUMBERFFLIST", 3, "v, l, split",
+    CVEC_TO_NUMBERFFLIST,
+    "cvec.c:CVEC_TO_NUMBERFFLIST" },
+
+  { "NUMBERFFLIST_TO_CVEC", 3, "l, v, split",
+    NUMBERFFLIST_TO_CVEC,
+    "cvec.c:NUMBERFFLIST_TO_CVEC" },
 
   { "ADD2", 4, "u, v, fr, to",
     ADD2,

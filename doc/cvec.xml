@@ -48,7 +48,6 @@ Germany
 <#Include SYSTEM "intro.xml">
 <#Include SYSTEM "install.xml">
 <#Include SYSTEM "datastrucs.xml">
-<#Include SYSTEM "scalars.xml">
 <#Include SYSTEM "vectors.xml">
 <#Include SYSTEM "matrices.xml">
 <#Include SYSTEM "performance.xml">

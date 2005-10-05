@@ -788,6 +788,83 @@ InstallMethod( IntegerRep, "for cvecs", [IsCVecRep],
     return l;
   end);
 
+InstallOtherMethod( NumberFFVector, "for a cvec, and a field size",
+  [IsCVecRep, IsPosInt],
+  function(v,sz)
+    local bas,c,f,halfword,i,l,res,wordlen;
+    c := DataType(TypeObj(v));
+    f := c![CVEC_IDX_fieldinfo];
+    if sz <> f![CVEC_IDX_q] then
+        Error("CVEC.NumberFFVector: vector over wrong field");
+        return;
+    fi;
+    wordlen := c![CVEC_IDX_wordlen];
+    bas := f![CVEC_IDX_p] ^ f![CVEC_IDX_elsperword];
+    if IsSmallIntRep(bas) then
+        l := 0*[1..wordlen];
+        CVEC.CVEC_TO_NUMBERFFLIST(v,l,false);
+        res := l[wordlen];
+        for i in [wordlen-1,wordlen-2..1] do
+            res := res * bas + l[i];
+        od;
+    else
+        l := 0*[1..2*wordlen];
+        CVEC.CVEC_TO_NUMBERFFLIST(v,l,true);
+        halfword := 2^(CVEC.BYTESPERWORD*4);
+        res := l[2*wordlen-1] + l[2*wordlen]*halfword;
+        for i in [2*wordlen-3,2*wordlen-5..1] do
+            res := res * bas + l[i] + halfword * l[i+1];
+        od;
+    fi;
+    return res;
+  end);
+
+InstallOtherMethod( NumberFFVector, "for a cvec", [IsCVecRep],
+  function(v)
+    local c;
+    c := DataType(TypeObj(v));
+    return NumberFFVector(v,c![CVEC_IDX_fieldinfo]![CVEC_IDX_q]);
+  end);
+
+InstallMethod( CVecNumber, "for four integers", 
+  [IsInt,IsPosInt,IsPosInt,IsPosInt],
+  function(nr,p,d,l)
+    local c;
+    c := CVEC.NewCVecClass(p,d,l);
+    return CVecNumber(nr,c);
+  end );
+
+InstallMethod( CVecNumber, "for an integer, and a cvecclass",
+  [IsInt, IsCVecClass],
+  function(nr,c)
+    local bas,f,halfword,i,l,q,qq,v,wordlen;
+    v := CVEC.NEW(c,c![CVEC_IDX_type]);
+    wordlen := c![CVEC_IDX_wordlen];
+    f := c![CVEC_IDX_fieldinfo];
+    bas := f![CVEC_IDX_p] ^ f![CVEC_IDX_elsperword];
+    if IsSmallIntRep(bas) then
+        l := 0*[1..wordlen];
+        for i in [1..wordlen] do
+            q := QuotientRemainder(nr,bas);
+            l[i] := q[2];
+            nr := q[1];
+        od;
+        CVEC.NUMBERFFLIST_TO_CVEC(l,v,false);
+    else
+        l := 0*[1..2*wordlen];
+        halfword := 2^(CVEC.BYTESPERWORD*4);
+        for i in [1,3..2*wordlen-1] do
+            q := QuotientRemainder(nr,bas);
+            qq := QuotientRemainder(q[2],halfword);
+            l[i] := qq[2];
+            l[i+1] := qq[1];
+            nr := q[1];
+        od;
+        CVEC.NUMBERFFLIST_TO_CVEC(l,v,true);
+    fi;
+    return v;
+  end );
+    
 # Access to the base field:
 
 InstallOtherMethod( Characteristic, "for cvecs", [IsCVecRep],
@@ -1549,6 +1626,34 @@ CVEC.MakeHashFunction := function(p,hashlen)
   fi;
 end;
 
+# Concatenation of vectors:
+
+CVEC.Concatenation := function(arg)
+  local c,cc,i,len,pos,v;
+  if Length(arg) = 0 or not(IsCVecRep(arg[1])) then
+      Error("CVEC.Concatenation: Need at least one cvec");
+      return;
+  fi;
+  c := DataType(TypeObj(arg[1]));
+  len := Length(arg[1]);
+  for i in [2..Length(arg)] do
+      if not(IsCVecRep(arg[i])) or 
+         not(IsIdenticalObj(c,DataType(TypeObj(arg[i])))) then
+          Error("CVEC.Concatenation: Arguments must all be cvecs over the ",
+                "same field ");
+          return;
+      fi;
+      len := len + Length(arg[i]);
+  od;
+  cc := CVEC.NewCVecClassSameField(c,len);
+  v := CVEC.New(cc);
+  pos := 1;
+  for i in [1..Length(arg)] do
+      CVEC.SLICE(arg[i],v,1,Length(arg[i]),pos);
+      pos := pos + Length(arg[i]);
+  od;
+  return v;
+end;
 
 #############################################################################
 # Arithmetic between vectors and matrices, especially multiplication:
