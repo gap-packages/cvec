@@ -803,16 +803,16 @@ InstallOtherMethod( NumberFFVector, "for a cvec, and a field size",
     if IsSmallIntRep(bas) then
         l := 0*[1..wordlen];
         CVEC.CVEC_TO_NUMBERFFLIST(v,l,false);
-        res := l[wordlen];
-        for i in [wordlen-1,wordlen-2..1] do
+        res := l[1];
+        for i in [2..wordlen] do
             res := res * bas + l[i];
         od;
     else
         l := 0*[1..2*wordlen];
         CVEC.CVEC_TO_NUMBERFFLIST(v,l,true);
         halfword := 2^(CVEC.BYTESPERWORD*4);
-        res := l[2*wordlen-1] + l[2*wordlen]*halfword;
-        for i in [2*wordlen-3,2*wordlen-5..1] do
+        res := l[1] + l[2]*halfword;
+        for i in [3,5..2*wordlen-1] do
             res := res * bas + l[i] + halfword * l[i+1];
         od;
     fi;
@@ -844,7 +844,7 @@ InstallMethod( CVecNumber, "for an integer, and a cvecclass",
     bas := f![CVEC_IDX_p] ^ f![CVEC_IDX_elsperword];
     if IsSmallIntRep(bas) then
         l := 0*[1..wordlen];
-        for i in [1..wordlen] do
+        for i in [wordlen,wordlen-1..1] do
             q := QuotientRemainder(nr,bas);
             l[i] := q[2];
             nr := q[1];
@@ -853,7 +853,7 @@ InstallMethod( CVecNumber, "for an integer, and a cvecclass",
     else
         l := 0*[1..2*wordlen];
         halfword := 2^(CVEC.BYTESPERWORD*4);
-        for i in [1,3..2*wordlen-1] do
+        for i in [2*wordlen-1,2*wordlen-3..1] do
             q := QuotientRemainder(nr,bas);
             qq := QuotientRemainder(q[2],halfword);
             l[i] := qq[2];
@@ -1428,6 +1428,7 @@ InstallOtherMethod( \-, "for cmats",
     if not(IsMutable(m)) and not(IsMutable(n)) then
         MakeImmutable(res);
     fi;
+    return res;
   end);
 
 InstallOtherMethod( AdditiveInverseSameMutability, "for a cmat",
@@ -1771,6 +1772,38 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
     return res;
   end);
 
+#############################################################################
+# Transposition:
+#############################################################################
+
+InstallOtherMethod( TransposedMatOp, "for a cmat",
+  [IsCMatRep and IsMatrix],
+  function(m)
+    # First make a new matrix:
+    local c,ct,i,l,mt,newlen;
+    c := m!.vecclass;
+    ct := CVEC.NewCVecClassSameField(c,m!.len);
+    newlen := c![CVEC_IDX_len];
+    l := 0*[1..newlen+1];
+    for i in [2..newlen+1] do
+        l[i] := CVEC.NEW(ct,ct![CVEC_IDX_type]);
+    od;
+    Unbind(l[1]);
+    mt := CVEC.CMatMaker(l,ct);
+    if m!.len > 0 and mt!.len > 0 then
+        CVEC.TRANSPOSED_MAT(m!.rows,mt!.rows);
+    fi;
+    return mt;
+  end);
+
+InstallOtherMethod( TransposedMat, "for a cmat",
+  [IsCMatRep and IsMatrix],
+  function(m)
+    local mt;
+    mt := TransposedMatOp(m);
+    MakeImmutable(mt);
+    return mt;
+  end);
 
 #############################################################################
 # Greasing:

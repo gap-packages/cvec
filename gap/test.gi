@@ -757,7 +757,65 @@ CVEC.TEST.SCALAR_UNPACK := function(p,d)
   od;
 end;
 
-      
+CVEC.TEST.NUMBERFFVECTOR := function(p,d)
+  local TestTwo,i,l,q,qq;
+  q := p^d;
+  if p = 2 then
+      l := QuoInt(256,d);
+  else
+      l := 41;
+  fi;
+  qq := q^l;
+
+  TestTwo := function(a,b)
+    local v,w;
+    v := CVecNumber(a,p,d,l);
+    w := CVecNumber(b,p,d,l);
+    if NumberFFVector(v) <> a or NumberFFVector(w) <> b then
+        Error("Alarm p=",p," d=",d," you can inspect, a, b, v, and w");
+    fi;
+    if (v=w) <> (a=b) then
+        Error("Alarm (eq) p=",p," d=",d," you can inspect, a, b, v, and w");
+    fi;
+    if (v<w) <> (a<b) then
+        Error("Alarm (<) p=",p," d=",d," you can inspect, a, b, v, and w");
+    fi;
+  end;
+
+  # Check some standard things:
+  TestTwo(0,1);
+  TestTwo(0,qq-1);
+  TestTwo(1,2);
+  TestTwo(p-1,p);
+  
+  # Do some random elements:
+  for i in [1..100] do
+      TestTwo(Random(0,qq-1),Random(0,qq-1));
+  od;
+end;
+
+CVEC.TEST.TRANSPOSED_MAT := function(p,d)
+  local m,mm,mo,n,nno,no,x,y;
+  x := Random(50,100);
+  y := Random(50,100);
+  m := CVEC.RandomMat(x,y,p,d);
+  n := TransposedMatOp(m);
+  mm := TransposedMatOp(n);
+  if m <> mm then
+      Error("Alarm p=",p," d=",d," you can inspect, m, n, and mm");
+  fi;
+  if p^d <= 256 then
+      mo := List(m,Unpack);
+      ConvertToMatrixRep(mo);
+      no := TransposedMat(mo);
+      nno := List(n,Unpack);
+      ConvertToMatrixRep(nno);
+      if no <> nno then
+          Error("Alarm p=",p," d=",d," you can inspect, m, n, no, and nno");
+      fi;
+  fi;
+end;
+
 CVEC.TEST.DOALL := function()
   local inf;
   inf := InfoLevel(InfoWarning);
@@ -834,6 +892,8 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.SCALAR_UNPACK(65537,2);
   Print("Testing SCALAR_UNPACK 65537^3...\r");
   CVEC.TEST.SCALAR_UNPACK(65537,3);
+  CVEC.TEST.ALLCHEAP("NUMBERFFVECTOR",CVEC.TEST.NUMBERFFVECTOR);
+  CVEC.TEST.ALLCHEAP("TRANSPOSED_MAT",CVEC.TEST.TRANSPOSED_MAT);
   SetInfoLevel(InfoWarning,inf);
 end;
 

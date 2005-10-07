@@ -2,18 +2,17 @@ TODO aufraeumen:
 
 Tasks to do:
 
-  * NumberFFVector testen
-  * FFVectorNumber testen
-  * Display bei Vektoren ueber GF(5,3)
-  * TransposedMat
   * InverseMat
+  * Random Vectors "RandomVec", (--> like matrices with one row)
   * matrix.g{d,i} look through for usability
   * test DeterminantMat
   * IsMutable-Durchgang durch cvec.gi
   * Beweis, dass keine CHANGED_BAGs fehlen
   * Documentation
   * Cleanup of "Hacks" and "Utilities" in cvec.gi
-  * Hash-Funktionen fuer Matrizen und Vektoren (Generators?)
+  * Hash-Funktionen fuer Matrizen (Generators!)
+    Use NumberFFVector for "small" vectors? Maybe for vectors < 2 words?
+  ? Display bei Vektoren ueber GF(5,3)
 
 Ideas for improvement:
 

@@ -700,6 +700,7 @@ STATIC Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
             res = INT_INTOBJ(ELM_PLIST(l,i));
         }
         shift = 0;
+        wo = 0;
         for (j = elsperword;j > 0;j--,shift += bitsperel) {
             wo |= (res % p) << shift;
             res /= p;
@@ -2925,6 +2926,52 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
     return 0L;
 }
 
+STATIC Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
+{
+    /* n is empty, correct size, >0 rows, >0 cols, right size, same field. */
+    PREPARE_clfi(ELM_PLIST(m,2),cl,fi);
+    PREPARE_d(fi);
+    Int lenm = LEN_PLIST(m)-1;   /* Remember the shift by one */
+    Int lenn = LEN_PLIST(n)-1;
+    Word *v;
+    register Int i,j,k;
+
+    seqaccess sasrc;   /* For access in source */
+    seqaccess sadst;   /* For access in destination */
+
+
+    if (d == 1) {
+        /* We read row-wise and write column-wise. */
+        INIT_SEQ_ACCESS(&sadst,ELM_PLIST(n,2),1);
+        for (i = 1;i <= lenm;i++) {
+            INIT_SEQ_ACCESS(&sasrc,ELM_PLIST(m,2),1);
+            v = DATA_CVEC(ELM_PLIST(m,i+1));
+            for (j = 1;j <= lenn;j++) {
+                SET_VEC_ELM(&sadst,DATA_CVEC(ELM_PLIST(n,j+1)),0,
+                            GET_VEC_ELM(&sasrc,v,0));
+                STEP_RIGHT(&sasrc);
+            }
+            STEP_RIGHT(&sadst);
+        }
+    } else {  /* d > 1 */
+        /* We read row-wise and write column-wise. */
+        INIT_SEQ_ACCESS(&sadst,ELM_PLIST(n,2),1);
+        for (i = 1;i <= lenm;i++) {
+            INIT_SEQ_ACCESS(&sasrc,ELM_PLIST(m,2),1);
+            v = DATA_CVEC(ELM_PLIST(m,i+1));
+            for (j = 1;j <= lenn;j++) {
+                for (k = 0;k < d;k++) {
+                    SET_VEC_ELM(&sadst,DATA_CVEC(ELM_PLIST(n,j+1)),k,
+                                GET_VEC_ELM(&sasrc,v,k));
+                }
+                STEP_RIGHT(&sasrc);
+            }
+            STEP_RIGHT(&sadst);
+        }
+    }
+    return 0L;
+}
+
 
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
@@ -3088,6 +3135,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "PROD_COEFFS_CVEC_PRIMEFIELD", 3, "u, v, w",
     PROD_COEFFS_CVEC_PRIMEFIELD,
     "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD" },
+
+  { "TRANSPOSED_MAT", 2, "m, n",
+    TRANSPOSED_MAT,
+    "cvec.c:TRANSPOSED_MAT" },
 
   { 0 }
 
