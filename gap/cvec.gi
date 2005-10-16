@@ -1802,42 +1802,6 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
     # Now make a copy of the matrix:
     mc := MutableCopyMat(m);
 
-    # Temporary GAP code:
-    #dim := mc!.len;
-    #for col in [1..dim] do
-    #    row := col;
-    #    while row <= dim and IsZero(mc[row][col]) do
-    #        row := row + 1;
-    #    od;
-    #    if row > dim then
-    #        return fail;
-    #    fi;
-    #    i := mc[row][col];
-    #    if not(IsOne(i)) then
-    #        i := i^-1;
-    #        MultRowVector(mi[row],i);
-    #        MultRowVector(mc[row],i);
-    #    fi;
-    #    for j in [1..col-1] do
-    #        i := mc[j][col];
-    #        if not(IsZero(i)) then
-    #            i := -i;
-    #            AddRowVector(mc[j],mc[row],i);
-    #            AddRowVector(mi[j],mi[row],i);
-    #        fi;
-    #    od;
-    #    for j in [row+1..dim] do
-    #        i := mc[j][col];
-    #        if not(IsZero(i)) then
-    #            i := -i;
-    #            AddRowVector(mc[j],mc[row],i);
-    #            AddRowVector(mi[j],mi[row],i);
-    #        fi;
-    #    od;
-    #    dummy := mc[col]; mc[col] := mc[row]; mc[row] := dummy;
-    #    dummy := mi[col]; mi[col] := mi[row]; mi[row] := dummy;
-    #od;
-
     # Now do the real work:
     helper := CVEC.New(vcl);
     i := CVEC.CMAT_INVERSE(mi!.rows,mc!.rows,CVEC.INVERT_FFE,helper);
