@@ -2972,7 +2972,124 @@ STATIC Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
     return 0L;
 }
 
+STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
+{
+    PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We known that the length is >=3 */
+    PREPARE_p(fi);
+    PREPARE_d(fi);
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+    Int dim = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+    Int col, row;
+    register Int j, k;
+    seqaccess sa;
+    register Word el = 0;
+    Word *helperdata = DATA_CVEC(helper);
+    Obj dummy;
 
+    INIT_SEQ_ACCESS(&sa,ELM_PLIST(mc,2),1);
+    for (col = 1; col <= dim;col++) {
+        row = col-1;
+        k = -1;  /* just to please the compiler */
+        while (row < dim && k == -1) {
+            row++;
+            for (k = d-1;k >= 0;k--) {
+                el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                if (el != 0)
+                    break;  /* Leave loop immediately to keep value of k! */
+            }
+        }
+        if (k == -1) return Fail;
+        /* Check whether the found element is not equal to one: */
+        if (k > 0) {   /* A non-prime field entry which is not equal to 1 */
+            el = invert_modp((Int) el,(Int) p);
+            MUL_INL(DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
+            MUL_INL(DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
+        } else if (el != 1) {   /* A primefield entry which is not equal to 1 */
+            /* Here we need an inversion of a field element: */
+            for (k = 0;k < d;k++) 
+                helperdata[k]=GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+            CALL_1ARGS(helperfun,helper);
+            for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
+            sclen++;
+            MUL1_INT(ELM_PLIST(mc,row+1),cl,fi,d,(Int *) helperdata,0,wordlen);
+            MUL1_INT(ELM_PLIST(mi,row+1),cl,fi,d,(Int *) helperdata,0,wordlen);
+        }
+        /* Now clean: */
+        for (j = 1;j < col;j++) {
+            /* Is entry non-zero? */
+            for (k = d-1;k >= 0;k--) {
+                el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+                if (el != 0)
+                    break;  /* Leave loop immediately to keep value of k! */
+            }
+            if (k > -1) {   /* A non-zero entry, we have to work! */
+                if (k == 0) {    /* Only a prime field component! */
+                    el = p - el;   /* We know it is nonzero! */
+                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1)),
+                               DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
+                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
+                               DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
+                } else {   /* extension field case! */
+                    for (k = 0;k < d;k++) {
+                        el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+                        if (el != 0) {
+                            sclen = k+1;
+                            helperdata[k] = p-el;
+                        } else
+                            helperdata[k] = 0;
+                    }
+                    sclen++;
+                    ADDMUL_INT(ELM_PLIST(mc,j+1),cl,fi,ELM_PLIST(mc,row+1),
+                               d,(Int *) helperdata, 0, wordlen);
+                    ADDMUL_INT(ELM_PLIST(mi,j+1),cl,fi,ELM_PLIST(mi,row+1),
+                               d,(Int *) helperdata, 0, wordlen);
+                }
+            }
+        }
+        for (j = row+1;j <= dim;j++) {
+            /* Is entry non-zero? */
+            for (k = d-1;k >= 0;k--) {
+                el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+                if (el != 0)
+                    break;  /* Leave loop immediately to keep value of k! */
+            }
+            if (k > -1) {   /* A non-zero entry, we have to work! */
+                if (k == 0) {    /* Only a prime field component! */
+                    el = p - el;   /* We know it is nonzero! */
+                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1)),
+                               DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
+                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
+                               DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
+                } else {   /* extension field case! */
+                    for (k = 0;k < d;k++) {
+                        el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+                        if (el != 0) {
+                            sclen = k+1;
+                            helperdata[k] = p-el;
+                        } else
+                            helperdata[k] = 0;
+                    }
+                    sclen++;
+                    ADDMUL_INT(ELM_PLIST(mc,j+1),cl,fi,ELM_PLIST(mc,row+1),
+                               d,(Int *) helperdata, 0, wordlen);
+                    ADDMUL_INT(ELM_PLIST(mi,j+1),cl,fi,ELM_PLIST(mi,row+1),
+                               d,(Int *) helperdata, 0, wordlen);
+                }
+            }
+
+        }
+        dummy = ELM_PLIST(mc,col+1);
+        SET_ELM_PLIST(mc,col+1,ELM_PLIST(mc,row+1)); 
+        SET_ELM_PLIST(mc,row+1,dummy);
+        dummy = ELM_PLIST(mi,col+1);
+        SET_ELM_PLIST(mi,col+1,ELM_PLIST(mi,row+1)); 
+        SET_ELM_PLIST(mi,row+1,dummy);
+
+        STEP_RIGHT(&sa);
+    }
+    return True;
+}
+    
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
 /******************************************************************************
@@ -3139,6 +3256,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "TRANSPOSED_MAT", 2, "m, n",
     TRANSPOSED_MAT,
     "cvec.c:TRANSPOSED_MAT" },
+
+  { "CMAT_INVERSE", 4, "mi, mc, helperfun, helper",
+    CMAT_INVERSE,
+    "cvec.c:CMAT_INVERSE" },
 
   { 0 }
 

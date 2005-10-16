@@ -1773,6 +1773,98 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
   end);
 
 #############################################################################
+# Inversion of matrices:
+#############################################################################
+
+InstallOtherMethod( InverseMutable, "for a square cmat",
+  [IsCMatRep and IsMatrix],
+  function(m)
+    local col,dim,dummy,helper,i,j,l,mc,mi,row,vcl;
+    vcl := m!.vecclass;
+    if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
+    if m!.len = 0 then return fail; fi;
+    if m!.len = 1 then
+        l := [,CVEC.New(vcl)];
+        i := m!.rows[1]^-1;
+        if i = fail then
+            return fail;
+        fi;
+        l[2][1] := i;
+        return CVEC.CMatMaker(l,m!.vecclass);
+    fi;
+    # Now make a new identity matrix:
+    l := [];
+    for i in [m!.len+1,m!.len..2] do
+        l[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
+        l[i][i-1] := 1;   # note that this works for all fields!
+    od;
+    mi := CVEC.CMatMaker(l,vcl);
+    # Now make a copy of the matrix:
+    mc := MutableCopyMat(m);
+
+    # Temporary GAP code:
+    #dim := mc!.len;
+    #for col in [1..dim] do
+    #    row := col;
+    #    while row <= dim and IsZero(mc[row][col]) do
+    #        row := row + 1;
+    #    od;
+    #    if row > dim then
+    #        return fail;
+    #    fi;
+    #    i := mc[row][col];
+    #    if not(IsOne(i)) then
+    #        i := i^-1;
+    #        MultRowVector(mi[row],i);
+    #        MultRowVector(mc[row],i);
+    #    fi;
+    #    for j in [1..col-1] do
+    #        i := mc[j][col];
+    #        if not(IsZero(i)) then
+    #            i := -i;
+    #            AddRowVector(mc[j],mc[row],i);
+    #            AddRowVector(mi[j],mi[row],i);
+    #        fi;
+    #    od;
+    #    for j in [row+1..dim] do
+    #        i := mc[j][col];
+    #        if not(IsZero(i)) then
+    #            i := -i;
+    #            AddRowVector(mc[j],mc[row],i);
+    #            AddRowVector(mi[j],mi[row],i);
+    #        fi;
+    #    od;
+    #    dummy := mc[col]; mc[col] := mc[row]; mc[row] := dummy;
+    #    dummy := mi[col]; mi[col] := mi[row]; mi[row] := dummy;
+    #od;
+
+    # Now do the real work:
+    helper := CVEC.New(vcl);
+    i := CVEC.CMAT_INVERSE(mi!.rows,mc!.rows,CVEC.INVERT_FFE,helper);
+
+    if i <> fail then
+        return mi;
+    else
+        return fail;
+    fi;
+  end);
+
+CVEC.INVERT_FFE := function(helper)
+  helper[1] := helper[1]^-1;
+end;
+
+InstallOtherMethod( InverseSameMutability, "for a square cmat",
+  [IsCMatRep and IsMatrix],
+  function(m)
+    local mi;
+    mi := InverseMutable(m);
+    if mi <> fail and not(IsMutable(m)) then
+        MakeImmutable(mi);
+    fi;
+    return mi;
+  end );
+
+#############################################################################
 # Transposition:
 #############################################################################
 
