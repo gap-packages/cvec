@@ -3001,10 +3001,6 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
         if (k == -1) return Fail;
         /* Check whether the found element is not equal to one: */
         if (k > 0) {   /* A non-prime field entry which is not equal to 1 */
-            el = invert_modp((Int) el,(Int) p);
-            MUL_INL(DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
-            MUL_INL(DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
-        } else if (el != 1) {   /* A primefield entry which is not equal to 1 */
             /* Here we need an inversion of a field element: */
             for (k = 0;k < d;k++) 
                 helperdata[k]=GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
@@ -3013,6 +3009,10 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
             sclen++;
             MUL1_INT(ELM_PLIST(mc,row+1),cl,fi,d,(Int *) helperdata,0,wordlen);
             MUL1_INT(ELM_PLIST(mi,row+1),cl,fi,d,(Int *) helperdata,0,wordlen);
+        } else if (el != 1) {   /* A primefield entry which is not equal to 1 */
+            el = invert_modp((Int) el,(Int) p);
+            MUL_INL(DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
+            MUL_INL(DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
         }
         /* Now clean: */
         for (j = 1;j < col;j++) {
@@ -3033,7 +3033,7 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
                     for (k = 0;k < d;k++) {
                         el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
                         if (el != 0) {
-                            sclen = k+1;
+                            sclen = k;
                             helperdata[k] = p-el;
                         } else
                             helperdata[k] = 0;
@@ -3064,7 +3064,7 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
                     for (k = 0;k < d;k++) {
                         el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
                         if (el != 0) {
-                            sclen = k+1;
+                            sclen = k;
                             helperdata[k] = p-el;
                         } else
                             helperdata[k] = 0;
