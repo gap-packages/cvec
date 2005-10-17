@@ -1113,8 +1113,10 @@ CVEC.BENCH.INVERSION := function(p,d)
   Print("With std. grease (level ",m!.greasehint,"): ",t2-t," ms\n");
   if m!.greasehint <> 0 then
       for lev in [1..m!.greasehint+1] do
+        if q^lev < 2500 then   # to get rid of too high greasing levels
           t := Runtime(); n := CVEC.InverseWithGrease(m,lev); t2 := Runtime();
           Print("With grease level ",lev,": ",t2-t," ms\n");
+        fi;
       od;
   fi;
   mm := List(m,Unpack);
