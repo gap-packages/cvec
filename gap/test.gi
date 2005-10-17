@@ -1099,7 +1099,7 @@ end;
 CVEC.BENCH.INVERSION := function(p,d)
   local l,lev,m,mm,n,nn,q,t,t2;
   q := p^d;
-  l := QuoInt(5000,q);
+  l := First([1..5000],i->i^3*q > 2500^3*2);
   if l < 100 then l := 100; fi;
   Print("Doing random invertible ",l,"x",l," matrices.");
   repeat

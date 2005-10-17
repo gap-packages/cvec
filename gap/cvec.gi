@@ -1066,7 +1066,7 @@ end);
 
 CVEC.CMatMaker := function(l,cl)
     # Makes a new CMat, given a list l with a hole in the first place
-    local m,ty;
+    local greasehint,m,q,qp,ty;
     if Length(l) > 0 then
         m := rec(rows := l, len := Length(l)-1, vecclass := cl,
                  scaclass := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_GF]);
@@ -1076,6 +1076,12 @@ CVEC.CMatMaker := function(l,cl)
     fi;
     m.greasehint := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease];   
          # this is the current bestgrease
+    q := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+    qp := q^m.greasehint;
+    while m.greasehint > 0 and Length(l) < qp do
+        m.greasehint := m.greasehint-1;
+        qp := qp/q;
+    od;
     ty := NewType(CollectionsFamily(CollectionsFamily(
                         cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam])),
                   IsMatrix and IsOrdinaryMatrix and HasLength and
