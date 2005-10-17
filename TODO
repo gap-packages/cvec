@@ -2,7 +2,6 @@ TODO aufraeumen:
 
 Tasks to do:
 
-  * InverseMat
   * Random Vectors "RandomVec", (--> like matrices with one row)
   * matrix.g{d,i} look through for usability
   * test DeterminantMat
