@@ -1792,7 +1792,7 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
         l[2][1] := i;
         return CVEC.CMatMaker(l,m!.vecclass);
     fi;
-    if m!.greasehint = 0 then
+    if m!.greasehint = 0 or m!.len < 100 then
         return CVEC.InverseWithoutGrease(m);
     else
         return CVEC.InverseWithGrease(m,m!.greasehint);

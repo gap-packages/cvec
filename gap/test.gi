@@ -1107,8 +1107,10 @@ CVEC.BENCH.INVERSION := function(p,d)
       Print(".\c");
   until RankMat(m) = l;
   Print("got one.\n");
-  t := Runtime(); n := m^-1; t2 := Runtime();
+  t := Runtime(); n := CVEC.InverseWithoutGrease(m); t2 := Runtime();
   Print("Without grease: ",t2-t," ms\n");
+  t := Runtime(); n := m^-1; t2 := Runtime();
+  Print("With std. grease: ",t2-t," ms\n");
   if m!.greasehint <> 0 then
       for lev in [1..m!.greasehint+1] do
           t := Runtime(); n := CVEC.InverseWithGrease(m,lev); t2 := Runtime();
