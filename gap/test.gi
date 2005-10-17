@@ -1094,3 +1094,26 @@ CVEC.BENCH.MEASUREACCURACY := function()
                " (MB/s)^2\n\n");
 end;
 
+CVEC.BENCH.INVERSION := function(p,d)
+  local l,lev,m,mm,n,nn,q,t,t2;
+  q := p^d;
+  l := QuoInt(5000,q);
+  if l < 100 then l := 100; fi;
+  Print("Doing random invertible ",l,"x",l," matrices.");
+  repeat
+      m := CVEC.RandomMat(l,l,p,d);
+      Print(".\c");
+  until RankMat(m) = l;
+  Print("got one.\n");
+  t := Runtime(); n := m^-1; t2 := Runtime();
+  Print("Without grease: ",t2-t," ms\n");
+  for lev in [1..m!.greasehint] do
+      t := Runtime(); n := CVEC.InverseWithGrease(m,lev); t2 := Runtime();
+      Print("With grease level ",lev,": ",t2-t," ms\n");
+  od;
+  mm := List(m,Unpack);
+  if q <= 256 then ConvertToMatrixRep(mm,q); fi;
+  t := Runtime(); nn := mm^-1; t2 := Runtime();
+  Print("GAP without cmats: ",t2-t," ms\n");
+end;
+
