@@ -802,7 +802,7 @@ CVEC.TEST.TRANSPOSED_MAT := function(p,d)
   n := TransposedMatOp(m);
   mm := TransposedMatOp(n);
   if m <> mm then
-      Error("Alarm p=",p," d=",d," you can inspect, m, n, and mm");
+      Error("Alarm p=",p," d=",d," you can inspect m, n, and mm");
   fi;
   if p^d <= 256 then
       mo := List(m,Unpack);
@@ -811,11 +811,29 @@ CVEC.TEST.TRANSPOSED_MAT := function(p,d)
       nno := List(n,Unpack);
       ConvertToMatrixRep(nno);
       if no <> nno then
-          Error("Alarm p=",p," d=",d," you can inspect, m, n, no, and nno");
+          Error("Alarm p=",p," d=",d," you can inspect m, n, no, and nno");
       fi;
   fi;
 end;
 
+CVEC.TEST.INVERSION := function(p,d)
+  local lev,m,n,nn,x;
+  x := Random(50,100);
+  repeat
+    m := CVEC.RandomMat(x,x,p,d);
+  until RankMat(m) = x;
+  n := m^-1;
+  if not(IsOne(m*n)) then
+      Error("Alarm p=",p," d=",d," you can inspect m and n");
+  fi;
+  for lev in [1..m!.greasehint] do
+      nn := CVEC.InverseWithGrease(m,lev);
+      if nn <> n then
+          Error("Alarm p=",p," d=",d," you can inspect m, n, nn, and lev");
+      fi;
+  od;
+end;
+  
 CVEC.TEST.DOALL := function()
   local inf;
   inf := InfoLevel(InfoWarning);
@@ -894,6 +912,7 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.SCALAR_UNPACK(65537,3);
   CVEC.TEST.ALLCHEAP("NUMBERFFVECTOR",CVEC.TEST.NUMBERFFVECTOR);
   CVEC.TEST.ALLCHEAP("TRANSPOSED_MAT",CVEC.TEST.TRANSPOSED_MAT);
+  CVEC.TEST.COMPRESSED_ALL("INVERSION",CVEC.TEST.INVERSION);
   SetInfoLevel(InfoWarning,inf);
 end;
 

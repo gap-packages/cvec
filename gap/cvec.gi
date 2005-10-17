@@ -1828,7 +1828,7 @@ InstallOtherMethod( InverseSameMutability, "for a square cmat",
     return mi;
   end );
 
-MutableInversionWithGrease :=
+CVEC.InverseWithGrease :=
   function(m,lev)
     local greasetab1,greasetab2,helper,i,l,mc,mi,spreadtab,tablen,vcl;
     vcl := m!.vecclass;
