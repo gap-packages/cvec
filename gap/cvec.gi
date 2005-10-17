@@ -1828,6 +1828,57 @@ InstallOtherMethod( InverseSameMutability, "for a square cmat",
     return mi;
   end );
 
+MutableInversionWithGrease :=
+  function(m,lev)
+    local greasetab1,greasetab2,helper,i,l,mc,mi,spreadtab,tablen,vcl;
+    vcl := m!.vecclass;
+    if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
+    if m!.len = 0 then return fail; fi;
+    if m!.len = 1 then
+        l := [,CVEC.New(vcl)];
+        i := m!.rows[1]^-1;
+        if i = fail then
+            return fail;
+        fi;
+        l[2][1] := i;
+        return CVEC.CMatMaker(l,m!.vecclass);
+    fi;
+    # Now make a new identity matrix:
+    l := [];
+    for i in [m!.len+1,m!.len..2] do
+        l[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
+        l[i][i-1] := 1;   # note that this works for all fields!
+    od;
+    mi := CVEC.CMatMaker(l,vcl);
+    # Now make a copy of the matrix:
+    mc := MutableCopyMat(m);
+
+    # Prepare to grease:
+    spreadtab := CVEC.MakeSpreadTab(
+         vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
+         vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
+         lev, vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_bitsperel]);
+    tablen := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q]^lev;
+    greasetab1 := 0*[1..tablen+2];
+    greasetab2 := 0*[1..tablen+2];
+    for i in [1..tablen+2] do
+      greasetab1[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
+      greasetab2[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
+    od;
+
+    # Now do the real work:
+    helper := CVEC.New(vcl);
+    i := CVEC.CMAT_INVERSE_GREASE(mi!.rows,mc!.rows,CVEC.INVERT_FFE,helper,
+                                  [greasetab1,greasetab2,spreadtab,lev,tablen]);
+
+    if i <> fail then
+        return mi;
+    else
+        return fail;
+    fi;
+  end;
+
+
 #############################################################################
 # Transposition:
 #############################################################################

@@ -2972,11 +2972,51 @@ STATIC Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
     return 0L;
 }
 
+STATIC inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
+        Obj cl, Obj fi, Int p, Int d, Int saver, Int wordlen, Word *helperdata)
+{
+    register Int k;
+    register Word el = 0;
+    
+    /* Is entry non-zero? */
+    for (k = d-1;k >= 0;k--) {
+        el = GET_VEC_ELM(sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+        if (el != 0)
+            break;  /* Leave loop immediately to keep value of k! */
+    }
+    if (k > -1) {   /* A non-zero entry, we have to work! */
+        if (k == 0) {    /* Only a prime field component! */
+            el = p - el;   /* We know it is nonzero! */
+            ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1))+saver,
+                       DATA_CVEC(ELM_PLIST(mc,row+1))+saver,
+                       fi,el,wordlen-saver);
+            ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
+                       DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
+        } else {   /* extension field case! */
+            for (k = 0;k < d;k++) {
+                el = GET_VEC_ELM(sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+                if (el != 0) {
+                    sclen = k;
+                    helperdata[k] = p-el;
+                } else
+                    helperdata[k] = 0;
+            }
+            sclen++;
+            ADDMUL_INT(ELM_PLIST(mc,j+1),cl,fi,ELM_PLIST(mc,row+1),
+                       d,(Int *) helperdata, saver, wordlen);
+            ADDMUL_INT(ELM_PLIST(mi,j+1),cl,fi,ELM_PLIST(mi,row+1),
+                       d,(Int *) helperdata, 0, wordlen);
+        }
+    }
+}
+
 STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
 {
     PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We known that the length is >=3 */
     PREPARE_p(fi);
     PREPARE_d(fi);
+    PREPARE_epw(fi);
+    Int saver = 0;
     Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
     Int dim = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
     Int col, row;
@@ -3005,6 +3045,9 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
             for (k = 0;k < d;k++) 
                 helperdata[k]=GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
             CALL_1ARGS(helperfun,helper);
+            /* GARBAGE COLLECTION POSSIBLE */
+            helperdata = DATA_CVEC(helper);  /* this is the only ref we have */
+
             for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
             sclen++;
             MUL1_INT(ELM_PLIST(mc,row+1),cl,fi,d,(Int *) helperdata,0,wordlen);
@@ -3015,68 +3058,12 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
             MUL_INL(DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
         }
         /* Now clean: */
-        for (j = 1;j < col;j++) {
-            /* Is entry non-zero? */
-            for (k = d-1;k >= 0;k--) {
-                el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
-                if (el != 0)
-                    break;  /* Leave loop immediately to keep value of k! */
-            }
-            if (k > -1) {   /* A non-zero entry, we have to work! */
-                if (k == 0) {    /* Only a prime field component! */
-                    el = p - el;   /* We know it is nonzero! */
-                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1)),
-                               DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
-                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
-                               DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
-                } else {   /* extension field case! */
-                    for (k = 0;k < d;k++) {
-                        el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
-                        if (el != 0) {
-                            sclen = k;
-                            helperdata[k] = p-el;
-                        } else
-                            helperdata[k] = 0;
-                    }
-                    sclen++;
-                    ADDMUL_INT(ELM_PLIST(mc,j+1),cl,fi,ELM_PLIST(mc,row+1),
-                               d,(Int *) helperdata, 0, wordlen);
-                    ADDMUL_INT(ELM_PLIST(mi,j+1),cl,fi,ELM_PLIST(mi,row+1),
-                               d,(Int *) helperdata, 0, wordlen);
-                }
-            }
-        }
-        for (j = row+1;j <= dim;j++) {
-            /* Is entry non-zero? */
-            for (k = d-1;k >= 0;k--) {
-                el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
-                if (el != 0)
-                    break;  /* Leave loop immediately to keep value of k! */
-            }
-            if (k > -1) {   /* A non-zero entry, we have to work! */
-                if (k == 0) {    /* Only a prime field component! */
-                    el = p - el;   /* We know it is nonzero! */
-                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1)),
-                               DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
-                    ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
-                               DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
-                } else {   /* extension field case! */
-                    for (k = 0;k < d;k++) {
-                        el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
-                        if (el != 0) {
-                            sclen = k;
-                            helperdata[k] = p-el;
-                        } else
-                            helperdata[k] = 0;
-                    }
-                    sclen++;
-                    ADDMUL_INT(ELM_PLIST(mc,j+1),cl,fi,ELM_PLIST(mc,row+1),
-                               d,(Int *) helperdata, 0, wordlen);
-                    ADDMUL_INT(ELM_PLIST(mi,j+1),cl,fi,ELM_PLIST(mi,row+1),
-                               d,(Int *) helperdata, 0, wordlen);
-                }
-            }
-
+        j = 1; if (j == row) j++;   /* Extrawurst */
+        while (j <= dim) {
+            InternalClean(mi,mc,&sa,row,j,cl,fi,p,d,saver,wordlen,helperdata);
+            j++;
+            if (j == col || j == row) 
+                j = row+1;   /* Jump over rows known to be zero and row */
         }
         dummy = ELM_PLIST(mc,col+1);
         SET_ELM_PLIST(mc,col+1,ELM_PLIST(mc,row+1)); 
@@ -3086,6 +3073,135 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
         SET_ELM_PLIST(mi,row+1,dummy);
 
         STEP_RIGHT(&sa);
+        if (col % elsperword == 0) {
+            saver += d;
+        }
+    }
+    return True;
+}
+    
+STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun, 
+                               Obj helper, Obj grease)
+{
+    PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We known that the length is >=3 */
+    PREPARE_p(fi);
+    PREPARE_d(fi);
+    PREPARE_epw(fi);
+    Int saver = 0;
+    Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+    Int dim = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+    Int col, row;
+    register Int j, k;
+    seqaccess sa,sa2;
+    register Word el = 0;
+    Word *helperdata = DATA_CVEC(helper);
+    Obj dummy;
+    Obj greasetab1 = ELM_PLIST(grease,1);
+    Obj greasetab2 = ELM_PLIST(grease,2);
+    Obj spreadtab = ELM_PLIST(grease,3);
+    Int lev = INT_INTOBJ(ELM_PLIST(grease,4));
+    Int tablen = INT_INTOBJ(ELM_PLIST(grease,5));
+    Int startgreaseclean; /* Record minimum, where we have to begin cleaning */
+    Int blockend, l, i;
+    Int val;
+
+    INIT_SEQ_ACCESS(&sa,ELM_PLIST(mc,2),1);
+    col = 1;
+    while (col <= dim) {
+        blockend = col+lev-1;
+        if (dim < blockend) blockend = dim;
+        startgreaseclean = dim+1;
+        for (l = col;l <= blockend;l++) {   /* First we collect cleaners: */
+            row = l-1;
+            k = -1;  /* just to please the compiler */
+            while (row < dim && k == -1) {
+                row++;
+                /* First clean left of the current situation in the block: */
+                INIT_SEQ_ACCESS(&sa2,ELM_PLIST(mc,2),col);
+                for (i = col;i < l;i++) {
+                    InternalClean(mi,mc,&sa2,i,row,cl,fi,p,d,0,
+                                  wordlen,helperdata);
+                    STEP_RIGHT(&sa2);
+                }
+                /* Now look in our column: */
+                for (k = d-1;k >= 0;k--) {
+                    el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                    if (el != 0)
+                        break;  /* Leave loop immediately to keep value of k! */
+                }
+            }
+            if (k == -1) return Fail;
+            /* Check whether the found element is not equal to one: */
+            if (k > 0) {   /* A non-prime field entry which is not equal to 1 */
+                /* Here we need an inversion of a field element: */
+                for (k = 0;k < d;k++) 
+                    helperdata[k] = GET_VEC_ELM(&sa,
+                              DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                CALL_1ARGS(helperfun,helper);
+                /* GARBAGE COLLECTION POSSIBLE */
+                helperdata = DATA_CVEC(helper);  
+                    /* this is the only ref we have */
+
+                for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
+                sclen++;
+                MUL1_INT(ELM_PLIST(mc,row+1),cl,fi,d,(Int *) helperdata,
+                                   0,wordlen);
+                MUL1_INT(ELM_PLIST(mi,row+1),cl,fi,d,(Int *) helperdata,
+                                   0,wordlen);
+            } else if (el != 1) {   
+                /* A primefield entry which is not equal to 1 */
+                el = invert_modp((Int) el,(Int) p);
+                MUL_INL(DATA_CVEC(ELM_PLIST(mc,row+1)),fi,el,wordlen);
+                MUL_INL(DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
+            }
+            /* Now swap up: */
+            if (row != l) {
+                dummy = ELM_PLIST(mc,l+1);
+                SET_ELM_PLIST(mc,l+1,ELM_PLIST(mc,row+1)); 
+                SET_ELM_PLIST(mc,row+1,dummy);
+                dummy = ELM_PLIST(mi,l+1);
+                SET_ELM_PLIST(mi,l+1,ELM_PLIST(mi,row+1)); 
+                SET_ELM_PLIST(mi,row+1,dummy);
+                if (row < startgreaseclean) startgreaseclean = row;
+            } else {
+                if (row+1 < startgreaseclean) startgreaseclean = row+1;
+            }
+            /* Finally clean within this block upwards: */
+            for (i = col;i < l;i++) {
+                InternalClean(mi,mc,&sa,l,i,cl,fi,p,d,saver,
+                              wordlen,helperdata);
+            }
+
+            STEP_RIGHT(&sa);
+            if (l % elsperword == 0) {
+                saver += d;
+            }
+        }
+        /* We now have found cleaner rows col..blockend (inclusively) and
+         * moved them to positions col..blockend. We can now fill the
+         * greasetab and clean out rows 1..col-1 and startgreaseclean..dim: */
+        FILL_GREASE_TAB(self,mc,INTOBJ_INT(col+1),INTOBJ_INT(lev),greasetab1,
+                        INTOBJ_INT(tablen),INTOBJ_INT(1));
+        FILL_GREASE_TAB(self,mi,INTOBJ_INT(col+1),INTOBJ_INT(lev),greasetab2,
+                        INTOBJ_INT(tablen),INTOBJ_INT(1));
+        EXTRACT_INIT(self,ELM_PLIST(mc,2),INTOBJ_INT(col),INTOBJ_INT(lev));
+        if (startgreaseclean <= blockend) startgreaseclean = blockend+1;
+        j = 1; if (j == col) j = startgreaseclean;
+        while (j <= dim) {
+            val = (*Vector_Extract_Worker)(DATA_CVEC(ELM_PLIST(mc,j+1)));
+            if (val != 0) {
+                val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
+                ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1)),
+                           DATA_CVEC(ELM_PLIST(greasetab1,val)),
+                           fi,p-1,wordlen);
+                ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
+                           DATA_CVEC(ELM_PLIST(greasetab2,val)),
+                           fi,p-1,wordlen);
+            }
+            j++;
+            if (j == col) j = startgreaseclean;
+        }
+        col = blockend+1;
     }
     return True;
 }
@@ -3260,6 +3376,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "CMAT_INVERSE", 4, "mi, mc, helperfun, helper",
     CMAT_INVERSE,
     "cvec.c:CMAT_INVERSE" },
+
+  { "CMAT_INVERSE_GREASE", 5, "mi, mc, helperfun, helper, grease",
+    CMAT_INVERSE_GREASE,
+    "cvec.c:CMAT_INVERSE_GREASE" },
 
   { 0 }
 
