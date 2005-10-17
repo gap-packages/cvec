@@ -1125,3 +1125,43 @@ CVEC.BENCH.INVERSION := function(p,d)
   Print("GAP without cmats: ",t2-t," ms\n");
 end;
 
+CVEC.BENCH.MULTIPLICATION := function(p,d)
+  local a,aa,greasehint,l,lev,m,merklev,mm,n,nn,q,t,t2;
+  q := p^d;
+  l := First([1..5000],i->i^3*q > 2500^3*2);
+  if l < 100 then l := 100; fi;
+  Print("Doing random ",l,"x",l," matrices.");
+  m := CVEC.RandomMat(l,l,p,d);
+  n := CVEC.RandomMat(l,l,p,d);
+  Print("got them.\n");
+  merklev := n!.greasehint;
+  n!.greasehint := 0;  # Switch off greasing
+  t := Runtime(); a := m*n; t2 := Runtime();
+  Print("Without grease: ",t2-t," ms\n");
+  n!.greasehint := merklev;
+  t := Runtime(); a := m*n; t2 := Runtime();
+  Print("With std. grease (level ",n!.greasehint,"): ",t2-t," ms\n");
+  if m!.greasehint <> 0 then
+      for lev in [1..m!.greasehint+1] do
+        if q^lev < 2500 then   # to get rid of too high greasing levels
+          n!.greasehint := lev;
+          t := Runtime(); a := m*n; t2 := Runtime();
+          Print("With grease level ",lev,": ",t2-t," ms\n");
+        fi;
+      od;
+  fi;
+  n!.greasehint := merklev;
+  GreaseMat(n);
+  t := Runtime(); a := m*n; t2 := Runtime();
+  Print("With pregreased n (level ",n!.greasehint,"): ",t2-t," ms\n");
+  UnGreaseMat(n);
+  mm := List(m,Unpack);
+  nn := List(n,Unpack);
+  if q <= 256 then 
+      ConvertToMatrixRep(mm,q); 
+      ConvertToMatrixRep(nn,q); 
+  fi;
+  t := Runtime(); aa := mm * nn; t2 := Runtime();
+  Print("GAP without cmats: ",t2-t," ms\n");
+end;
+
