@@ -826,12 +826,14 @@ CVEC.TEST.INVERSION := function(p,d)
   if not(IsOne(m*n)) then
       Error("Alarm p=",p," d=",d," you can inspect m and n");
   fi;
-  for lev in [1..m!.greasehint] do
-      nn := CVEC.InverseWithGrease(m,lev);
-      if nn <> n then
-          Error("Alarm p=",p," d=",d," you can inspect m, n, nn, and lev");
-      fi;
-  od;
+  if m!.greasehint <> 0 then
+      for lev in [1..m!.greasehint+1] do
+          nn := CVEC.InverseWithGrease(m,lev);
+          if nn <> n then
+              Error("Alarm p=",p," d=",d," you can inspect m, n, nn, and lev");
+          fi;
+      od;
+  fi;
 end;
   
 CVEC.TEST.DOALL := function()
@@ -1107,10 +1109,12 @@ CVEC.BENCH.INVERSION := function(p,d)
   Print("got one.\n");
   t := Runtime(); n := m^-1; t2 := Runtime();
   Print("Without grease: ",t2-t," ms\n");
-  for lev in [1..m!.greasehint] do
-      t := Runtime(); n := CVEC.InverseWithGrease(m,lev); t2 := Runtime();
-      Print("With grease level ",lev,": ",t2-t," ms\n");
-  od;
+  if m!.greasehint <> 0 then
+      for lev in [1..m!.greasehint+1] do
+          t := Runtime(); n := CVEC.InverseWithGrease(m,lev); t2 := Runtime();
+          Print("With grease level ",lev,": ",t2-t," ms\n");
+      od;
+  fi;
   mm := List(m,Unpack);
   if q <= 256 then ConvertToMatrixRep(mm,q); fi;
   t := Runtime(); nn := mm^-1; t2 := Runtime();

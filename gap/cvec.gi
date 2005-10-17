@@ -1779,7 +1779,7 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
 InstallOtherMethod( InverseMutable, "for a square cmat",
   [IsCMatRep and IsMatrix],
   function(m)
-    local col,dim,dummy,helper,i,j,l,mc,mi,row,vcl;
+    local i,l,vcl;
     vcl := m!.vecclass;
     if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
     if m!.len = 0 then return fail; fi;
@@ -1792,7 +1792,28 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
         l[2][1] := i;
         return CVEC.CMatMaker(l,m!.vecclass);
     fi;
+    if m!.greasehint = 0 then
+        return CVEC.InverseWithoutGrease(m);
+    else
+        return CVEC.InverseWithGrease(m,m!.greasehint);
+    fi;
+  end );
+
+InstallOtherMethod( InverseSameMutability, "for a square cmat",
+  [IsCMatRep and IsMatrix],
+  function(m)
+    local mi;
+    mi := InverseMutable(m);
+    if mi <> fail and not(IsMutable(m)) then
+        MakeImmutable(mi);
+    fi;
+    return mi;
+  end );
+
+CVEC.InverseWithoutGrease := function(m)
     # Now make a new identity matrix:
+    local helper,i,l,mc,mi,vcl;
+    vcl := m!.vecclass;
     l := [];
     for i in [m!.len+1,m!.len..2] do
         l[i] := CVEC.NEW(vcl,vcl![CVEC_IDX_type]);
@@ -1811,22 +1832,11 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
     else
         return fail;
     fi;
-  end);
+  end;
 
 CVEC.INVERT_FFE := function(helper)
   helper[1] := helper[1]^-1;
 end;
-
-InstallOtherMethod( InverseSameMutability, "for a square cmat",
-  [IsCMatRep and IsMatrix],
-  function(m)
-    local mi;
-    mi := InverseMutable(m);
-    if mi <> fail and not(IsMutable(m)) then
-        MakeImmutable(mi);
-    fi;
-    return mi;
-  end );
 
 CVEC.InverseWithGrease :=
   function(m,lev)
