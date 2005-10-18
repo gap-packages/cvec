@@ -63,9 +63,9 @@ of matrices on storage. These descriptions might be very valuable to
 understand the behaviour of the implementation and various performance
 issues. Those and other performance issues are covered in Chapter <Ref
 Chap="performance"/>, where you mainly find hints on how to tune your
-own programs that use this package. Chapters <Ref Chap="scalars"/> to
-<Ref Chap="matrices"/> describe the available functionality for scalars,
-vectors, and matrices respectively. Chapter <Ref Chap="gaplib"/> describes,
+own programs that use this package. Chapters <Ref Chap="vectors"/> to
+<Ref Chap="matrices"/> describe the available functionality for
+vectors and matrices respectively. Chapter <Ref Chap="gaplib"/> describes,
 how the functionality in this package is or is not usable in connection
 with the &GAP; library. Finally, Chapter <Ref Chap="examples"/>
 shows instructive examples for the usage of this package.

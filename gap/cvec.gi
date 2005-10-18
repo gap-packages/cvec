@@ -250,6 +250,21 @@ InstallMethod( CVecClass, "for a cvec", [IsCVecRep],
     return DataType(TypeObj(v));
   end);
 
+InstallMethod( CVecClass, "for a cvec and a length", [IsCVecRep, IsInt],
+  function(v,l)
+    return CVEC.NewCVecClassSameField(DataType(TypeObj(v)),l);
+  end );
+
+InstallMethod( CVecClass, "for a cvecclass and a length", [IsCVecClass, IsInt],
+  function(c,l)
+    return CVEC.NewCVecClassSameField(c,l);
+  end );
+
+InstallMethod( CVecClass, "for three integers", [IsPosInt, IsPosInt, IsInt],
+  function(p,d,l)
+    return CVEC.NewCVecClass(p,d,l);
+  end );
+
 CVEC.New := function(arg)
   local c,d,l,p;
   if Length(arg) = 1 then
@@ -616,6 +631,7 @@ InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt],
 
 InstallOtherMethod( PositionNonZero, "for cvecs",
   [IsCVecRep], CVEC.POSITION_NONZERO_CVEC);
+a
 InstallOtherMethod( PositionLastNonZero, "for cvecs",
   [IsCVecRep], CVEC.POSITION_LAST_NONZERO_CVEC);
 InstallOtherMethod( PositionNot, "for cvecs",
@@ -967,6 +983,35 @@ InstallOtherMethod( \{\}, "for a cvec and a list",
 # Note that slicing assignment is intentionally not supported, because
 # this will usually be used only by inefficient code. Use CVEC.Slice
 # or even CVEC.SLICE instead.
+
+# Concatenation of vectors:
+
+CVEC.Concatenation := function(arg)
+  local c,cc,i,len,pos,v;
+  if Length(arg) = 0 or not(IsCVecRep(arg[1])) then
+      Error("CVEC.Concatenation: Need at least one cvec");
+      return;
+  fi;
+  c := DataType(TypeObj(arg[1]));
+  len := Length(arg[1]);
+  for i in [2..Length(arg)] do
+      if not(IsCVecRep(arg[i])) or 
+         not(IsIdenticalObj(c,DataType(TypeObj(arg[i])))) then
+          Error("CVEC.Concatenation: Arguments must all be cvecs over the ",
+                "same field ");
+          return;
+      fi;
+      len := len + Length(arg[i]);
+  od;
+  cc := CVEC.NewCVecClassSameField(c,len);
+  v := CVEC.New(cc);
+  pos := 1;
+  for i in [1..Length(arg)] do
+      CVEC.SLICE(arg[i],v,1,Length(arg[i]),pos);
+      pos := pos + Length(arg[i]);
+  od;
+  return v;
+end;
 
 
 InstallOtherMethod( ProductCoeffs, "for cvecs",
@@ -1633,35 +1678,6 @@ CVEC.MakeHashFunction := function(p,hashlen)
   fi;
 end;
 
-# Concatenation of vectors:
-
-CVEC.Concatenation := function(arg)
-  local c,cc,i,len,pos,v;
-  if Length(arg) = 0 or not(IsCVecRep(arg[1])) then
-      Error("CVEC.Concatenation: Need at least one cvec");
-      return;
-  fi;
-  c := DataType(TypeObj(arg[1]));
-  len := Length(arg[1]);
-  for i in [2..Length(arg)] do
-      if not(IsCVecRep(arg[i])) or 
-         not(IsIdenticalObj(c,DataType(TypeObj(arg[i])))) then
-          Error("CVEC.Concatenation: Arguments must all be cvecs over the ",
-                "same field ");
-          return;
-      fi;
-      len := len + Length(arg[i]);
-  od;
-  cc := CVEC.NewCVecClassSameField(c,len);
-  v := CVEC.New(cc);
-  pos := 1;
-  for i in [1..Length(arg)] do
-      CVEC.SLICE(arg[i],v,1,Length(arg[i]),pos);
-      pos := pos + Length(arg[i]);
-  od;
-  return v;
-end;
-
 #############################################################################
 # Arithmetic between vectors and matrices, especially multiplication:
 #############################################################################
@@ -2227,14 +2243,10 @@ CVEC.ReadMatsFromFile := function(fnpref)
   return l;
 end;
 
-      
-# Hacks:
-
-# FIXME: Is this needed?
 InstallMethod(DefaultFieldOfMatrix,
   [IsMatrix and IsCMatRep and IsFFECollColl],
   function(m)
     local f;
-    return m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_GF];
+    return m!.vecclass![CVEC_IDX_GF];
   end);
 

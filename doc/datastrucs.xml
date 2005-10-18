@@ -13,8 +13,8 @@ This chapter describes the data structures.
 
 This chapter describes all the data structures used in this package. We
 start with a section on finite fields and what is already there in the
-&GAP; kernel and library. Then we describe compressed vectors, large
-scalars and compressed matrices.
+&GAP; kernel and library. Then we describe compressed vectors
+and compressed matrices.
 
 <Section Label="finfields">
 <Heading>Finite field elements</Heading>
@@ -34,21 +34,19 @@ we can store coset representatives by storing polynomials of degree less
 than <M>d</M>, where <M>d</M> is the degree of the finite field over its
 prime field.<P/>
 
-As of this writing, &GAP; has another implementation of finite field
-elements built into its kernel, which stores finite field elements by
+As of this writing, &GAP; has two implementation of finite field
+elements built into its kernel and library, the first of which stores 
+finite field elements by
 storing the discrete logarithm with respect to a primitive root of the
 field. Although this is nice and efficient for small finite fields, it
 becomes unhandy for larger finite fields, because one needs a lookup table of
-length <M>p^d</M> for doing efficient addition. The &GAP; implementation
+length <M>p^d</M> for doing efficient addition. This implementation
 thus is limited to fields with less than or equal to <M>65536</M> elements.
-<P/>
+The other implementation using polynomial arithmetic modulo the Conway
+polynomial is used for fields with more than <M>65536</M> elements.
+For prime fields of characteristic <M>p</M> with more than that elements, 
+there is an implementation using integers modulo <M>p</M>.
 
-For those finite fields implemented in &GAP; we use those elements as
-scalars for our vectors. Conversion between the internal format used in
-the compressed vectors and the &GAP; representation is done via table
-lookup. For larger finite fields, this package provides
-an implementation that uses the above mentioned approach with polynomial
-arithmetic. See Section <Ref Sect="cscas"/> for details.<P/>
 </Section>
 
 <Section Label="cvecs">
@@ -199,101 +197,146 @@ third piece, the defining data, and is called a <Q><C>cvecclass</C></Q>.<P/>
 A <C>cvecclass</C> is a positional object with <M>5</M>
 components:
 
-<Table Align="ll">
+<Table Align="cll">
 <Caption>Components of a <C>cvecclass</C></Caption>
 <Row>
-<Item>Position</Item><Item>Content</Item>
+<Item>Position</Item><Item>Name</Item><Item>Content</Item>
 </Row>
 <HorLine/>
 <Row>
-<Item>1</Item><Item>a <C>fieldinfo</C> object, see below</Item>
+<Item>1</Item><Item><Alt Only="LaTeX"><C>IDX\_fieldinfo</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_fieldinfo</C></Alt></Item>
+<Item>a <C>fieldinfo</C> object, see below</Item>
 </Row>
 <Row>
-<Item>2</Item><Item>the length of the vector as immediate &GAP; integer</Item>
+<Item>2</Item><Item><Alt Only="LaTeX"><C>IDX\_len</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_len</C></Alt></Item>
+<Item>the length of the vector as immediate &GAP; integer</Item>
 </Row>
 <Row>
-<Item>3</Item><Item>the number of <C>Word</C>s used as immediate &GAP;
-integer</Item>
+<Item>3</Item><Item><Alt Only="LaTeX"><C>IDX\_wordlen</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_wordlen</C></Alt></Item>
+<Item>the number of <C>Word</C>s used as immediate &GAP; integer</Item>
 </Row>
 <Row>
-<Item>4</Item><Item>a &GAP; type used to create new vectors</Item>
+<Item>4</Item><Item><Alt Only="LaTeX"><C>IDX\_type</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_type</C></Alt></Item>
+<Item>a &GAP; type used to create new vectors</Item>
 </Row>
 <Row>
-<Item>5</Item><Item>a &GAP; object for the base field</Item>
+<Item>5</Item><Item><Alt Only="LaTeX"><C>IDX\_GF</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_GF</C></Alt></Item>
+<Item>a &GAP; object for the base field</Item>
+</Row>
+<Row>
+<Item>6</Item><Item><Alt Only="LaTeX"><C>IDX\_lens</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_lens</C></Alt></Item>
+<Item>a list holding lengths of vectors in <C>cvecclasses</C>
+    for the same field</Item>
+</Row>
+<Row>
+<Item>7</Item><Item><Alt Only="LaTeX"><C>IDX\_classes</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_classes</C></Alt></Item>
+<Item>a list holding <C>cvecclass</C>es for the same field
+    with lengths as in entry number 6</Item>
 </Row>
 </Table>
-In position 5 we have just the &GAP; finite field object <C>GF(p,d)</C> for
-the case that <M>p^d \leq 65536</M> and the corresponding <C>cscaclass</C>
-(see Section <Ref Sect="cscas"/>) otherwise.<P/>
+In position 5 we have just the &GAP; finite field object <C>GF(p,d)</C>.
+The names appear as symbols in the code.<P/>
 
 The field is described by the &GAP; object in position 1, a so-called
 <C>fieldinfo</C> object, which is described in the following table:
 
-<Table Align="ll">
+<Table Align="cll">
 <Caption>Components of a <C>fieldinfo</C></Caption>
 <Row>
-<Item><E>Position</E></Item><Item><E>Content</E></Item>
+<Item><E>Position</E></Item><Item>Name</Item><Item><E>Content</E></Item>
 </Row>
 <HorLine/>
 <Row>
-<Item>1</Item><Item><M>p</M> as an immediate &GAP; integer</Item>
+<Item>1</Item><Item><Alt Only="LaTeX"><C>IDX\_p</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_p</C></Alt></Item>
+<Item><M>p</M> as an immediate &GAP; integer</Item>
 </Row>
 <Row>
-<Item>2</Item><Item><M>d</M> as an immediate &GAP; integer</Item>
+<Item>2</Item><Item><Alt Only="LaTeX"><C>IDX\_d</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_d</C></Alt></Item>
+<Item><M>d</M> as an immediate &GAP; integer</Item>
 </Row>
 <Row>
-<Item>3</Item><Item><M>q=p^d</M> as a &GAP; integer</Item>
+<Item>3</Item><Item><Alt Only="LaTeX"><C>IDX\_q</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_q</C></Alt></Item>
+<Item><M>q=p^d</M> as a &GAP; integer</Item>
 </Row>
 <Row>
-<Item>4</Item><Item>a &GAP; string containing the coefficients of the
+<Item>4</Item><Item><Alt Only="LaTeX"><C>IDX\_conway</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_conway</C></Alt></Item>
+<Item>a &GAP; string containing the coefficients of the
                     Conway Polynomial as unsigned int []</Item>
 </Row>
 <Row>
-<Item>5</Item><Item>number of bits per element of the prime field
+<Item>5</Item><Item><Alt Only="LaTeX"><C>IDX\_bitsperel</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_bitsperel</C></Alt></Item>
+<Item>number of bits per element of the prime field
 (<C>bitsperel</C>)</Item>
 </Row>
 <Row>
-<Item>6</Item><Item>prime field elements per <C>Word</C>
+<Item>6</Item><Item><Alt Only="LaTeX"><C>IDX\_elsperword</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_elsperword</C></Alt></Item>
+<Item>prime field elements per <C>Word</C>
 (<C>elsperword</C>)</Item>
 </Row>
 <Row>
-<Item>7</Item><Item>a &GAP; string containing C data for internal use</Item>
+<Item>7</Item><Item><Alt Only="LaTeX"><C>IDX\_wordinfo</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_wordinfo</C></Alt></Item>
+<Item>a &GAP; string containing C data for internal use</Item>
 </Row>
 <Row>
-<Item>8</Item><Item>the best grease level (see Section <Ref
+<Item>8</Item><Item><Alt Only="LaTeX"><C>IDX\_bestgrease</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_bestgrease</C></Alt></Item>
+<Item>the best grease level (see Section <Ref
 Sect="Greasing"/>)</Item>
 </Row>
 <Row>
-<Item>9</Item><Item>the length of a grease table using best grease</Item>
+<Item>9</Item><Item><Alt Only="LaTeX"><C>IDX\_greasetabl</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_greasetabl</C></Alt></Item>
+<Item>the length of a grease table using best grease</Item>
 </Row>
 <Row>
-<Item>10</Item><Item>a filter list for the creation of new vectors over
+<Item>10</Item><Item><Alt Only="LaTeX"><C>IDX\_filts</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_filts</C></Alt></Item>
+<Item>a filter list for the creation of new vectors over
 this field</Item>
 </Row>
 <Row>
-<Item>11</Item><Item>a table for <M>GF(q)</M> to <C>[0..q-1]</C> conversion
+<Item>11</Item><Item><Alt Only="LaTeX"><C>IDX\_tab1</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_tab1</C></Alt></Item>
+<Item>a table for <M>GF(q)</M> to <C>[0..q-1]</C> conversion
 if <M>q \leq 65536</M></Item>
 </Row>
 <Row>
-<Item>12</Item><Item>a table for <C>[0..q-1]</C> to <M>GF(q)</M> conversion
+<Item>12</Item><Item><Alt Only="LaTeX"><C>IDX\_tab2</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_tab2</C></Alt></Item>
+<Item>a table for <C>[0..q-1]</C> to <M>GF(q)</M> conversion
 if <M>q \leq 65536</M></Item>
 </Row>
 <Row>
-<Item>13</Item><Item>0 for <M>q \leq 65536</M>, otherwise 1 if <M>q</M> is
+<Item>13</Item><Item><Alt Only="LaTeX"><C>IDX\_size</C></Alt>
+                    <Alt Not="LaTeX"><C>IDX_size</C></Alt></Item>
+<Item>0 for <M>q \leq 65536</M>, otherwise 1 if <M>q</M> is
 a &GAP; immediate integer and 2 if not</Item>
 </Row>
 <Row>
-<Item>14</Item><Item>the scalars family</Item>
+<Item>14</Item><Item><Alt Only="LaTeX"><C>IDX\_scafam</C></Alt>
+                     <Alt Not="LaTeX"><C>IDX_scafam</C></Alt></Item>
+<Item>the scalars family</Item>
 </Row>
 </Table>
 Note that &GAP; has a family for all finite field elements of a given
 characteristic <M>p</M>, vectors over a finite field are then in the
 collections family of that family and matrices are in the collections
 family of the collections family of the scalars family. We use the same
-families in the same way for compressed vectors and matrices for fields
-with less than or equal to <M>65536</M> elements. For larger finite fields,
-we create a new family for each field (see Section <Ref
-Sect="cscas"/>).<P/>
+families in the same way for compressed vectors and matrices.
 
 </Subsection>
 

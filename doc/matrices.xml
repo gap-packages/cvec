@@ -13,6 +13,16 @@ This chapter covers compressed matrices.
 
 Here comes text.<P/>
 
+<!-- CMat, ZeroMat, IdentityMat, RandomMat, Add, Remove, [], []:=, {}, {}:=,
+Length, ShallowCopy, Collected, DuplicateFreeList, Append, Filtered,
+Unbind, CopySubMatrix, +, -, -(unary), Zero{Mutable,...}, One{Mutable,...},
+* with scalars, =, <, IsZero, IsOne, Characteristic, DegreeFF, BaseField,
+MakeHashFunction, vec * mat, mat * mat, Inverse{Mutable,...}, TransposedMat,
+GreaseMat, UnGreaseMat, OptimizeGreaseHint, WriteMat, WriteMatToFile,
+WriteMatsToFile, ReadMat, ReadMatFromFile, ReadMatsFromFile,
+DefaultFieldOfMatrix, FieldOfMatrix -->
+
+
 <!-- ############################################################ -->
 
 </Chapter>

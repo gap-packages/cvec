@@ -103,4 +103,6 @@ DeclareOperation( "UnGreaseMat", [IsCMatRep]);
 
 DeclareOperation( "BaseField", [IsObject] );
 DeclareOperation( "CVecClass", [IsObject] );
+DeclareOperation( "CVecClass", [IsObject, IsInt] );
+DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 

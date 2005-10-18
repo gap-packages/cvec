@@ -1130,7 +1130,7 @@ CVEC.BENCH.MULTIPLICATION := function(p,d)
   q := p^d;
   l := First([1..5000],i->i^3*q > 2500^3*2);
   if l < 100 then l := 100; fi;
-  Print("Doing random ",l,"x",l," matrices...\c"
+  Print("Doing random ",l,"x",l," matrices...\c");
   m := CVEC.RandomMat(l,l,p,d);
   n := CVEC.RandomMat(l,l,p,d);
   Print("got them.\n");
