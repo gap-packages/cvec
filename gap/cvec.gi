@@ -631,7 +631,6 @@ InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt],
 
 InstallOtherMethod( PositionNonZero, "for cvecs",
   [IsCVecRep], CVEC.POSITION_NONZERO_CVEC);
-a
 InstallOtherMethod( PositionLastNonZero, "for cvecs",
   [IsCVecRep], CVEC.POSITION_LAST_NONZERO_CVEC);
 InstallOtherMethod( PositionNot, "for cvecs",
