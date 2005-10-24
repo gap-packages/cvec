@@ -5,10 +5,7 @@ Tasks to do:
   * Random Vectors "RandomVec", (--> like matrices with one row)
   * matrix.g{d,i} look through for usability
   * test DeterminantMat
-  * IsMutable-Durchgang durch cvec.gi
-  * Beweis, dass keine CHANGED_BAGs fehlen
-  * Documentation
-  * Cleanup of "Hacks" and "Utilities" in cvec.gi
+  * Documentation for matrices, run through pdf doc.
   * Hash-Funktionen fuer Matrizen (Generators!)
     Use NumberFFVector for "small" vectors? Maybe for vectors < 2 words?
   ? Display bei Vektoren ueber GF(5,3)
@@ -34,4 +31,3 @@ Possibly not to do:
   * Append for CVecs
   * Resize for CVecs
   * * mod cp, at least over prime field
-

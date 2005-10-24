@@ -195,10 +195,6 @@ as <A>v</A>.
 
 </Section>
 
-<Section>
-<Heading>Element access and unpacking</Heading>
-
-</Section>
 
 <Section>
 <Heading>Arithmetic</Heading>
@@ -310,21 +306,217 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 
 <Section>
 <Heading>Element access and slicing</Heading>
-<!-- [], []:=, {}, Slice,  -->
+
+<C>cvec</C>s behave to some extend like lists with respect to element access 
+and slicing. However, they allow only actions that can be implemented
+efficiently and that do not change their length. In addition there is a 
+highly optimised function to copy contiguous sections of <C>cvec</C>s
+into another <C>cvec</C>.
+
+<ManSection>
+<Meth Name="ELM_LIST" Arg="v, pos"/>
+<Returns>a finite field element</Returns>
+<Description>
+This is a method for (reading) element access of vectors. <A>v</A> must
+be a <A>cvec</A> and <A>pos</A> must be a positive integer not greater
+than the length of <A>v</A>. The finite field element at position
+<A>pos</A> in <A>v</A> is returned.<P/>
+
+Note that the list access syntax <Q><A>v</A>[<A>pos</A>]</Q> triggers a call
+to the <Ref Meth="ELM_LIST"/> operation.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ASS_LIST" Arg="v, pos, s"/>
+<Returns>nothing</Returns>
+<Description>
+This is a method for (writing) element access of vectors. <A>v</A> must
+be a <A>cvec</A> and <A>pos</A> must be a positive integer not greater
+than the length of <A>v</A>. <A>s</A> must be a finite field element
+or an integer. The finite field element at position
+<A>pos</A> in <A>v</A> is set to <A>s</A>.<P/>
+
+The scalar <A>s</A> is treated exactly as described in Subsection 
+<Ref Subsect="scahandl"/>.<P/>
+
+Note that the list access syntax 
+<Q><A>v</A><C>[</C><A>pos</A><C>] := </C><A>s</A></Q>
+triggers a call to the <Ref Meth="ASS_LIST"/> operation.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ELMS_LIST" Arg="v, l"/>
+<Returns>a <C>cvec</C></Returns>
+<Description>
+This is a method for (reading) slice access of vectors. <A>v</A> must
+be a <A>cvec</A> and <A>l</A> must be a range object or a list of positive 
+integers not greater than the length of <A>v</A>. In both cases the list
+of numbers must be contiguous list of valid positions in the vector.
+A new <C>cvec</C> over the same field as <A>v</A> and with the same
+length as <A>l</A> is created and returned. The finite field element at i
+positions <A>l</A> in <A>v</A> are copied into the new vector.<P/>
+
+Note that the list slice access syntax <Q><A>v</A>{<A>l</A>}</Q> triggers a 
+call to the <Ref Meth="ELMS_LIST"/> operation.
+</Description>
+</ManSection>
+
+Note that there intentionally is no write slice access to <C>cvec</C>s,
+because in most cases this would lead to code that unnecessarily
+copies data around in an expensive way. Please use the following function
+instead:
+
+<ManSection>
+<Func Name="CVEC.Slice" Arg="src, dst, srcpos, len, dstpos"/>
+<Returns>nothing</Returns>
+<Description>
+<A>src</A> and <A>dst</A> must be <C>cvec</C>s over the same field.
+The field elements from positions <A>srcpos</A> to 
+<M><A>srcpos</A>+<A>len</A>-1</M> in <A>src</A> are copied to positions 
+from <A>dstpos</A> in <A>dst</A>. Of course all positions must be within
+the vectors. <P/>
+
+Note that this functions is quite efficient, however, the ranges are
+checked. If you want to avoid this, use <C>CVEC.SLICE</C> instead (with
+same calling convention), but do not complain later if crashes occur in
+case of illegal positions used.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVEC.Concatenation" Arg="arg"/>
+<Returns>a new <C>cvec</C> by concatenating all arguments</Returns>
+<Description>
+This function provides concatenation of <C>cvec</C>s over the same
+base field. The result is a new <C>cvec</C>. A variable number of
+<C>cvec</C>s over the same field can be given.
+</Description>
+</ManSection>
 
 </Section>
+
 
 <Section>
 <Heading>Comparison of Vectors and other information</Heading>
 
-<!-- =, <, <=, IsZero, PositionNonZero, PositionLastNonZero, Length  -->
+<ManSection>
+<Meth Name="=" Arg="v, w"/>
+<Returns><C>true</C> or <C>false</C></Returns>
+<Description>
+    Returns <C>true</C> if the <C>cvec</C>s <A>v</A> and <A>w</A> are
+    equal. The vectors must be over the same field and must have equal
+    length.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="&lt;" Arg="v, w"/>
+<Returns><C>true</C> or <C>false</C></Returns>
+<Description>
+    Returns <C>true</C> if the <C>cvec</C>s <A>v</A> is smaller than <A>w</A>.
+    The vectors must be over the same field and must have equal
+    length. The order implemented is very efficient but is <E>not</E> 
+    compatible with lexicographic ordering of lists of
+    finite field elements! This method should therefore only be used
+    for binary search purposes.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="IsZero" Arg="v"/>
+<Returns><C>true</C> or <C>false</C></Returns>
+<Description>
+    Returns <C>true</C> if the <C>cvec</C> <A>v</A> is equal to zero, meaning
+    that all entries are equal to zero.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="PositionNonZero" Arg="v"/>
+<Returns>a positive integer</Returns>
+<Description>
+    Returns the index of the first entry in the <C>cvec</C> <A>v</A> that is 
+    not equal to zero. If the vector is equal to zero, then its <C>Length</C>
+    plus one is returned.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="PositionLastNonZero" Arg="v"/>
+<Returns>a non-negative integer</Returns>
+<Description>
+    Returns the index of the last entry in the <C>cvec</C> <A>v</A> that is 
+    not equal to zero. If the vector is equal to zero, then <M>0</M>
+    is returned.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="Length" Arg="v"/>
+<Returns>a non-negative integer</Returns>
+<Description>
+    Returns the length of the <C>cvec</C> <A>v</A>.
+</Description>
+</ManSection>
 
 </Section>
 
 <Section>
 <Heading>Changing representation, Unpacking</Heading>
 
-<!-- Unpack, IntegerRep, NumberFFVector, CVecNumber -->
+<ManSection>
+<Meth Name="Unpack" Arg="v" Label="cvec"/>
+<Returns>a list of finite field elements</Returns>
+<Description>
+    This operation unpacks a <C>cvec</C> <A>v</A>. A new plain list containing
+    the corresponding numbers as &GAP; finite field elements. Note that
+    the vector <A>v</A> remains unchanged.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="IntegerRep" Arg="v" Label="cvec"/>
+<Returns>a list of integers or of lists of integers</Returns>
+<Description>
+    This operation unpacks a <C>cvec</C> <A>v</A> into its integer
+    representation. A new plain list containing
+    the corresponding numbers of the vector is returned. The integer
+    representation of a finite field element is either one integer
+    (containing the p-adic expansion of the polynomial representative of
+    the residue class modulo the Conway polynomial, if the field has
+    less or equal to <M>65536</M> elements. For larger finite fields each
+    field element is represented as a list of <M>d</M> integers between
+    <M>0</M> and <M>p-1</M>, where <M>d</M> is the degree of the finite
+    field over its prime field. Note that
+    the vector <A>v</A> remains unchanged.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="NumberFFVector" Arg="v, sz" Label="cvec"/>
+<Returns>an integer</Returns>
+<Description>
+    This implements the library operation <Ref Oper="NumberFFVector"
+        BookName="Ref"/>. Note that only the case that <A>sz</A> is the
+    number of elements in the base field of <A>v</A> is implemented.
+    There is an inverse operation called <Ref Oper="CVecNumber"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Oper Name="CVecNumber" Arg="nr, cl"/>
+<Oper Name="CVecNumber" Arg="nr, p, d, l"/>
+<Returns>a <C>cvec</C></Returns>
+<Description>
+    This is the inverse operation to <Ref Oper="NumberFFVector" 
+        BookName="Ref"/>. Of course, the base field of the vector and its
+    length has to be specified, either by giving a <C>cvecclass</C> <A>cl</A>
+    or the parameters <A>p</A>, <A>d</A>, and <A>l</A>. For both cases
+    corresponding methods are available.
+</Description>
+</ManSection>
 
 </Section>
 
@@ -336,16 +528,30 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 <Returns>Returns the base field of <A>v</A>.
 </Returns>
 <Description>
-    For a <C>cvec</C> <A>v</A>. For <M>q=p^d \leq 65536</M> this returns
-    the &GAP; object <C>GF(p,d)</C>. For larger finite fields this
-    uses the &GAP; library to form a field object, which basically only
-    knows its <C>Size</C> and finiteness, <C>Zero</C> and <C>One</C>.
-    One can probably not do much more with this. One can form
-    a polynomial ring over it.
+    For a <C>cvec</C> <A>v</A> this returns
+    the &GAP; object <C>GF(p,d)</C>. 
 </Description>
 </ManSection>
 
-<!-- Characteristic, DegreeFF -->
+<ManSection>
+<Meth Name="Characteristic" Arg="v" Label="cvec"/>
+<Returns>the characteristic of the base field of <A>v</A>
+</Returns>
+<Description>
+    Returns the characteristic of the base field of <A>v</A> (see
+    <Ref Meth="BaseField"/>).
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="DegreeFFE" Arg="v" Label="cvec"/>
+<Returns>the degree of the base field of <A>v</A> over its prime field
+</Returns>
+<Description>
+    Returns the degree of the base field of <A>v</A> over its prime field (see
+    <Ref Meth="BaseField"/>).
+</Description>
+</ManSection>
 
 </Section>
 

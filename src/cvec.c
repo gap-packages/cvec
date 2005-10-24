@@ -3044,8 +3044,8 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
             /* Here we need an inversion of a field element: */
             for (k = 0;k < d;k++) 
                 helperdata[k]=GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
-            CALL_1ARGS(helperfun,helper);
             /* GARBAGE COLLECTION POSSIBLE */
+            CALL_1ARGS(helperfun,helper);
             helperdata = DATA_CVEC(helper);  /* this is the only ref we have */
 
             for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
@@ -3071,6 +3071,8 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
         dummy = ELM_PLIST(mi,col+1);
         SET_ELM_PLIST(mi,col+1,ELM_PLIST(mi,row+1)); 
         SET_ELM_PLIST(mi,row+1,dummy);
+        /* No CHANGED_BAG necessary here, because things are only
+         * interchanged. */
 
         STEP_RIGHT(&sa);
         if (col % elsperword == 0) {
@@ -3137,8 +3139,8 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
                 for (k = 0;k < d;k++) 
                     helperdata[k] = GET_VEC_ELM(&sa,
                               DATA_CVEC(ELM_PLIST(mc,row+1)),k);
-                CALL_1ARGS(helperfun,helper);
                 /* GARBAGE COLLECTION POSSIBLE */
+                CALL_1ARGS(helperfun,helper);
                 helperdata = DATA_CVEC(helper);  
                     /* this is the only ref we have */
 
@@ -3162,6 +3164,8 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
                 dummy = ELM_PLIST(mi,l+1);
                 SET_ELM_PLIST(mi,l+1,ELM_PLIST(mi,row+1)); 
                 SET_ELM_PLIST(mi,row+1,dummy);
+                /* No CHANGED_BAG necessary here because things are only
+                 * interchanged. */
                 if (row < startgreaseclean) startgreaseclean = row;
             } else {
                 if (row+1 < startgreaseclean) startgreaseclean = row+1;
@@ -3484,5 +3488,35 @@ StructInitInfo * Init__cvec ( void )
 {
   return &module;
 }
+
+/* Here is a sketch of a proof that there are no bugs in this file because
+ * of garbage collections being triggered and in the sequel references
+ * kept in the C-level are no longer valid:
+ * All places where a garbage collection can be triggered are marked
+ * with "GARBAGE COLLECTION POSSIBLE" (usage of functions "NewBag",
+ * "NEW_STRING", "NEW_PLIST", "GrowString" or "CALL_1ARGS"). 
+ * All those places have to be checked that no absolute reference is 
+ * reused after the garbage collection. This has been done. 
+ * The following functions contain such places:
+ *   FINALIZE_FIELDINFO
+ *   NEW
+ *   ELM_CVEC
+ *   PROD_CMAT_CMAT_NOGREASE2
+ *   CVEC_TO_EXTREP
+ *   PROD_COEFFS_CVEC_PRIMEFIELD
+ *   CMAT_INVERSE
+ *   CMAT_INVERSE_GREASE
+ * Those functions are not called in this file from the C level. So no
+ * other functions are "infected". */
+
+/* Here is a sketch of a proof that there are no missing CHANGED_BAGs in
+ * this file:
+ * A CHANGED_BAG only has to be used after assigning a reference to
+ * a masterpointer. This can only be done by using one of
+ *   SET_ELM_PLIST, SET_TYPE_DATOBJ, AssPRec
+ * AssPRec does the CHANGED_BAG on its own.
+ * All occurrences of "SET_" have been checked, whether references to
+ * masterpointers are assigned. No missing CHANGED_BAGs have been found. */
+
 
 

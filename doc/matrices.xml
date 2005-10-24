@@ -20,7 +20,7 @@ Unbind, CopySubMatrix, +, -, -(unary), Zero{Mutable,...}, One{Mutable,...},
 MakeHashFunction, vec * mat, mat * mat, Inverse{Mutable,...}, TransposedMat,
 GreaseMat, UnGreaseMat, OptimizeGreaseHint, WriteMat, WriteMatToFile,
 WriteMatsToFile, ReadMat, ReadMatFromFile, ReadMatsFromFile,
-DefaultFieldOfMatrix, FieldOfMatrix -->
+DefaultFieldOfMatrix, FieldOfMatrix, FieldOfMatrixList -->
 
 
 <!-- ############################################################ -->

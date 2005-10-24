@@ -170,7 +170,8 @@ CVEC.NewCVecClass := function(p,d,len)
 
       # Now the starting filter list:
       filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
-               IsCopyable and CanEasilyCompareElements;
+               IsCopyable and CanEasilyCompareElements and
+               CanEasilySortElements;
       # Note that IsMutable is added below, when we create the vector type
       l[CVEC_IDX_filts] := filts;
 
@@ -627,6 +628,7 @@ InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt],
         return s;
     fi;
   end);
+
 # PositionNonZero and friends:
 
 InstallOtherMethod( PositionNonZero, "for cvecs",
@@ -922,6 +924,10 @@ CVEC.Slice := function(src,dst,srcpos,len,dstpos)
       Error("CVEC.Slice: destination area not valid");
       return;
   fi;
+  if not(IsMutable(dst)) then
+      Error("CVEC.Slice: destination vector immutable");
+      return;
+  fi;
   CVEC.SLICE(src,dst,srcpos,len,dstpos);
 end;
 
@@ -938,8 +944,7 @@ InstallOtherMethod( \{\}, "for a cvec and a range", [IsCVecRep, IsRangeRep],
     fi;
     cl := DataType(TypeObj(v));
     len := last+1-first;
-    c := CVEC.NewCVecClass(cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
-                           cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],len);
+    c := CVEC.NewCVecClassSameField(cl,len);
     w := CVEC.NEW(c,c![CVEC_IDX_type]);
     CVEC.SLICE(v,w,first,len,1);
     if not(IsMutable(v)) then
@@ -969,8 +974,7 @@ InstallOtherMethod( \{\}, "for a cvec and a list",
     fi;
     cl := DataType(TypeObj(v));
     len := last+1-first;
-    c := CVEC.NewCVecClass(cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p],
-                           cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],len);
+    c := CVEC.NewCVecClassSameField(cl,len);
     w := CVEC.NEW(c,c![CVEC_IDX_type]);
     if len > 0 then CVEC.SLICE(v,w,first,len,1); fi;
     if not(IsMutable(v)) then
@@ -1352,7 +1356,8 @@ InstallOtherMethod( \{\}, "for a cmat, and a list",
   end);
 
 InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
-  [IsCMatRep and IsMatrix, IsHomogeneousList, IsCMatRep and IsMatrix],
+  [IsCMatRep and IsMatrix and IsMutable, IsHomogeneousList, 
+   IsCMatRep and IsMatrix],
   function(m,l,n)
     local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
@@ -1437,11 +1442,29 @@ CVEC.CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
       Error("CVEC.CopySubmatrix: destination area not valid");
       return;
   fi;
+  if not(IsMutable(dst)) then
+      Error("CVEC.CopySubmatrix: destination is immutable");
+      return;
+  fi;
   for i in [1..Length(srcli)] do
       CVEC.SLICE(src!.rows[srcli[i]+1],dst!.rows[dstli[i]+1],
                  srcpos,len,dstpos);
   od;
 end;
+
+InstallGlobalFunction( CopySubmatrix,
+  function(src, dst, srcli, dstli, srcpos, len, dstpos)
+    local fr,i,to;
+    if IsCMatRep(src) and IsCMatRep(dst) then
+        CVEC.CopySubmatrix(src,dst,srcli,dstli,srcpos,len,dstpos);
+        return;
+    fi;
+    fr := [srcpos..srcpos+len-1];
+    to := [dstpos..dstpos+len-1];
+    for i in [1..Length(srcli)] do
+        dst[dstli[i]]{to} := src[srcli[i]]{fr};
+    od;
+  end );
 
 # Arithmetic for matrices:
 
@@ -1632,6 +1655,34 @@ InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
     return c![CVEC_IDX_fieldinfo]![CVEC_IDX_GF];
   end);
     
+InstallMethod(FieldOfMatrixList,
+  [IsListOrCollection and IsFFECollCollColl],1,
+  function(l)
+    local char,deg,m;
+    if Length(l) = 0 then
+        TryNextMethod();
+    fi;
+    if not(IsCMatRep(l[1])) then
+        TryNextMethod();
+    fi;
+    deg := 1;
+    char := Characteristic(l[1]);
+    for m in l do
+        deg := Lcm(deg,DegreeFFE(m));
+        if char <> Characteristic(m) then
+            Error("not all matrices over field with same characteristic");
+        fi;
+    od;
+    return GF(char,deg);
+  end);
+
+InstallMethod(DefaultFieldOfMatrix,
+  [IsMatrix and IsCMatRep and IsFFECollColl],
+  function(m)
+    local f;
+    return m!.vecclass![CVEC_IDX_GF];
+  end);
+
 # The making of good hash functions:
 
 CVEC.HashFunctionForGF2Vectors := function(v,hashlen,bytelen)
@@ -2241,11 +2292,4 @@ CVEC.ReadMatsFromFile := function(fnpref)
   od;
   return l;
 end;
-
-InstallMethod(DefaultFieldOfMatrix,
-  [IsMatrix and IsCMatRep and IsFFECollColl],
-  function(m)
-    local f;
-    return m!.vecclass![CVEC_IDX_GF];
-  end);
 
