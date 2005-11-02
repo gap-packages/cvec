@@ -11,15 +11,225 @@ This chapter covers compressed matrices.
 <Chapter Label="matrices">
 <Heading>Matrices</Heading>
 
-Here comes text.<P/>
+A compressed matrix (a <C>cmat</C>) behaves very much like a list of
+<C>cvec</C>s. However, it insists on having only <C>cvec</C>s of the
+same length and over the same base field as its elements, and it insists
+on being a list without holes. Apart from these restrictions, you can
+use all the standard list operations with <C>cmat</C>s (see Section
+<Ref Sect="matlists"/>. <P/>
 
-<!-- CMat, ZeroMat, IdentityMat, RandomMat, Add, Remove, [], []:=, {}, {}:=,
+In the rest of this chapter, we document all methods for matrices for the
+sake of completeness. If they behave exactly as is to be expected by the
+already defined operation no further explanation is given.
+
+<Section Label="matcreation">
+<Heading>Creation</Heading>
+
+The basic operation to create new <C>cmat</C>s is <F>CMat</F>, for which
+a variety of methods is available:
+
+<ManSection>
+<Meth Name="CMat" Arg="l, cl, dochecks"/>
+<Meth Name="CMat" Arg="l, cl"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+    A new <C>cmat</C> is created with rows being in the <C>cvecclass</C>
+    <A>cl</A>. All elements of the list <A>l</A> must be <C>cvec</C>s in
+    that class. The boolean flag <A>dochecks</A> indicates, whether
+    this should be checked or not. If the flag is omitted, checks are
+    performed. Note that <A>l</A> may be the empty list.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CMat" Arg="l, dochecks"/>
+<Meth Name="CMat" Arg="l"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+    A new <C>cmat</C> is created with rows being in the <C>cvecclass</C>
+    of the vectors in <A>l</A>. All elements of the list <A>l</A> must 
+    be <C>cvec</C>s in the same class. 
+    The boolean flag <A>dochecks</A> indicates, whether
+    this should be checked or not. If the flag is omitted, checks are
+    performed. Note that <A>l</A> may not be the empty list.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CMat" Arg="l, v"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+    A new <C>cmat</C> is created with rows being in the <C>cvecclass</C>
+    of the <C>cvec</C> <A>v</A>. All elements of the list <A>l</A> must 
+    be <C>cvec</C>s in the that same class. This is checked.
+    Note that <A>l</A> may be the empty list.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CMat" Arg="m"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+Creates a new <C>cmat</C> which is equal to <A>m</A>, which must be a
+compressed matrix in the filter <F>IsGF2MatrixRep</F>
+or the filter <F>Is8BitMatrixRep</F>.
+</Description>
+</ManSection>
+
+There are some methods to create <C>cmat</C>s of special form:
+
+<ManSection>
+<Func Name="CVEC.ZeroMat" Arg="rows, cl"/>
+<Func Name="CVEC.ZeroMat" Arg="rows, cols, p, d"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+    Creates a zero matrix with <A>rows</A> rows and <A>cols</A> columns
+    over the field <C>GF(<A>p</A>,<A>d</A>)</C>. If a <C>cvecclass</C>
+    <A>cl</A> is given, the number of columns and the field follow
+    from that.
+</Description>
+</ManSection>
+
+<ManSection>
+<Func Name="CVEC.IdentityMat" Arg="rows, cl"/>
+<Func Name="CVEC.IdentityMat" Arg="rows, cols, p, d"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+    Creates an identity matrix with <A>rows</A> rows and <A>cols</A> columns
+    over the field <C>GF(<A>p</A>,<A>d</A>)</C>. If a <C>cvecclass</C>
+    <A>cl</A> is given, the number of columns and the field follow
+    from that.
+</Description>
+</ManSection>
+
+<ManSection>
+<Func Name="CVEC.RandomMat" Arg="rows, cl"/>
+<Func Name="CVEC.RandomMat" Arg="rows, cols, p, d"/>
+<Returns> a new <C>cmat</C> </Returns>
+<Description>
+    Creates a random matrix with <A>rows</A> rows and <A>cols</A> columns
+    over the field <C>GF(<A>p</A>,<A>d</A>)</C>. If a <C>cvecclass</C>
+    <A>cl</A> is given, the number of columns and the field follow
+    from that. Note that this is not particularly efficient.
+</Description>
+</ManSection>
+
+</Section>
+
+<Section Label="matlists">
+<Heading>Matrices as lists</Heading>
+
+In this section, arguments named <A>m</A> and <A>n</A> are <C>cmat</C>s
+and <A>v</A> and <A>w</A> are <C>cvec</C>s that fit into the corresponding
+matrices. <A>pos</A> is an integer between <M>1</M> and <C>Length(m)</C>
+if it applies to the matrix <A>m</A>.
+
+<ManSection>
+<Meth Name="Add" Arg="m, v [, pos]"/>
+<Returns> nothing </Returns>
+<Description>
+Behaves exactly as expected.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="Remove" Arg="m [, pos]"/>
+<Returns> a <C>cvec</C> </Returns>
+<Description>
+Behaves exactly as expected. No holes can be made.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ELM_LIST" Arg="m, pos"/>
+<Returns> a <C>cvec</C> </Returns>
+<Description>
+    Behaves exactly as expected. Note that this method is triggered when
+    one uses the (reading) syntax <Q><C>m[pos]</C></Q>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ASS_LIST" Arg="m, pos, v"/>
+<Returns> nothing </Returns>
+<Description>
+    Behaves exactly as expected. Note that one can only assign to positions
+    such that the resulting matrix has no holes. This method is triggered
+    when one uses the (assignment) syntax <Q><C>m[pos] := </C></Q>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="" Arg=""/>
+<Returns> </Returns>
+<Description>
+Behaves exactly as expected.
+</Description>
+</ManSection>
+
+<!--
+Add, Remove, [], []:=, {}, {}:=,
 Length, ShallowCopy, Collected, DuplicateFreeList, Append, Filtered,
-Unbind, CopySubMatrix, +, -, -(unary), Zero{Mutable,...}, One{Mutable,...},
-* with scalars, =, <, IsZero, IsOne, Characteristic, DegreeFF, BaseField,
+Unbind, -->
+
+</Section>
+
+<Section Label="arithmetic">
+<Heading>Arithmetic</Heading>
+
+<!--
++, -, -(unary), Zero{Mutable,...}, One{Mutable,...},
+* with scalars, =, <, IsZero, IsOne,
 MakeHashFunction, vec * mat, mat * mat, Inverse{Mutable,...}, TransposedMat,
-GreaseMat, UnGreaseMat, OptimizeGreaseHint, WriteMat, WriteMatToFile,
+-->
+
+</Section>
+
+<Section Label="matinfo">
+<Heading>Information about matrices</Heading>
+
+Characteristic, DegreeFF, BaseField,
+DefaultFieldOfMatrix, FieldOfMatrix, FieldOfMatrixList -->
+
+</Section>
+
+<Section Label="matio">
+<Heading>Input and output</Heading>
+
+<!--
+WriteMat, WriteMatToFile,
 WriteMatsToFile, ReadMat, ReadMatFromFile, ReadMatsFromFile,
+-->
+
+</Section>
+
+<Section Label="greasemat">
+<Heading>Grease</Heading>
+
+<!--
+GreaseMat, UnGreaseMat, OptimizeGreaseHint, 
+-->
+</Section>
+
+<Section Label="sonst">
+<Heading>Everything else</Heading>
+
+<!-- CopySubMatrix -->
+
+</Section>
+
+<!-- CMat, ZeroMat, IdentityMat, RandomMat, 
+Add, Remove, [], []:=, {}, {}:=,
+Length, ShallowCopy, Collected, DuplicateFreeList, Append, Filtered,
+Unbind, 
+CopySubMatrix, 
++, -, -(unary), Zero{Mutable,...}, One{Mutable,...},
+* with scalars, =, <, IsZero, IsOne,
+MakeHashFunction, vec * mat, mat * mat, Inverse{Mutable,...}, TransposedMat,
+GreaseMat, UnGreaseMat, OptimizeGreaseHint, 
+WriteMat, WriteMatToFile,
+WriteMatsToFile, ReadMat, ReadMatFromFile, ReadMatsFromFile,
+Characteristic, DegreeFF, BaseField,
 DefaultFieldOfMatrix, FieldOfMatrix, FieldOfMatrixList -->
 
 
