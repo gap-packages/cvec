@@ -41,7 +41,7 @@ of a calculation necessary to create <C>cvec</C>s explicitly.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVec" Arg="coeffs, cvecclass" Label="coeffl_cvecclass"/>
+<Meth Name="CVec" Arg="coeffs, cvecclass" Label="coefflcvecclass"/>
 <Returns>a new mutable <C>cvec</C></Returns>
 <Description>
     This method takes a coefficient list and a <C>cvecclass</C>
@@ -72,7 +72,7 @@ of a calculation necessary to create <C>cvec</C>s explicitly.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVec" Arg="coeffs, p, d" Label="coeffl_p_d"/>
+<Meth Name="CVec" Arg="coeffs, p, d" Label="coefflpd"/>
 <Returns>a new mutable <C>cvec</C></Returns>
 <Description>
     This method takes a coefficient list and two positive integers
@@ -80,7 +80,7 @@ of a calculation necessary to create <C>cvec</C>s explicitly.
     will be created. Let <M>q := p^d</M>.<P/>
     For a description of the possible values of the coefficient list 
     <A>coeffs</A> see the description of the method <Ref Meth="CVec"
-    Label="coeffl_cvecclass"/>.
+    Label="coefflcvecclass"/>.
 </Description>
 </ManSection>
 
@@ -224,7 +224,7 @@ addition! Larger integers than immediate integers are not supported.
 </Subsection>
 
 <ManSection>
-<Meth Name="\+" Arg="v, w" Label="cvec_cvec"/>
+<Meth Name="\+" Arg="v, w" Label="cveccvec"/>
 <Returns>The sum <M><A>v</A>+<A>w</A></M> as a new <C>cvec</C>.</Returns>
 <Description>
     For two <C>cvec</C>s <A>v</A> and <A>w</A>. Works as expected.
@@ -232,7 +232,7 @@ addition! Larger integers than immediate integers are not supported.
 </ManSection>
 
 <ManSection>
-<Meth Name="\-" Arg="v, w" Label="cvec_cvec"/>
+<Meth Name="\-" Arg="v, w" Label="cveccvec"/>
 <Returns>The difference <M><A>v</A>-<A>w</A></M> as a new <C>cvec</C>.</Returns>
 <Description>
     For two <C>cvec</C>s <A>v</A> and <A>w</A>. Works as expected.
@@ -257,8 +257,8 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 </ManSection>
 
 <ManSection>
-<Meth Name="\*" Arg="v, s" Label="cvec_sca"/>
-<Meth Name="\*" Arg="s, v" Label="sca_cvec"/>
+<Meth Name="\*" Arg="v, s" Label="cvecsca"/>
+<Meth Name="\*" Arg="s, v" Label="scacvec"/>
 <Returns>The scalar multiple <A>s</A><M>\cdot</M><A>v</A>.</Returns>
 <Description>
     For a <C>cvec</C> <A>v</A> and a scalar <A>s</A>. For the format
@@ -267,8 +267,8 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 </ManSection>
 
 <ManSection>
-<Meth Name="AddRowVector" Arg="v, w, s" Label="cvec_cvec_sca"/>
-<Meth Name="AddRowVector" Arg="v, w, s, fr, to" Label="cvec_cvec_sca_pos_pos"/>
+<Meth Name="AddRowVector" Arg="v, w, s" Label="cveccvecsca"/>
+<Meth Name="AddRowVector" Arg="v, w, s, fr, to" Label="cveccvecscapospos"/>
 <Returns>nothing</Returns>
 <Description>
     <A>v</A> and <A>w</A> must be <C>cvec</C>s over the same field with
@@ -286,8 +286,8 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 </ManSection>
 
 <ManSection>
-<Meth Name="MultRowVector" Arg="v, s" Label="cvec_sca"/>
-<Meth Name="MultRowVector" Arg="v, s, fr, to" Label="cvec_sca_pos_pos"/>
+<Meth Name="MultRowVector" Arg="v, s" Label="cvecsca"/>
+<Meth Name="MultRowVector" Arg="v, s, fr, to" Label="cvecscapospos"/>
 <Returns>nothing</Returns>
 <Description>
     <A>v</A> must be a mutable <C>cvec</C> and <A>s</A> a scalar (see
