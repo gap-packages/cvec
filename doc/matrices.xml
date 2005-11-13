@@ -125,10 +125,11 @@ matrices. <A>pos</A> is an integer between <M>1</M> and <C>Length(m)</C>
 if it applies to the matrix <A>m</A>.
 
 <ManSection>
-<Meth Name="Add" Arg="m, v [, pos]"/>
+<Meth Name="Add" Arg="m, v [,pos]"/>
 <Returns> nothing </Returns>
 <Description>
-Behaves exactly as expected.
+Behaves exactly as expected. Note that one can only add <C>cvec</C>s of the
+right length and over the right field.
 </Description>
 </ManSection>
 
@@ -188,6 +189,7 @@ MakeHashFunction, vec * mat, mat * mat, Inverse{Mutable,...}, TransposedMat,
 <Section Label="matinfo">
 <Heading>Information about matrices</Heading>
 
+<!--
 Characteristic, DegreeFF, BaseField,
 DefaultFieldOfMatrix, FieldOfMatrix, FieldOfMatrixList -->
 
