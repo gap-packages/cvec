@@ -902,7 +902,7 @@ InstallMethod( BaseField, "for cvecs", [IsCVecRep],
   function(v)
     local c;
     c := DataType(TypeObj(v));
-    return c![CVEC_IDX_fieldinfo]![CVEC_IDX_GF];
+    return c![CVEC_IDX_GF];
   end);
     
 # Slicing:
@@ -1117,10 +1117,10 @@ CVEC.CMatMaker := function(l,cl)
     local greasehint,m,q,qp,ty;
     if Length(l) > 0 then
         m := rec(rows := l, len := Length(l)-1, vecclass := cl,
-                 scaclass := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_GF]);
+                 scaclass := cl![CVEC_IDX_GF]);
     else
         m := rec(rows := l, len := 0, vecclass := cl,
-                 scaclass := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_GF]);
+                 scaclass := cl![CVEC_IDX_GF]);
     fi;
     m.greasehint := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease];   
          # this is the current bestgrease
@@ -1652,7 +1652,7 @@ InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     local c;
     c := m!.vecclass;
-    return c![CVEC_IDX_fieldinfo]![CVEC_IDX_GF];
+    return c![CVEC_IDX_GF];
   end);
     
 InstallMethod(FieldOfMatrixList,
