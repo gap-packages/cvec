@@ -169,7 +169,7 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
     cl := CVEC.NewCVecClass( mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p], 
                              mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
                              nrows );
-    zv := CVEC.NEW(cl);
+    zv := CVEC.NEW(cl,cl![CVEC_IDX_type]);
     T := CMat([],cl);
     for i in [1..nrows] do
         Add(T,ShallowCopy(zv));
