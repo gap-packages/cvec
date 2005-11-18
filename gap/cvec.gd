@@ -96,8 +96,6 @@ DeclareFilter( "HasGreaseTab" );
 DeclareOperation( "GreaseMat", [IsCMatRep, IsInt]);
 DeclareOperation( "UnGreaseMat", [IsCMatRep]);
 
-DeclareGlobalFunction( "CopySubmatrix" );
-
 
 #############################################################################
 # Access to the base field:

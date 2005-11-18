@@ -991,6 +991,46 @@ InstallOtherMethod( \{\}, "for a cvec and a list",
     return w;
   end);
 
+InstallOtherMethod( CopySubVector, "for two cvecs and stuff",
+  [IsCVecRep, IsCVecRep and IsMutable, 
+   IsRangeRep and IsList, IsRangeRep and IsList],
+  function(src,dst,scols,dcols)
+    local len,pos,to;
+    if Length(scols) <> Length(dcols) then
+        Error("CVEC.CopySubVector: ranges must have equal length");
+        return;
+    fi;
+    if Length(scols) = 0 then return; fi;
+    pos := scols[1];
+    len := Length(scols);
+    to := dcols[1];
+    CVEC.Slice(src,dst,pos,len,to);
+  end );
+
+InstallMethod( CopySubVector, "for two cvecs and stuff",
+  [IsCVecRep, IsCVecRep and IsMutable, IsList, IsList],
+  function(src,dst,scols,dcols)
+    local len,pos,to,i;
+    if Length(scols) <> Length(dcols) then
+        Error("CVEC.CopySubVector: ranges must have equal length");
+        return;
+    fi;
+    if Length(scols) = 0 then return; fi;
+
+    pos := scols[1];
+    len := Length(scols);
+    to := dcols[1];
+    if scols <> [pos..pos+len-1] or     # Check for rangeness:
+       dcols <> [to..to+len-1] then
+        # This is horrible:
+        for i in [1..Length(scols)] do
+            dst[dcols[i]] := src[scols[i]];
+        od;
+        return;
+    fi;
+    CVEC.Slice(src,dst,pos,len,to);
+  end );
+    
 # Note that slicing assignment is intentionally not supported, because
 # this will usually be used only by inefficient code. Use CVEC.Slice
 # or even CVEC.SLICE instead.
@@ -1170,7 +1210,7 @@ InstallMethod( MatrixNC, "for a list of cvecs and a cvec",
   end );
 
 InstallMethod( MatrixNC, "for an immutable list of cvecs and a cvec",
-  [IsList and IsMutable, IsCVecRep],
+  [IsList, IsCVecRep],
   function(l,v)
     local li,m;
     li := [fail];
@@ -1470,7 +1510,7 @@ CVEC.CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
       return;
   fi;
   if Length(srcli) <> Length(dstli) then
-      Error("CVEC.CopySubmatrix: line lists do not have equal lengths");
+      Error("CVEC.CopySubmatrix: row lists do not have equal lengths");
       return;
   fi;
   if srcpos < 1 or srcpos+len-1 > src!.vecclass![CVEC_IDX_len] or len <= 0 then
@@ -1491,18 +1531,62 @@ CVEC.CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
   od;
 end;
 
-InstallGlobalFunction( CopySubmatrix,
-  function(src, dst, srcli, dstli, srcpos, len, dstpos)
-    local fr,i,to;
-    if IsCMatRep(src) and IsCMatRep(dst) then
-        CVEC.CopySubmatrix(src,dst,srcli,dstli,srcpos,len,dstpos);
+InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
+  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
+   IsList,IsList,IsList and IsRangeRep,IsList and IsRangeRep],
+  function( src,dst,srows,drows,scols,dcols )
+    local len,pos,to,i;
+    if Length(scols) <> Length(dcols) then
+        Error("CVEC.CopySubMatrix: ranges must have equal length");
         return;
     fi;
-    fr := [srcpos..srcpos+len-1];
-    to := [dstpos..dstpos+len-1];
-    for i in [1..Length(srcli)] do
-        dst[dstli[i]]{to} := src[srcli[i]]{fr};
-    od;
+    if Length(scols) = 0 then return; fi;
+
+    pos := scols[1];
+    len := Length(scols);
+    to := dcols[1];
+    if scols[len] <> pos + len - 1 or
+       dcols[len] <> to + len - 1 then
+        # we do it by hand - horrible!
+        if Length(srows) <> Length(drows) then
+            Error("CVEC.CopySubMatrix: ranges must have same length");
+            return;
+        fi;
+        for i in [1..Length(srows)] do
+            CopySubVector(src[srows[i]],dst[drows[i]],scols,dcols);
+        od;
+        return;
+    fi;
+    CVEC.CopySubmatrix(src,dst,srows,drows,pos,len,to);
+  end );
+
+InstallMethod( CopySubMatrix, "for two cmats and stuff",
+  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
+   IsList,IsList,IsList,IsList],
+  function( src,dst,srows,drows,scols,dcols )
+    local len,pos,to,i;
+    if Length(scols) <> Length(dcols) then
+        Error("CVEC.CopySubmatrix: ranges must have equal length");
+        return;
+    fi;
+    if Length(scols) = 0 then return; fi;
+
+    pos := scols[1];
+    len := Length(scols);
+    to := dcols[1];
+    if scols <> [pos..pos+len-1] or     # Check for rangeness:
+       dcols <> [to..to+len-1] then
+        # we do it by hand - horrible!
+        if Length(srows) <> Length(drows) then
+            Error("CVEC.CopySubMatrix: ranges must have same length");
+            return;
+        fi;
+        for i in [1..Length(srows)] do
+            CopySubVector(src[srows[i]],dst[drows[i]],scols,dcols);
+        od;
+        return;
+    fi;
+    CVEC.CopySubmatrix(src,dst,srows,drows,pos,len,to);
   end );
 
 # Arithmetic for matrices:
