@@ -1575,16 +1575,16 @@ CVEC.CopySubmatrixHorrible := function(src,dst,srows,drows,scols,dcols)
             Add(r,l1[i1]);
             Add(r,newrun);
             Add(r,l2[i2]);
-            r2[i2] := r2[i2] + newrun;
-            r2[i2+1] := r2[i2+1] - newrun;
+            l2[i2] := l2[i2] + newrun;
+            l2[i2+1] := l2[i2+1] - newrun;
             i1 := i1 + 2;
-        elif l1[iِ1+1] > l2[i2+1] then
+        elif l1[i1+1] > l2[i2+1] then
             newrun := l2[i1+1];
             Add(r,l1[i1]);
             Add(r,newrun);
             Add(r,l2[i2]);
-            r1[i1] := r1[i1] + newrun;
-            r1[i1+1] := r1[i1+1] - newrun;
+            l1[i1] := l1[i1] + newrun;
+            l1[i1+1] := l1[i1+1] - newrun;
             i2 := i2 + 2;
         else
             newrun := l1[i1+1];
@@ -1594,7 +1594,7 @@ CVEC.CopySubmatrixHorrible := function(src,dst,srows,drows,scols,dcols)
             i1 := i1 + 2;
             i2 := i2 + 2;
         fi;
-    fi;
+    od;
     return r;
   end;
 
@@ -1630,7 +1630,7 @@ InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
         if Length(srows) <> Length(drows) then
             Error("CVEC.CopySubMatrix: ranges must have same length");
         else
-            CVEC.CopySubMatrixHorrible(src,dst,srows,drows,scols,dcols);
+            CVEC.CopySubmatrixHorrible(src,dst,srows,drows,scols,dcols);
         fi;
         return;
     fi;
@@ -1657,7 +1657,7 @@ InstallMethod( CopySubMatrix, "for two cmats and stuff",
         if Length(srows) <> Length(drows) then
             Error("CVEC.CopySubMatrix: ranges must have same length");
         else
-            CVEC.CopySubMatrixHorrible(src,dst,srows,drows,scols,dcols);
+            CVEC.CopySubmatrixHorrible(src,dst,srows,drows,scols,dcols);
         fi;
         return;
     fi;
