@@ -1531,6 +1531,85 @@ CVEC.CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
   od;
 end;
 
+CVEC.CopySubmatrixHorrible := function(src,dst,srows,drows,scols,dcols)
+  # This handles the ugly case that scols and dcols are no ranges
+  # with increment 1, we try to optimize using SLICE. We already
+  # know, that they have equal nonzero length:
+
+  local FindRuns,IntersectRuns,c,i,j,r,s;
+
+  FindRuns := function(l)
+    # l must be nonempty
+    local c,i,r,s;
+    r := [];
+    i := 2;
+    s := l[1];
+    c := l[1];
+    while i <= Length(l) do
+        if l[i] = c+1 then
+            c := c + 1;
+        else
+            Add(r,s);      # The start of the run
+            Add(r,c-s+1);  # The length of the run
+            c := l[i];
+            s := l[i];
+        fi;
+        i := i + 1;
+    od;
+    Add(r,s);
+    Add(r,c-s+1);
+    return r;
+  end;
+
+  IntersectRuns := function(l1,l2)
+    # Both are nonempty, the result are two refined runs with equal part 
+    # lengths. They are given as one list of triples.
+    local i1,i2,newrun,r;
+    r := [];
+    i1 := 1;
+    i2 := 1;
+    while i1 <= Length(l1) do
+        # Note that i1 <= Length(l1) iff i2 <= Length(l2)
+        if l1[i1+1] < l2[i2+1] then
+            newrun := l1[i1+1];
+            Add(r,l1[i1]);
+            Add(r,newrun);
+            Add(r,l2[i2]);
+            r2[i2] := r2[i2] + newrun;
+            r2[i2+1] := r2[i2+1] - newrun;
+            i1 := i1 + 2;
+        elif l1[iِ1+1] > l2[i2+1] then
+            newrun := l2[i1+1];
+            Add(r,l1[i1]);
+            Add(r,newrun);
+            Add(r,l2[i2]);
+            r1[i1] := r1[i1] + newrun;
+            r1[i1+1] := r1[i1+1] - newrun;
+            i2 := i2 + 2;
+        else
+            newrun := l1[i1+1];
+            Add(r,l1[i1]);
+            Add(r,newrun);
+            Add(r,l2[i2]);
+            i1 := i1 + 2;
+            i2 := i2 + 2;
+        fi;
+    fi;
+    return r;
+  end;
+
+  r := [FindRuns(scols),FindRuns(dcols)];
+  r := IntersectRuns(r[1],r[2]);
+  
+  for i in [1..Length(srows)] do
+      j := 1;
+      while j <= Length(r) do
+          CVEC.SLICE(src[srows[i]],dst[drows[i]],r[j],r[j+1],r[j+2]);
+          j := j + 3;
+      od;
+  od;
+end;
+
 InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
    IsList,IsList,IsList and IsRangeRep,IsList and IsRangeRep],
@@ -1550,11 +1629,9 @@ InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
         # we do it by hand - horrible!
         if Length(srows) <> Length(drows) then
             Error("CVEC.CopySubMatrix: ranges must have same length");
-            return;
+        else
+            CVEC.CopySubMatrixHorrible(src,dst,srows,drows,scols,dcols);
         fi;
-        for i in [1..Length(srows)] do
-            CopySubVector(src[srows[i]],dst[drows[i]],scols,dcols);
-        od;
         return;
     fi;
     CVEC.CopySubmatrix(src,dst,srows,drows,pos,len,to);
@@ -1579,11 +1656,9 @@ InstallMethod( CopySubMatrix, "for two cmats and stuff",
         # we do it by hand - horrible!
         if Length(srows) <> Length(drows) then
             Error("CVEC.CopySubMatrix: ranges must have same length");
-            return;
+        else
+            CVEC.CopySubMatrixHorrible(src,dst,srows,drows,scols,dcols);
         fi;
-        for i in [1..Length(srows)] do
-            CopySubVector(src[srows[i]],dst[drows[i]],scols,dcols);
-        od;
         return;
     fi;
     CVEC.CopySubmatrix(src,dst,srows,drows,pos,len,to);
