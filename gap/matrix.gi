@@ -80,7 +80,7 @@ InstallMethod( MutableCopyMat, "for a cmat", [IsCMatRep and IsMatrix],
         l[i] := ShallowCopy(m!.rows[i]);
     od;
     Unbind(l[1]);
-    return CVEC.CMatMaker(l,m!.vecclass);
+    return CVEC_CMatMaker(l,m!.vecclass);
   end);
 
 # SemiEchelonMat and friends:
@@ -166,10 +166,10 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
     heads   := ListWithIdenticalEntries( ncols, 0 );
     vectors := CMat([],mat!.vecclass);
     
-    cl := CVEC.NewCVecClass( mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p], 
+    cl := CVEC_NewCVecClass( mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p], 
                              mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
                              nrows );
-    zv := CVEC.NEW(cl,cl![CVEC_IDX_type]);
+    zv := CVEC_NEW(cl,cl![CVEC_IDX_type]);
     T := CMat([],cl);
     for i in [1..nrows] do
         Add(T,ShallowCopy(zv));

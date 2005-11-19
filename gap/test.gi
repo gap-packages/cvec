@@ -112,15 +112,15 @@ CVEC.TEST.INTFFE_CONVERSION := function(p,d)
   if not(IsPrimePowerInt(q)) or q > MAXSIZE_GF_INTERNAL then
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
-  c := CVEC.NewCVecClass(p,d,q);
+  c := CVEC_NewCVecClass(p,d,q);
   c := c![CVEC_IDX_fieldinfo];
   l := 1*[0..q-1];
-  CVEC.INTLI_TO_FFELI(c,l);
+  CVEC_INTLI_TO_FFELI(c,l);
   if l <> c![CVEC_IDX_tab2] then
       Print("Alarm: INTLI_TO_FFELI, p=",p," d=",d,"      \n");
   fi;
   l := ShallowCopy(c![CVEC_IDX_tab2]);
-  CVEC.FFELI_TO_INTLI(c,l);
+  CVEC_FFELI_TO_INTLI(c,l);
   if l <> [0..q-1] then
       Print("Alarm: FFELI_TO_INTLI, p=",p," d=",d,"      \n");
   fi;
@@ -133,22 +133,22 @@ CVEC.TEST.ADD2 := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   l := 0*[1..q];
   ll := 0*[1..q];
   for i in [0..q-1] do
-      CVEC.INTREP_TO_CVEC(l,w);
+      CVEC_INTREP_TO_CVEC(l,w);
       ww := ShallowCopy(l);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
-      CVEC.ADD2(w,v,1,q);
-      CVEC.CVEC_TO_INTREP(w,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
+      CVEC_ADD2(w,v,1,q);
+      CVEC_CVEC_TO_INTREP(w,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       if ll <> vv+ww then
           Print("Alarm: i=",i,"\n");
           Print("ll=",ll,"\nvv+ww=",vv+ww,"\n");
@@ -164,24 +164,24 @@ CVEC.TEST.ADD2_COMPRESSED := function(p,d)
       Error("Only for those p^d for which compressed vectors are in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   ConvertToVectorRep(vv);
   l := 0*[1..q];
   for i in [0..q-1] do
-      CVEC.INTREP_TO_CVEC(l,w);
+      CVEC_INTREP_TO_CVEC(l,w);
       ww := ShallowCopy(l);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
       ConvertToVectorRep(ww);
-      CVEC.ADD2(w,v,1,q);
+      CVEC_ADD2(w,v,1,q);
       ll := 0*[1..q];
-      CVEC.CVEC_TO_INTREP(w,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_CVEC_TO_INTREP(w,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       ConvertToVectorRep(ll);
       if ll <> vv+ww then
           Print("Alarm: i=",i,"\n");
@@ -198,23 +198,23 @@ CVEC.TEST.ADD3 := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  u := CVEC.New(c);
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  u := CVEC_New(c);
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   l := 0*[1..q];
   ll := 0*[1..q];
   for i in [0..q-1] do
-      CVEC.INTREP_TO_CVEC(l,w);
+      CVEC_INTREP_TO_CVEC(l,w);
       ww := ShallowCopy(l);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
-      CVEC.ADD3(u,w,v);
-      CVEC.CVEC_TO_INTREP(u,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
+      CVEC_ADD3(u,w,v);
+      CVEC_CVEC_TO_INTREP(u,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       if ll <> vv+ww then
           Print("Alarm: i=",i,"\n");
           Print("ll=",ll,"\nvv+ww=",vv+ww,"\n");
@@ -230,25 +230,25 @@ CVEC.TEST.ADD3_COMPRESSED := function(p,d)
       Error("Only for those p^d for which compressed vectors are in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  u := CVEC.New(c);
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  u := CVEC_New(c);
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   ConvertToVectorRep(vv);
   l := 0*[1..q];
   for i in [0..q-1] do
-      CVEC.INTREP_TO_CVEC(l,w);
+      CVEC_INTREP_TO_CVEC(l,w);
       ww := ShallowCopy(l);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ww);
       ConvertToVectorRep(ww);
-      CVEC.ADD3(u,w,v);
+      CVEC_ADD3(u,w,v);
       ll := 0*[1..q];
-      CVEC.CVEC_TO_INTREP(u,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_CVEC_TO_INTREP(u,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       ConvertToVectorRep(ll);
       if ll <> vv+ww then
           Print("Alarm: i=",i,"\n");
@@ -265,20 +265,20 @@ CVEC.TEST.MUL1 := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   ll := 0*[1..q];
   for i in [0..q-1] do
       sc := c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i+1];
-      CVEC.COPY(v,w);
-      CVEC.MUL1(w,i,1,q);
-      CVEC.CVEC_TO_INTREP(w,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_COPY(v,w);
+      CVEC_MUL1(w,i,1,q);
+      CVEC_CVEC_TO_INTREP(w,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       if ll <> sc * vv then
           Print("Alarm: i=",i,"\n");
           Print("ll=",ll,"\ni * vv=",vv,"\n");
@@ -294,21 +294,21 @@ CVEC.TEST.MUL1_COMPRESSED := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   ConvertToVectorRep(vv);
   for i in [0..q-1] do
       sc := c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i+1];
-      CVEC.COPY(v,w);
-      CVEC.MUL1(w,i,1,q);
+      CVEC_COPY(v,w);
+      CVEC_MUL1(w,i,1,q);
       ll := 0*[1..q];
-      CVEC.CVEC_TO_INTREP(w,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_CVEC_TO_INTREP(w,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       ConvertToVectorRep(ll);
       if ll <> sc * vv then
           Print("Alarm: i=",i,"\n");
@@ -325,19 +325,19 @@ CVEC.TEST.MUL2 := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   ll := 0*[1..q];
   for i in [0..q-1] do
       sc := c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i+1];
-      CVEC.MUL2(w,v,i);
-      CVEC.CVEC_TO_INTREP(w,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_MUL2(w,v,i);
+      CVEC_CVEC_TO_INTREP(w,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       if ll <> sc * vv then
           Print("Alarm: i=",i,"\n");
           Print("ll=",ll,"\ni * vv=",vv,"\n");
@@ -353,20 +353,20 @@ CVEC.TEST.MUL2_COMPRESSED := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   vv := ShallowCopy(l);
-  CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
+  CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],vv);   # Change numbers into FFEs
   ConvertToVectorRep(vv);
   for i in [0..q-1] do
       sc := c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i+1];
-      CVEC.MUL2(w,v,i);
+      CVEC_MUL2(w,v,i);
       ll := 0*[1..q];
-      CVEC.CVEC_TO_INTREP(w,ll);
-      CVEC.INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
+      CVEC_CVEC_TO_INTREP(w,ll);
+      CVEC_INTLI_TO_FFELI(c![CVEC_IDX_fieldinfo],ll);
       ConvertToVectorRep(ll);
       if ll <> sc * vv then
           Print("Alarm: i=",i,"\n");
@@ -383,27 +383,27 @@ CVEC.TEST.ADDMUL := function(p,d)
       Error("Test is only for those p^d that are implemented in GAP!");
   fi;
       
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
-  w := CVEC.New(c);
-  u := CVEC.New(c);
-  z := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
+  w := CVEC_New(c);
+  u := CVEC_New(c);
+  z := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   ll := [];
   for i in [0..q-1] do
       Add(ll,Random([0..q-1]));
   od;
-  CVEC.INTREP_TO_CVEC(ll,w);
+  CVEC_INTREP_TO_CVEC(ll,w);
   lll := 0*[0..q-1];
   llll := ShallowCopy(lll);
   for i in [0..q-1] do
-      CVEC.COPY(v,u);
-      CVEC.ADDMUL(u,w,i,1,q);
-      CVEC.MUL2(z,w,i);
-      CVEC.ADD2(z,v,1,q);
-      CVEC.CVEC_TO_INTREP(u,lll);
-      CVEC.CVEC_TO_INTREP(z,llll);
+      CVEC_COPY(v,u);
+      CVEC_ADDMUL(u,w,i,1,q);
+      CVEC_MUL2(z,w,i);
+      CVEC_ADD2(z,v,1,q);
+      CVEC_CVEC_TO_INTREP(u,lll);
+      CVEC_CVEC_TO_INTREP(z,llll);
       if lll <> llll then
           Print("Alarm: ADDMUL i=",i," ",lll,llll,"\n");
       fi;
@@ -417,12 +417,12 @@ CVEC.TEST.ELM_CVEC := function(p,d)
       Error("Test is only for those p^d that are GAP small integers!");
   fi;
 
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
   l := 1*[0..q-1];
-  CVEC.INTREP_TO_CVEC(l,v);
+  CVEC_INTREP_TO_CVEC(l,v);
   for i in [1..q] do
-      el := CVEC.ELM_CVEC(v,i);
+      el := CVEC_ELM_CVEC(v,i);
       if q <= MAXSIZE_GF_INTERNAL then
           if el <> c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i] then
               Print("Alarm: ELM_CVEC i=",i," ",el," ",
@@ -443,23 +443,23 @@ CVEC.TEST.ASS_CVEC := function(p,d)
       Error("Test is only for those p^d that are GAP small integers!");
   fi;
 
-  c := CVEC.NewCVecClass(p,d,q);   # Length is q
-  v := CVEC.New(c);
+  c := CVEC_NewCVecClass(p,d,q);   # Length is q
+  v := CVEC_New(c);
   l := 0*[0..q-1];
   for i in [1..q] do
-      CVEC.ASS_CVEC(v,i,i-1);
+      CVEC_ASS_CVEC(v,i,i-1);
   od;
-  CVEC.CVEC_TO_INTREP(v,l);
+  CVEC_CVEC_TO_INTREP(v,l);
   if l <> [0..q-1] then
       Print("Alarm ASS_CVEC p=",p," d=",d,"                  \n");
   fi;
   if q <= MAXSIZE_GF_INTERNAL then
-      CVEC.MAKEZERO(v);
+      CVEC_MAKEZERO(v);
       # Try to assign finite field elements:
       for i in [1..q] do
-          CVEC.ASS_CVEC(v,i,c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i]);
+          CVEC_ASS_CVEC(v,i,c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i]);
       od;
-      CVEC.CVEC_TO_INTREP(v,l);
+      CVEC_CVEC_TO_INTREP(v,l);
       if l <> [0..q-1] then
           Print("Alarm ASS_CVEC FFE p=",p," d=",d,"                  \n");
       fi;
@@ -474,19 +474,19 @@ CVEC.TEST.POSITION_NONZERO_CVEC := function(p,d)
   fi;
 
   q := Minimum(q,256);   # just to reduce the length of the vectors
-  c := CVEC.NewCVecClass(p,d,q);
-  v := CVEC.New(c);
-  if CVEC.POSITION_NONZERO_CVEC(v) <> q+1 then
+  c := CVEC_NewCVecClass(p,d,q);
+  v := CVEC_New(c);
+  if CVEC_POSITION_NONZERO_CVEC(v) <> q+1 then
       Print("Alarm POSITION_NONZERO_CVEC p=",p," d=",d," i=0        \n");
   fi;
   l := 1 * [0..q-1];
   l[1] := 1;
   for i in [1..q] do
-      CVEC.ASS_CVEC(v,i,l[i]);
-      if CVEC.POSITION_NONZERO_CVEC(v) <> i then
+      CVEC_ASS_CVEC(v,i,l[i]);
+      if CVEC_POSITION_NONZERO_CVEC(v) <> i then
           Print("Alarm POSITION_NONZERO_CVEC p=",p," d=",d," i=",i,"       \n");
       fi;
-      CVEC.ASS_CVEC(v,i,0);
+      CVEC_ASS_CVEC(v,i,0);
   od;
 end;
 
@@ -498,20 +498,20 @@ CVEC.TEST.POSITION_LAST_NONZERO_CVEC := function(p,d)
   fi;
 
   q := Minimum(q,256);   # just to reduce the length of the vectors
-  c := CVEC.NewCVecClass(p,d,q);
-  v := CVEC.New(c);
-  if CVEC.POSITION_LAST_NONZERO_CVEC(v) <> 0 then
+  c := CVEC_NewCVecClass(p,d,q);
+  v := CVEC_New(c);
+  if CVEC_POSITION_LAST_NONZERO_CVEC(v) <> 0 then
       Print("Alarm POSITION_LAST_NONZERO_CVEC p=",p," d=",d," i=0        \n");
   fi;
   l := 1 * [0..q-1];
   l[1] := 1;
   for i in [1..q] do
-      CVEC.ASS_CVEC(v,i,l[i]);
-      if CVEC.POSITION_LAST_NONZERO_CVEC(v) <> i then
+      CVEC_ASS_CVEC(v,i,l[i]);
+      if CVEC_POSITION_LAST_NONZERO_CVEC(v) <> i then
           Print("Alarm POSITION_LAST_NONZERO_CVEC p=",p," d=",d," i=",
                 i,"       \n");
       fi;
-      CVEC.ASS_CVEC(v,i,0);
+      CVEC_ASS_CVEC(v,i,0);
   od;
 end;
 
@@ -527,8 +527,8 @@ CVEC.TEST.MATMUL := function(p,d)
   s := Random([100..150]);
   t := Random([100..150]);
   Print("\n     (doing ",r,"x",s," * ",s,"x",t,"...)\n");
-  ca := CVEC.NewCVecClass(p,d,s);
-  cb := CVEC.NewCVecClass(p,d,t);
+  ca := CVEC_NewCVecClass(p,d,s);
+  cb := CVEC_NewCVecClass(p,d,t);
   a := CMat([],ca);
   aold := [];
   for i in [1..r] do
@@ -563,14 +563,14 @@ CVEC.TEST.MATMUL := function(p,d)
   for i in [1..Length(a)] do
       c5[i+1] := a[i] * b;
   od;
-  c5 := CVEC.CMatMaker(c5,cb);
+  c5 := CVEC_CMatMaker(c5,cb);
   GreaseMat(b);
   c6 := 0*[1..Length(a)+1];
   Unbind(c6[1]);
   for i in [1..Length(a)] do
       c6[i+1] := a[i] * b;
   od;
-  c6 := CVEC.CMatMaker(c6,cb);
+  c6 := CVEC_CMatMaker(c6,cb);
 
   if List(c1,Unpack) <> List(c2,x->List(x,y->y)) then
       Print("Alarm p=",p," d=",d," std matmul            \n");
@@ -598,7 +598,7 @@ CVEC.TEST.SLICE := function(p,d)
   local c,srcpos,len,dstpos,l,one,q,s,v,w;
   q := p^d;
   l := 256;
-  c := CVEC.NewCVecClass(p,d,l);
+  c := CVEC_NewCVecClass(p,d,l);
   v := CVec(0*[1..l]+1,c);
   one := v[1];
   Print("\n");
@@ -606,8 +606,8 @@ CVEC.TEST.SLICE := function(p,d)
       Print("srcpos=",srcpos," (256)\r");
       for len in [1..l-srcpos+1] do
           for dstpos in [1..l-len+1] do
-              w := CVEC.New(c);
-              CVEC.SLICE(v,w,srcpos,len,dstpos);
+              w := CVEC_New(c);
+              CVEC_SLICE(v,w,srcpos,len,dstpos);
               if PositionNonZero(w) <> dstpos or
                  PositionLastNonZero(w) <> dstpos+len-1 then
                   Print("Alarm p=",p," d=",d," srcpos=",srcpos," len=",len,
@@ -629,16 +629,16 @@ end;
 CVEC.TEST.IO := function(p,d)
   local l,m,mm,n,q;
   q := p^d;
-  m := CVEC.RandomMat(Random([50..100]),Random([50..100]),p,d);
-  n := CVEC.RandomMat(Random([50..100]),Random([50..100]),p,d);
-  CVEC.WriteMatToFile("TEMP_MATRIX_CAN_BE_REMOVED",m);
-  mm := CVEC.ReadMatFromFile("TEMP_MATRIX_CAN_BE_REMOVED");
+  m := CVEC_RandomMat(Random([50..100]),Random([50..100]),p,d);
+  n := CVEC_RandomMat(Random([50..100]),Random([50..100]),p,d);
+  CVEC_WriteMatToFile("TEMP_MATRIX_CAN_BE_REMOVED",m);
+  mm := CVEC_ReadMatFromFile("TEMP_MATRIX_CAN_BE_REMOVED");
   if m <> mm then
       Error("Alarm p=",p," d=",d," IO, you can inspect m and mm");
   fi;
   IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED");
-  CVEC.WriteMatsToFile("TEMP_MATRIX_CAN_BE_REMOVED.",[m,n]);
-  l := CVEC.ReadMatsFromFile("TEMP_MATRIX_CAN_BE_REMOVED.");
+  CVEC_WriteMatsToFile("TEMP_MATRIX_CAN_BE_REMOVED.",[m,n]);
+  l := CVEC_ReadMatsFromFile("TEMP_MATRIX_CAN_BE_REMOVED.");
   if l = fail or l[1] <> m or l[2] <> n then
       Error("Alarm p=",p," d=",d," IO, you can inspect m, n and l");
   fi;
@@ -654,18 +654,18 @@ CVEC.TEST.PROD_COEFFS_CVEC_PRIMEFIELD := function(p,d)
   fi;
   l1 := Random(50,100);
   l2 := Random(50,100);
-  m := CVEC.RandomMat(Random(50,100),l1,p,d);
-  n := CVEC.RandomMat(Random(50,100),l2,p,d);
-  cl := CVEC.NewCVecClass(p,d,l1+l2-1);
-  u := CVEC.New(cl);
-  h := CVEC.New(cl);
+  m := CVEC_RandomMat(Random(50,100),l1,p,d);
+  n := CVEC_RandomMat(Random(50,100),l2,p,d);
+  cl := CVEC_NewCVecClass(p,d,l1+l2-1);
+  u := CVEC_New(cl);
+  h := CVEC_New(cl);
   for i in [1..Length(m)] do
       a := Unpack(m[i]);
       for j in [1..Length(n)] do
-          CVEC.PROD_COEFFS_CVEC_PRIMEFIELD(u,m[i],n[j],h);
+          CVEC_PROD_COEFFS_CVEC_PRIMEFIELD(u,m[i],n[j],h);
           b := Unpack(n[j]);
           c := Unpack(u);
-          CVEC.MAKEZERO(u);
+          CVEC_MAKEZERO(u);
           cc := ProductCoeffs(a,b);
           if c <> cc then
               Error("Alarm p=",p," you can inspect a, b, c, and cc");
@@ -676,7 +676,7 @@ end;
 
 CVEC.TEST.SCALAR_IN := function(p,d)
   local c,i,l,limit,q,tab2,v,z,zz;
-  c := CVEC.NewCVecClass(p,d,1);
+  c := CVEC_NewCVecClass(p,d,1);
   v := CVec(c);
   z := Z(p,d);
   q := p^d;
@@ -725,7 +725,7 @@ end;
 
 CVEC.TEST.SCALAR_OUT := function(p,d)
   local c,i,limit,q,v,z,zz;
-  c := CVEC.NewCVecClass(p,d,1);
+  c := CVEC_NewCVecClass(p,d,1);
   v := CVec(c);
   z := Z(p,d);
   q := p^d;
@@ -742,7 +742,7 @@ end;
 
 CVEC.TEST.SCALAR_UNPACK := function(p,d)
   local c,i,limit,q,v,z,zz;
-  c := CVEC.NewCVecClass(p,d,1);
+  c := CVEC_NewCVecClass(p,d,1);
   v := CVec(c);
   z := Z(p,d);
   q := p^d;
@@ -798,7 +798,7 @@ CVEC.TEST.TRANSPOSED_MAT := function(p,d)
   local m,mm,mo,n,nno,no,x,y;
   x := Random(50,100);
   y := Random(50,100);
-  m := CVEC.RandomMat(x,y,p,d);
+  m := CVEC_RandomMat(x,y,p,d);
   n := TransposedMatOp(m);
   mm := TransposedMatOp(n);
   if m <> mm then
@@ -820,7 +820,7 @@ CVEC.TEST.INVERSION := function(p,d)
   local lev,m,n,nn,x;
   x := Random(50,100);
   repeat
-    m := CVEC.RandomMat(x,x,p,d);
+    m := CVEC_RandomMat(x,x,p,d);
   until RankMat(m) = x;
   n := m^-1;
   if not(IsOne(m*n)) then
@@ -828,7 +828,7 @@ CVEC.TEST.INVERSION := function(p,d)
   fi;
   if m!.greasehint <> 0 then
       for lev in [1..m!.greasehint+1] do
-          nn := CVEC.InverseWithGrease(m,lev);
+          nn := CVEC_InverseWithGrease(m,lev);
           if nn <> n then
               Error("Alarm p=",p," d=",d," you can inspect m, n, nn, and lev");
           fi;
@@ -932,13 +932,13 @@ CVEC.BENCH.ADD2 := function(p,d)
   if q < 16 then nr := nr * 4; fi;   # some more for small fields
   table := [];
   repeat
-    c := CVEC.NewCVecClass(p,d,l);
+    c := CVEC_NewCVecClass(p,d,l);
     wordlen := c![CVEC_IDX_wordlen];
-    vecsize := CVEC.BYTESPERWORD*wordlen;
+    vecsize := CVEC_BYTESPERWORD*wordlen;
     Print("Doing vectors of length ",l," using ", vecsize," bytes each...\n");
     Print("Initialising...\c");
-    v := CVEC.New(c);
-    w := CVEC.New(c);
+    v := CVEC_New(c);
+    w := CVEC_New(c);
     j := 0;
     for i in [1..l] do
         v[i] := j;
@@ -949,7 +949,7 @@ CVEC.BENCH.ADD2 := function(p,d)
     Print("Doing ",nr," times ADD2 of such vectors...\c");
     r := Runtime();
     for i in [1..nr] do
-        CVEC.ADD2(w,v,0,0);
+        CVEC_ADD2(w,v,0,0);
     od;
     r2 := Runtime();
     Print("done.\n");
@@ -1020,14 +1020,14 @@ CVEC.BENCH.MEASUREACCURACY := function()
   l := 524288; # 16384;
   nr := 1024;  # 32768;
   times := 20;
-  c := CVEC.NewCVecClass(p,d,l);
+  c := CVEC_NewCVecClass(p,d,l);
   wordlen := c![CVEC_IDX_wordlen];
-  vecsize := CVEC.BYTESPERWORD*wordlen;
+  vecsize := CVEC_BYTESPERWORD*wordlen;
   Print("Doing vectors of length ",l," using ", vecsize," bytes each...\n");
   Print("Initialising...\c");
-  v := CVEC.New(c);
+  v := CVEC_New(c);
   x := [1,2,3];
-  w := CVEC.New(c);
+  w := CVEC_New(c);
   j := 0;
   for i in [1..l] do
       v[i] := j;
@@ -1041,14 +1041,14 @@ CVEC.BENCH.MEASUREACCURACY := function()
   for j in [1..times] do
       r := Runtime();
       for i in [1..nr] do
-          CVEC.ADD2(w,v,0,0);
+          CVEC_ADD2(w,v,0,0);
       od;
       r2 := Runtime();
       throughput := QuoInt(nr*vecsize*1000,(r2-r)*1024);  # in kB/s
       Print("Time: ",r2-r," ms which means: ",throughput," kB/s throughput.\n");
       sum := sum + throughput;
       sqsum := sqsum + throughput^2;
-      w := CVEC.New(c);   # see to it, that w changes its place in memory
+      w := CVEC_New(c);   # see to it, that w changes its place in memory
   od;
   Print("Average: ",QuoInt(sum,times * 1000)," MB/s ",
         " Variance: ",
@@ -1060,14 +1060,14 @@ CVEC.BENCH.MEASUREACCURACY := function()
   l := 524288; # 16384;
   nr := 1024;  # 32768;
   times := 20;
-  c := CVEC.NewCVecClass(p,d,l);
+  c := CVEC_NewCVecClass(p,d,l);
   wordlen := c![CVEC_IDX_wordlen];
-  vecsize := CVEC.BYTESPERWORD*wordlen;
+  vecsize := CVEC_BYTESPERWORD*wordlen;
   Print("Doing vectors of length ",l," using ", vecsize," bytes each...\n");
   Print("Initialising...\c");
-  v := CVEC.New(c);
+  v := CVEC_New(c);
   x := [1,2,3];
-  w := CVEC.New(c);
+  w := CVEC_New(c);
   j := 0;
   for i in [1..l] do
       v[i] := j;
@@ -1081,14 +1081,14 @@ CVEC.BENCH.MEASUREACCURACY := function()
   for j in [1..times] do
       r := Runtime();
       for i in [1..nr] do
-          CVEC.ADD2(w,v,0,0);
+          CVEC_ADD2(w,v,0,0);
       od;
       r2 := Runtime();
       throughput := QuoInt(nr*vecsize*1000,(r2-r)*1024);  # in kB/s
       Print("Time: ",r2-r," ms which means: ",throughput," kB/s throughput.\n");
       sum := sum + throughput;
       sqsum := sqsum + throughput^2;
-      w := CVEC.New(c);   # see to it, that w changes its place in memory
+      w := CVEC_New(c);   # see to it, that w changes its place in memory
   od;
   Print("Average: ",QuoInt(sum,times * 1000)," MB/s ",
         " Variance: ",
@@ -1103,18 +1103,18 @@ CVEC.BENCH.INVERSION := function(p,d)
   if l < 100 then l := 100; fi;
   Print("Doing random invertible ",l,"x",l," matrices.");
   repeat
-      m := CVEC.RandomMat(l,l,p,d);
+      m := CVEC_RandomMat(l,l,p,d);
       Print(".\c");
   until RankMat(m) = l;
   Print("got one.\n");
-  t := Runtime(); n := CVEC.InverseWithoutGrease(m); t2 := Runtime();
+  t := Runtime(); n := CVEC_InverseWithoutGrease(m); t2 := Runtime();
   Print("Without grease: ",t2-t," ms\n");
   t := Runtime(); n := m^-1; t2 := Runtime();
   Print("With std. grease (level ",m!.greasehint,"): ",t2-t," ms\n");
   if m!.greasehint <> 0 then
       for lev in [1..m!.greasehint+1] do
         if q^lev < 2500 then   # to get rid of too high greasing levels
-          t := Runtime(); n := CVEC.InverseWithGrease(m,lev); t2 := Runtime();
+          t := Runtime(); n := CVEC_InverseWithGrease(m,lev); t2 := Runtime();
           Print("With grease level ",lev,": ",t2-t," ms\n");
         fi;
       od;
@@ -1131,8 +1131,8 @@ CVEC.BENCH.MULTIPLICATION := function(p,d)
   l := First([1..5000],i->i^3*q > 2500^3*2);
   if l < 100 then l := 100; fi;
   Print("Doing random ",l,"x",l," matrices...\c");
-  m := CVEC.RandomMat(l,l,p,d);
-  n := CVEC.RandomMat(l,l,p,d);
+  m := CVEC_RandomMat(l,l,p,d);
+  n := CVEC_RandomMat(l,l,p,d);
   Print("got them.\n");
   merklev := n!.greasehint;
   n!.greasehint := 0;  # Switch off greasing

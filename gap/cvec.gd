@@ -65,8 +65,8 @@ DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ##  ![3]: wordlen of vectors
 ##  ![4]: starting type (mutable version) for new vectors in this class
 ##  ![5]: GF(p,d)
-##  ![6]: CVEC.lens[pos] where pos = Position(CVEC.q,q)
-##  ![7]: CVEC.classes[pos] where pos = Position(CVEC.q.q)
+##  ![6]: CVEC_lens[pos] where pos = Position(CVEC_q,q)
+##  ![7]: CVEC_classes[pos] where pos = Position(CVEC_q.q)
 ##         the latter are used for fast access to other cvec classes over
 ##         the same field.
 

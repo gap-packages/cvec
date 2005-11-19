@@ -79,8 +79,8 @@ or the filter <F>Is8BitMatrixRep</F>.
 There are some methods to create <C>cmat</C>s of special form:
 
 <ManSection>
-<Func Name="CVEC.ZeroMat" Arg="rows, cl"/>
-<Func Name="CVEC.ZeroMat" Arg="rows, cols, p, d"/>
+<Func Name="CVEC_ZeroMat" Arg="rows, cl"/>
+<Func Name="CVEC_ZeroMat" Arg="rows, cols, p, d"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     Creates a zero matrix with <A>rows</A> rows and <A>cols</A> columns
@@ -91,8 +91,8 @@ There are some methods to create <C>cmat</C>s of special form:
 </ManSection>
 
 <ManSection>
-<Func Name="CVEC.IdentityMat" Arg="rows, cl"/>
-<Func Name="CVEC.IdentityMat" Arg="rows, cols, p, d"/>
+<Func Name="CVEC_IdentityMat" Arg="rows, cl"/>
+<Func Name="CVEC_IdentityMat" Arg="rows, cols, p, d"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     Creates an identity matrix with <A>rows</A> rows and <A>cols</A> columns
@@ -103,8 +103,8 @@ There are some methods to create <C>cmat</C>s of special form:
 </ManSection>
 
 <ManSection>
-<Func Name="CVEC.RandomMat" Arg="rows, cl"/>
-<Func Name="CVEC.RandomMat" Arg="rows, cols, p, d"/>
+<Func Name="CVEC_RandomMat" Arg="rows, cl"/>
+<Func Name="CVEC_RandomMat" Arg="rows, cols, p, d"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     Creates a random matrix with <A>rows</A> rows and <A>cols</A> columns

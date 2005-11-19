@@ -379,14 +379,14 @@ from <A>dstpos</A> in <A>dst</A>. Of course all positions must be within
 the vectors. <P/>
 
 Note that this functions is quite efficient, however, the ranges are
-checked. If you want to avoid this, use <C>CVEC.SLICE</C> instead (with
+checked. If you want to avoid this, use <C>CVEC_SLICE</C> instead (with
 same calling convention), but do not complain later if crashes occur in
 case of illegal positions used.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="CVEC.Concatenation" Arg="arg"/>
+<Meth Name="CVEC_Concatenation" Arg="arg"/>
 <Returns>a new <C>cvec</C> by concatenating all arguments</Returns>
 <Description>
 This function provides concatenation of <C>cvec</C>s over the same

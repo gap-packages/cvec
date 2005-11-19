@@ -754,7 +754,7 @@ static Int scbuf[MAXDEGREE+1];
 /* Is always at least 1. */
 static Int sclen; 
 /* A buffer for elsperword consecutive field entries: */
-static Int buf[MAXDEGREE+1]; 
+static Word buf[MAXDEGREE+1]; 
 
    /*                                                          */
   /* First some internal inlined functions to do addition and */
@@ -3245,175 +3245,175 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
 */
 static StructGVarFunc GVarFuncs [] = {
 
-  { "TEST_ASSUMPTIONS", 0, "",
+  { "CVEC_TEST_ASSUMPTIONS", 0, "",
     TEST_ASSUMPTIONS,
     "cvec.c:TEST_ASSUMPTIONS" },
 
-  { "COEFF_LIST_TO_C", 2, "coefflist, st",
+  { "CVEC_COEFF_LIST_TO_C", 2, "coefflist, st",
     COEFF_LIST_TO_C,
     "cvec.c:COEFF_LIST_TO_C" },
 
-  { "FINALIZE_FIELDINFO", 1, "fieldinfo",
+  { "CVEC_FINALIZE_FIELDINFO", 1, "fieldinfo",
     FINALIZE_FIELDINFO,
     "cvec.c:FINALIZE_FIELDINFO" },
 
-  { "INIT_SMALL_GFQ_TABS", 6, "p, d, q, tab1, tab2, primroot",
+  { "CVEC_INIT_SMALL_GFQ_TABS", 6, "p, d, q, tab1, tab2, primroot",
     INIT_SMALL_GFQ_TABS,
     "cvec.c:INIT_SMALL_GFQ_TABS" },
 
-  { "NEW", 2, "class, type",
+  { "CVEC_NEW", 2, "class, type",
     NEW,
     "cvec.c:NEW" },
 
-  { "MAKEZERO", 1, "v",
+  { "CVEC_MAKEZERO", 1, "v",
     MAKEZERO,
     "cvec.c:MAKEZERO" },
 
-  { "COPY", 2, "v, w",
+  { "CVEC_COPY", 2, "v, w",
     COPY,
     "cvec.c:COPY" },
 
-  { "CVEC_TO_INTREP", 2, "v, l",
+  { "CVEC_CVEC_TO_INTREP", 2, "v, l",
     CVEC_TO_INTREP,
     "cvec.c:CVEC_TO_INTREP" },
 
-  { "INTREP_TO_CVEC", 2, "l, v",
+  { "CVEC_INTREP_TO_CVEC", 2, "l, v",
     INTREP_TO_CVEC,
     "cvec.c:INTREP_TO_CVEC" },
 
-  { "INTLI_TO_FFELI", 2, "c, l",
+  { "CVEC_INTLI_TO_FFELI", 2, "c, l",
     INTLI_TO_FFELI,
     "cvec.c:INTLI_TO_FFELI" },
 
-  { "FFELI_TO_INTLI", 2, "c, l",
+  { "CVEC_FFELI_TO_INTLI", 2, "c, l",
     FFELI_TO_INTLI,
     "cvec.c:FFELI_TO_INTLI" },
 
-  { "CVEC_TO_NUMBERFFLIST", 3, "v, l, split",
+  { "CVEC_CVEC_TO_NUMBERFFLIST", 3, "v, l, split",
     CVEC_TO_NUMBERFFLIST,
     "cvec.c:CVEC_TO_NUMBERFFLIST" },
 
-  { "NUMBERFFLIST_TO_CVEC", 3, "l, v, split",
+  { "CVEC_NUMBERFFLIST_TO_CVEC", 3, "l, v, split",
     NUMBERFFLIST_TO_CVEC,
     "cvec.c:NUMBERFFLIST_TO_CVEC" },
 
-  { "ADD2", 4, "u, v, fr, to",
+  { "CVEC_ADD2", 4, "u, v, fr, to",
     ADD2,
     "cvec.c:ADD2" },
 
-  { "ADD3", 3, "u, v, w",
+  { "CVEC_ADD3", 3, "u, v, w",
     ADD3,
     "cvec.c:ADD3" },
 
-  { "MUL1", 4, "u, s, fr, to",
+  { "CVEC_MUL1", 4, "u, s, fr, to",
     MUL1,
     "cvec.c:MUL1" },
 
-  { "MUL2", 3, "u, v, s",
+  { "CVEC_MUL2", 3, "u, v, s",
     MUL2,
     "cvec.c:MUL2" },
 
-  { "ADDMUL", 5, "u, v, s, fr, to",
+  { "CVEC_ADDMUL", 5, "u, v, s, fr, to",
     ADDMUL,
     "cvec.c:ADDMUL" },
 
-  { "ASS_CVEC", 3, "v, pos, s",
+  { "CVEC_ASS_CVEC", 3, "v, pos, s",
     ASS_CVEC,
     "cvec.c:ASS_CVEC" },
 
-  { "ELM_CVEC", 2, "v, pos",
+  { "CVEC_ELM_CVEC", 2, "v, pos",
     ELM_CVEC,
     "cvec.c:ELM_CVEC" },
 
-  { "POSITION_NONZERO_CVEC", 1, "v",
+  { "CVEC_POSITION_NONZERO_CVEC", 1, "v",
     POSITION_NONZERO_CVEC,
     "cvec.c:POSITION_NONZERO_CVEC" },
 
-  { "POSITION_LAST_NONZERO_CVEC", 1, "v",
+  { "CVEC_POSITION_LAST_NONZERO_CVEC", 1, "v",
     POSITION_LAST_NONZERO_CVEC,
     "cvec.c:POSITION_LAST_NONZERO_CVEC" },
 
-  { "CVEC_LT", 2, "u, v",
+  { "CVEC_CVEC_LT", 2, "u, v",
     CVEC_LT,
     "cvec.c:CVEC_LT" },
 
-  { "CVEC_EQ", 2, "u, v",
+  { "CVEC_CVEC_EQ", 2, "u, v",
     CVEC_EQ,
     "cvec.c:CVEC_EQ" },
 
-  { "CVEC_ISZERO", 1, "u",
+  { "CVEC_CVEC_ISZERO", 1, "u",
     CVEC_ISZERO,
     "cvec.c:CVEC_ISZERO" },
 
-  { "EXTRACT", 3, "v, i, l",
+  { "CVEC_EXTRACT", 3, "v, i, l",
     EXTRACT,
     "cvec.c:EXTRACT" },
 
-  { "EXTRACT_INIT", 3, "v, i, l",
+  { "CVEC_EXTRACT_INIT", 3, "v, i, l",
     EXTRACT_INIT,
     "cvec.c:EXTRACT_INIT" },
 
-  { "EXTRACT_DOIT", 1, "v",
+  { "CVEC_EXTRACT_DOIT", 1, "v",
     EXTRACT_DOIT,
     "cvec.c:EXTRACT_DOIT" },
 
-  { "FILL_GREASE_TAB", 6, "li, i, l, tab, tablen, offset",
+  { "CVEC_FILL_GREASE_TAB", 6, "li, i, l, tab, tablen, offset",
      FILL_GREASE_TAB,
      "cvec.c:FILL_GREASE_TAB" },
 
-  { "PROD_CVEC_CMAT_NOGREASE", 3, "u, v, m",
+  { "CVEC_PROD_CVEC_CMAT_NOGREASE", 3, "u, v, m",
     PROD_CVEC_CMAT_NOGREASE,
     "cvec.c:PROD_CVEC_CMAT_NOGREASE" },
 
-  { "PROD_CVEC_CMAT_GREASED", 5, "u, v, mgreasetab, spreadtab, glev",
+  { "CVEC_PROD_CVEC_CMAT_GREASED", 5, "u, v, mgreasetab, spreadtab, glev",
     PROD_CVEC_CMAT_GREASED,
     "cvec.c:PROD_CVEC_CMAT_GREASED" },
 
-  { "PROD_CMAT_CMAT_GREASED", 6, "l, m, ngreasetab, spreadtab, len, glev",
+  { "CVEC_PROD_CMAT_CMAT_GREASED", 6, "l, m, ngreasetab, spreadtab, len, glev",
     PROD_CMAT_CMAT_GREASED,
     "cvec.c:PROD_CMAT_CMAT_GREASED" },
 
-  { "PROD_CMAT_CMAT_NOGREASE", 3, "l, m, n",
+  { "CVEC_PROD_CMAT_CMAT_NOGREASE", 3, "l, m, n",
     PROD_CMAT_CMAT_NOGREASE,
     "cvec.c:PROD_CMAT_CMAT_NOGREASE" },
 
-  { "PROD_CMAT_CMAT_NOGREASE2", 3, "l, m, n",
+  { "CVEC_PROD_CMAT_CMAT_NOGREASE2", 3, "l, m, n",
     PROD_CMAT_CMAT_NOGREASE2,
     "cvec.c:PROD_CMAT_CMAT_NOGREASE2" },
 
-  { "PROD_CMAT_CMAT_WITHGREASE", 6, "l, m, n, greasetab, spreadtab, glev",
+  { "CVEC_PROD_CMAT_CMAT_WITHGREASE", 6, "l, m, n, greasetab, spreadtab, glev",
     PROD_CMAT_CMAT_WITHGREASE,
     "cvec.c:PROD_CMAT_CMAT_WITHGREASE" },
 
-  { "SLICE", 5, "src, dst, srcpos, len, dstpos",
+  { "CVEC_SLICE", 5, "src, dst, srcpos, len, dstpos",
     SLICE,
     "cvec.c:SLICE" },
 
-  { "CVEC_TO_EXTREP", 2, "v, s",
+  { "CVEC_CVEC_TO_EXTREP", 2, "v, s",
     CVEC_TO_EXTREP,
     "cvec.c:CVEC_TO_EXTREP" },
 
-  { "EXTREP_TO_CVEC", 2, "s, v",
+  { "CVEC_EXTREP_TO_CVEC", 2, "s, v",
     EXTREP_TO_CVEC,
     "cvec.c:EXTREP_TO_CVEC" },
 
-  { "PROD_COEFFS_CVEC_PRIMEFIELD", 3, "u, v, w",
+  { "CVEC_PROD_COEFFS_CVEC_PRIMEFIELD", 3, "u, v, w",
     PROD_COEFFS_CVEC_PRIMEFIELD,
     "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD" },
 
-  { "TRANSPOSED_MAT", 2, "m, n",
+  { "CVEC_TRANSPOSED_MAT", 2, "m, n",
     TRANSPOSED_MAT,
     "cvec.c:TRANSPOSED_MAT" },
 
-  { "CMAT_INVERSE", 4, "mi, mc, helperfun, helper",
+  { "CVEC_CMAT_INVERSE", 4, "mi, mc, helperfun, helper",
     CMAT_INVERSE,
     "cvec.c:CMAT_INVERSE" },
 
-  { "CMAT_INVERSE_GREASE", 5, "mi, mc, helperfun, helper, grease",
+  { "CVEC_CMAT_INVERSE_GREASE", 5, "mi, mc, helperfun, helper, grease",
     CMAT_INVERSE_GREASE,
     "cvec.c:CMAT_INVERSE_GREASE" },
 
-  { "GREASEPOS", 2, "v, pivs",
+  { "CVEC_GREASEPOS", 2, "v, pivs",
     GREASEPOS,
     "cvec.c:GREASEPOS" },
 
@@ -3433,7 +3433,7 @@ static Int InitKernel ( StructInitInfo *module )
     return 0;
 }
 
-#define CVEC_PUBLISH(nam) gvar=GVarName("CVEC_"#nam); MakeReadWriteGVar(gvar);\
+#define CVEC_PUBLISH(nam) gvar=GVarName("CVEC_"#nam); \
     AssGVar( gvar, INTOBJ_INT(nam)); MakeReadOnlyGVar(gvar)
 
 /******************************************************************************
@@ -3444,16 +3444,19 @@ static Int InitLibrary ( StructInitInfo *module )
     Int             i, gvar;
     Obj             tmp;
 
-    /* init filters and functions
-       we assign the functions to components of a record "CVEC"         */
-    tmp = NEW_PREC(0);
+    /* init filters and functions */
     for ( i = 0;  GVarFuncs[i].name != 0;  i++ ) {
-      AssPRec(tmp, RNamName((Char*)GVarFuncs[i].name),
-              NewFunctionC( GVarFuncs[i].name, GVarFuncs[i].nargs,
-                 GVarFuncs[i].args, GVarFuncs[i].handler ) );
+      gvar = GVarName(GVarFuncs[i].name);
+      AssGVar(gvar,NewFunctionC( GVarFuncs[i].name, GVarFuncs[i].nargs,
+                                 GVarFuncs[i].args, GVarFuncs[i].handler ) );
+      MakeReadOnlyGVar(gvar);
     }
-    AssPRec(tmp, RNamName("BYTESPERWORD"), INTOBJ_INT(BYTESPERWORD));
-    AssPRec(tmp, RNamName("MAXDEGREE"), INTOBJ_INT(MAXDEGREE));
+    gvar = GVarName("CVEC_BYTESPERWORD");
+    AssGVar(gvar,INTOBJ_INT(BYTESPERWORD));
+    MakeReadOnlyGVar(gvar);
+    gvar = GVarName("CVEC_MAXDEGREE");
+    AssGVar(gvar,INTOBJ_INT(MAXDEGREE));
+    MakeReadOnlyGVar(gvar);
 
     /* Export position numbers: */
     CVEC_PUBLISH(IDX_p);
@@ -3481,10 +3484,8 @@ static Int InitLibrary ( StructInitInfo *module )
 
     /*ImportFuncFromLibrary( "IsCVecRep", &IsCVecRep );*/
 
-    gvar = GVarName("CVEC");
-    MakeReadWriteGVar( gvar);
-    AssGVar( gvar, tmp );
-    MakeReadOnlyGVar(gvar);
+    tmp = NEW_PREC(0);
+    gvar = GVarName("CVEC"); AssGVar( gvar, tmp ); MakeReadOnlyGVar(gvar);
     /* return success                                                      */
     return 0;
 }
