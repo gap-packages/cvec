@@ -27,7 +27,7 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define CACHESIZE (512L*1024L)
 #define CACHELINE 64
 /* If you want to change the following limit, please also change the
- * corresponding value in cvec.gi in CVEC.NewCVecClass! */
+ * corresponding value in cvec.gi in CVEC_NewCVecClass! */
 #define MAXDEGREE 1024
 
 /* Define this to empty if you want global access to functions: */
@@ -346,7 +346,7 @@ STATIC Obj NEW(Obj self, Obj cl, Obj type)
     /* GARBAGE COLLECTION POSSIBLE */
     v = NewBag( T_DATOBJ, sizeof( Obj ) + si );
     if (v == 0L) {
-        return OurErrorBreakQuit("CVEC.NEW: Cannot allocate memory");
+        return OurErrorBreakQuit("CVEC_NEW: Cannot allocate memory");
     }
     SET_TYPE_DATOBJ(v, type);
     return v;
@@ -355,7 +355,7 @@ STATIC Obj NEW(Obj self, Obj cl, Obj type)
 STATIC Obj MAKEZERO(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.MAKEZERO: no cvec");
+        return OurErrorBreakQuit("CVEC_MAKEZERO: no cvec");
     }
     {
         Int si;
@@ -369,7 +369,7 @@ STATIC Obj MAKEZERO(Obj self, Obj v)
 STATIC Obj COPY(Obj self, Obj v, Obj w)
 {
     if (!IS_CVEC(v) || !IS_CVEC(w)) {
-        return OurErrorBreakQuit("CVEC.COPY: no cvec");
+        return OurErrorBreakQuit("CVEC_COPY: no cvec");
     }
     {
         Int si,si2;
@@ -378,7 +378,7 @@ STATIC Obj COPY(Obj self, Obj v, Obj w)
         si = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
         si2 = INT_INTOBJ(ELM_PLIST(cl2,IDX_len));
         if (si != si2) {
-            return OurErrorBreakQuit("CVEC.COPY: unequal length");
+            return OurErrorBreakQuit("CVEC_COPY: unequal length");
         }
         si = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
         memcpy(DATA_CVEC(w),DATA_CVEC(v),sizeof(Word)*si);
@@ -399,10 +399,10 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
     Int size;
 
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.CVEC_TO_INTREP: no cvec");
+        return OurErrorBreakQuit("CVEC_CVEC_TO_INTREP: no cvec");
     }
     if (!IS_PLIST(l)) {
-        return OurErrorBreakQuit("CVEC.CVEC_TO_INTREP: no plist");
+        return OurErrorBreakQuit("CVEC_CVEC_TO_INTREP: no plist");
     }
 
     {
@@ -412,7 +412,7 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
         size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
 
         if (LEN_PLIST(l) != len) {
-            return OurErrorBreakQuit("CVEC.CVEC_TO_INTREP: different lengths");
+            return OurErrorBreakQuit("CVEC_CVEC_TO_INTREP: different lengths");
         }
 
         pw = DATA_CVEC(v);
@@ -477,7 +477,7 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
     register Word *pw;
 
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.INTREP_TO_CVEC: no cvec");
+        return OurErrorBreakQuit("CVEC_INTREP_TO_CVEC: no cvec");
     }
 
     {
@@ -489,7 +489,7 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
       /* Check lengths: */
       if (!IS_PLIST(l) || LEN_PLIST(l) != len) {
           return OurErrorBreakQuit(
-         "CVEC.INTREP_TO_CVEC: l must be a list of corresponding length to v");
+         "CVEC_INTREP_TO_CVEC: l must be a list of corresponding length to v");
       }
 
       {
@@ -522,7 +522,7 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
                              (VAL_FFE(o)-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2));
                       else {
                           return OurErrorBreakQuit(
-                                "CVEC.INTREP_TO_CVEC: invalid object in list");
+                                "CVEC_INTREP_TO_CVEC: invalid object in list");
                       }
                       w = (w << bitsperel) | y;
                       j--;
@@ -574,12 +574,12 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
                               /* We assume that tab1 is for GF(p) here! */
                           } else {
                               return OurErrorBreakQuit(
-                             "CVEC.INTREP_TO_CVEC: invalid object in list");
+                             "CVEC_INTREP_TO_CVEC: invalid object in list");
                           }
                       }
                   } else {
                       return OurErrorBreakQuit(
-                             "CVEC.INTREP_TO_CVEC: invalid object in list");
+                             "CVEC_INTREP_TO_CVEC: invalid object in list");
                   }
               }
           }
@@ -593,7 +593,7 @@ Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
 {
     if (!IS_PLIST(l)) {
         return OurErrorBreakQuit(
-      "CVEC.INTLI_TO_FFELI: Must be called with a field info and a plain list");
+      "CVEC_INTLI_TO_FFELI: Must be called with a field info and a plain list");
     }
     {
         Int len;
@@ -606,7 +606,7 @@ Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
         for (i = 1;i <= len;i++) {
             e = ELM_PLIST(l,i);
             if (!IS_INTOBJ(e) || INT_INTOBJ(e) < 0 || INT_INTOBJ(e) >= q) {
-                return OurErrorBreakQuit("CVEC.INTLI_TO_FFELI: Elements of l "
+                return OurErrorBreakQuit("CVEC_INTLI_TO_FFELI: Elements of l "
                                          "must be integers between 0 and q‐1");
             }
             e = ELM_PLIST(tab2,INT_INTOBJ(e)+1);
@@ -621,7 +621,7 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
 {
     if (!IS_PLIST(l)) {
         return OurErrorBreakQuit(
-      "CVEC.FFELI_TO_INTLI: Must be called with a field info and a plain list");
+      "CVEC_FFELI_TO_INTLI: Must be called with a field info and a plain list");
     }
     {
         Int len;
@@ -637,7 +637,7 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
             e = ELM_PLIST(l,i);
             if (!IS_FFE(e) || CHAR_FF(FLD_FFE(e)) != p || 
                 (d % DEGR_FF(FLD_FFE(e))) != 0) {
-                return OurErrorBreakQuit("CVEC.FFELI_TO_INTLI: Elements of l "
+                return OurErrorBreakQuit("CVEC_FFELI_TO_INTLI: Elements of l "
                                          "must be finite field elements over "
                                          "the right field");
             }
@@ -1340,11 +1340,11 @@ static INLINE Int mulmodp(Int a, Int b, Int p)
  * prime-field values is implemented only here!             
  * For all of the following functions u,v, and w must be vectors over the
  * same field of equal length, already allocated:
- *   CVEC.ADD2(u,v,fr,to)       does u += v
- *   CVEC.ADD3(u,v,w)           does u = v+w
- *   CVEC.MUL1(v,s,fr,to)       does v *= s
- *   CVEC.MUL2(u,v,s)           does u = v*s
- *   CVEC.ADDMUL(u,v,s,fr,to)   does u += v*s
+ *   CVEC_ADD2(u,v,fr,to)       does u += v
+ *   CVEC_ADD3(u,v,w)           does u = v+w
+ *   CVEC_MUL1(v,s,fr,to)       does v *= s
+ *   CVEC_MUL2(u,v,s)           does u = v*s
+ *   CVEC_ADDMUL(u,v,s,fr,to)   does u += v*s
  * They all return nothing. Scalars s can be immediate integers or finite
  * field elements where appropriate. fr and to are hints, that all elements
  * outside the range [fr..to] in v are known to be zero, such that operations
@@ -1363,7 +1363,7 @@ static INLINE Int handle_hints(Obj cl, Obj fi, Obj fr, Obj to,
     /* A return value of zero indicates failure. */
     if (!IS_INTOBJ(fr) || !IS_INTOBJ(to)) {
         return (Int) OurErrorBreakQuit(
-                    "CVEC.handle_hints: fr and to must be immediate integers");
+                    "CVEC_handle_hints: fr and to must be immediate integers");
     }
     st = INT_INTOBJ(fr); 
     if (st == 0) st = 1;
@@ -1378,7 +1378,7 @@ static INLINE Int handle_hints(Obj cl, Obj fi, Obj fr, Obj to,
 STATIC Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.ADD2: no cvec");
+        return OurErrorBreakQuit("CVEC_ADD2: no cvec");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         PREPARE_clfi(u,ucl,ufi);
@@ -1387,7 +1387,7 @@ STATIC Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
 
         if (ufi != vfi || ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len)) {
             return OurErrorBreakQuit(
-                        "CVEC.ADD2: incompatible fields or lengths");
+                        "CVEC_ADD2: incompatible fields or lengths");
         }
 
         /* Handle hints: */
@@ -1401,7 +1401,7 @@ STATIC Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
 STATIC Obj ADD3(Obj self, Obj u, Obj v,Obj w)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
-        return OurErrorBreakQuit("CVEC.ADD3: no cvec");
+        return OurErrorBreakQuit("CVEC_ADD3: no cvec");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         PREPARE_clfi(u,ucl,ufi);
@@ -1412,7 +1412,7 @@ STATIC Obj ADD3(Obj self, Obj u, Obj v,Obj w)
             ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len) ||
             ELM_PLIST(vcl,IDX_len) != ELM_PLIST(wcl,IDX_len)) {
             return OurErrorBreakQuit(
-                        "CVEC.ADD3: incompatible fields or lengths");
+                        "CVEC_ADD3: incompatible fields or lengths");
         }
         ADD3_INL(DATA_CVEC(u),DATA_CVEC(v),DATA_CVEC(w),ufi,
              INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen)));
@@ -1483,7 +1483,7 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
         return scbuf;
     } else {
         return (Int *) OurErrorBreakQuit(
-                "CVEC.MUL*: strange object as scalar");
+                "CVEC_MUL*: strange object as scalar");
     }
     /* Now the scalar is in sc as integer between 0..q-1 */
     /* We write out the p-adic expansion into our buffer: */
@@ -1544,7 +1544,7 @@ STATIC INLINE void MUL1_INT(Obj u, Obj ucl, Obj ufi, Int d, Int *sc,
 STATIC Obj MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u)) {
-        return OurErrorBreakQuit("CVEC.MUL1: no cvec");
+        return OurErrorBreakQuit("CVEC_MUL1: no cvec");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         PREPARE_clfi(u,ucl,ufi);
@@ -1617,7 +1617,7 @@ STATIC INLINE void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v,
 STATIC Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.MUL1: no cvec");
+        return OurErrorBreakQuit("CVEC_MUL1: no cvec");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         PREPARE_clfi(u,ucl,ufi);
@@ -1631,7 +1631,7 @@ STATIC Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
         if (ufi != vfi || 
             ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len)) {
             return OurErrorBreakQuit(
-                        "CVEC.MUL2: incompatible fields or lengths");
+                        "CVEC_MUL2: incompatible fields or lengths");
         }
         
         /* Now handle the scalar: */
@@ -1697,7 +1697,7 @@ STATIC INLINE void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
 STATIC Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.ADDMUL: no cvec");
+        return OurErrorBreakQuit("CVEC_ADDMUL: no cvec");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         PREPARE_clfi(u,ucl,ufi);
@@ -1710,7 +1710,7 @@ STATIC Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
         if (ufi != vfi || 
             ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len)) {
             return OurErrorBreakQuit(
-                        "CVEC.ADDMUL: incompatible fields or lengths");
+                        "CVEC_ADDMUL: incompatible fields or lengths");
         }
         
         /* Now handle the scalar: */
@@ -1733,10 +1733,10 @@ STATIC Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
     Int i;
     Int *sc;
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.ASS_CVEC: no cvec");
+        return OurErrorBreakQuit("CVEC_ASS_CVEC: no cvec");
     }
     if (!IS_INTOBJ(pos)) {
-        return OurErrorBreakQuit("CVEC.ASS_CVEC: no integer");
+        return OurErrorBreakQuit("CVEC_ASS_CVEC: no integer");
     }
     i = INT_INTOBJ(pos);
     {
@@ -1746,7 +1746,7 @@ STATIC Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
 
         /* Check bounds: */
         if (i < 1 || i > INT_INTOBJ(ELM_PLIST(cl,IDX_len))) {
-            return OurErrorBreakQuit("CVEC.ASS_CVEC: out of bounds");
+            return OurErrorBreakQuit("CVEC_ASS_CVEC: out of bounds");
         }
 
         /* Now handle the scalar: */
@@ -1767,10 +1767,10 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
 {
     Int i;
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.ELM_CVEC: no cvec");
+        return OurErrorBreakQuit("CVEC_ELM_CVEC: no cvec");
     }
     if (!IS_INTOBJ(pos)) {
-        return OurErrorBreakQuit("CVEC.ELM_CVEC: no integer");
+        return OurErrorBreakQuit("CVEC_ELM_CVEC: no integer");
     }
     i = INT_INTOBJ(pos);
     {
@@ -1786,7 +1786,7 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
 
         /* Check bounds: */
         if (i < 1 || i > INT_INTOBJ(ELM_PLIST(cl,IDX_len))) {
-            return OurErrorBreakQuit("CVEC.ELM_CVEC: out of bounds");
+            return OurErrorBreakQuit("CVEC_ELM_CVEC: out of bounds");
         }
 
         if (size >= 1 && d > 1) {  /* The field has more than 65536 elements */
@@ -1829,7 +1829,7 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
 STATIC Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.POSITION_NONZERO_CVEC: no cvec");
+        return OurErrorBreakQuit("CVEC_POSITION_NONZERO_CVEC: no cvec");
     }
     {
         PREPARE_clfi(v,cl,fi);
@@ -1848,7 +1848,7 @@ STATIC Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
 STATIC Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.POSITION_LAST_NONZERO_CVEC: no cvec");
+        return OurErrorBreakQuit("CVEC_POSITION_LAST_NONZERO_CVEC: no cvec");
     }
     {
         PREPARE_clfi(v,cl,fi);
@@ -1867,7 +1867,7 @@ STATIC Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
 STATIC Obj CVEC_LT(Obj self, Obj u, Obj v)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.CVEC_LT: no cvecs");
+        return OurErrorBreakQuit("CVEC_CVEC_LT: no cvecs");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         register Int wordlen;
@@ -1880,7 +1880,7 @@ STATIC Obj CVEC_LT(Obj self, Obj u, Obj v)
         if (ufi != vfi || 
             ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len)) {
             return OurErrorBreakQuit(
-                        "CVEC.CVEC_LT: incompatible fields or lengths");
+                        "CVEC_CVEC_LT: incompatible fields or lengths");
         }
         wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
         p1 = DATA_CVEC(u);
@@ -1899,7 +1899,7 @@ STATIC Obj CVEC_LT(Obj self, Obj u, Obj v)
 STATIC Obj CVEC_EQ(Obj self, Obj u, Obj v)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
-        return OurErrorBreakQuit("CVEC.CVEC_EQ: no cvecs");
+        return OurErrorBreakQuit("CVEC_CVEC_EQ: no cvecs");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         register Int wordlen;
@@ -1912,7 +1912,7 @@ STATIC Obj CVEC_EQ(Obj self, Obj u, Obj v)
         if (ufi != vfi || 
             ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len)) {
             return OurErrorBreakQuit(
-                        "CVEC.CVEC_EQ: incompatible fields or lengths");
+                        "CVEC_CVEC_EQ: incompatible fields or lengths");
         }
         wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
         p1 = DATA_CVEC(u);
@@ -1930,7 +1930,7 @@ STATIC Obj CVEC_EQ(Obj self, Obj u, Obj v)
 STATIC Obj CVEC_ISZERO(Obj self, Obj u)
 {
     if (!IS_CVEC(u)) {
-        return OurErrorBreakQuit("CVEC.CVEC_EQ: no cvec");
+        return OurErrorBreakQuit("CVEC_CVEC_EQ: no cvec");
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         register Int wordlen;
@@ -2882,7 +2882,7 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
  * u must have length len(v)+len(w)-1 */
 {
     if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
-        return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
+        return OurErrorBreakQuit("CVEC_COEFFS_CVEC_PRIMEFIELD: "
                    "no cvecs");
     }
     {
@@ -2905,7 +2905,7 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
         /* GARBAGE COLLECTION POSSIBLE */
         tmp = NEW_STRING(sizeof(Word)*(wordlenw+1)*tablen);
         if (tmp == 0L) {
-            return OurErrorBreakQuit("CVEC.COEFFS_CVEC_PRIMEFIELD: "
+            return OurErrorBreakQuit("CVEC_COEFFS_CVEC_PRIMEFIELD: "
                                      "out of memory");
         }
         /* done with possible garbage collections, no references stored! */
