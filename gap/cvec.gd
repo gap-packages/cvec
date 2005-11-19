@@ -23,6 +23,7 @@ BindGlobal("CVecClassFamily",NewFamily("CVecClassFamily"));
 
 DeclareRepresentation( "IsCVecRep", IsDataObjectRep, [] );
 DeclareRepresentation( "IsCMatRep", IsComponentObjectRep, [] );
+DeclareFilter( "IsCVecRepOverSmallField" );
 
 #############################################################################
 ## Information about the base fields:
@@ -105,4 +106,16 @@ DeclareOperation( "BaseField", [IsObject] );
 DeclareOperation( "CVecClass", [IsObject] );
 DeclareOperation( "CVecClass", [IsObject, IsInt] );
 DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
+
+
+#############################################################################
+# Lazy grease:
+#############################################################################
+
+BindGlobal( "LazyGreaserFamily", NewFamily("LazyGreaserFamily") );
+DeclareCategory( "IsLazyGreaser", IsComponentObjectRep );
+DeclareOperation( "LazyGreaser", [IsObject, IsPosInt] );
+DeclareOperation( "GetLinearCombination", 
+  [IsLazyGreaser, IsObject, IsPosInt, IsList] );
+
 

@@ -326,6 +326,12 @@ INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
     sa->mask = ((1UL << bitsperel)-1) << sa->bitpos;
 }
 
+/* Initializes the sequential access struct, v is a cvec: */
+#define MOVE_SEQ_ACCESS(sa,pos) \
+    (sa)->offset = (sa)->d*(((pos)-1) / (sa)->elsperword); \
+    (sa)->bitpos = (((pos)-1) % (sa)->elsperword) * (sa)->bitsperel; \
+    (sa)->mask = ((1UL << (sa)->bitsperel)-1) << (sa)->bitpos;
+
 
   /*******************************************************/
  /* Interfacing stuff for the objects to the GAP level: */
@@ -708,6 +714,28 @@ STATIC Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
         *vv++ = wo;;
     } 
     return 0L;
+}
+
+STATIC Obj GREASEPOS(Obj self, Obj v, Obj pivs)
+{
+    PREPARE_clfi(v,cl,fi);
+    PREPARE_p(fi);
+    PREPARE_d(fi);
+    Int i,j;
+    seqaccess sa;
+    Int res;
+    Word *ww = DATA_CVEC(v);
+
+    i = LEN_PLIST(pivs);
+    INIT_SEQ_ACCESS(&sa,v,INT_INTOBJ(ELM_PLIST(pivs,i)));
+    res = 0;
+    while (1) {   /* we use break */
+        /* sa already points to position i! */
+        for (j = d-1;j >= 0;j--) res = res * p + GET_VEC_ELM(&sa,ww,j);
+        if (--i <= 0) break;
+        MOVE_SEQ_ACCESS(&sa,INT_INTOBJ(ELM_PLIST(pivs,i)));
+    }
+    return INTOBJ_INT(res+1);
 }
 
   /*******************/
@@ -3384,6 +3412,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "CMAT_INVERSE_GREASE", 5, "mi, mc, helperfun, helper, grease",
     CMAT_INVERSE_GREASE,
     "cvec.c:CMAT_INVERSE_GREASE" },
+
+  { "GREASEPOS", 2, "v, pivs",
+    GREASEPOS,
+    "cvec.c:GREASEPOS" },
 
   { 0 }
 

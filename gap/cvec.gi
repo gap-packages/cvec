@@ -169,9 +169,16 @@ CVEC.NewCVecClass := function(p,d,len)
       l[CVEC_IDX_greasetabl] := greasetabl; 
 
       # Now the starting filter list:
-      filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
-               IsCopyable and CanEasilyCompareElements and
-               CanEasilySortElements;
+      if size = 0 then
+          filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
+                   IsCopyable and CanEasilyCompareElements and
+                   CanEasilySortElements and IsCVecRepOverSmallField;
+      else
+          filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
+                   IsCopyable and CanEasilyCompareElements and
+                   CanEasilySortElements;
+      fi;
+
       # Note that IsMutable is added below, when we create the vector type
       l[CVEC_IDX_filts] := filts;
 
@@ -470,9 +477,14 @@ InstallOtherMethod( AddRowVector, "for cvecs",
   function(v,w) CVEC.ADD2(v,w,0,0); end);
 
 InstallOtherMethod( AddRowVector, "for cvecs",
-  [IsMutable and IsCVecRep, IsCVecRep, IsPosInt, IsPosInt],
+  [IsMutable and IsCVecRep, IsCVecRep, IsInt, IsInt],
   function(v,w,fr,to) CVEC.ADD2(v,w,fr,to); end);
 
+InstallOtherMethod( AddRowVector, "for cvecs",
+  [IsMutable and IsCVecRep, IsCVecRep, IsFFE and IsInternalRep],
+  function(v,w,s)
+    CVEC.ADDMUL(v,w,s,0,0);
+  end );
 InstallOtherMethod( AddRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsCVecRep, IsFFE],
   function(v,w,s) 
@@ -483,12 +495,20 @@ InstallOtherMethod( AddRowVector, "for cvecs",
   function(v,w,s) CVEC.ADDMUL(v,w,s,0,0); end);
 
 InstallOtherMethod( AddRowVector, "for cvecs",
-  [IsMutable and IsCVecRep, IsCVecRep, IsFFE, IsPosInt, IsPosInt],
+  [IsMutable and IsCVecRep, IsCVecRep, IsFFE and IsInternalRep, IsInt, IsInt],
+  function(v,w,s,fr,to) 
+    CVEC.ADDMUL(v,w,s,fr,to); 
+  end);
+InstallOtherMethod( AddRowVector, "for cvecs",
+  [IsMutable and IsCVecRep, IsCVecRep, IsFFE, IsInt, IsInt],
   function(v,w,s,fr,to) 
     CVEC.ADDMUL(v,w,CVEC.HandleScalar(DataType(TypeObj(v)),s),fr,to); 
   end);
 InstallOtherMethod( AddRowVector, "for cvecs",
-  [IsMutable and IsCVecRep,IsCVecRep,IsInt and IsSmallIntRep,IsPosInt,IsPosInt],
+  [IsMutable and IsCVecRep,IsCVecRep,IsInt and IsSmallIntRep,IsInt,IsInt],
+  CVEC.ADDMUL );
+InstallOtherMethod( AddRowVector, "for cvecs",
+  [IsMutable and IsCVecRep,IsCVecRep,IsFFE and IsInternalRep,IsInt,IsInt],
   CVEC.ADDMUL );
 
 # MultRowVector(v,s [,fr,to]) where s is integer or FFE:
@@ -498,7 +518,14 @@ InstallOtherMethod( MultRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsInt and IsSmallIntRep],
   function(v,s) CVEC.MUL1(v,s,0,0); end);
 InstallOtherMethod( MultRowVector, "for cvecs",
-  [IsMutable and IsCVecRep, IsInt and IsSmallIntRep, IsPosInt, IsPosInt],
+  [IsMutable and IsCVecRep, IsInt and IsSmallIntRep, IsInt, IsInt],
+  CVEC.MUL1 );
+
+InstallOtherMethod( MultRowVector, "for cvecs",
+  [IsMutable and IsCVecRep, IsFFE and IsInternalRep],
+  function(v,s) CVEC.MUL1(v,s,0,0); end);
+InstallOtherMethod( MultRowVector, "for cvecs",
+  [IsMutable and IsCVecRep, IsFFE and IsInternalRep, IsInt, IsInt],
   CVEC.MUL1 );
 
 InstallOtherMethod( MultRowVector, "for cvecs",
@@ -507,7 +534,7 @@ InstallOtherMethod( MultRowVector, "for cvecs",
     CVEC.MUL1(v,CVEC.HandleScalar(DataType(TypeObj(v)),s),0,0); 
   end);
 InstallOtherMethod( MultRowVector, "for cvecs",
-  [IsMutable and IsCVecRep, IsFFE, IsPosInt, IsPosInt],
+  [IsMutable and IsCVecRep, IsFFE, IsInt, IsInt],
   function(v,s,fr,to) 
     CVEC.MUL1(v,CVEC.HandleScalar(DataType(TypeObj(v)),s),fr,to); 
   end);
@@ -572,12 +599,22 @@ CVEC.VECTOR_TIMES_SCALAR := function(v,s)
   end;
 InstallOtherMethod( \*, "for cvecs", [IsCVecRep, IsInt], 
   CVEC.VECTOR_TIMES_SCALAR);
-InstallOtherMethod( \*, "for cvecs", [IsCVecRep, IsFFE], 
+InstallOtherMethod( \*, "for cvecs", [IsCVecRep, IsFFE and IsInternalRep], 
   CVEC.VECTOR_TIMES_SCALAR);
+InstallOtherMethod( \*, "for cvecs", [IsCVecRep, IsFFE], 
+  function (v,s) 
+    return CVEC.VECTOR_TIMES_SCALAR(v,
+                CVEC.HandleScalar(DataType(TypeObj(v)),s));
+  end);
 InstallOtherMethod( \*, "for cvecs", [IsInt,IsCVecRep], 
   function(s,v) return CVEC.VECTOR_TIMES_SCALAR(v,s); end);
-InstallOtherMethod( \*, "for cvecs", [IsFFE,IsCVecRep], 
+InstallOtherMethod( \*, "for cvecs", [IsFFE and IsInternalRep,IsCVecRep], 
   function(s,v) return CVEC.VECTOR_TIMES_SCALAR(v,s); end);
+InstallOtherMethod( \*, "for cvecs", [IsFFE, IsCVecRep], 
+  function (s,v) 
+    return CVEC.VECTOR_TIMES_SCALAR(v,
+                CVEC.HandleScalar(DataType(TypeObj(v)),s));
+  end);
 
 # Comparison of vectors:
 
@@ -589,6 +626,8 @@ InstallOtherMethod( IsZero, "for cvecs", [IsCVecRep], CVEC.CVEC_ISZERO);
 
 InstallOtherMethod( \[\]\:\=, "for a cvec, a pos, and an int",
   [IsCVecRep and IsMutable, IsPosInt, IsInt and IsSmallIntRep], CVEC.ASS_CVEC );
+InstallOtherMethod( \[\]\:\=, "for a cvec, a pos, and an int",
+  [IsCVecRep and IsMutable, IsPosInt, IsFFE and IsInternalRep], CVEC.ASS_CVEC );
 InstallOtherMethod( \[\]\:\=, "for a cvec, a pos, and a ffe",
   [IsCVecRep and IsMutable, IsPosInt, IsFFE], 
   function(v,pos,s)
@@ -599,6 +638,8 @@ InstallOtherMethod( \[\]\:\=, "for cvecs", [IsCVecRep, IsPosInt, IsInt],
 InstallOtherMethod( \[\]\:\=, "for cvecs", [IsCVecRep, IsPosInt, IsFFE],
   function(v,p,o) Error("cvec is immutable"); end);
 
+InstallOtherMethod( \[\], "for cvecs", 
+  [IsCVecRep and IsCVecRepOverSmallField, IsPosInt],CVEC.ELM_CVEC );
 InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt], 
   function(v,pos)
     local d,fam,i,p,s,size,vcl;
@@ -639,7 +680,9 @@ InstallOtherMethod( PositionNot, "for cvecs",
   [IsCVecRep, IsFFE], 
   function(v,z)
     if z <> Zero(z) then
-        Error("PositionNot for cvecs and other values than zero not yet impl.");
+        Print("#I You are using the horribly inefficient operation ",
+              "PositionNot.\n");
+        return First([1..Length(v)+1],j->j > Length(v) or v[j] <> z);
     fi;
     return PositionNonZero(v);
   end);
@@ -647,7 +690,9 @@ InstallOtherMethod( PositionNot, "for cvecs",
   [IsCVecRep, IsFFE, IsInt], 
   function(v,z,i)
     if z <> Zero(z) or i <> 0 then
-        Error("PositionNot for cvecs and other values than zero not yet impl.");
+        Print("#I You are using the horribly inefficient operation ",
+              "PositionNot.\n");
+        return First([i+1..Length(v)+1],j->j > Length(v) or v[j] <> z);
     fi;
     return PositionNonZero(v);
   end);
@@ -1383,7 +1428,7 @@ InstallOtherMethod( Add, "for a cmat, a cvec, and a position",
         Error("Add: only correct cvecs allowed in this matrix");
         return fail;
     fi;
-    if pos < 1 or pos > m!.len+1 then
+    if pos > m!.len+1 then
         Error("Add: position not possible because denseness");
     fi;
     m!.len := m!.len+1;
@@ -1853,6 +1898,11 @@ InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
     return c![CVEC_IDX_GF];
   end);
     
+InstallMethod( BaseField, "for a compressed matrix",
+  [IsGF2MatrixRep], function(m) return GF(2); end );
+InstallMethod( BaseField, "for a compressed matrix",
+  [Is8BitMatrixRep], function(m) return DefaultFieldOfMatrix(m); end );
+
 InstallMethod(FieldOfMatrixList,
   [IsListOrCollection and IsFFECollCollColl],1,
   function(l)
@@ -2488,6 +2538,119 @@ CVEC.ReadMatsFromFile := function(fnpref)
           i := i + 1;
       fi;
   od;
+  return l;
+end;
+
+#############################################################################
+# Lazy grease:
+#############################################################################
+
+InstallMethod( LazyGreaser, "for a vector and a positive grease level",
+  [IsObject, IsPosInt],
+  function( vecs, lev )
+    local lg;
+    lg := rec( vecs := vecs, tab := vecs{[]}, ind := [], lev := lev, 
+               fs := Size(BaseField(vecs)) );
+    if lg.fs > 65536 then
+        Error("Lazy grease only supported for fields with <= 65536 elements");
+        return;
+    fi;
+    return Objectify( NewType(LazyGreaserFamily, IsLazyGreaser), lg );
+  end );
+
+InstallMethod( ViewObj, "for a lazy greaser",
+  [IsLazyGreaser],
+  function( lg )
+    Print("<lazy greaser level ",lg!.lev," with ",Length(lg!.tab)," vectors>");
+  end );
+
+InstallMethod( GetLinearCombination, 
+  "for a lazy greaser, a vector, an offset, and a list of integers",
+  [IsLazyGreaser, IsVector, IsPosInt, IsList],
+  function( lg, v, offset, pivs )
+    # offset must be congruent 1 mod lev
+    local group,i,pos,w;
+    pos := NumberFFVector(v{Reversed(pivs)},lg!.fs)+1;
+    group := (offset-1) / lg!.lev + 1;
+    if not IsBound(lg!.ind[group]) then
+        lg!.ind[group] := [];
+    fi;
+    if not IsBound(lg!.ind[group][pos]) then
+        # Cut away all trailing zeroes:
+        i := Length(pivs);
+        while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
+        if i = 0 then
+            w := ZeroSameMutability(lg!.vecs[offset]);
+        elif i = 1 then
+            w := v[pivs[1]] * lg!.vecs[offset];
+        else
+            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]}) +
+                                      v[pivs[i]] * lg!.vecs[offset+i-1];
+        fi;
+        Add(lg!.tab,w);
+        lg!.ind[group][pos] := Length(lg!.tab);
+    else
+        w := lg!.tab[lg!.ind[group][pos]];
+    fi;
+    return w;
+  end );
+
+InstallMethod( GetLinearCombination, 
+  "for a lazy greaser, a cvec, an offset, and a list of integers",
+  [IsLazyGreaser, IsCVecRep, IsPosInt, IsList],
+  function( lg, v, offset, pivs )
+    # the vecs entry of the lazy greaser must be a cmat!
+    # offset must be congruent 1 mod lev
+    local group,i,pos,w;
+    pos := CVEC.GREASEPOS(v,pivs);
+    group := (offset-1) / lg!.lev + 1;
+    if not IsBound(lg!.ind[group]) then
+        lg!.ind[group] := [];
+    fi;
+    if not IsBound(lg!.ind[group][pos]) then
+        # Cut away all trailing zeroes:
+        i := Length(pivs);
+        while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
+        if i = 0 then
+            w := ZeroSameMutability(lg!.vecs[offset]);
+        elif i = 1 then
+            w := v[pivs[1]] * lg!.vecs[offset];
+        else
+            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]}) +
+                                      v[pivs[i]] * lg!.vecs[offset+i-1];
+        fi;
+        Add(lg!.tab,w);
+        lg!.ind[group][pos] := Length(lg!.tab);
+    else
+        w := lg!.tab[lg!.ind[group][pos]];
+    fi;
+    return w;
+  end );
+
+CVEC.TESTLAZY := function(m,lev)
+  local f,i,j,l,offset,newpos,poss,v,w;
+  v := ShallowCopy(m[1]);
+  l := LazyGreaser(m,lev);
+  f := BaseField(m);
+  offset := Random(1,Length(m)-lev+1);
+  offset := QuoInt(offset-1,lev)*lev + 1;  # make it congruent 1 mod lev
+  for i in [1..10000] do
+      w := Zero(v);
+      poss := [];
+      for j in [1..lev] do
+          repeat
+              newpos := Random([1..Length(v)]);
+          until not newpos in poss;
+          Add(poss,newpos);
+          v[poss[j]] := Random(f);
+          w := w + v[poss[j]] * m[offset+j-1];
+      od;
+      if w <> GetLinearCombination(l,v,offset,poss) then
+          Error();
+      fi;
+      Print(i,"\r");
+  od;
+  Print("\n");
   return l;
 end;
 

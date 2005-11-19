@@ -369,7 +369,7 @@ copies data around in an expensive way. Please use the following function
 instead:
 
 <ManSection>
-<Func Name="CVEC.Slice" Arg="src, dst, srcpos, len, dstpos"/>
+<Func Name="CVEC_Slice" Arg="src, dst, srcpos, len, dstpos"/>
 <Returns>nothing</Returns>
 <Description>
 <A>src</A> and <A>dst</A> must be <C>cvec</C>s over the same field.
