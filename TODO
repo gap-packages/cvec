@@ -2,6 +2,10 @@ TODO aufraeumen:
 
 Tasks to do:
 
+  * Bug in matrix product
+  * Bug in tests for ALLCONWAY (too much memory)
+  * BENCH.ADDOLD scheint nicht zu gehen
+  * Test fuer LazyGrease
   * Random Vectors "RandomVec", (--> like matrices with one row)
   * matrix.g{d,i} look through for usability
   * test DeterminantMat

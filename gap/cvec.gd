@@ -118,4 +118,3 @@ DeclareOperation( "LazyGreaser", [IsObject, IsPosInt] );
 DeclareOperation( "GetLinearCombination", 
   [IsLazyGreaser, IsObject, IsPosInt, IsList] );
 
-
