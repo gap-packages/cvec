@@ -2580,7 +2580,7 @@ InstallMethod( GetLinearCombination,
         i := Length(pivs);
         while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
         if i = 0 then
-            w := ZeroSameMutability(lg!.vecs[offset]);
+            w := 0;
         elif i = 1 then
             w := v[pivs[1]] * lg!.vecs[offset];
         else
@@ -2612,7 +2612,7 @@ InstallMethod( GetLinearCombination,
         i := Length(pivs);
         while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
         if i = 0 then
-            w := ZeroSameMutability(lg!.vecs[offset]);
+            w := 0;
         elif i = 1 then
             w := v[pivs[1]] * lg!.vecs[offset];
         else
