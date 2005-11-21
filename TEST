@@ -1,0 +1,44 @@
+gens := AtlasGenerators("Fi22",13).generators;
+m := CMat(gens[2]);
+b := EmptySemiEchelonBasis( m[1] );
+for v in m do CleanRow(b,ShallowCopy(v),true); od;
+w := CVec(Random(GF(5)^428));
+x := ZeroVector(w,Length(b.vectors));
+a := CleanRow(b,ShallowCopy(w),x);
+if x * b.vectors <> w then Error(); fi;
+b2 := EmptySemiEchelonBasis( m[1], 3 );
+#glc := ApplicableMethod( GetLinearCombination, [b2.lazygreaser,w,1,[1,2,3]] );
+#b2.lazygreaser!.ind := L
+for v in m do CleanRow(b2,ShallowCopy(v),true); od;
+a := CleanRow(b2,ShallowCopy(w),x);
+if x * b2.vectors <> w then Error(); fi;
+
+
+with grease, tables already filled:
+
+  count  self/ms  chld/ms  function                                           
+  19026        5       -1  EQ: for cyclotomic and unknown                     
+  58358       25       -4  ELM_LIST: for cvecs                                
+  42212       19        2  CVEC_GREASEPOS                                     
+  19457       30       -1  ELM_LIST: for a cmat, and a position               
+  57081       35        0  ASS_LIST: for a cvec, a pos, and an int            
+  19029       36        2  AddRowVector: for cvecs                            
+  19029       26       37  AddRowVector: for cvecs                            
+  19029       17       61  AddRowVector                                       
+  42212      125       46  GetLinearCombination: for a lazy greaser, a cvec*  
+    428      489      330  CH0P_Decompose                                     
+             820           TOTAL
+
+
+gap> DisplayProfile();
+  count  self/ms  chld/ms  function                                           
+  45672       38        3  ASS_LIST: for a cvec, a pos, and an int            
+  46100       63       -5  ELM_LIST: for a cmat, and a position               
+ 126840       62        2  ELM_LIST: for cvecs                                
+  45672       67        2  IsZero: for an additive-element-with-zero          
+  45672      129        1  AddRowVector: for cvecs                            
+ 126840       78       71  IsZero                                             
+  45672       61      129  AddRowVector: for cvecs                            
+  45672       40      187  AddRowVector                                       
+    428      325      545  CH0P_Decompose                                     
+             878           TOTAL

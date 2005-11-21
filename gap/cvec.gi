@@ -2571,21 +2571,25 @@ InstallMethod( GetLinearCombination,
     # offset must be congruent 1 mod lev
     local group,i,pos,w;
     pos := NumberFFVector(v{Reversed(pivs)},lg!.fs)+1;
+    if pos = 1 then return 0; fi;
     group := (offset-1) / lg!.lev + 1;
-    if not IsBound(lg!.ind[group]) then
-        lg!.ind[group] := [];
-    fi;
+    #if not IsBound(lg!.ind[group]) then
+    #    lg!.ind[group] := [];
+    #fi;
     if not IsBound(lg!.ind[group][pos]) then
         # Cut away all trailing zeroes:
         i := Length(pivs);
         while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
-        if i = 0 then
-            w := 0;
-        elif i = 1 then
+        # i = 0 does not happen!
+        if i = 1 then
             w := v[pivs[1]] * lg!.vecs[offset];
         else
-            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]}) +
-                                      v[pivs[i]] * lg!.vecs[offset+i-1];
+            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]});
+            if w = 0 then
+                w := v[pivs[i]] * lg!.vecs[offset+i-1];
+            else
+                w := w + v[pivs[i]] * lg!.vecs[offset+i-1];
+            fi;
         fi;
         Add(lg!.tab,w);
         lg!.ind[group][pos] := Length(lg!.tab);
@@ -2603,6 +2607,7 @@ InstallMethod( GetLinearCombination,
     # offset must be congruent 1 mod lev
     local group,i,pos,w;
     pos := CVEC_GREASEPOS(v,pivs);
+    if pos = 1 then return 0; fi;
     group := (offset-1) / lg!.lev + 1;
     if not IsBound(lg!.ind[group]) then
         lg!.ind[group] := [];
@@ -2611,24 +2616,27 @@ InstallMethod( GetLinearCombination,
         # Cut away all trailing zeroes:
         i := Length(pivs);
         while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
-        if i = 0 then
-            w := 0;
-        elif i = 1 then
+        # i = 0 does not happen!
+        if i = 1 then
             w := v[pivs[1]] * lg!.vecs[offset];
         else
-            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]}) +
-                                      v[pivs[i]] * lg!.vecs[offset+i-1];
+            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]});
+            if w = 0 then
+                w := v[pivs[i]] * lg!.vecs[offset+i-1];
+            else
+                w := w + v[pivs[i]] * lg!.vecs[offset+i-1];
+            fi;
         fi;
         Add(lg!.tab,w);
         lg!.ind[group][pos] := Length(lg!.tab);
+        return w;
     else
-        w := lg!.tab[lg!.ind[group][pos]];
+        return lg!.tab[lg!.ind[group][pos]];
     fi;
-    return w;
   end );
 
 CVEC_TESTLAZY := function(m,lev)
-  local f,i,j,l,offset,newpos,poss,v,w;
+  local erg,f,i,j,l,offset,newpos,poss,v,w;
   v := ShallowCopy(m[1]);
   l := LazyGreaser(m,lev);
   f := BaseField(m);
@@ -2645,7 +2653,8 @@ CVEC_TESTLAZY := function(m,lev)
           v[poss[j]] := Random(f);
           w := w + v[poss[j]] * m[offset+j-1];
       od;
-      if w <> GetLinearCombination(l,v,offset,poss) then
+      erg := GetLinearCombination(l,v,offset,poss);
+      if not((erg = 0 and IsZero(w)) or w = erg) then
           Error();
       fi;
       Print(i,"\r");
@@ -2653,4 +2662,113 @@ CVEC_TESTLAZY := function(m,lev)
   Print("\n");
   return l;
 end;
+
+BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
+  local c,firstnz,i,j,lc,len,lev,mo,newpiv,pivs;
+  # INPUT
+  # basis: record with fields
+  #        pivots   : integer list of pivot columns of basis matrix
+  #        vectors : matrix of basis vectors in semi echelon form
+  # and optionally:
+  #        lazygreaser : a lazygreaser object for the vectors
+  # vec  : vector of same length as basis vectors
+  # extend : boolean value indicating whether the basis will we extended
+  #          note that for the greased case also the basis vectors before
+  #          the new one may be changed
+  # OUTPUT
+  # returns decomposition of vec in the basis, if possible.
+  # otherwise returns 'fail' and adds cleaned vec to basis and updates
+  # pivots
+  # NOTES
+  # destructive in both arguments
+
+  # First a little shortcut:
+  firstnz := PositionNonZero(vec);
+  if firstnz > Length(vec) then
+      return dec;
+  fi;
+
+  len := Length(basis.vectors);
+  if IsBound(basis.lazygreaser) then
+    # The grease case:
+    lev := basis.lazygreaser!.lev;
+    i := 1;
+    mo := -One(vec[1]);
+    while i+lev-1 <= len do
+      pivs := basis.pivots{[i..i+lev-1]};
+      j := lev;
+      while j > 0 and pivs[j] < firstnz do j := j - 1; od;
+      if j > 0 then    # Otherwise, there is nothing to do at all
+        lc := GetLinearCombination(basis.lazygreaser,vec,i,pivs);
+        #lc := glc(basis.lazygreaser,vec,i,pivs);
+        if lc <> 0 then   # 0 indicates the zero linear combination
+          if dec <> false and dec <> true then
+            for j in [i..i+lev-1] do
+              dec[j] := vec[basis.pivots[j]];
+            od;
+          fi;
+          AddRowVector( vec, lc, mo );
+        fi;
+      fi;
+      i := i + lev;
+    od;
+    # Now go to the standard case for the rest, starting at i
+  else
+    i := 1;
+    # The non-grease case starts from the beginning
+  fi;
+
+  # we have to work without the lazy greaser:
+  for j in [i..len] do
+    if basis.pivots[j] >= firstnz then
+      c := vec[ basis.pivots[ j ] ];
+      if not IsZero( c ) then
+        if not(IsBool(dec)) then
+          dec[ j ] := c;
+        fi;
+        AddRowVector( vec, basis.vectors[ j ], -c );
+      fi;
+    fi;
+  od;
+
+  newpiv := PositionNonZero( vec );
+  if newpiv = Length( vec ) + 1 then
+    return true;
+  else
+    MultRowVector( vec, vec[ newpiv ]^-1 );
+    if not(IsBool(dec)) then
+      return false;
+    fi;
+    if dec = true then
+      Add( basis.vectors, vec );
+      Add( basis.pivots, newpiv );
+      if IsBound(basis.lazygreaser) then
+        # In the grease case, we do full-echelon form within the grease block:
+        for j in [i..len] do
+          c := basis.vectors[j][newpiv];
+          if not IsZero(c) then
+            AddRowVector( basis.vectors[j], basis.vectors[len+1], -c );
+          fi;
+        od;
+      fi;
+    fi;
+    return false;
+  fi;
+end );
+    
+InstallMethod( CleanRow, "GAP method", [IsRecord, IsObject, IsObject],
+  CVEC_CleanRow );
+
+InstallMethod( EmptySemiEchelonBasis, "GAP method", [IsObject],
+  function( vec )
+    return rec( vectors := MatrixNC([],vec), pivots := [] );
+  end );
+
+InstallMethod( EmptySemiEchelonBasis, "GAP method", [IsObject, IsPosInt],
+  function( vec, greaselev )
+    local r;
+    r := rec( vectors := MatrixNC([],vec), pivots := [] );
+    r.lazygreaser := LazyGreaser( r.vectors, greaselev );
+    return r;
+  end );
 

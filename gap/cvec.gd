@@ -118,3 +118,24 @@ DeclareOperation( "LazyGreaser", [IsObject, IsPosInt] );
 DeclareOperation( "GetLinearCombination", 
   [IsLazyGreaser, IsObject, IsPosInt, IsList] );
 
+DeclareOperation( "CleanRow", [IsRecord, IsObject, IsObject] );
+# CleanRow ( basis, vec, decorextend )
+#   basis ist record mit Eintraegen:
+#       .vectors  : matrix bzw. liste von Vektoren
+#       .pivots   : spalten der pivots
+#     plus optional:
+#       .lazygreaser : fuer lazy greasing
+#   vec ist ein Vektor
+#   decorextend ist entweder ein vector der Laenge der Basis oder true/false
+#     vector: decompose, aber nicht extend
+#     true:   clean, extend if necessary
+#     false:  clean, do not extend
+#
+
+DeclareOperation( "EmptySemiEchelonBasis", [IsObject, IsInt] );
+DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );
+# EmptySemiEchelonBasis ist Operation:
+# EmptySemiEchelonBasis( vector [,greaselev] )
+#   vector ist ein Beispielvektor
+#   greaselev ist die Grease-Level
+
