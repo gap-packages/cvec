@@ -3238,6 +3238,188 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
     return True;
 }
     
+/* Cleaning vectors (using lazy grease): */
+
+STATIC Int GREASEPOS_INT(Obj *v, Int p, Int d, Int *pivs, Int pivslen)
+{
+    Int i,j;
+    seqaccess sa;
+    Int res;
+    Word *ww = DATA_CVEC(v);
+
+    i = pivslen;
+    INIT_SEQ_ACCESS(&sa,v,pivs[i]);
+    res = 0;
+    while (1) {   /* we use break */
+        /* sa already points to position i! */
+        for (j = d-1;j >= 0;j--) res = res * p + GET_VEC_ELM(&sa,ww,j);
+        if (--i <= 0) break;
+        MOVE_SEQ_ACCESS(&sa,pivs[i]);
+    }
+    return INTOBJ_INT(res+1);
+}
+
+InstallMethod( GetLinearCombination, 
+  "for a lazy greaser, a cvec, an offset, and a list of integers",
+  [IsLazyGreaser, IsCVecRep, IsPosInt, IsList],
+  function( lg, v, offset, pivs )
+    # the vecs entry of the lazy greaser must be a cmat!
+    # offset must be congruent 1 mod lev
+    local group,i,pos,w;
+    pos := CVEC_GREASEPOS(v,pivs);
+    if pos = 1 then return 0; fi;
+    group := (offset-1) / lg!.lev + 1;
+    if not IsBound(lg!.ind[group]) then
+        lg!.ind[group] := [];
+    fi;
+    if not IsBound(lg!.ind[group][pos]) then
+        # Cut away all trailing zeroes:
+        i := Length(pivs);
+        while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
+        # i = 0 does not happen!
+        if i = 1 then
+            w := v[pivs[1]] * lg!.vecs[offset];
+        else
+            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]});
+            if w = 0 then
+                w := v[pivs[i]] * lg!.vecs[offset+i-1];
+            else
+                w := w + v[pivs[i]] * lg!.vecs[offset+i-1];
+            fi;
+        fi;
+        Add(lg!.tab,w);
+        lg!.ind[group][pos] := Length(lg!.tab);
+        return w;
+    else
+        return lg!.tab[lg!.ind[group][pos]];
+    fi;
+  end );
+
+
+STATIC Obj CleanRowKernel( Obj self, Obj basis, Obj vec, Obj dec )
+{
+  /* INPUT:
+     basis: record with fields
+            vectors : matrix of basis vectors in semi echelon form
+                      must be a cmat here!
+            pivots  : integer list of pivot columns of basis matrix
+     and optionally:
+            lazygreaser : a lazygreaser object for the vectors
+     vec : vector of same length as basis vectors
+           must be a cvec here
+     dec : either a boolean value indicating whether the basis will we 
+           extended for the "Clean" case
+           or a cvec with length equal to the length of the basis for
+           the "Decompose" case (which does not extend)
+           note that for the greased case also the basis vectors before
+           the new one may be changed
+     OUTPUT
+     returns either true or false, depending on whether the vector lies
+     in the span of the basis
+     if dec is a cvec, then the coefficients of the linear combination
+     are put there, if dec is true and the vector lies not in the span,
+     then the basis is extended
+     NOTES
+     destructive in all arguments basis, vec, and dec */
+  PREPARE_clfi(vec,cl,fi);
+  PREPARE_p(fi);
+  PREPARE_d(fi);
+  PREPARE_q(fi);
+  Obj cldec;
+  Obj vectors = ElmPRec( basis, RNamName( "vectors" ) );
+  Obj pivots = ElmPRec( basis, RNamName( "pivots" ) );
+  Obj lazygreaser = ElmPRec( basis, RNamName( "lazygreaser" ) );
+  Int vlen = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+  Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
+  Int firstnz;
+  Int len;
+  Int i,j;
+  Int pivs[16];   /* we will never see more than level 10 grease or so */
+  Int shortcut;
+  Obj lc;
+  Int newpiv;
+
+  if (dec == True || dec == False)
+      cldec = 0L;
+  else {
+      cldec = ELM_PLIST(TYPE_DATOBJ(dec),POS_DATA_TYPE);
+      /* Zero the decomposition vector: */
+      MUL_INL(DATA_CVEC(dec),fi,0,INT_INTOBJ(ELM_PLIST(cldec,IDX_wordlen)));
+  }
+
+  /* First a little shortcut: */
+  if (d == 1)
+      firstnz = CVEC_Firstnzp(fi,DATA_CVEC(vec),vlen);
+  else
+      firstnz = CVEC_Firstnzq(fi,DATA_CVEC(vec),vlen,wordlen);
+  if (firstnz > vlen) return True;  /* The zero vector, all done */
+
+  len = LEN_PLIST( vectors );
+  if (lazygrease) {
+      /* The grease case: */
+      Obj lg_tab = ElmPRec( lazygreaser, RNamName( "tab" ) );
+      Obj lg_ind = ElmPRec( lazygreaser, RNamName( "ind" ) );
+      Obj lg_lev = ElmPRec( lazygreaser, RNamName( "lev" ) );
+      /* Note that lazygrease!.vecs must be the same object as 
+       * basis.vectors! */
+
+      for (i = 1;i+lev-1 <= len;i += lev) {
+          /* Fetch the columns to work on: */
+          shortcut = 1;
+          for (j = 0;j < lev;j++) {
+              pivs[j] = INT_INTOBJ(ELM_PLIST(pivots,i+j));
+              if (pivs[j] >= firstnz) shortcut = 0;
+          }
+          if (!shortcut) {
+              /* Otherwise, there is nothing to do at all */
+              lc = GetLinearCombination(tab,ind,lev,vec,cl,fi,p,d,
+                                        i,pivs,pivslen,dec);
+              /* This changes dec in positions i..i+lev-1 if it is a cvec! */
+              if (lc)   /* 0 indicates the zero linear combination */
+                  ADDMUL_INL( DATA_CVEC(vec), DATA_CVEC(lc),fi,p-1,wordlen );
+          }
+      }
+      /* Now go to the standard case for the rest, starting at i */
+  } else i = 1;
+      /* The non-grease case starts from the beginning */
+
+  /* we have to work without the lazy greaser: */
+  for (j = i;j <= len;j++) {
+      if (INT_INTOBJ(ELM_PLIST(pivots,j)) >= firstnz) {
+          c := vec[ basis.pivots[ j ] ];
+          if not IsZero( c ) then
+            if not(IsBool(dec)) then
+              dec[ j ] := c;
+            fi;
+            AddRowVector( vec, basis.vectors[ j ], -c );
+          fi;
+      fi;
+  od;
+
+  newpiv := PositionNonZero( vec );
+  if newpiv = Length( vec ) + 1 then
+    return true;
+  else
+    MultRowVector( vec, vec[ newpiv ]^-1 );
+    if not(IsBool(dec)) then
+      return false;
+    fi;
+    if dec = true then
+      Add( basis.vectors, vec );
+      Add( basis.pivots, newpiv );
+      if IsBound(basis.lazygreaser) then
+        # In the grease case, we do full-echelon form within the grease block:
+        for j in [i..len] do
+          c := basis.vectors[j][newpiv];
+          if not IsZero(c) then
+            AddRowVector( basis.vectors[j], basis.vectors[len+1], -c );
+          fi;
+        od;
+      fi;
+    fi;
+    return false;
+  fi;
+end );
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
 /******************************************************************************

@@ -2682,10 +2682,15 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
   # NOTES
   # destructive in both arguments
 
+  # Clear dec vector if given:
+  if not(IsBoolean(dec)) then
+    MultRowVector(dec,Zero(dec[1]));
+  fi;
+  
   # First a little shortcut:
   firstnz := PositionNonZero(vec);
   if firstnz > Length(vec) then
-      return dec;
+      return true;
   fi;
 
   len := Length(basis.vectors);
@@ -2759,9 +2764,14 @@ end );
 InstallMethod( CleanRow, "GAP method", [IsRecord, IsObject, IsObject],
   CVEC_CleanRow );
 
+InstallMethod( CleanRow, "Kernel method", [IsRecord, IsCVecRep, IsObject],
+  CVEC_CleanRowKernel );
+
 InstallMethod( EmptySemiEchelonBasis, "GAP method", [IsObject],
   function( vec )
-    return rec( vectors := MatrixNC([],vec), pivots := [] );
+    return rec( vectors := MatrixNC([],vec), pivots := [], 
+                lazygreaser := fail );
+    # The lazygreaser component must always be bound!
   end );
 
 InstallMethod( EmptySemiEchelonBasis, "GAP method", [IsObject, IsPosInt],
