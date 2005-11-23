@@ -2694,7 +2694,7 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
   fi;
 
   len := Length(basis.vectors);
-  if IsBound(basis.lazygreaser) and basis.layzgreaser <> fail then
+  if IsBound(basis.lazygreaser) and basis.lazygreaser <> fail then
     # The grease case:
     lev := basis.lazygreaser!.lev;
     i := 1;
