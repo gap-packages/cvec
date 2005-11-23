@@ -13,6 +13,21 @@ for v in m do CleanRow(b2,ShallowCopy(v),true); od;
 a := CleanRow(b2,ShallowCopy(w),x);
 if x * b2.vectors <> w then Error(); fi;
 
+export SHELL=bash
+gdb ../../bin/i686-pc-linux-gnu-gcc/gap
+break CleanRowKernel
+run -l /home/antares/neunhoef/4.0 -L /home/antares/neunhoef/4.0/bin/wsgap4
+LoadPackage("chop");
+gens := AtlasGenerators("Fi22",13).generators;
+m := CMat(gens[2]);
+b := EmptySemiEchelonBasis( m[1] );
+CleanRow(b,ShallowCopy(m[1]),true);
+CleanRow(b,ShallowCopy(m[2]),true);
+for i in [3..428] do v := m[i]; CleanRow(b,ShallowCopy(v),true); od;
+w := CVec(Random(GF(5)^428));
+x := ZeroVector(w,Length(b.vectors));
+a := CleanRow(b,ShallowCopy(w),x);
+if x * b.vectors <> w then Error(); fi;
 
 with grease, tables already filled:
 

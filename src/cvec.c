@@ -3240,61 +3240,143 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
     
 /* Cleaning vectors (using lazy grease): */
 
-STATIC Int GREASEPOS_INT(Obj *v, Int p, Int d, Int *pivs, Int pivslen)
+STATIC Int GREASEPOS_INT(Obj v, Int p, Int d, Int *pivs, Int pivslen)
 {
     Int i,j;
     seqaccess sa;
     Int res;
     Word *ww = DATA_CVEC(v);
 
-    i = pivslen;
+    i = pivslen-1;
     INIT_SEQ_ACCESS(&sa,v,pivs[i]);
     res = 0;
     while (1) {   /* we use break */
         /* sa already points to position i! */
         for (j = d-1;j >= 0;j--) res = res * p + GET_VEC_ELM(&sa,ww,j);
-        if (--i <= 0) break;
+        if (--i < 0) break;
         MOVE_SEQ_ACCESS(&sa,pivs[i]);
     }
-    return INTOBJ_INT(res+1);
+    return res+1;
 }
 
-InstallMethod( GetLinearCombination, 
-  "for a lazy greaser, a cvec, an offset, and a list of integers",
-  [IsLazyGreaser, IsCVecRep, IsPosInt, IsList],
-  function( lg, v, offset, pivs )
-    # the vecs entry of the lazy greaser must be a cmat!
-    # offset must be congruent 1 mod lev
-    local group,i,pos,w;
-    pos := CVEC_GREASEPOS(v,pivs);
-    if pos = 1 then return 0; fi;
-    group := (offset-1) / lg!.lev + 1;
-    if not IsBound(lg!.ind[group]) then
-        lg!.ind[group] := [];
-    fi;
-    if not IsBound(lg!.ind[group][pos]) then
-        # Cut away all trailing zeroes:
-        i := Length(pivs);
-        while i > 0 and IsZero(v[pivs[i]]) do i := i - 1; od;
-        # i = 0 does not happen!
-        if i = 1 then
-            w := v[pivs[1]] * lg!.vecs[offset];
-        else
-            w := GetLinearCombination(lg,v,offset,pivs{[1..i-1]});
-            if w = 0 then
-                w := v[pivs[i]] * lg!.vecs[offset+i-1];
-            else
-                w := w + v[pivs[i]] * lg!.vecs[offset+i-1];
-            fi;
-        fi;
-        Add(lg!.tab,w);
-        lg!.ind[group][pos] := Length(lg!.tab);
-        return w;
-    else
-        return lg!.tab[lg!.ind[group][pos]];
-    fi;
-  end );
+STATIC Int GREASEPOS_INT_WITH_DEC(Obj v, Int p, Int d, Int *pivs, Int pivslen,
+                                  Obj dec, Int startpos)
+{
+    Int i,j;
+    seqaccess sa;
+    seqaccess sadec;
+    Int res;
+    Word *ww = DATA_CVEC(v);
+    Word *dd = DATA_CVEC(dec);
+    Int c;
 
+    i = pivslen-1;
+    INIT_SEQ_ACCESS(&sa,v,pivs[i]);
+    INIT_SEQ_ACCESS(&sadec,dec,startpos+pivslen-1);
+    res = 0;
+    while (1) {   /* we use break */
+        /* sa already points to position i! */
+        for (j = d-1;j >= 0;j--) {
+            c = GET_VEC_ELM(&sa,ww,j);
+            res = res * p + c;
+            SET_VEC_ELM(&sadec,dd,j,c);
+        }
+        if (--i < 0) break;
+        MOVE_SEQ_ACCESS(&sa,pivs[i]);
+        STEP_LEFT(&sadec);
+    }
+    return res+1;
+}
+
+
+STATIC Obj GetLinearCombination(Obj self, Obj lg_vecs, Obj lg_tab, Obj lg_ind, 
+            Int lg_lev, Obj vec, Obj cl, Obj fi, Int p, Int d, Int offset, 
+            Int *pivs, Int pivslen, Int len, Obj dec, Int wordlen) 
+{
+    /* This function may trigger GARBAGE COLLECTIONS! */
+    Int pos;
+    Int group;
+    Int i;
+    Obj w;
+    Obj ourtab;
+    Obj rows = ElmPRec( lg_tab, RNamName("rows") );
+    Int tlen;
+
+    /* offset must be congruent 1 mod lev */
+    if (dec != False && dec != True && pivslen == lg_lev)
+        pos = GREASEPOS_INT_WITH_DEC(vec,p,d,pivs,pivslen,dec,offset);
+    else
+        pos = GREASEPOS_INT(vec,p,d,pivs,pivslen);
+    if (pos == 1) return INTOBJ_INT(0L);
+    group = (offset-1) / lg_lev + 1;
+    if (!ISB_LIST(lg_ind,group)) {
+        ASS_LIST(lg_ind,group,NEW_PLIST(T_PLIST,pos));
+    }
+    /* GARBAGE COLLECTION POSSIBLE! */
+    ourtab = ELM_PLIST(lg_ind,group);
+    if (!ISB_LIST(ourtab,pos)) {
+        /* First we need a new vector: */
+        w = NEW(self,cl,ELM_PLIST(cl,IDX_type));
+        /* GARBAGE COLLECTION POSSIBLE! */
+        if (d == 1) {  /* We distinguish prime field and extension field: */
+            /* Cut away all trailing zeroes: */
+            Int c;
+            /* Note that at least one position is nonzero, otherwise pos==1 */
+            i = pivslen-1;
+            while (1) {
+                c = CVEC_Itemp(fi, DATA_CVEC(vec), pivs[i]);
+                if (c) break;
+                i--;
+            }
+            /* Again: i < 0 does not happen! */
+            MUL2_INL(DATA_CVEC(w),DATA_CVEC(ELM_PLIST(lg_vecs,offset+i+1)),fi,
+                     c,wordlen);
+            if (i > 0) {
+                Obj ww;
+                ww = GetLinearCombination(self,lg_vecs,lg_tab,lg_ind,lg_lev,
+                        vec,cl,fi,p,d,offset,pivs,i,len,dec,wordlen);
+                if (ww != INTOBJ_INT(0))
+                  ADD2_INL(DATA_CVEC(w),DATA_CVEC(ww),fi,wordlen);
+            }
+            tlen = LEN_LIST(rows);
+            ASS_LIST(rows,tlen+1,w);
+            AssPRec(lg_tab,RNamName("len"),INTOBJ_INT(tlen));
+            /* Note the fail in position 1! */
+            ASS_LIST(ourtab,pos,INTOBJ_INT(tlen));   
+            /* shift intentional because of the fail in position 1 of rows! */
+            return w;
+        } else {
+            /* extension field case: */
+            /* Cut away all trailing zeroes: */
+            /* Note that at least one position is nonzero, otherwise pos==1 */
+            i = pivslen-1;
+            while (1) {
+                CVEC_Itemq(fi, DATA_CVEC(vec), pivs[i]);
+                if (sclen > 1 || scbuf[0] != 0) break;
+                i--;
+            }
+            /* Again: i < 0 does not happen! */
+            MUL2_INT(w,cl,fi,ELM_PLIST(lg_vecs,offset+i+1),d,wordlen,scbuf);
+            if (i > 0) {
+                Obj ww;
+                ww = GetLinearCombination(self,lg_vecs,lg_tab,lg_ind,lg_lev,
+                        vec,cl,fi,p,d,offset,pivs,i,len,dec,wordlen);
+                if (ww != INTOBJ_INT(0))
+                    ADD2_INL(DATA_CVEC(w),DATA_CVEC(ww),fi,wordlen);
+            }
+            tlen = LEN_LIST(rows);
+            ASS_LIST(rows,tlen+1,w);
+            AssPRec(lg_tab,RNamName("len"),INTOBJ_INT(tlen));
+            /* Note the fail in position 1! */
+            ASS_LIST(ourtab,pos,INTOBJ_INT(tlen));   
+            /* shift intentional because of the fail in position 1 of rows! */
+            return w;
+        }
+    } else {
+        return ELM_PLIST(rows,INT_INTOBJ(ELM_PLIST(ourtab,pos))+1);
+           /* Note the fail in position 1 of lg_tab */
+    }
+}
 
 STATIC Obj CleanRowKernel( Obj self, Obj basis, Obj vec, Obj dec )
 {
@@ -3324,11 +3406,12 @@ STATIC Obj CleanRowKernel( Obj self, Obj basis, Obj vec, Obj dec )
   PREPARE_clfi(vec,cl,fi);
   PREPARE_p(fi);
   PREPARE_d(fi);
-  PREPARE_q(fi);
   Obj cldec;
   Obj vectors = ElmPRec( basis, RNamName( "vectors" ) );
+  Obj rows = ElmPRec( vectors, RNamName( "rows" ) );
   Obj pivots = ElmPRec( basis, RNamName( "pivots" ) );
   Obj lazygreaser = ElmPRec( basis, RNamName( "lazygreaser" ) );
+  Obj helper = ElmPRec( basis, RNamName( "helper" ) );
   Int vlen = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
   Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
   Int firstnz;
@@ -3354,28 +3437,29 @@ STATIC Obj CleanRowKernel( Obj self, Obj basis, Obj vec, Obj dec )
       firstnz = CVEC_Firstnzq(fi,DATA_CVEC(vec),vlen,wordlen);
   if (firstnz > vlen) return True;  /* The zero vector, all done */
 
-  len = LEN_PLIST( vectors );
-  if (lazygrease) {
+  len = LEN_PLIST( rows )-1;  /* note that CMats start with a fail in pos 1 */
+  if (lazygreaser != Fail) {
       /* The grease case: */
       Obj lg_tab = ElmPRec( lazygreaser, RNamName( "tab" ) );
       Obj lg_ind = ElmPRec( lazygreaser, RNamName( "ind" ) );
-      Obj lg_lev = ElmPRec( lazygreaser, RNamName( "lev" ) );
+      Int lg_lev = INT_INTOBJ(ElmPRec( lazygreaser, RNamName( "lev" ) ) );
       /* Note that lazygrease!.vecs must be the same object as 
        * basis.vectors! */
 
-      for (i = 1;i+lev-1 <= len;i += lev) {
+      for (i = 1;i+lg_lev-1 <= len;i += lg_lev) {
           /* Fetch the columns to work on: */
           shortcut = 1;
-          for (j = 0;j < lev;j++) {
+          for (j = 0;j < lg_lev;j++) {
               pivs[j] = INT_INTOBJ(ELM_PLIST(pivots,i+j));
               if (pivs[j] >= firstnz) shortcut = 0;
           }
           if (!shortcut) {
               /* Otherwise, there is nothing to do at all */
-              lc = GetLinearCombination(tab,ind,lev,vec,cl,fi,p,d,
-                                        i,pivs,pivslen,dec);
-              /* This changes dec in positions i..i+lev-1 if it is a cvec! */
-              if (lc)   /* 0 indicates the zero linear combination */
+              lc = GetLinearCombination(self,rows,lg_tab,lg_ind,lg_lev,vec,
+                      cl,fi,p,d,i,pivs,lg_lev,len,dec,wordlen);
+              /* This changes dec in positions i..i+lg_lev-1 if it is a cvec! */
+              if (lc != INTOBJ_INT(0L))   
+                  /* 0 indicates the zero linear combination */
                   ADDMUL_INL( DATA_CVEC(vec), DATA_CVEC(lc),fi,p-1,wordlen );
           }
       }
@@ -3384,42 +3468,110 @@ STATIC Obj CleanRowKernel( Obj self, Obj basis, Obj vec, Obj dec )
       /* The non-grease case starts from the beginning */
 
   /* we have to work without the lazy greaser: */
-  for (j = i;j <= len;j++) {
-      if (INT_INTOBJ(ELM_PLIST(pivots,j)) >= firstnz) {
-          c := vec[ basis.pivots[ j ] ];
-          if not IsZero( c ) then
-            if not(IsBool(dec)) then
-              dec[ j ] := c;
-            fi;
-            AddRowVector( vec, basis.vectors[ j ], -c );
-          fi;
-      fi;
-  od;
+  /* we distinguish between prime field case and extension field case: */
+  if (d == 1) {
+      Word *vecvec = DATA_CVEC(vec);
+      Word *decdec = 0L;
+      Int c;
+      if (cldec) decdec = DATA_CVEC(dec);
+      for (j = i;j <= len;j++) {
+          Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
+          if (piv >= firstnz) {   /* otherwise a shortcut */
+              c = CVEC_Itemp(fi,vecvec,piv);
+              if (c) {
+                  if (cldec) CVEC_AssItemp(fi,decdec,j,c);
+                  ADDMUL_INL(vecvec,DATA_CVEC(ELM_PLIST(rows,j+1)),fi,
+                             p-c,wordlen);
+              }
+          }
+      }
+      newpiv = CVEC_Firstnzp(fi,vecvec,vlen);
+      if (newpiv > vlen) return True;
+      c = CVEC_Itemp(fi,vecvec,newpiv);
+      if (c != 1) {
+          c = invert_modp(c,p);
+          MUL_INL(vecvec,fi,c,wordlen);
+      }
+      if (dec == True) {
+          /* GARBAGE COLLECTION POSSIBLE HERE! */
+          ASS_LIST(rows,len+2,vec);   /* Remember the fail in position 1! */
+          AssPRec(vectors,RNamName("len"),INTOBJ_INT(len+1));
+          ASS_LIST(pivots,len+1,INTOBJ_INT(newpiv));
+          /* We do not use any longer any references we might have! */
+          if (lazygreaser != Fail) {
+              /* In the grease case, we do full-echelon form within the 
+                 grease block: */
+              for (j = i;j <= len;j++) {
+                  Word *w = DATA_CVEC(ELM_PLIST(rows,j+1));
+                  c = CVEC_Itemp(fi,w,newpiv);
+                  if (c) ADDMUL_INL(w,vecvec,fi,p-c,wordlen);
+              }
+          }
+      }
+      return False;
+  } else {
+      Word *vecvec = DATA_CVEC(vec);
+      Word *decdec = 0L;
+      if (cldec) decdec = DATA_CVEC(dec);
+      for (j = i;j <= len;j++) {
+          Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
+          if (piv >= firstnz) {   /* otherwise a shortcut */
+              CVEC_Itemq(fi,vecvec,piv);
+              if (sclen > 1 || scbuf[0] != 0) {
+                  Int k;
+                  if (cldec) CVEC_AssItemq(fi,decdec,j,scbuf);
+                  for (k = sclen-1;k >= 0;k--)
+                      scbuf[k] = scbuf[k] ? p-scbuf[k] : 0;
+                  ADDMUL_INT(vec,cl,fi,ELM_PLIST(rows,j+1),d,scbuf,0,wordlen);
+              }
+          }
+      }
+      newpiv = CVEC_Firstnzq(fi,vecvec,vlen,wordlen);
+      if (newpiv > vlen) return True;
+      CVEC_Itemq(fi,vecvec,newpiv);
+      if (sclen > 1 || scbuf[0] != 1) {
+          Word *helperdata = DATA_CVEC(helper);
+          Obj helperfun = VAL_GVAR(GVarName("CVEC_INVERT_FFE"));
+          Int k;
+          
+          /* Here we need an inversion of a field element: */
+          for (k = 0;k < d;k++) helperdata[k]=scbuf[k];
+          /* GARBAGE COLLECTION POSSIBLE */
+          CALL_1ARGS(helperfun,helper);  
+          
+          /* these are the only refs we have and still use: */
+          helperdata = DATA_CVEC(helper);
+          vecvec = DATA_CVEC(vecvec);
+          
+          for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
+          sclen++;
+          MUL1_INT(vec,cl,fi,d,(Int *) helperdata,0,wordlen);
+      }
+      if (dec == True) {
+          /* GARBAGE COLLECTION POSSIBLE HERE! */
+          ASS_LIST(rows,len+2,vec);   /* Remember the fail in position 1! */
+          AssPRec(vectors,RNamName("len"),INTOBJ_INT(len+1));
+          ASS_LIST(pivots,len+1,INTOBJ_INT(newpiv));
+          /* We do not use any longer any references we might have! */
+          if (lazygreaser != Fail) {
+              /* In the grease case, we do full-echelon form within the 
+                 grease block: */
+              for (j = i;j <= len;j++) {
+                  Obj w = ELM_PLIST(rows,j+1);
+                  CVEC_Itemq(fi,DATA_CVEC(w),newpiv);
+                  if (sclen > 1 || scbuf[0] != 0) {
+                      Int k;
+                      for (k = sclen-1;k >= 0;k--)
+                          scbuf[k] = scbuf[k] ? p-scbuf[k] : 0;
+                      ADDMUL_INT(w,cl,fi,vec,d,scbuf,0,wordlen);
+                  }
+              }
+          }
+      }
+      return False;
+  }
+}
 
-  newpiv := PositionNonZero( vec );
-  if newpiv = Length( vec ) + 1 then
-    return true;
-  else
-    MultRowVector( vec, vec[ newpiv ]^-1 );
-    if not(IsBool(dec)) then
-      return false;
-    fi;
-    if dec = true then
-      Add( basis.vectors, vec );
-      Add( basis.pivots, newpiv );
-      if IsBound(basis.lazygreaser) then
-        # In the grease case, we do full-echelon form within the grease block:
-        for j in [i..len] do
-          c := basis.vectors[j][newpiv];
-          if not IsZero(c) then
-            AddRowVector( basis.vectors[j], basis.vectors[len+1], -c );
-          fi;
-        od;
-      fi;
-    fi;
-    return false;
-  fi;
-end );
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
 /******************************************************************************
@@ -3598,6 +3750,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_GREASEPOS", 2, "v, pivs",
     GREASEPOS,
     "cvec.c:GREASEPOS" },
+
+  { "CVEC_CleanRowKernel", 3, "basis, vec, dec",
+    CleanRowKernel, 
+    "cvec.c:CleanRowKernel" },
 
   { 0 }
 
