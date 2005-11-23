@@ -29,6 +29,13 @@ x := ZeroVector(w,Length(b.vectors));
 a := CleanRow(b,ShallowCopy(w),x);
 if x * b.vectors <> w then Error(); fi;
 
+m := CVEC_RandomMat(10,10,5,1);
+b2 := EmptySemiEchelonBasis( m[1], 3 );
+v := ShallowCopy(m[1]); CleanRow(b2,v,true);
+v := ShallowCopy(m[2]); CleanRow(b2,v,true);
+v := ShallowCopy(m[3]); CleanRow(b2,v,true);
+v := ShallowCopy(m[4]); CleanRow(b2,v,true);
+
 with grease, tables already filled:
 
   count  self/ms  chld/ms  function                                           
