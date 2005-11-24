@@ -108,16 +108,6 @@ DeclareOperation( "CVecClass", [IsObject, IsInt] );
 DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 
 
-#############################################################################
-# Lazy grease:
-#############################################################################
-
-BindGlobal( "LazyGreaserFamily", NewFamily("LazyGreaserFamily") );
-DeclareCategory( "IsLazyGreaser", IsComponentObjectRep );
-DeclareOperation( "LazyGreaser", [IsObject, IsPosInt] );
-DeclareOperation( "GetLinearCombination", 
-  [IsLazyGreaser, IsObject, IsPosInt, IsList] );
-
 DeclareOperation( "CleanRow", [IsRecord, IsObject, IsObject] );
 # CleanRow ( basis, vec, decorextend )
 #   basis ist record mit Eintraegen:
@@ -139,3 +129,4 @@ DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );
 #   vector ist ein Beispielvektor
 #   greaselev ist die Grease-Level
 
+DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
