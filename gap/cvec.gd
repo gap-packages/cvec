@@ -110,23 +110,27 @@ DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 
 DeclareOperation( "CleanRow", [IsRecord, IsObject, IsBool, IsObject] );
 # CleanRow ( basis, vec, extend, dec )
-#   basis ist record mit Eintraegen:
+#   basis is record with the following components:
 #       .vectors  : matrix bzw. liste von Vektoren
 #       .pivots   : spalten der pivots
-#   vec ist ein Vektor
-#   extend ist true oder false
+#   vec is a vector
+#   extend is true or false
 #     true:   clean, extend if necessary
 #     false:  clean, do not extend
-#   dec, falls ungleich fail, muss mindestens Laenge der Basis haben
-#     (+1, falls extend=true)
-#     ein vektor mind. der Laenge der Basis  (+1)
+#   dec, if not equal to fail, must be a vectors over the same field of
+#     length at least the length of the basis
+#     (+1, if extend=true, because the coefficient of the new basis vector
+#     in a decomposition of vec is also written in to dec)
+# Cleans vec with basis. If vec lies in the span, true is returned, 
+# otherwise false. In case of false, if extend is true, the basis is
+# extended. If dec is not equal to fail, then the coefficients of the
+# linear combination of the vectors in the basis that represents vec
+# is put into dec.
 
-DeclareOperation( "EmptySemiEchelonBasis", [IsObject, IsInt] );
 DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );
-# EmptySemiEchelonBasis ist Operation:
-# EmptySemiEchelonBasis( vector [,greaselev] )
-#   vector ist ein Beispielvektor
-#   greaselev ist die Grease-Level
+# EmptySemiEchelonBasis is an operation:
+# EmptySemiEchelonBasis( vector )
+#   vector is a sample vector
 
 DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
 

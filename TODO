@@ -1,5 +1,7 @@
 TODO aufraeumen:
 
+  * FactorsOfCharacteristicPolynomial optimieren bei vielen gleichen
+
 Tasks to do:
 
   * Bug in matrix product
