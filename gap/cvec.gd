@@ -108,19 +108,18 @@ DeclareOperation( "CVecClass", [IsObject, IsInt] );
 DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 
 
-DeclareOperation( "CleanRow", [IsRecord, IsObject, IsObject] );
-# CleanRow ( basis, vec, decorextend )
+DeclareOperation( "CleanRow", [IsRecord, IsObject, IsBool, IsObject] );
+# CleanRow ( basis, vec, extend, dec )
 #   basis ist record mit Eintraegen:
 #       .vectors  : matrix bzw. liste von Vektoren
 #       .pivots   : spalten der pivots
-#     plus optional:
-#       .lazygreaser : fuer lazy greasing
 #   vec ist ein Vektor
-#   decorextend ist entweder ein vector der Laenge der Basis oder true/false
-#     vector: decompose, aber nicht extend
+#   extend ist true oder false
 #     true:   clean, extend if necessary
 #     false:  clean, do not extend
-#
+#   dec, falls ungleich fail, muss mindestens Laenge der Basis haben
+#     (+1, falls extend=true)
+#     ein vektor mind. der Laenge der Basis  (+1)
 
 DeclareOperation( "EmptySemiEchelonBasis", [IsObject, IsInt] );
 DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );

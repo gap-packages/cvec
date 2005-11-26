@@ -2245,8 +2245,8 @@ CVEC_InverseWithGrease :=
     if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
     if m!.len = 0 then return fail; fi;
     if m!.len = 1 then
-        l := [,CVEC_New(vcl)];
-        i := m!.rows[1]^-1;
+        l := [fail,CVEC_New(vcl)];
+        i := m!.rows[2][1]^-1;
         if i = fail then
             return fail;
         fi;
@@ -2296,8 +2296,8 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
     if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
     if m!.len = 0 then return fail; fi;
     if m!.len = 1 then
-        l := [,CVEC_New(vcl)];
-        i := m!.rows[1]^-1;
+        l := [fail,CVEC_New(vcl)];
+        i := m!.rows[2][1]^-1;
         if i = fail then
             return fail;
         fi;
@@ -2545,7 +2545,7 @@ end;
 # Cleaning and semi-echelonised bases:
 #############################################################################
 
-BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
+BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
   local c,firstnz,i,j,lc,len,lev,mo,newpiv,pivs;
   # INPUT
   # basis: record with fields
@@ -2565,7 +2565,7 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
   # destructive in both arguments
 
   # Clear dec vector if given:
-  if not(IsBool(dec)) then
+  if dec <> fail then
     MultRowVector(dec,Zero(dec[1]));
   fi;
   
@@ -2582,7 +2582,7 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
     if basis.pivots[j] >= firstnz then
       c := vec[ basis.pivots[ j ] ];
       if not IsZero( c ) then
-        if not(IsBool(dec)) then
+        if dec <> fail then
           dec[ j ] := c;
         fi;
         AddRowVector( vec, basis.vectors[ j ], -c );
@@ -2594,11 +2594,12 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, dec)
   if newpiv = Length( vec ) + 1 then
     return true;
   else
-    MultRowVector( vec, vec[ newpiv ]^-1 );
-    if not(IsBool(dec)) then
-      return false;
-    fi;
-    if dec = true then
+    if extend then
+      c := vec[newpiv]^-1;
+      MultRowVector( vec, vec[ newpiv ]^-1 );
+      if dec <> fail then
+        dec[len+1] := c;
+      fi;
       Add( basis.vectors, vec );
       Add( basis.pivots, newpiv );
     fi;
@@ -2608,11 +2609,11 @@ end );
     
 InstallMethod( CleanRow, 
   "GAP method for a record, a vector, and a boolean or vector", 
-  [IsRecord, IsObject, IsObject], CVEC_CleanRow );
+  [IsRecord, IsObject, IsBool, IsObject], CVEC_CleanRow );
 
 InstallMethod( CleanRow, 
   "kernel method for a record, a cvec, and a boolean or cvec", 
-  [IsRecord, IsCVecRep, IsObject], CVEC_CLEANROWKERNEL );
+  [IsRecord, IsCVecRep, IsBool, IsObject], CVEC_CLEANROWKERNEL );
 
 InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsObject],
   function( vec )

@@ -3040,7 +3040,7 @@ STATIC inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
 
 STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
 {
-    PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We known that the length is >=3 */
+    PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We know that the length is >=2 */
     PREPARE_p(fi);
     PREPARE_d(fi);
     PREPARE_epw(fi);
@@ -3240,7 +3240,7 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
     
 /* Cleaning vectors: */
 
-STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj dec )
+STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
 {
   /* INPUT:
      basis: record with fields
@@ -3249,18 +3249,17 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj dec )
             pivots  : integer list of pivot columns of basis matrix
      vec : vector of same length as basis vectors
            must be a cvec here
-     dec : either a boolean value indicating whether the basis will we 
-           extended for the "Clean" case
-           or a cvec with length equal to the length of the basis for
-           the "Decompose" case (which does not extend)
-           note that for the greased case also the basis vectors before
-           the new one may be changed
+     extend : either true or false, indicating, whether the basis is extended
+           note that if extend=true, then we norm the new vector!
+     dec : either fail for no decomposition
+           or a cvec with length at least equal to the length of the basis for
+           the not-extend case, otherwise length at least one longer to 
+           store the norming factor
      OUTPUT
      returns either true or false, depending on whether the vector lies
      in the span of the basis
      if dec is a cvec, then the coefficients of the linear combination
-     are put there, if dec is true and the vector lies not in the span,
-     then the basis is extended
+     are put there, if extend=true, then the basis is extended
      NOTES
      destructive in all arguments basis, vec, and dec */
   PREPARE_clfi(vec,cl,fi);
@@ -3278,7 +3277,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj dec )
   Int i,j;
   Int newpiv;
 
-  if (dec == True || dec == False)
+  if (dec == Fail)
       cldec = 0L;
   else {
       cldec = ELM_PLIST(TYPE_DATOBJ(dec),POS_DATA_TYPE);
@@ -3314,12 +3313,13 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj dec )
       }
       newpiv = CVEC_Firstnzp(fi,vecvec,vlen);
       if (newpiv > vlen) return True;
-      c = CVEC_Itemp(fi,vecvec,newpiv);
-      if (c != 1) {
-          c = invert_modp(c,p);
-          MUL_INL(vecvec,fi,c,wordlen);
-      }
-      if (dec == True) {
+      if (extend == True) {
+          c = CVEC_Itemp(fi,vecvec,newpiv);
+          if (cldec) CVEC_AssItemp(fi,decdec,len+1,c);
+          if (c != 1) {
+              c = invert_modp(c,p);
+              MUL_INL(vecvec,fi,c,wordlen);
+          }
           /* GARBAGE COLLECTION POSSIBLE HERE! */
           ASS_LIST(rows,len+2,vec);   /* Remember the fail in position 1! */
           AssPRec(vectors,RNamName("len"),INTOBJ_INT(len+1));
@@ -3346,26 +3346,28 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj dec )
       }
       newpiv = CVEC_Firstnzq(fi,vecvec,vlen,wordlen);
       if (newpiv > vlen) return True;
-      CVEC_Itemq(fi,vecvec,newpiv);
-      if (sclen > 1 || scbuf[0] != 1) {
-          Word *helperdata = DATA_CVEC(helper);
-          Obj helperfun = VAL_GVAR(GVarName("CVEC_INVERT_FFE"));
-          Int k;
-          
-          /* Here we need an inversion of a field element: */
-          for (k = 0;k < d;k++) helperdata[k]=scbuf[k];
-          /* GARBAGE COLLECTION POSSIBLE */
-          CALL_1ARGS(helperfun,helper);  
-          
-          /* these are the only refs we have and still use: */
-          helperdata = DATA_CVEC(helper);
-          vecvec = DATA_CVEC(vecvec);
-          
-          for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
-          sclen++;
-          MUL1_INT(vec,cl,fi,d,(Int *) helperdata,0,wordlen);
-      }
-      if (dec == True) {
+      if (extend == True) {
+          /* Norm the vector: */
+          CVEC_Itemq(fi,vecvec,newpiv);
+          if (cldec) CVEC_AssItemq(fi,decdec,len+1,scbuf);
+          if (sclen > 1 || scbuf[0] != 1) {
+              Word *helperdata = DATA_CVEC(helper);
+              Obj helperfun = VAL_GVAR(GVarName("CVEC_INVERT_FFE"));
+              Int k;
+              
+              /* Here we need an inversion of a field element: */
+              for (k = 0;k < d;k++) helperdata[k]=scbuf[k];
+              /* GARBAGE COLLECTION POSSIBLE */
+              CALL_1ARGS(helperfun,helper);  
+              
+              /* these are the only refs we have and still use: */
+              helperdata = DATA_CVEC(helper);
+              vecvec = DATA_CVEC(vecvec);
+              
+              for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
+              sclen++;
+              MUL1_INT(vec,cl,fi,d,(Int *) helperdata,0,wordlen);
+          }
           /* GARBAGE COLLECTION POSSIBLE HERE! */
           ASS_LIST(rows,len+2,vec);   /* Remember the fail in position 1! */
           AssPRec(vectors,RNamName("len"),INTOBJ_INT(len+1));
@@ -3555,7 +3557,7 @@ static StructGVarFunc GVarFuncs [] = {
     GREASEPOS,
     "cvec.c:GREASEPOS" },
 
-  { "CVEC_CLEANROWKERNEL", 3, "basis, vec, dec",
+  { "CVEC_CLEANROWKERNEL", 4, "basis, vec, extend, dec",
     CLEANROWKERNEL, 
     "cvec.c:CLEANROWKERNEL" },
 
