@@ -129,3 +129,15 @@ DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );
 #   greaselev ist die Grease-Level
 
 DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
+
+DeclareOperation( "CharacteristicPolynomialOfMatrix", [IsObject] );
+DeclareOperation( "CharacteristicPolynomialOfMatrix", [IsObject, IsInt] );
+# Returns the characteristic polynomial of a matrix.
+# Second argument is indeterminate number.
+
+DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject] );
+DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject, IsInt] );
+# Returns a list with the irreducible factors of the characteristic
+# polynomial of a matrix, sorted in ascending order by degree.
+# Second argument is indeterminate number.
+

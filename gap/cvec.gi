@@ -2634,3 +2634,87 @@ InstallMethod( MakeSemiEchelonBasis, "for a semi echelonised matrix",
     b.helper := b.vectors[1]{[1]};
     return b;
   end);
+
+# Characteristic polynomials:
+
+CVEC_CharacteristicPolynomialFactors := function(m,indetnr)
+  # m must be square
+  local L,b,b2,closed,d,dec,f,facs,fam,i,l,lambda,newlambda,o,p,
+        newpiv,pivs,subdim,v,vcopy,zero;
+  zero := ZeroMutable(m[1]);
+  d := Length(m);
+  b := EmptySemiEchelonBasis(zero);
+  pivs := [1..d];
+  facs := [];
+  f := BaseField(m);
+  o := One(f);
+  fam := FamilyObj(o);
+  dec := ShallowCopy(zero);
+  while Length(pivs) > 0 do
+      subdim := Length(b.pivots);
+      p := pivs[1];
+      v := ShallowCopy(zero);
+      v[p] := o;
+      b2 := EmptySemiEchelonBasis(v);
+      Add(b2.vectors,v);
+      Add(b2.pivots,p);
+      lambda := [dec{[1]}];
+      lambda[1][1] := o;
+      RemoveSet(pivs,p);
+      while true do   # break is used to jump out
+          v := v * m;
+          vcopy := ShallowCopy(v);
+          CleanRow(b,vcopy,false,fail);
+          closed := CleanRow(b2,vcopy,true,dec);
+          if closed then break; fi;
+          Add(lambda,dec{[1..Length(b2.pivots)]});
+          RemoveSet(pivs,b2.pivots[Length(b2.pivots)]);
+      od;
+      d := Length(b2.pivots);
+      # we have the lambdas, expressing v*m^(i-1) in terms of the semiechelon
+      # basis, now we have to express v*m^d in terms of the v*m^(i-1), that
+      # means inverting a matrix: 
+      L := CVEC_ZeroMat(d,CVecClass(lambda[d]));
+      for i in [1..d] do
+          CopySubVector(lambda[i],L[i],[1..i],[1..i]);
+      od;
+      l := - dec{[1..d]} * L^-1;
+      l := Unpack(l);
+      Add(l,o);
+      ConvertToVectorRep(l,Size(f));
+      Add(facs,UnivariatePolynomialByCoefficients(fam,l,indetnr));
+      # Add b2 to b:
+      Append(b.vectors,b2.vectors);
+      Append(b.pivots,b2.pivots);
+  od;
+  return facs;
+end;
+
+InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat", [IsCMatRep],
+  function( m )
+    return Product(CVEC_CharacteristicPolynomialFactors(m, 1));
+  end );
+
+InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat and an integer",
+  [IsCMatRep, IsInt],
+  function( m,indetnr )
+    return Product(CVEC_CharacteristicPolynomialFactors(m, indetnr));
+  end );
+
+InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat", [IsCMatRep],
+  function( m ) return FactorsOfCharacteristicPolynomial(m, 1); end );
+
+InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat, and an integer",
+  [IsCMatRep, IsInt],
+  function( m, indetnr )
+    local f,facs,irrfacs;
+    facs := CVEC_CharacteristicPolynomialFactors(m, indetnr);
+    irrfacs := [];
+    for f in facs do
+        Append(irrfacs,Factors(f));
+    od;
+    Sort(irrfacs);
+    return irrfacs;
+  end );
+
+
