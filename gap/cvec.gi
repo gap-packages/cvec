@@ -1135,7 +1135,7 @@ end);
 #############################################################################
 
 CVEC_CMatMaker := function(l,cl)
-    # Makes a new CMat, given a list l with a hole in the first place
+    # Makes a new CMat, given a list l with a 0 in the first place
     local greasehint,m,q,qp,ty;
     if Length(l) > 0 then
         m := rec(rows := l, len := Length(l)-1, vecclass := cl,
@@ -1204,7 +1204,6 @@ InstallMethod( CMat, "for a compressed GF2 matrix",
   function(m)
   local c,i,l,v;
   l := 0*[1..Length(m)+1];
-  l[1] := fail;
   c := CVEC_NewCVecClass(2,1,Length(m[1]));
   for i in [1..Length(m)] do
       v := ShallowCopy(m[i]);
@@ -1219,7 +1218,6 @@ InstallMethod( CMat, "for a compressed 8bit matrix",
   function(m)
   local c,i,l,pd,v;
   l := 0*[1..Length(m)+1];
-  l[1] := fail;
   pd := Factors(Size(DefaultFieldOfMatrix(m)));
   c := CVEC_NewCVecClass(pd[1],Length(pd),Length(m[1]));
   for i in [1..Length(m)] do
@@ -1243,14 +1241,14 @@ InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value",
             fi;
         od;
     fi;
-    Add(l,fail,1);
+    Add(l,0,1);
     return CVEC_CMatMaker(l,cl);
   end);
 
 InstallMethod( MatrixNC, "for a list of cvecs and a cvec",
   [IsList and IsMutable, IsCVecRep],
   function(l,v)
-    Add(l,fail,1);
+    Add(l,0,1);
     return CVEC_CMatMaker(l,DataType(TypeObj(v)));
   end );
 
@@ -1258,7 +1256,7 @@ InstallMethod( MatrixNC, "for an immutable list of cvecs and a cvec",
   [IsList, IsCVecRep],
   function(l,v)
     local li,m;
-    li := [fail];
+    li := [0];
     Append(li,l);
     m := CVEC_CMatMaker(li,DataType(TypeObj(v)));
     MakeImmutable(m);
@@ -1308,7 +1306,6 @@ CVEC_ZeroMat := function(arg)
       return;
   fi;
   l := 0*[1..y+1];
-  l[1] := fail;
   for i in [1..y] do
       l[i+1] := CVEC_NEW(c,c![CVEC_IDX_type]);
   od;
@@ -1339,7 +1336,6 @@ CVEC_IdentityMat := function(arg)
       return;
   fi;
   l := 0*[1..y+1];
-  l[1] := fail;
   for i in [1..y] do
       l[i+1] := CVEC_NEW(c,c![CVEC_IDX_type]);
       l[i+1][i] := 1;   # note that this works for all fields!
@@ -1378,7 +1374,6 @@ CVEC_RandomMat := function(arg)
       return;
   fi;
   l := 0*[1..y+1];
-  l[1] := fail;
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] <= 1 then    
       # q is an immediate integer
       li := 0*[1..x];
@@ -1533,7 +1528,7 @@ InstallOtherMethod( FilteredOp, "for a cmat and a function",
   [IsCMatRep and IsMatrix, IsFunction],
   function(m,f)
     local l;
-    l := Filtered(m!.rows,f);
+    l := Filtered(m!.rows{[2..m!.len+1]},f);
     return CMat(l,m!.vecclass,false);
   end);
 
@@ -1770,7 +1765,7 @@ InstallOtherMethod( ZeroImmutable, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m)
     local i,l,res,v;
-    l := [];
+    l := [0];
     v := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
     MakeImmutable(v);
     for i in [2..m!.len+1] do
@@ -1784,7 +1779,7 @@ InstallOtherMethod( ZeroMutable, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m)
     local i,l;
-    l := [];
+    l := [0];
     for i in [2..m!.len+1] do
         l[i] := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
     od;
@@ -1816,7 +1811,6 @@ InstallOtherMethod( OneMutable, "for a cmat",
         w[i] := one;
         l[i+1] := w;
     od;
-    l[1] := fail;
     return CVEC_CMatMaker(l,m!.vecclass);
   end);
 InstallOtherMethod( OneSameMutability, "for a cmat",
@@ -1835,7 +1829,6 @@ InstallOtherMethod( OneSameMutability, "for a cmat",
 CVEC_MATRIX_TIMES_SCALAR := function(m,s)
     local i,l,res;
     l := 0*[1..m!.len+1];
-    l[1] := fail;
     for i in [2..m!.len+1] do l[i] := s * m!.rows[i]; od;
     res := CVEC_CMatMaker(l,m!.vecclass);
     if not(IsMutable(m)) then
@@ -2150,7 +2143,6 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     for i in [2..m!.len+1] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     od;
-    l[1] := fail;
     res := CVEC_CMatMaker(l,n!.vecclass);
     if m!.len > 0 then
         q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
@@ -2194,7 +2186,6 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
     for i in [2..m!.len+1] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     od;
-    l[1] := fail;
     res := CVEC_CMatMaker(l,n!.vecclass);
     if m!.len > 0 then
         CVEC_PROD_CMAT_CMAT_GREASED(l,m!.rows,n!.greasetab,n!.spreadtab,
@@ -2218,7 +2209,7 @@ CVEC_InverseWithoutGrease := function(m)
     # Now make a new identity matrix:
     local helper,i,l,mc,mi,vcl;
     vcl := m!.vecclass;
-    l := [];
+    l := [0];
     for i in [m!.len+1,m!.len..2] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
         l[i][i-1] := 1;   # note that this works for all fields!
@@ -2245,7 +2236,7 @@ CVEC_InverseWithGrease :=
     if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
     if m!.len = 0 then return fail; fi;
     if m!.len = 1 then
-        l := [fail,CVEC_New(vcl)];
+        l := [0,CVEC_New(vcl)];
         i := m!.rows[2][1]^-1;
         if i = fail then
             return fail;
@@ -2254,7 +2245,7 @@ CVEC_InverseWithGrease :=
         return CVEC_CMatMaker(l,m!.vecclass);
     fi;
     # Now make a new identity matrix:
-    l := [];
+    l := [0];
     for i in [m!.len+1,m!.len..2] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
         l[i][i-1] := 1;   # note that this works for all fields!
@@ -2296,7 +2287,7 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
     if m!.len <> vcl![CVEC_IDX_len] then return fail; fi;
     if m!.len = 0 then return fail; fi;
     if m!.len = 1 then
-        l := [fail,CVEC_New(vcl)];
+        l := [0,CVEC_New(vcl)];
         i := m!.rows[2][1]^-1;
         if i = fail then
             return fail;
@@ -2339,7 +2330,6 @@ InstallOtherMethod( TransposedMatOp, "for a cmat",
     for i in [2..newlen+1] do
         l[i] := CVEC_NEW(ct,ct![CVEC_IDX_type]);
     od;
-    l[1] := fail;
     mt := CVEC_CMatMaker(l,ct);
     if m!.len > 0 and mt!.len > 0 then
         CVEC_TRANSPOSED_MAT(m!.rows,mt!.rows);
