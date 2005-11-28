@@ -218,6 +218,81 @@ InstallMethod( SemiEchelonMatTransformation,
     end );
 
 
+InstallMethod( SemiEchelonRowsX, "for a cmat", [IsCMatRep],
+  function( m )
+    local b,v;
+    b := EmptySemiEchelonBasis( m!.vecclass );
+    for v in m do CleanRow(b,v,true,fail); od;
+    return b;
+  end );
+InstallMethod( SemiEchelonRows, "for a cmat", [IsCMatRep],
+  function( m )
+    return SemiEchelonRowsX( MutableCopyMat( m ) );
+  end );
+InstallMethod( SemiEchelonRowsTX, "for a cmat", [IsCMatRep],
+  function( m )
+    local b,coeffs,dec,i,j,mo,newcoeffs,newrelation,relations,v,zerov;
+    b := EmptySemiEchelonBasis( m!.vecclass );
+    zerov := CVEC_New(m!.vecclass);
+    dec := ZeroVector(zerov,m!.len);  # Maximal length of the basis
+    if m!.len = 0 then
+        b.coeffs := MatrixNC([],dec);
+        b.relations := rec( vectors := MatrixNC([],dec), pivots := [] );
+    fi;
+    coeffs := MatrixNC([],dec);
+    relations := EmptySemiEchelonBasis( dec );
+    i := 0;  # is length of coeffs
+    mo := -One(dec[1]);
+    for j in [1..Length(m)] do
+        v := m[j];
+        if not CleanRow(b,v,true,dec) then
+            # a new vector in the basis, we have to produce a coeff line:
+            # now dec * b.vectors = v (original one)
+            # need: coeffs * mat = b.vectors[Length(b.vectors)]
+            # ==> need to use
+            if i > 0 then
+                newcoeffs := ((-dec[i+1]^-1) * dec{[1..i]}) * coeffs;
+                newcoeffs[j] := dec[i+1]^-1;
+                Add(coeffs,newcoeffs);
+            else
+                newcoeffs := ShallowCopy(dec);
+                newcoeffs[1] := dec[1]^-1;
+                Add(coeffs,newcoeffs);
+            fi;
+            i := i + 1;
+        else
+            if i > 0 then
+                newrelation := dec{[1..i]} * coeffs;
+                newrelation[j] := mo;
+                CleanRow(relations,newrelation,true,fail);
+            else
+                newrelation := ShallowCopy(dec);
+                newrelation[j] := -mo;
+                Add(relations.vectors,newrelation);
+                Add(relations.pivots,j);
+            fi;
+        fi;
+    od;
+    b.coeffs := coeffs;
+    b.relations := relations;
+    return b;
+  end);
+InstallMethod( SemiEchelonRowsT, "for a cmat", [IsCMatRep],
+  function( m )
+    return SemiEchelonRowsTX( MutableCopyMat( m ) );
+  end );
+
+InstallMethod( SemiEchelonNullspaceX, "for a cmat", [IsCMatRep],
+  function( m )
+    local b;
+    b := SemiEchelonRowsTX(m);
+    return b.relations;
+  end );
+InstallMethod( SemiEchelonNullspace, "for a cmat", [IsCMatRep],
+  function( m )
+    return SemiEchelonNullspaceX( MutableCopyMat( m ) );
+  end );
+
 # Some code to allow code reusage from the GAP library:
 
 # todo:

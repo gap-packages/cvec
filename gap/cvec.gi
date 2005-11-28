@@ -2657,6 +2657,21 @@ InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsObject],
     # The helper is needed for the kernel cleaner for CVecs
   end );
 
+InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsCVecRep],
+  function( vec )
+    return rec( vectors := MatrixNC([],vec),pivots := [],helper := vec{[1]} );
+    # The helper is needed for the kernel cleaner for CVecs
+  end );
+
+InstallMethod( EmptySemiEchelonBasis, "for a cvecclass", [IsCVecClass],
+  function( cl )
+    local cl1;
+    cl1 := CVEC_NewCVecClassSameField( cl, 1 );
+    return rec( vectors := CMat([],cl), pivots := [],
+                helper :=  CVEC_New( cl1 ) );
+    # The helper is needed for the kernel cleaner for CVecs
+  end );
+
 InstallMethod( MakeSemiEchelonBasis, "for a semi echelonised matrix",
   [IsRecord],
   function(b)

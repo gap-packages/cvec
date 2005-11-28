@@ -147,3 +147,12 @@ DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject, IsInt] );
 
 DeclareOperation( "RandomizeVector", [IsObject] );
 # Changes the mutable argument to a random vector of the same kind.
+
+DeclareOperation( "SemiEchelonRowsX", [IsObject] );
+DeclareOperation( "SemiEchelonRows", [IsObject] );
+DeclareOperation( "SemiEchelonRowsTX", [IsObject] );
+DeclareOperation( "SemiEchelonRowsT", [IsObject] );
+DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
+DeclareOperation( "SemiEchelonNullspace", [IsObject] );
+
+
