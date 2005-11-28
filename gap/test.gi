@@ -559,14 +559,12 @@ CVEC.TEST.MATMUL := function(p,d)
   c4 := a * b;
   b!.greasehint := lev;
   c5 := 0*[1..Length(a)+1];
-  Unbind(c5[1]);
   for i in [1..Length(a)] do
       c5[i+1] := a[i] * b;
   od;
   c5 := CVEC_CMatMaker(c5,cb);
   GreaseMat(b);
   c6 := 0*[1..Length(a)+1];
-  Unbind(c6[1]);
   for i in [1..Length(a)] do
       c6[i+1] := a[i] * b;
   od;
