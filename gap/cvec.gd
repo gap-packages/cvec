@@ -145,3 +145,5 @@ DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject, IsInt] );
 # polynomial of a matrix, sorted in ascending order by degree.
 # Second argument is indeterminate number.
 
+DeclareOperation( "RandomizeVector", [IsObject] );
+# Changes the mutable argument to a random vector of the same kind.

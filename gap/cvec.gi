@@ -1129,6 +1129,52 @@ InstallOtherMethod( ProductCoeffs, "for cvecs",
   return u;
 end);
 
+InstallMethod( RandomizeVector, "for 8bit vectors",
+  [Is8BitVectorRep and IsMutable],
+  function( v )
+    local f,i;
+    f := DefaultField(v);
+    for i in [1..Length(v)] do
+        v[i] := Random(f);
+    od;
+    return v;
+  end );
+
+InstallMethod( RandomizeVector, "for gf2 vectors",
+  [IsGF2VectorRep and IsMutable],
+  function( v )
+    local f,i;
+    f := GF(2);
+    for i in [1..Length(v)] do
+        v[i] := Random(f);
+    od;
+    return v;
+  end );
+
+InstallMethod( RandomizeVector, "for cvecs", [IsCVecRep and IsMutable],
+  function( v )
+    local cl,d,j,len,li,p,q,size;
+    cl := DataType(TypeObj(v));
+    len := Length(v);
+    size := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
+    d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+    if size <= 1 then
+        q := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+        li := 0*[1..len];
+        for j in [1..len] do
+            li[j] := Random(0,q-1);
+        od;
+        CVEC_INTREP_TO_CVEC(li,v);
+    else    # big scalars!
+        li := 0*[1..len*d];
+        p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+        for j in [1..len*d] do
+            li[j] := Random(0,p-1);
+        od;
+        CVEC_INTREP_TO_CVEC(li,v);
+    fi;
+    return v;
+  end );
 
 #############################################################################
 # Matrices:

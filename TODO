@@ -2,6 +2,16 @@ TODO aufraeumen:
 
   * FactorsOfCharacteristicPolynomial optimieren bei vielen gleichen
 
+Diverses into library:
+
+  * operation RandomizeVector and methods for compressed vectors
+  * new method for vectors over fields
+  * EmptySemiEchelonBasis
+  * MakeSemiEchelonBasis
+  * SemiEchelonMat no attribute
+  * CharacteristicPolynomialOfMatrix
+  * FactorsOfCharacteristicPolynomial
+
 Tasks to do:
 
   * Bug in matrix product
@@ -15,7 +25,9 @@ Tasks to do:
   * Hash-Funktionen fuer Matrizen (Generators!)
     Use NumberFFVector for "small" vectors? Maybe for vectors < 2 words?
   ? Display bei Vektoren ueber GF(5,3)
-
+  * SemiEchelonMat mit Kernel-Cleaner
+  * Return pivots in SemiEchelonMat?
+  
 Ideas for improvement:
 
   * Make integers as scalars behave like mod p or like p-adic expansion?
