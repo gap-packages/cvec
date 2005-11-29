@@ -3276,6 +3276,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   Int len;
   Int i,j;
   Int newpiv;
+  int fnzcounter = 0;
 
   if (dec == Fail)
       cldec = 0L;
@@ -3302,6 +3303,10 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
       if (cldec) decdec = DATA_CVEC(dec);
       for (j = i;j <= len;j++) {
           Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
+          if (++fnzcounter >= 10) {
+              firstnz = CVEC_Firstnzp(fi,vecvec,vlen);
+              fnzcounter = 0;
+          }
           if (piv >= firstnz) {   /* otherwise a shortcut */
               c = CVEC_Itemp(fi,vecvec,piv);
               if (c) {
@@ -3327,12 +3332,16 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
           /* We do not use any longer any references we might have! */
       }
       return False;
-  } else {
+  } else {   /* d > 1 */
       Word *vecvec = DATA_CVEC(vec);
       Word *decdec = 0L;
       if (cldec) decdec = DATA_CVEC(dec);
       for (j = i;j <= len;j++) {
           Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
+          if (++fnzcounter >= 10) {
+              firstnz = CVEC_Firstnzq(fi,vecvec,vlen,wordlen);
+              fnzcounter = 0;
+          }
           if (piv >= firstnz) {   /* otherwise a shortcut */
               CVEC_Itemq(fi,vecvec,piv);
               if (sclen > 1 || scbuf[0] != 0) {

@@ -2688,7 +2688,7 @@ InstallMethod( MakeSemiEchelonBasis, "for a semi echelonised matrix",
 
 # Characteristic polynomials:
 
-CVEC_CharacteristicPolynomialFactors := function(m,indetnr)
+CVEC_CharacteristicPolynomialFactors := function(m)
   # m must be square
   local L,b,b2,closed,d,dec,f,facs,fam,i,l,lambda,newlambda,o,p,
         newpiv,pivs,subdim,v,vcopy,zero;
@@ -2733,7 +2733,7 @@ CVEC_CharacteristicPolynomialFactors := function(m,indetnr)
       l := Unpack(l);
       Add(l,o);
       ConvertToVectorRep(l,Size(f));
-      Add(facs,UnivariatePolynomialByCoefficients(fam,l,indetnr));
+      Add(facs,UnivariatePolynomialByCoefficients(fam,l,1));
       # Add b2 to b:
       Append(b.vectors,b2.vectors);
       Append(b.pivots,b2.pivots);
@@ -2743,23 +2743,15 @@ end;
 
 InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat", [IsCMatRep],
   function( m )
-    return Product(CVEC_CharacteristicPolynomialFactors(m, 1));
-  end );
-
-InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat and an integer",
-  [IsCMatRep, IsInt],
-  function( m,indetnr )
-    return Product(CVEC_CharacteristicPolynomialFactors(m, indetnr));
+    local facs;
+    facs := CVEC_CharacteristicPolynomialFactors(m);
+    return rec( poly := Product(facs), factors := facs );
   end );
 
 InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat", [IsCMatRep],
-  function( m ) return FactorsOfCharacteristicPolynomial(m, 1); end );
-
-InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat, and an integer",
-  [IsCMatRep, IsInt],
-  function( m, indetnr )
+  function( m )
     local f,facs,irrfacs;
-    facs := CVEC_CharacteristicPolynomialFactors(m, indetnr);
+    facs := CVEC_CharacteristicPolynomialFactors(m);
     irrfacs := [];
     for f in facs do
         Append(irrfacs,Factors(f));
@@ -2768,4 +2760,137 @@ InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat, and an integer",
     return irrfacs;
   end );
 
+CVEC_MinimalPolynomial := function(m)
+  # m must be square
+  local L,b,b2,closed,d,dec,f,fam,i,l,lambda,o,p,pivs,poly,subdim,v,vcopy,zero;
 
+  zero := ZeroMutable(m[1]);
+  d := Length(m);
+  b := EmptySemiEchelonBasis(zero);
+  pivs := [1..d];
+  f := BaseField(m);
+  poly := One(PolynomialRing(f,[1]));
+  o := One(f);
+  fam := FamilyObj(o);
+  dec := ShallowCopy(zero);
+  while Length(pivs) > 0 do
+      subdim := Length(b.pivots);
+      p := pivs[1];
+      v := ShallowCopy(zero);
+      v[p] := o;
+      b2 := EmptySemiEchelonBasis(v);
+      Add(b2.vectors,v);
+      Add(b2.pivots,p);
+      lambda := [dec{[1]}];
+      lambda[1][1] := o;
+      RemoveSet(pivs,p);
+      while true do   # break is used to jump out
+          v := v * m;
+          vcopy := ShallowCopy(v);
+          closed := CleanRow(b2,vcopy,true,dec);
+          if closed then break; fi;
+          Add(lambda,dec{[1..Length(b2.pivots)]});
+          RemoveSet(pivs,b2.pivots[Length(b2.pivots)]);
+      od;
+      d := Length(b2.pivots);
+      # we have the lambdas, expressing v*m^(i-1) in terms of the semiechelon
+      # basis, now we have to express v*m^d in terms of the v*m^(i-1), that
+      # means inverting a matrix: 
+      L := CVEC_ZeroMat(d,CVecClass(lambda[d]));
+      for i in [1..d] do
+          CopySubVector(lambda[i],L[i],[1..i],[1..i]);
+      od;
+      l := - dec{[1..d]} * L^-1;
+      l := Unpack(l);
+      Add(l,o);
+      ConvertToVectorRep(l,Size(f));
+      poly := Lcm(poly,UnivariatePolynomialByCoefficients(fam,l,1));
+      # Add b2 to b:
+      for v in b2.vectors do
+          if not(CleanRow(b,v,true,fail)) then
+              RemoveSet(pivs,b.pivots[Length(b.pivots)]);
+          fi;
+      od;
+  od;
+  return poly;
+end;
+
+CVEC_NewCharAndMinimalPolynomial := function( m )
+  local col,f,facs,havedim,i,irreds,l,lowbound,mp,mult,multmin,ns,p,wantns,x,y;
+  # First the characteristic polynomial:
+  facs := CVEC_CharacteristicPolynomialFactors(m);
+  if Length(facs) = 1 then
+      return [facs[1],facs[1]];
+  fi;
+  Print("More than 1 factor, factorising characteristic polynomial...\n");
+  # Factor all parts:
+  col := [];
+  for f in facs do
+      Add(col,Collected(Factors(f)));
+  od;
+  # Collect all irreducible factors:
+  irreds := [];
+  mult := [];
+  lowbound := [];
+  multmin := [];
+  for l in col do
+      for i in l do
+          p := Position(irreds,i[1]);
+          if p = fail then
+              Add(irreds,i[1]);
+              Add(mult,i[2]);
+              Add(lowbound,i[2]);
+              Add(multmin,0);
+              p := Sortex(irreds);
+              mult := Permuted(mult,p);
+              lowbound := Permuted(lowbound,p);
+          else
+              mult[p] := mult[p] + i[2];
+              if i[2] > lowbound[p] then
+                  lowbound[p] := i[2];
+              fi;
+          fi;
+      od;
+  od;
+  mp := irreds[1]^0;
+  for i in [1..Length(irreds)] do
+      Print("Working on irreducible factor of degree ",
+            DegreeOfLaurentPolynomial(irreds[i]),"...\n");
+      if mult[i] = lowbound[i] then
+          Print("Factor of degree ",DegreeOfLaurentPolynomial(irreds[i]),
+                " with multiplicity ",mult[i],"\n");
+          mp := mp * irreds[i]^mult[i];
+          multmin[i] := mult[i];
+      else
+          x := Value(irreds[i],m);
+          wantns := DegreeOfLaurentPolynomial(irreds[i]) * mult[i];
+          Print("Want dimension: ",wantns,"\n");
+          ns := SemiEchelonNullspace(x);
+          havedim := Length(ns.vectors);
+          Print("Found nullspace of dimension ",havedim,"\n");
+          if havedim = wantns then
+              f := 1;
+          else
+              f := lowbound[i];
+              x := CH0P_ActionOnQuotient([x],ns)[1];
+              y := x^f;
+              ns := SemiEchelonNullspace(y);
+              while havedim + Length(ns.vectors) < wantns do
+                  Print("Trying f=",f,": Have nullspace of dim. ",
+                        havedim+Length(ns.vectors),"\n");
+                  x := CH0P_ActionOnQuotient([x],ns)[1];
+                  y := CH0P_ActionOnQuotient([y],ns)[1];
+                  y := y * x;
+                  f := f + 1;
+                  havedim := havedim + Length(ns.vectors);
+                  ns := SemiEchelonNullspace(y);
+              od;
+          fi;
+          Print("Done multiplicity is ",f,"\n");
+          mp := mp * irreds[i]^f;
+          multmin[i] := f;
+      fi;
+  od;
+  return rec(charpoly := Product(facs), irreds := irreds, mult := mult,
+             minpoly := mp, multmin := multmin);
+end;
