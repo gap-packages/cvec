@@ -98,11 +98,13 @@ CVEC.TEST.ALLCONWAY := function(name,func)
   local d,l,p;
   p := ConwayPolynomial(2,2);
   for p in Filtered([2..Length(CONWAYPOLDATA)],i->IsBound(CONWAYPOLDATA[i])) do
+    if p < CVEC.TEST.LIMIT_ALLFFE then
       l := Length(CONWAYPOLDATA[p]);
       for d in Filtered([1..l],i->IsBound(CONWAYPOLDATA[p][i])) do
           Print("Testing ",name," p=",p," d=",d," ...\r");
           func(p,d);
       od;
+    fi;
   od;
 end;
 

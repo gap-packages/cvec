@@ -765,7 +765,7 @@ InstallMethod( CVec, "for a homogeneous list and a cvec class",
             CVEC_INTREP_TO_CVEC(List(l,x->x![1]),v);
             return v;
         elif IsFFE(l[1]) and not(IsInternalRep(l[1])) then  # large scalars:
-            CVEC_INTREP_TO_CVEC(List(l,x->CVEC_HandleScalar(c,x)));
+            CVEC_INTREP_TO_CVEC(List(l,x->CVEC_HandleScalar(c,x)),v);
             return v;
         fi;
     fi;
@@ -2816,7 +2816,8 @@ CVEC_MinimalPolynomial := function(m)
 end;
 
 CVEC_NewCharAndMinimalPolynomial := function( m )
-  local col,f,facs,havedim,i,irreds,l,lowbound,mp,mult,multmin,ns,p,wantns,x,y;
+  local col,deg,f,facs,havedim,i,irreds,l,lastpower,lowbound,lowbounds,mp,mult,
+        multfactoredout,multmin,nrblocks,ns,p,power,targetmult,upbound,x,y;
   # First the characteristic polynomial:
   facs := CVEC_CharacteristicPolynomialFactors(m);
   if Length(facs) = 1 then
@@ -2824,14 +2825,11 @@ CVEC_NewCharAndMinimalPolynomial := function( m )
   fi;
   Print("More than 1 factor, factorising characteristic polynomial...\n");
   # Factor all parts:
-  col := [];
-  for f in facs do
-      Add(col,Collected(Factors(f)));
-  od;
+  col := List(facs,f->Collected(Factors(f)));
   # Collect all irreducible factors:
   irreds := [];
   mult := [];
-  lowbound := [];
+  lowbounds := [];
   multmin := [];
   for l in col do
       for i in l do
@@ -2839,58 +2837,142 @@ CVEC_NewCharAndMinimalPolynomial := function( m )
           if p = fail then
               Add(irreds,i[1]);
               Add(mult,i[2]);
-              Add(lowbound,i[2]);
+              Add(lowbounds,i[2]);
               Add(multmin,0);
               p := Sortex(irreds);
               mult := Permuted(mult,p);
-              lowbound := Permuted(lowbound,p);
+              lowbounds := Permuted(lowbounds,p);
           else
               mult[p] := mult[p] + i[2];
-              if i[2] > lowbound[p] then
-                  lowbound[p] := i[2];
+              if i[2] > lowbounds[p] then
+                  lowbounds[p] := i[2];
               fi;
           fi;
       od;
   od;
   mp := irreds[1]^0;
   for i in [1..Length(irreds)] do
-      Print("Working on irreducible factor of degree ",
-            DegreeOfLaurentPolynomial(irreds[i]),"...\n");
-      if mult[i] = lowbound[i] then
-          Print("Factor of degree ",DegreeOfLaurentPolynomial(irreds[i]),
-                " with multiplicity ",mult[i],"\n");
+      deg := DegreeOfLaurentPolynomial(irreds[i]);
+      Print("Working on irreducible factor of degree ",deg,"...\n");
+      if mult[i] = lowbounds[i] then
+          Print("Factor of degree ",deg," with multiplicity ",mult[i],"\n");
           mp := mp * irreds[i]^mult[i];
           multmin[i] := mult[i];
       else
           x := Value(irreds[i],m);
-          wantns := DegreeOfLaurentPolynomial(irreds[i]) * mult[i];
-          Print("Want dimension: ",wantns,"\n");
-          ns := SemiEchelonNullspace(x);
-          havedim := Length(ns.vectors);
-          Print("Found nullspace of dimension ",havedim,"\n");
-          if havedim = wantns then
-              f := 1;
-          else
-              f := lowbound[i];
-              x := CH0P_ActionOnQuotient([x],ns)[1];
-              y := x^f;
+          y := x;       # in the beginning we go for only one Nullspace
+          lastpower := 0;  
+          power := 1;   # we always have y = x^power
+          targetmult := mult[i];      # the multiplicity to reach
+          lowbound := lowbounds[i];   # from the calc. of the charpoly
+          upbound := targetmult;      # an upper bound
+          Print("Lower bound: ",lowbound," upper bound: ",upbound,"\n");
+          multfactoredout := 0;       # no quotient yet
+          # Note that when we divide something out, we adjust targetmult
+          # and record this in multfactoredout
+          while true do
+              Print("Target multiplicity: ",targetmult,"\n");
               ns := SemiEchelonNullspace(y);
-              while havedim + Length(ns.vectors) < wantns do
-                  Print("Trying f=",f,": Have nullspace of dim. ",
-                        havedim+Length(ns.vectors),"\n");
-                  x := CH0P_ActionOnQuotient([x],ns)[1];
+              havedim := Length(ns.vectors);
+              Print("Found nullspace of dimension ",havedim,"\n");
+              # We have a lower bound for the multiplicity in the minpoly
+              # from earlier and one from the number of generalized Jordan 
+              # blocks we see:
+              if power = lastpower+1 then
+                  nrblocks := havedim/deg;
+                  lowbound := Maximum(lowbound,
+                      multfactoredout + QuoInt(targetmult+nrblocks-1,nrblocks));
+                  upbound := Minimum(upbound,
+                      multfactoredout + targetmult-nrblocks+1);
+                  Print("Lower bound: ",lowbound," upper bound: ",upbound,"\n");
+                  if lowbound = upbound then break; fi;
+                  lastpower := power;
+                  power := lowbound;
+              else
+                  if havedim = deg * targetmult then break; fi;
+                  # Go one step further:
+                  lastpower := power;
+                  power := power + 1;
+              fi;
+
+              Print("Factoring out nullspace of dimension ",havedim," and ",
+                    "going to power ",power,"\n");
+              # Now we want to go to the quotient and to power power:
+              x := CH0P_ActionOnQuotient([x],ns)[1];
+              if lastpower = 1 then
+                  y := x;
+                  y := y^power;
+              else
                   y := CH0P_ActionOnQuotient([y],ns)[1];
-                  y := y * x;
-                  f := f + 1;
-                  havedim := havedim + Length(ns.vectors);
-                  ns := SemiEchelonNullspace(y);
-              od;
-          fi;
-          Print("Done multiplicity is ",f,"\n");
-          mp := mp * irreds[i]^f;
-          multmin[i] := f;
+                  y := y * x^(power-lastpower);
+              fi;
+              targetmult := targetmult - havedim/deg;
+              multfactoredout := lastpower;
+          od;
+          Print("Done multiplicity is ",lowbound,"\n");
+          mp := mp * irreds[i]^lowbound;
+          multmin[i] := lowbound;
       fi;
   od;
   return rec(charpoly := Product(facs), irreds := irreds, mult := mult,
              minpoly := mp, multmin := multmin);
 end;
+
+CVEC_GlueMatrices := function(l)
+  # all elements of the list l must be CMats over the same field
+  local d,g,i,m,n,p,pos,x;
+  n := Sum(l,Length);
+  p := Characteristic(l[1]);
+  d := DegreeFFE(l[1]);
+  m := CVEC_ZeroMat(n,n,p,d);
+  pos := 1;
+  for i in [1..Length(l)] do
+      CopySubMatrix(l[i],m,[1..Length(l[i])],[pos..pos+Length(l[i])-1],
+                    [1..Length(l[i])],[pos..pos+Length(l[i])-1]);
+      pos := pos + Length(l[i]);
+  od;
+  Display(m);
+  g := GL(n,p^d);
+  g := Group(List(GeneratorsOfGroup(g),CMat));
+  x := PseudoRandom(g);
+  return x * m * x^-1;
+end;
+  
+CVEC_MakeJordanBlock := function(f,pol,s)
+  local c,cl,d,deg,i,m,n,o,p,pos;
+  p := Characteristic(f);
+  d := DegreeOverPrimeField(f);
+  deg := DegreeOfLaurentPolynomial(pol);
+  n := s * deg;
+  m := CVEC_ZeroMat(n,n,p,d);
+  c := CompanionMat(pol);
+  c := CMat(List(c,CVec));
+  o := OneMutable(c);
+  pos := 1;
+  for i in [1..s] do
+      CopySubMatrix(c,m,[1..deg],[pos..pos+deg-1],[1..deg],[pos..pos+deg-1]);
+      pos := pos + deg;
+  od;
+  pos := 1;
+  for i in [1..s-1] do
+      CopySubMatrix(o,m,[1..deg],[pos..pos+deg-1],[1..deg],
+                        [pos+deg..pos+2*deg-1]);
+      pos := pos + deg;
+  od;
+  return m;
+end;
+
+CVEC_MakeExample := function(f,p,l)
+  # p a list of irredcible polynomials
+  # l a list of lists of the same length than p, each a list of sizes of
+  # generalized Jordan blocks
+  local i,ll,s;
+  ll := [];
+  for i in [1..Length(p)] do
+      for s in l[i] do
+          Add(ll,CVEC_MakeJordanBlock(f,p[i],s));
+      od;
+  od;
+  return CVEC_GlueMatrices(ll);
+end;
+
