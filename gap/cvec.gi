@@ -2872,7 +2872,8 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
       return rec( charpoly := facs[1], irreds := facs, mult := [1],
                   minpoly := facs[1], multmin := [1] );
   fi;
-  Print("More than 1 factor, factorising characteristic polynomial...\n");
+  Info(InfoCVec,2,
+       "More than 1 factor, factorising characteristic polynomial...");
   # Factor all parts:
   col := List(facs,f->Collected(Factors(f)));
   # Collect all irreducible factors:
@@ -2900,14 +2901,14 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
       od;
   od;
   mp := irreds[1]^0;
-  Print("Degrees of irreducible factors of charpoly:\n",
-        List(irreds,DegreeOfLaurentPolynomial),"\n");
+  Info(InfoCVec,2,"Degrees of irreducible factors of charpoly:",
+       List(irreds,DegreeOfLaurentPolynomial));
   for i in [1..Length(irreds)] do
       deg := DegreeOfLaurentPolynomial(irreds[i]);
-      Print("Working on irreducible factor of degree ",deg,"...\n");
+      Info(InfoCVec,2,"Working on irreducible factor of degree ",deg,"...");
       if mult[i] = lowbounds[i] then
-          Print("Found factor of degree ",deg," with multiplicity ",
-                mult[i],"\n");
+          Info(InfoCVec,2,"Found factor of degree ",deg," with multiplicity ",
+                mult[i]);
           mp := mp * irreds[i]^mult[i];
           multmin[i] := mult[i];
       else
@@ -2915,7 +2916,8 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
           targetmult := mult[i];      # the multiplicity to reach
           lowbound := lowbounds[i];   # from the calc. of the charpoly
           upbound := targetmult;      # an upper bound
-          Print("First lower bound: ",lowbound," upper bound: ",upbound,"\n");
+          Info(InfoCVec,2,"First lower bound: ",lowbound,
+               " upper bound: ",upbound);
           multfactoredout := 0;       # no quotient yet
           # Note that when we divide something out, we adjust targetmult
           # and record this in multfactoredout.
@@ -2934,11 +2936,11 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
               #    lowbound+multfactoredout
 
               # First calculate a nullspace and get some estimates:
-              Print("Target multiplicity: ",targetmult,", already factored ",
-                    "out: ",multfactoredout,"\n");
+              Info(InfoCVec,2,"Target multiplicity: ",targetmult,
+                   ", already factored out: ",multfactoredout);
               ns := SemiEchelonNullspace(x);
               havedim := Length(ns.vectors);
-              Print("Found nullspace of dimension ",havedim,"\n");
+              Info(InfoCVec,2,"Found nullspace of dimension ",havedim);
               # We have a lower bound for the multiplicity in the minpoly
               # from earlier and one from the number of generalized Jordan 
               # blocks we see:
@@ -2947,21 +2949,22 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
               lowbound := Maximum(lowbound,
                                   QuoInt(targetmult+nrblocks-1,nrblocks));
               upbound := Minimum(upbound,targetmult-nrblocks+1);
-              Print("Lower bound: ",lowbound," upper bound: ",upbound,"\n");
+              Info(InfoCVec,2,"Lower bound: ",lowbound," upper bound: ",
+                   upbound);
               if lowbound = upbound then break; fi;
 
               # Now we divide out the nullspace and go to lowbound:
               lowbound := lowbound-1;   # Adjustment because of quotient!
-              Print("Factoring out nullspace of dimension ",havedim," and ",
-                    "going to power ",lowbound,"\n");
+              Info(InfoCVec,2,"Factoring out nullspace of dimension ",havedim,
+                   " and going to power ",lowbound);
               x := CVEC_ActionOnQuotient([x],ns)[1];
               multfactoredout := multfactoredout + 1;
               targetmult := targetmult - nrblocks;
               x := x^lowbound;
-              Print("Target multiplicity: ",targetmult,"\n");
+              Info(InfoCVec,2,"Target multiplicity: ",targetmult);
               ns := SemiEchelonNullspace(x);
               havedim := Length(ns.vectors);
-              Print("Found nullspace of dimension ",havedim,"\n");
+              Info(InfoCVec,2,"Found nullspace of dimension ",havedim);
 
               # Check, whether we have the complete generalized eigenspace:
               if havedim/deg = targetmult then
@@ -2971,15 +2974,15 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
               fi;
               
               # Now we want to go to the quotient and redo everything:
-              Print("Factoring out nullspace of dimension ",havedim," and ",
-                    "going to power ",lowbound,"\n");
+              Info(InfoCVec,2,"Factoring out nullspace of dimension ",havedim,
+                   " and going to power ",lowbound);
               x := CVEC_ActionOnQuotient([x],ns)[1];
               multfactoredout := multfactoredout + 1 + lowbound;
               targetmult := targetmult - Length(ns.vectors)/deg;
               lowbound := 0;   # we do not know anything about this quotient
               upbound := targetmult;
           od;
-          Print("Done! Multiplicity is ",lowbound+multfactoredout,"\n");
+          Info(InfoCVec,2,"Done! Multiplicity is ",lowbound+multfactoredout);
           mp := mp * irreds[i]^(lowbound+multfactoredout);
           multmin[i] := (lowbound+multfactoredout);
       fi;
