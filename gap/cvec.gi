@@ -2869,7 +2869,8 @@ CVEC_CharAndMinimalPolynomial := function( m, indetnr )
   # First the characteristic polynomial:
   facs := CVEC_CharacteristicPolynomialFactors(m,indetnr);
   if Length(facs) = 1 then
-      return [facs[1],facs[1]];
+      return rec( charpoly := facs[1], irreds := facs, mult := [1],
+                  minpoly := facs[1], multmin := [1] );
   fi;
   Print("More than 1 factor, factorising characteristic polynomial...\n");
   # Factor all parts:
