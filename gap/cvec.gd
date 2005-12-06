@@ -136,7 +136,10 @@ DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
 
 DeclareOperation( "CharacteristicPolynomialOfMatrix", [IsObject] );
 DeclareOperation( "CharacteristicPolynomialOfMatrix", [IsObject, IsInt] );
-# Returns the characteristic polynomial of a matrix.
+# Returns the characteristic polynomial of a matrix. Returns a record
+# with components "poly" (the polynomial) and "factors" (a list of
+# factors which happened to come out of the calculation, the product of 
+# which is the charpoly)
 # Second argument is indeterminate number.
 
 DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject] );
@@ -145,6 +148,15 @@ DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject, IsInt] );
 # polynomial of a matrix, sorted in ascending order by degree.
 # Second argument is indeterminate number.
 
+DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject] );
+DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject, IsInt] );
+# Returns a record with the following components:
+#  charpoly: characteristic polynomial
+#  irreds:   set of the irreducible factors of the char. poly
+#  mult:     multiplicities of the irreducible factors in the char. poly
+#  minpoly:  minimal polynomial
+#  multmin:  multiplicities of the irreducible factors in the minimal poly
+ 
 DeclareOperation( "RandomizeVector", [IsObject] );
 # Changes the mutable argument to a random vector of the same kind.
 

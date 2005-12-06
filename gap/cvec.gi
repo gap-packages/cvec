@@ -2688,7 +2688,7 @@ InstallMethod( MakeSemiEchelonBasis, "for a semi echelonised matrix",
 
 # Characteristic polynomials:
 
-CVEC_CharacteristicPolynomialFactors := function(m)
+CVEC_CharacteristicPolynomialFactors := function(m,indetnr)
   # m must be square
   local L,b,b2,closed,d,dec,f,facs,fam,i,l,lambda,newlambda,o,p,
         newpiv,pivs,subdim,v,vcopy,zero;
@@ -2733,7 +2733,7 @@ CVEC_CharacteristicPolynomialFactors := function(m)
       l := Unpack(l);
       Add(l,o);
       ConvertToVectorRep(l,Size(f));
-      Add(facs,UnivariatePolynomialByCoefficients(fam,l,1));
+      Add(facs,UnivariatePolynomialByCoefficients(fam,l,indetnr));
       # Add b2 to b:
       Append(b.vectors,b2.vectors);
       Append(b.pivots,b2.pivots);
@@ -2741,17 +2741,32 @@ CVEC_CharacteristicPolynomialFactors := function(m)
   return facs;
 end;
 
-InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat", [IsCMatRep],
+InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat and an indet nr", 
+  [IsCMatRep, IsPosInt],
+  function( m, indetnr )
+    local facs;
+    facs := CVEC_CharacteristicPolynomialFactors(m, indetnr);
+    return rec( poly := Product(facs), factors := facs );
+  end );
+
+InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat", 
+  [IsCMatRep],
   function( m )
     local facs;
-    facs := CVEC_CharacteristicPolynomialFactors(m);
+    facs := CVEC_CharacteristicPolynomialFactors(m, 1);
     return rec( poly := Product(facs), factors := facs );
   end );
 
 InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat", [IsCMatRep],
   function( m )
+    return FactorsOfCharacteristicPolynomial(m,1);
+  end );
+
+InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat and an indet nr", 
+  [IsCMatRep, IsPosInt],
+  function( m, indetnr )
     local f,facs,irrfacs;
-    facs := CVEC_CharacteristicPolynomialFactors(m);
+    facs := CVEC_CharacteristicPolynomialFactors(m,indetnr);
     irrfacs := [];
     for f in facs do
         Append(irrfacs,Factors(f));
@@ -2759,6 +2774,39 @@ InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat", [IsCMatRep],
     Sort(irrfacs);
     return irrfacs;
   end );
+
+CVEC_ActionOnQuotient := function( gens, basis )
+  local dimsubspc, dimfullspc, dimquotspc, diff, zerov, imgens, x, i, k;
+  # INPUT
+  # gens : List of matrices
+  # basis : basis of submodule ie record with fields
+  #         pivots   : integer list of pivot columns
+  #         vectors : matrix of basis in semi-echelon form
+  # OUTPUT
+  # List of matrices representing the action of the module given by 'gens'
+  # on the quotient space induced by 'basis'
+  # NOTES
+  # 
+  dimsubspc := Length( basis.vectors );
+  dimfullspc := Length( basis.vectors[ 1 ] );
+  dimquotspc := dimfullspc - dimsubspc;
+  diff := Difference( [1..dimfullspc], basis.pivots );
+  zerov := ZeroVector( basis.vectors[1], 
+	               dimquotspc ); #prepare vector type
+  imgens := []; # stores result
+  for i in [ 1 .. Length( gens ) ] do
+    imgens[ i ] := CVEC_ZeroMat( dimquotspc, CVecClass(zerov) );
+    # grab rows corresponding to added basis vectors:
+    x := MutableCopyMat(gens[ i ]{ diff }); 
+    for k in [1..Length(x)] do # clean rows with subspace basis
+      CleanRow( basis, x[ k ], false, fail );
+    od;
+    # now remove zero columns
+    CopySubMatrix( x, imgens[ i ], [1..dimquotspc], [1..dimquotspc], 
+                                   diff , [1..dimquotspc] );
+  od;
+  return imgens;
+end;
 
 CVEC_MinimalPolynomial := function(m)
   # m must be square
@@ -2815,11 +2863,11 @@ CVEC_MinimalPolynomial := function(m)
   return poly;
 end;
 
-CVEC_NewCharAndMinimalPolynomial := function( m )
-  local col,deg,f,facs,havedim,i,irreds,l,lastpower,lowbound,lowbounds,mp,mult,
-        multfactoredout,multmin,nrblocks,ns,p,power,targetmult,upbound,x,y;
+CVEC_CharAndMinimalPolynomial := function( m, indetnr )
+  local col,deg,facs,havedim,i,irreds,l,lowbound,lowbounds,mp,mult,
+        multfactoredout,multmin,nrblocks,ns,p,targetmult,upbound,x;
   # First the characteristic polynomial:
-  facs := CVEC_CharacteristicPolynomialFactors(m);
+  facs := CVEC_CharacteristicPolynomialFactors(m,indetnr);
   if Length(facs) = 1 then
       return [facs[1],facs[1]];
   fi;
@@ -2851,72 +2899,104 @@ CVEC_NewCharAndMinimalPolynomial := function( m )
       od;
   od;
   mp := irreds[1]^0;
+  Print("Degrees of irreducible factors of charpoly:\n",
+        List(irreds,DegreeOfLaurentPolynomial),"\n");
   for i in [1..Length(irreds)] do
       deg := DegreeOfLaurentPolynomial(irreds[i]);
       Print("Working on irreducible factor of degree ",deg,"...\n");
       if mult[i] = lowbounds[i] then
-          Print("Factor of degree ",deg," with multiplicity ",mult[i],"\n");
+          Print("Found factor of degree ",deg," with multiplicity ",
+                mult[i],"\n");
           mp := mp * irreds[i]^mult[i];
           multmin[i] := mult[i];
       else
           x := Value(irreds[i],m);
-          y := x;       # in the beginning we go for only one Nullspace
-          lastpower := 0;  
-          power := 1;   # we always have y = x^power
           targetmult := mult[i];      # the multiplicity to reach
           lowbound := lowbounds[i];   # from the calc. of the charpoly
           upbound := targetmult;      # an upper bound
-          Print("Lower bound: ",lowbound," upper bound: ",upbound,"\n");
+          Print("First lower bound: ",lowbound," upper bound: ",upbound,"\n");
           multfactoredout := 0;       # no quotient yet
           # Note that when we divide something out, we adjust targetmult
-          # and record this in multfactoredout
-          while true do
-              Print("Target multiplicity: ",targetmult,"\n");
-              ns := SemiEchelonNullspace(y);
+          # and record this in multfactoredout.
+          # This stores the number of dimensions each Jordan block is
+          # made smaller by our current quotient.
+          # We also adjust lowbound and upbound when we go to a quotient!
+          while true do   # break is used to leave 
+              # This loop tries to determine the size of the largest Jordan
+              # block of the matrix x and either exits with 
+              #    lowbound=upbound=that size
+              # or reduces the problem to a smaller one in some quotient,
+              # thereby adjusting multfactoredout by the number of rows/cols
+              # that are divided away by the quotient and going to the
+              # next iteration.
+              # I.e. in the end the right multiplicity is always equal to
+              #    lowbound+multfactoredout
+
+              # First calculate a nullspace and get some estimates:
+              Print("Target multiplicity: ",targetmult,", already factored ",
+                    "out: ",multfactoredout,"\n");
+              ns := SemiEchelonNullspace(x);
               havedim := Length(ns.vectors);
               Print("Found nullspace of dimension ",havedim,"\n");
               # We have a lower bound for the multiplicity in the minpoly
               # from earlier and one from the number of generalized Jordan 
               # blocks we see:
-              if power = lastpower+1 then
-                  nrblocks := havedim/deg;
-                  lowbound := Maximum(lowbound,
-                      multfactoredout + QuoInt(targetmult+nrblocks-1,nrblocks));
-                  upbound := Minimum(upbound,
-                      multfactoredout + targetmult-nrblocks+1);
-                  Print("Lower bound: ",lowbound," upper bound: ",upbound,"\n");
-                  if lowbound = upbound then break; fi;
-                  lastpower := power;
-                  power := lowbound;
-              else
-                  if havedim = deg * targetmult then break; fi;
-                  # Go one step further:
-                  lastpower := power;
-                  power := power + 1;
-              fi;
+              nrblocks := havedim/deg;   # this is in quotient!
+              # note that lowbound is absolute i.e. in the original space:
+              lowbound := Maximum(lowbound,
+                                  QuoInt(targetmult+nrblocks-1,nrblocks));
+              upbound := Minimum(upbound,targetmult-nrblocks+1);
+              Print("Lower bound: ",lowbound," upper bound: ",upbound,"\n");
+              if lowbound = upbound then break; fi;
 
+              # Now we divide out the nullspace and go to lowbound:
+              lowbound := lowbound-1;   # Adjustment because of quotient!
               Print("Factoring out nullspace of dimension ",havedim," and ",
-                    "going to power ",power,"\n");
-              # Now we want to go to the quotient and to power power:
-              x := CH0P_ActionOnQuotient([x],ns)[1];
-              if lastpower = 1 then
-                  y := x;
-                  y := y^power;
-              else
-                  y := CH0P_ActionOnQuotient([y],ns)[1];
-                  y := y * x^(power-lastpower);
+                    "going to power ",lowbound,"\n");
+              x := CVEC_ActionOnQuotient([x],ns)[1];
+              multfactoredout := multfactoredout + 1;
+              targetmult := targetmult - nrblocks;
+              x := x^lowbound;
+              Print("Target multiplicity: ",targetmult,"\n");
+              ns := SemiEchelonNullspace(x);
+              havedim := Length(ns.vectors);
+              Print("Found nullspace of dimension ",havedim,"\n");
+
+              # Check, whether we have the complete generalized eigenspace:
+              if havedim/deg = targetmult then
+                  # lowbound is correct!
+                  upbound := lowbound;
+                  break;
               fi;
-              targetmult := targetmult - havedim/deg;
-              multfactoredout := lastpower;
+              
+              # Now we want to go to the quotient and redo everything:
+              Print("Factoring out nullspace of dimension ",havedim," and ",
+                    "going to power ",lowbound,"\n");
+              x := CVEC_ActionOnQuotient([x],ns)[1];
+              multfactoredout := multfactoredout + 1 + lowbound;
+              targetmult := targetmult - Length(ns.vectors)/deg;
+              lowbound := 0;   # we do not know anything about this quotient
+              upbound := targetmult;
           od;
-          Print("Done multiplicity is ",lowbound,"\n");
-          mp := mp * irreds[i]^lowbound;
-          multmin[i] := lowbound;
+          Print("Done! Multiplicity is ",lowbound+multfactoredout,"\n");
+          mp := mp * irreds[i]^(lowbound+multfactoredout);
+          multmin[i] := (lowbound+multfactoredout);
       fi;
   od;
   return rec(charpoly := Product(facs), irreds := irreds, mult := mult,
              minpoly := mp, multmin := multmin);
 end;
+
+InstallMethod( MinimalPolynomialOfMatrix, "for a matrix and an indet nr",
+  [IsCMatRep, IsPosInt],
+  function( m, indetnr )
+    return CVEC_CharAndMinimalPolynomial(m,indetnr);
+  end );
+
+InstallMethod( MinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
+  function( m )
+    return CVEC_CharAndMinimalPolynomial(m,1);
+  end );
 
 CVEC_GlueMatrices := function(l)
   # all elements of the list l must be CMats over the same field
@@ -2936,6 +3016,7 @@ CVEC_GlueMatrices := function(l)
   g := Group(List(GeneratorsOfGroup(g),CMat));
   x := PseudoRandom(g);
   return x * m * x^-1;
+  #return m;
 end;
   
 CVEC_MakeJordanBlock := function(f,pol,s)
