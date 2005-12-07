@@ -1665,7 +1665,7 @@ CVEC_CopySubmatrixHorrible := function(src,dst,srows,drows,scols,dcols)
             l2[i2+1] := l2[i2+1] - newrun;
             i1 := i1 + 2;
         elif l1[i1+1] > l2[i2+1] then
-            newrun := l2[i1+1];
+            newrun := l2[i2+1];
             Add(r,l1[i1]);
             Add(r,newrun);
             Add(r,l2[i2]);
