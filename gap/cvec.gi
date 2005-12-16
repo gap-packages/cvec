@@ -1750,6 +1750,31 @@ InstallMethod( CopySubMatrix, "for two cmats and stuff",
     CVEC_CopySubmatrix(src,dst,srows,drows,pos,len,to);
   end );
 
+InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
+  [IsCMatRep and IsMatrix, IsList, IsList],
+  function( mat, rows, cols )
+    local i,l,vcl;
+    vcl := mat!.vecclass;
+    l := 0*[1..Length(rows)+1];
+    if cols = [1..vcl![CVEC_IDX_len]] then
+        for i in [1..Length(rows)] do
+            l[i+1] := ShallowCopy(mat!.rows[rows[i]+1]);
+        od;
+        return CVEC_CMatMaker(l,vcl);
+    elif Length(cols) <> vcl![CVEC_IDX_len] then
+        vcl := CVEC_NewCVecClassSameField(vcl,Length(cols));
+    fi;
+    if cols <> [cols[1]..cols[Length(cols)]] then
+        Error("not yet implemented");
+    fi;
+    for i in [1..Length(rows)] do
+        l[i+1] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
+        CVEC_SLICE(mat!.rows[rows[i]+1],l[i+1],cols[1],Length(cols),1);
+    od;
+    #  FIXME: cols an arbitrary list!!!
+    return CVEC_CMatMaker(l,vcl);
+  end );
+
 # Arithmetic for matrices:
 
 InstallOtherMethod( \+, "for cmats", 
@@ -1972,26 +1997,40 @@ InstallMethod(DefaultFieldOfMatrix,
 
 # The making of good hash functions:
 
-CVEC_HashFunctionForGF2Vectors := function(v,hashlen,bytelen)
-  return HASHKEY_BAG(v,101,8,bytelen) mod hashlen + 1;
+CVEC_HashFunctionForShortGF2Vectors := function(v,data)
+  return NumberFFVector(v,2) mod data[1] + 1;
 end;
 
-CVEC_HashFunctionFor8BitVectors := function(v,hashlen,bytelen)
-  return HASHKEY_BAG(v,101,12,bytelen) mod hashlen + 1;
+CVEC_HashFunctionForShort8BitVectors := function(v,data)
+  return NumberFFVector(v,data[2]) mod data[1] + 1;
 end;
 
-CVEC_HashFunctionForCVecs := function(v,hashlen,bytelen)
-  return HASHKEY_BAG(v,101,4,bytelen) mod hashlen + 1;
+CVEC_HashFunctionForGF2Vectors := function(v,data)
+  return HASHKEY_BAG(v,101,8,data[2]) mod data[1] + 1;
+end;
+
+CVEC_HashFunctionFor8BitVectors := function(v,data)
+  return HASHKEY_BAG(v,101,12,data[2]) mod data[1] + 1;
+end;
+
+CVEC_HashFunctionForCVecs := function(v,data)
+  return HASHKEY_BAG(v,101,4,data[2]) mod data[1] + 1;
 end;
 
 CVEC_MakeHashFunction := function(p,hashlen)
   local bytelen,c,i,q,qq;
   if IsGF2VectorRep(p) then
-      bytelen := QuoInt(Length(p)+7,8);
+      bytelen := QuoInt(Length(p),8);
+      # Note that unfortunately gf2 vectors are not "clean" after their
+      # "official" length, therefore we *must not* use the last, half-used
+      # byte. This inevitably leads to collisions!
       if bytelen = 0 then
-          Error("vector too short!");
+          return rec( func := CVEC_HashFunctionForShortGF2Vectors,
+                      data := [hashlen] );
+      else
+          return rec( func := CVEC_HashFunctionForGF2Vectors,
+                      data := [hashlen,bytelen] );
       fi;
-      return x->CVEC_HashFunctionForGF2Vectors(x,hashlen,bytelen);
   elif Is8BitVectorRep(p) then
       q := Q_VEC8BIT(p);
       qq := q;
@@ -2001,11 +2040,15 @@ CVEC_MakeHashFunction := function(p,hashlen)
           i := i + 1;
       od;
       # i is now the number of field elements per byte
-      bytelen := QuoInt(Length(p)+i-1,i);
+      bytelen := QuoInt(Length(p),i);
+      # Note that unfortunately 8bit vectors are not "clean" after their
+      # "official" length, therefore we *must not* use the last, half-used
+      # byte. This inevitably leads to collisions!
       if bytelen = 0 then
-          Error("vector too short!");
+          return x->CVEC_HashFunctionForShort8BitVectors(x,hashlen,q);
+      else
+          return x->CVEC_HashFunctionFor8BitVectors(x,hashlen,bytelen);
       fi;
-      return x->CVEC_HashFunctionFor8BitVectors(x,hashlen,bytelen);
   elif IsCVecRep(p) then
       c := CVecClass(p);
       bytelen := c![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
@@ -2015,6 +2058,105 @@ CVEC_MakeHashFunction := function(p,hashlen)
   fi;
 end;
 
+InstallMethod( MakeHashFunction, "for compressed gf2 vectors",
+  [IsGF2VectorRep,IsInt],
+  function(p,hashlen)
+    local bytelen;
+    bytelen := QuoInt(Length(p),8);
+    # Note that unfortunately gf2 vectors are not "clean" after their
+    # "official" length, therefore we *must not* use the last, half-used
+    # byte. This inevitably leads to collisions!
+    if bytelen = 0 then
+        return rec( func := CVEC_HashFunctionForShortGF2Vectors,
+                    data := [hashlen] );
+    else
+        return rec( func := CVEC_HashFunctionForGF2Vectors,
+                    data := [hashlen,bytelen] );
+    fi;
+  end );
+
+InstallMethod( MakeHashFunction, "for compressed 8bit vectors",
+  [Is8BitVectorRep,IsInt],
+  function(p,hashlen)
+    local bytelen,i,q,qq;
+    q := Q_VEC8BIT(p);
+    qq := q;
+    i := 0;
+    while qq <= 256 do
+        qq := qq * q;
+        i := i + 1;
+    od;
+    # i is now the number of field elements per byte
+    bytelen := QuoInt(Length(p),i);
+    # Note that unfortunately 8bit vectors are not "clean" after their
+    # "official" length, therefore we *must not* use the last, half-used
+    # byte. This inevitably leads to collisions!
+    if bytelen = 0 then
+        return rec( func := CVEC_HashFunctionForShort8BitVectors,
+                    data := [hashlen,q] );
+    else
+        return rec( func := CVEC_HashFunctionFor8BitVectors,
+                    data := [hashlen,bytelen] );
+    fi;
+  end );
+
+InstallMethod( MakeHashFunction, "for cvecs",
+  [IsCVecRep,IsInt],
+  function(p,hashlen)
+    local bytelen,c;
+    c := CVecClass(p);
+    bytelen := c![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
+    return rec( func := CVEC_HashFunctionForCVecs,
+                data := [hashlen,bytelen] );
+  end );
+
+CVEC_HashFunctionForCMats := function(x,data)
+  local i,res;
+  res := 0;
+  for i in [2..x!.len+1] do
+      res := res + CVEC_HashFunctionForCVecs(x!.rows[i],data);
+  od;
+  return res mod data[1] + 1;
+end;
+
+InstallMethod( MakeHashFunction, "for cmats",
+  [IsCMatRep,IsInt],
+  function(p,hashlen)
+    local bytelen,cl;
+    cl := p!.vecclass;
+    bytelen := cl![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
+    return rec( func := CVEC_HashFunctionForCMats,
+                data := [hashlen,bytelen] );
+  end );
+
+CVEC_HashFunctionForCompressedMats := function(x,data)
+  local i,res;
+  res := 0;
+  for i in [1..Length(x)] do
+      res := res + data[2].func(x[i],data[2].data);
+  od;
+  return res mod data[1] + 1;
+end;
+
+InstallMethod( MakeHashFunction, "for compressed gf2 matrices",
+  [IsGF2MatrixRep,IsInt],
+  function(p,hashlen)
+    local data;
+    data := [hashlen,MakeHashFunction(p[1],hashlen)];
+    return rec( func := CVEC_HashFunctionForCompressedMats,
+                data := data );
+  end );
+
+InstallMethod( MakeHashFunction, "for compressed 8bit matrices",
+  [Is8BitMatrixRep,IsInt],
+  function(p,hashlen)
+    local data;
+    data := [hashlen,MakeHashFunction(p[1],hashlen)];
+    return rec( func := CVEC_HashFunctionForCompressedMats,
+                data := data );
+  end );
+
+    
 #############################################################################
 # Greasing:
 #############################################################################

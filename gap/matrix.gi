@@ -293,6 +293,25 @@ InstallMethod( SemiEchelonNullspace, "for a cmat", [IsCMatRep],
     return SemiEchelonNullspaceX( MutableCopyMat( m ) );
   end );
 
+InstallGlobalFunction( OverviewMat, function(M)
+  local i,j,s,ts,tz,z;
+  z := Length(M);
+  s := Length(M[1]);
+  tz := QuoInt(z+39,40);
+  ts := QuoInt(s+39,40);
+  for i in [1..QuoInt(z+tz-1,tz)] do
+      for j in [1..QuoInt(s+ts-1,ts)] do
+          if IsZero(M{[1+(i-1)*tz..Minimum(i*tz,z)]}
+                     {[1+(j-1)*ts..Minimum(j*ts,s)]}) then
+              Print(".");
+          else
+              Print("*");
+          fi;
+      od;
+      Print("\n");
+  od;
+end );
+
 # Some code to allow code reusage from the GAP library:
 
 # todo:

@@ -167,4 +167,6 @@ DeclareOperation( "SemiEchelonRowsT", [IsObject] );
 DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
 DeclareOperation( "SemiEchelonNullspace", [IsObject] );
 
+DeclareOperation( "MakeHashFunction", [IsObject, IsInt] );
 
+DeclareGlobalFunction( "OverviewMat" );
