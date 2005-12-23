@@ -3387,6 +3387,11 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   }
 }
 
+STATIC Obj CVEC_EQINT(Obj self, Obj a, Obj b)
+{
+    return (EQ( a, b ) ? True : False);
+}
+
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
 /******************************************************************************
@@ -3489,6 +3494,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_CVEC_EQ", 2, "u, v",
     CVEC_EQ,
     "cvec.c:CVEC_EQ" },
+
+  { "CVEC_EQINT", 2, "u, v",
+    CVEC_EQINT,
+    "cvec.c:CVEC_EQINT" },
 
   { "CVEC_CVEC_ISZERO", 1, "u",
     CVEC_ISZERO,

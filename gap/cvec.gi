@@ -1753,7 +1753,7 @@ InstallMethod( CopySubMatrix, "for two cmats and stuff",
 InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
   [IsCMatRep and IsMatrix, IsList, IsList],
   function( mat, rows, cols )
-    local i,l,vcl;
+    local i,j,l,vcl;
     vcl := mat!.vecclass;
     l := 0*[1..Length(rows)+1];
     if cols = [1..vcl![CVEC_IDX_len]] then
@@ -1765,14 +1765,39 @@ InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
         vcl := CVEC_NewCVecClassSameField(vcl,Length(cols));
     fi;
     if cols <> [cols[1]..cols[Length(cols)]] then
-        Error("not yet implemented");
+        for i in [1..Length(rows)] do
+            l[i+1] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
+            # FIXME: This is horribly inefficient!
+            for j in [1..Length(cols)] do
+                l[i+1][j] := mat!.rows[rows[i]+1][cols[j]];
+            od;
+        od;
+    else
+        for i in [1..Length(rows)] do
+            l[i+1] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
+            CVEC_SLICE(mat!.rows[rows[i]+1],l[i+1],cols[1],Length(cols),1);
+        od;
     fi;
-    for i in [1..Length(rows)] do
-        l[i+1] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-        CVEC_SLICE(mat!.rows[rows[i]+1],l[i+1],cols[1],Length(cols),1);
-    od;
-    #  FIXME: cols an arbitrary list!!!
     return CVEC_CMatMaker(l,vcl);
+  end );
+
+InstallMethod( ExtractSubMatrix, "for a compressed gf2 matrix",
+  [IsMatrix and IsGF2MatrixRep, IsList, IsList],
+  function(m, rows, cols)
+    local mm;
+    mm := m{rows}{cols};
+    ConvertToMatrixRep(mm,2);
+    return mm;
+  end );
+
+InstallMethod( ExtractSubMatrix, "for a compressed 8bit matrix",
+  [IsMatrix and Is8BitMatrixRep, IsList, IsList],
+  function(m, rows, cols)
+    local mm,s;
+    mm := m{rows}{cols};
+    s := Size(BaseField(m));
+    ConvertToMatrixRep(mm,s);
+    return mm;
   end );
 
 # Arithmetic for matrices:
@@ -2156,7 +2181,27 @@ InstallMethod( MakeHashFunction, "for compressed 8bit matrices",
                 data := data );
   end );
 
+CVEC_HashFunctionForIntegers := function(x,data)
+  return x mod data[1] + 1;
+end;
+
+InstallMethod( MakeHashFunction, "for integers", [IsInt,IsInt],
+  function(p,hashlen)
+    return rec( func := CVEC_HashFunctionForIntegers, data := [hashlen] );
+  end );
     
+CVEC_HashFunctionForMemory := function(x,data)
+  return data[1](x!.el,data[2]);
+end;
+
+InstallMethod( MakeHashFunction, "for memory objects", 
+  [IsObjWithMemory, IsInt],
+  function(p,hashlen)
+    local hf;
+    hf := MakeHashFunction(p!.el,hashlen);
+    return rec( func := CVEC_HashFunctionForMemory, data := [hf.func,hf.data] );
+  end );
+
 #############################################################################
 # Greasing:
 #############################################################################
