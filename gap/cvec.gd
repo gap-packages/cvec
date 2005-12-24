@@ -102,7 +102,6 @@ DeclareOperation( "UnGreaseMat", [IsCMatRep]);
 # Access to the base field:
 #############################################################################
 
-DeclareOperation( "BaseField", [IsObject] );
 DeclareOperation( "CVecClass", [IsObject] );
 DeclareOperation( "CVecClass", [IsObject, IsInt] );
 DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
@@ -157,16 +156,11 @@ DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject, IsInt] );
 #  minpoly:  minimal polynomial
 #  multmin:  multiplicities of the irreducible factors in the minimal poly
  
-DeclareOperation( "RandomizeVector", [IsObject] );
-# Changes the mutable argument to a random vector of the same kind.
-
 DeclareOperation( "SemiEchelonRowsX", [IsObject] );
 DeclareOperation( "SemiEchelonRows", [IsObject] );
 DeclareOperation( "SemiEchelonRowsTX", [IsObject] );
 DeclareOperation( "SemiEchelonRowsT", [IsObject] );
 DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
 DeclareOperation( "SemiEchelonNullspace", [IsObject] );
-
-DeclareOperation( "MakeHashFunction", [IsObject, IsInt] );
 
 DeclareGlobalFunction( "OverviewMat" );

@@ -1129,29 +1129,7 @@ InstallOtherMethod( ProductCoeffs, "for cvecs",
   return u;
 end);
 
-InstallMethod( RandomizeVector, "for 8bit vectors",
-  [Is8BitVectorRep and IsMutable],
-  function( v )
-    local f,i;
-    f := DefaultField(v);
-    for i in [1..Length(v)] do
-        v[i] := Random(f);
-    od;
-    return v;
-  end );
-
-InstallMethod( RandomizeVector, "for gf2 vectors",
-  [IsGF2VectorRep and IsMutable],
-  function( v )
-    local f,i;
-    f := GF(2);
-    for i in [1..Length(v)] do
-        v[i] := Random(f);
-    od;
-    return v;
-  end );
-
-InstallMethod( RandomizeVector, "for cvecs", [IsCVecRep and IsMutable],
+InstallMethod( Randomize, "for cvecs", [IsCVecRep and IsMutable],
   function( v )
     local cl,d,j,len,li,p,q,size;
     cl := DataType(TypeObj(v));
@@ -1175,6 +1153,33 @@ InstallMethod( RandomizeVector, "for cvecs", [IsCVecRep and IsMutable],
     fi;
     return v;
   end );
+
+InstallMethod( Randomize, "for a cvec and a random source", 
+  [IsCVecRep and IsMutable, IsRandomSource],
+  function( v, rs )
+    local cl,d,j,len,li,p,q,size;
+    cl := DataType(TypeObj(v));
+    len := Length(v);
+    size := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
+    d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+    if size <= 1 then
+        q := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+        li := 0*[1..len];
+        for j in [1..len] do
+            li[j] := Random(rs,0,q-1);
+        od;
+        CVEC_INTREP_TO_CVEC(li,v);
+    else    # big scalars!
+        li := 0*[1..len*d];
+        p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+        for j in [1..len*d] do
+            li[j] := Random(rs,0,p-1);
+        od;
+        CVEC_INTREP_TO_CVEC(li,v);
+    fi;
+    return v;
+  end );
+
 
 #############################################################################
 # Matrices:
@@ -1388,6 +1393,23 @@ CVEC_IdentityMat := function(arg)
   od;
   return CVEC_CMatMaker(l,c);
 end;
+
+InstallMethod( Randomize, "for a cmat", [ IsCMatRep and IsMutable ],
+  function( m )
+    local i;
+    for i in [2..m!.len+1] do
+      Randomize(m!.rows[i]);
+    od;
+  end );
+
+InstallMethod( Randomize, "for a cmat and a random source", 
+  [ IsCMatRep and IsMutable, IsRandomSource ],
+  function( m, rs )
+    local i;
+    for i in [2..m!.len+1] do
+      Randomize(m!.rows[i],rs);
+    od;
+  end );
 
 CVEC_RandomMat := function(arg)
   local c,d,i,j,l,li,p,q,x,y;
@@ -1987,11 +2009,6 @@ InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
     return c![CVEC_IDX_GF];
   end);
     
-InstallMethod( BaseField, "for a compressed matrix",
-  [IsGF2MatrixRep], function(m) return GF(2); end );
-InstallMethod( BaseField, "for a compressed matrix",
-  [Is8BitMatrixRep], function(m) return DefaultFieldOfMatrix(m); end );
-
 InstallMethod(FieldOfMatrixList,
   [IsListOrCollection and IsFFECollCollColl],1,
   function(l)
@@ -2022,110 +2039,11 @@ InstallMethod(DefaultFieldOfMatrix,
 
 # The making of good hash functions:
 
-CVEC_HashFunctionForShortGF2Vectors := function(v,data)
-  return NumberFFVector(v,2) mod data[1] + 1;
-end;
-
-CVEC_HashFunctionForShort8BitVectors := function(v,data)
-  return NumberFFVector(v,data[2]) mod data[1] + 1;
-end;
-
-CVEC_HashFunctionForGF2Vectors := function(v,data)
-  return HASHKEY_BAG(v,101,8,data[2]) mod data[1] + 1;
-end;
-
-CVEC_HashFunctionFor8BitVectors := function(v,data)
-  return HASHKEY_BAG(v,101,12,data[2]) mod data[1] + 1;
-end;
-
 CVEC_HashFunctionForCVecs := function(v,data)
   return HASHKEY_BAG(v,101,4,data[2]) mod data[1] + 1;
 end;
 
-CVEC_MakeHashFunction := function(p,hashlen)
-  local bytelen,c,i,q,qq;
-  if IsGF2VectorRep(p) then
-      bytelen := QuoInt(Length(p),8);
-      # Note that unfortunately gf2 vectors are not "clean" after their
-      # "official" length, therefore we *must not* use the last, half-used
-      # byte. This inevitably leads to collisions!
-      if bytelen = 0 then
-          return rec( func := CVEC_HashFunctionForShortGF2Vectors,
-                      data := [hashlen] );
-      else
-          return rec( func := CVEC_HashFunctionForGF2Vectors,
-                      data := [hashlen,bytelen] );
-      fi;
-  elif Is8BitVectorRep(p) then
-      q := Q_VEC8BIT(p);
-      qq := q;
-      i := 0;
-      while qq <= 256 do
-          qq := qq * q;
-          i := i + 1;
-      od;
-      # i is now the number of field elements per byte
-      bytelen := QuoInt(Length(p),i);
-      # Note that unfortunately 8bit vectors are not "clean" after their
-      # "official" length, therefore we *must not* use the last, half-used
-      # byte. This inevitably leads to collisions!
-      if bytelen = 0 then
-          return x->CVEC_HashFunctionForShort8BitVectors(x,hashlen,q);
-      else
-          return x->CVEC_HashFunctionFor8BitVectors(x,hashlen,bytelen);
-      fi;
-  elif IsCVecRep(p) then
-      c := CVecClass(p);
-      bytelen := c![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
-      return x->CVEC_HashFunctionForCVecs(x,hashlen,bytelen);
-  else
-      Error("No hash function for objects like ",p," available!");
-  fi;
-end;
-
-InstallMethod( MakeHashFunction, "for compressed gf2 vectors",
-  [IsGF2VectorRep,IsInt],
-  function(p,hashlen)
-    local bytelen;
-    bytelen := QuoInt(Length(p),8);
-    # Note that unfortunately gf2 vectors are not "clean" after their
-    # "official" length, therefore we *must not* use the last, half-used
-    # byte. This inevitably leads to collisions!
-    if bytelen = 0 then
-        return rec( func := CVEC_HashFunctionForShortGF2Vectors,
-                    data := [hashlen] );
-    else
-        return rec( func := CVEC_HashFunctionForGF2Vectors,
-                    data := [hashlen,bytelen] );
-    fi;
-  end );
-
-InstallMethod( MakeHashFunction, "for compressed 8bit vectors",
-  [Is8BitVectorRep,IsInt],
-  function(p,hashlen)
-    local bytelen,i,q,qq;
-    q := Q_VEC8BIT(p);
-    qq := q;
-    i := 0;
-    while qq <= 256 do
-        qq := qq * q;
-        i := i + 1;
-    od;
-    # i is now the number of field elements per byte
-    bytelen := QuoInt(Length(p),i);
-    # Note that unfortunately 8bit vectors are not "clean" after their
-    # "official" length, therefore we *must not* use the last, half-used
-    # byte. This inevitably leads to collisions!
-    if bytelen = 0 then
-        return rec( func := CVEC_HashFunctionForShort8BitVectors,
-                    data := [hashlen,q] );
-    else
-        return rec( func := CVEC_HashFunctionFor8BitVectors,
-                    data := [hashlen,bytelen] );
-    fi;
-  end );
-
-InstallMethod( MakeHashFunction, "for cvecs",
+InstallMethod( ChooseHashFunction, "for cvecs",
   [IsCVecRep,IsInt],
   function(p,hashlen)
     local bytelen,c;
@@ -2144,7 +2062,7 @@ CVEC_HashFunctionForCMats := function(x,data)
   return res mod data[1] + 1;
 end;
 
-InstallMethod( MakeHashFunction, "for cmats",
+InstallMethod( ChooseHashFunction, "for cmats",
   [IsCMatRep,IsInt],
   function(p,hashlen)
     local bytelen,cl;
@@ -2152,54 +2070,6 @@ InstallMethod( MakeHashFunction, "for cmats",
     bytelen := cl![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
     return rec( func := CVEC_HashFunctionForCMats,
                 data := [hashlen,bytelen] );
-  end );
-
-CVEC_HashFunctionForCompressedMats := function(x,data)
-  local i,res;
-  res := 0;
-  for i in [1..Length(x)] do
-      res := res + data[2].func(x[i],data[2].data);
-  od;
-  return res mod data[1] + 1;
-end;
-
-InstallMethod( MakeHashFunction, "for compressed gf2 matrices",
-  [IsGF2MatrixRep,IsInt],
-  function(p,hashlen)
-    local data;
-    data := [hashlen,MakeHashFunction(p[1],hashlen)];
-    return rec( func := CVEC_HashFunctionForCompressedMats,
-                data := data );
-  end );
-
-InstallMethod( MakeHashFunction, "for compressed 8bit matrices",
-  [Is8BitMatrixRep,IsInt],
-  function(p,hashlen)
-    local data;
-    data := [hashlen,MakeHashFunction(p[1],hashlen)];
-    return rec( func := CVEC_HashFunctionForCompressedMats,
-                data := data );
-  end );
-
-CVEC_HashFunctionForIntegers := function(x,data)
-  return x mod data[1] + 1;
-end;
-
-InstallMethod( MakeHashFunction, "for integers", [IsInt,IsInt],
-  function(p,hashlen)
-    return rec( func := CVEC_HashFunctionForIntegers, data := [hashlen] );
-  end );
-    
-CVEC_HashFunctionForMemory := function(x,data)
-  return data[1](x!.el,data[2]);
-end;
-
-InstallMethod( MakeHashFunction, "for memory objects", 
-  [IsObjWithMemory, IsInt],
-  function(p,hashlen)
-    local hf;
-    hf := MakeHashFunction(p!.el,hashlen);
-    return rec( func := CVEC_HashFunctionForMemory, data := [hf.func,hf.data] );
   end );
 
 #############################################################################

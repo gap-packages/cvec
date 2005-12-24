@@ -242,7 +242,8 @@ Dependencies := rec(
   # list of pairs [package name, (least) version],  package name is case
   # insensitive, least version denoted with '>=' prepended to version string.
   # without these, the package will not load
-  NeededOtherPackages := [["GAPDoc", ">= 0.99"],["IO", ">=1.0"]],
+  NeededOtherPackages := [["GAPDoc", ">= 0.99"],["IO", ">=1.0"],
+                          ["orb", ">= 0.1"]],
   # without these the package will issue a warning while loading
   # SuggestedOtherPackages := [],
   SuggestedOtherPackages := [],

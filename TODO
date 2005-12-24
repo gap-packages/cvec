@@ -1,7 +1,10 @@
 TODO aufraeumen:
 
   * FactorsOfCharacteristicPolynomial optimieren bei vielen gleichen
-  * Doppelslice
+  * Doppelslice  ==>  geht nicht, habe jetzt ExtractSubMatrix in GAP lib
+    und hier methods
+  * InstallGlobalFunctions ueberall???
+  
 
 Diverses into library:
 
