@@ -842,6 +842,20 @@ InstallMethod( Unpack, "for cvecs", [IsCVecRep],
     return l;
   end);
 
+InstallMethod( Unpack, "for a cmat", [IsCMatRep],
+  function(m)
+    local mm,q,i;
+    mm := [];
+    q := Size(BaseField(m));
+    for i in [2..m!.len+1] do
+        Add(mm,Unpack(m!.rows[i]));
+    od;
+    if q <= 256 and Length(mm) > 0 then
+        ConvertToMatrixRep(mm,q);
+    fi;
+    return mm;
+  end );
+
 InstallMethod( IntegerRep, "for cvecs", [IsCVecRep],
   function(v)
     local d,l,p,q,vcl;
