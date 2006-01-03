@@ -2224,6 +2224,26 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
     return res;
   end);
  
+InstallOtherMethod(\^, "for a cvec and a cmat, without greasing",
+  [IsCVecRep, IsCMatRep and IsMatrix],
+  function(v,m)
+    local i,res,vcl,s,z;
+    vcl := DataType(TypeObj(v));
+    if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
+                          m!.vecclass![CVEC_IDX_fieldinfo])) then
+        Error("\\^: incompatible base fields");
+    fi;
+    if Length(v) <> m!.len then
+        Error("\\^: lengths not equal");
+    fi;
+    res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
+    CVEC_PROD_CVEC_CMAT_NOGREASE(res,v,m!.rows);
+    if not(IsMutable(v)) then
+        MakeImmutable(res);
+    fi;
+    return res;
+  end);
+ 
 InstallOtherMethod(\*, "for a cvec and a greased cmat",
   [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
   function(v,m)
@@ -2235,6 +2255,26 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
     fi;
     if Length(v) <> m!.len then
         Error("\\*: lengths not equal");
+    fi;
+    res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
+    CVEC_PROD_CVEC_CMAT_GREASED(res,v,m!.greasetab,m!.spreadtab,m!.greaselev);
+    if not(IsMutable(v)) then
+        MakeImmutable(res);
+    fi;
+    return res;
+  end);
+ 
+InstallOtherMethod(\^, "for a cvec and a greased cmat",
+  [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
+  function(v,m)
+    local i,res,vcl,l,pos,val;
+    vcl := DataType(TypeObj(v));
+    if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
+                          m!.vecclass![CVEC_IDX_fieldinfo])) then
+        Error("\\^: incompatible base fields");
+    fi;
+    if Length(v) <> m!.len then
+        Error("\\^: lengths not equal");
     fi;
     res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC_PROD_CVEC_CMAT_GREASED(res,v,m!.greasetab,m!.spreadtab,m!.greaselev);
