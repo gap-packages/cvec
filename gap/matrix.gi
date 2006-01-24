@@ -277,6 +277,42 @@ InstallMethod( SemiEchelonRowsTX, "for a cmat", [IsCMatRep],
     b.relations := relations;
     return b;
   end);
+InstallMethod( SemiEchelonRowsXp, "for a cmat", [IsCMatRep],
+  function( m )
+    local b,p,dec,j,v,zerov, decl;
+    b := EmptySemiEchelonBasis( m!.vecclass );
+    zerov := CVEC_New(m!.vecclass);
+    decl := Minimum( 100, m!.len );
+    dec := ZeroVector(zerov,decl);
+    if m!.len = 0 then
+        b.p := MatrixNC( [], dec );
+        return b;
+    fi;
+    p := [];
+    for j in [1..m!.len] do
+        v := m[j];
+        if Length( b.vectors ) >= decl then
+            decl := Maximum( decl + 100, m!.len );
+            dec := ZeroVector( dec, decl );
+        fi;
+        CleanRow(b,v,true,dec);
+        Add( p, ShallowCopy( dec ) );
+    od;
+    decl := Length( b.vectors );
+    j := 1;
+    while j <= Length( p ) and Length( p[ j ] ) < decl do
+        dec := ZeroVector( p[ j ], decl );
+        CopySubVector( p[ j ], dec, [1..Length(p[j])],[1..Length(p[j])] );
+        p[j] := dec;
+        j := j + 1;
+    od;
+    while j <= Length( p ) do
+        p[ j ] := p[ j ]{[1..decl]};
+        j := j + 1;
+    od;
+    b.p := CMat( p );
+    return b;
+  end);
 InstallMethod( SemiEchelonRowsT, "for a cmat", [IsCMatRep],
   function( m )
     return SemiEchelonRowsTX( MutableCopyMat( m ) );
@@ -301,8 +337,8 @@ InstallGlobalFunction( OverviewMat, function(M)
   ts := QuoInt(s+39,40);
   for i in [1..QuoInt(z+tz-1,tz)] do
       for j in [1..QuoInt(s+ts-1,ts)] do
-          if IsZero(M{[1+(i-1)*tz..Minimum(i*tz,z)]}
-                     {[1+(j-1)*ts..Minimum(j*ts,s)]}) then
+          if IsZero(ExtractSubMatrix(M,[1+(i-1)*tz..Minimum(i*tz,z)],
+                                       [1+(j-1)*ts..Minimum(j*ts,s)])) then
               Print(".");
           else
               Print("*");
@@ -311,6 +347,29 @@ InstallGlobalFunction( OverviewMat, function(M)
       Print("\n");
   od;
 end );
+InstallMethod( KroneckerProduct, "for cmats", 
+               [ IsMatrix and IsCMatRep, IsMatrix and IsCMatRep],
+  function( A, B )
+    local rowsA, rowsB, colsA, colsB, newclass, AxB, i, j;
+      rowsA := Length(A);
+      colsA := Length(A[1]);
+      rowsB := Length(B);
+      colsB := Length(B[1]);
+
+      newclass := CVecClass( A[1], colsA * colsB );
+      AxB := CVEC_ZeroMat( rowsA * rowsB, newclass );
+
+      # Cache matrices
+      # not implemented yet
+
+      for i in [1..rowsA] do
+	for j in [1..colsA] do
+	  CopySubMatrix( A[i][j] * B, AxB, 
+			 [ 1 .. rowsB ], [ rowsB * (i-1) + 1 .. rowsB * i ],                             [ 1 .. colsB ], [ (j-1) * colsB + 1 .. j * colsB ] );
+	od;
+      od;
+      return AxB;
+    end );
 
 # Some code to allow code reusage from the GAP library:
 

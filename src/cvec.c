@@ -2634,6 +2634,383 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
     return 0L;
 }
     
+STATIC Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
+/* srcposs and dstposs may each be ranges or dense plain lists. src and
+ * dst must be cvecs over the same field (this is not checked!).
+ * srcposs and dstposs must be lists of integers within 
+ * [1..Length(src)] and [1..Length(dst)] respectively. This is checked.
+ * */
+{
+    PREPARE_clfi(src,cl,fi);
+    PREPARE_clfi(dst,cldst,fidst);
+    PREPARE_d(fi);
+    seqaccess sasrc,sadst;
+    register Int i,j;
+    Word *so = DATA_CVEC(src);
+    Word *de = DATA_CVEC(dst);
+    Int srcl = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+    Int dstl = INT_INTOBJ(ELM_PLIST(cldst,IDX_len));
+    Int a,b;
+
+    if (fi != fidst) {  /* we can do IsIdenticalObj here! */
+        return OurErrorBreakQuit("CVEC_SLICE_LIST: " 
+                                 "cvecs not over same field");
+    }
+
+    if (IS_RANGE(srcposs) && GET_INC_RANGE(srcposs) == 1 &&
+        IS_RANGE(dstposs) && GET_INC_RANGE(dstposs) == 1) {
+        PREPARE_epw(fi);
+        PREPARE_bpe(fi);
+        Int srcpos,len,dstpos;
+        srcpos = GET_LOW_RANGE(srcposs);
+        len = GET_LEN_RANGE(srcposs);
+        dstpos = GET_LOW_RANGE(dstposs);
+        if (srcpos < 1 || srcpos+len-1 > srcl) {
+            return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                     "source positions not valid");
+        }
+        if (dstpos < 1 || dstpos+len-1 > dstl) {
+            return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                     "destination positions not valid");
+        }
+        SLICE_INT(DATA_CVEC(src),DATA_CVEC(dst),srcpos,len,dstpos,
+                  d,elsperword,bitsperel);
+        return 0L;
+    }
+
+    /* In the other case we have to do it the nasty way, we still have
+     * four cases (note that ranges always have length at least 2!): */
+    if (IS_RANGE(srcposs)) {
+        if (IS_RANGE(dstposs)) {
+            Int srcpos = GET_LOW_RANGE(srcposs);
+            Int dstpos = GET_LOW_RANGE(dstposs);
+            Int srcinc = GET_INC_RANGE(srcposs);
+            Int dstinc = GET_INC_RANGE(dstposs);
+            i = GET_LEN_RANGE(srcposs);
+            if (srcpos < 1 || srcpos > srcl || dstpos < 1 || dstpos > dstl ||
+                srcpos + (i-1)*srcinc < 1 || srcpos + (i-1)*srcinc > srcl ||
+                dstpos + (i-1)*dstinc < 1 || dstpos + (i-1)*dstinc > dstl ||
+                i != GET_LEN_RANGE(dstposs)) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                         "index out of range or unequal lengths");
+            }
+            INIT_SEQ_ACCESS(&sasrc,src,srcpos);
+            INIT_SEQ_ACCESS(&sadst,dst,dstpos);
+            while (1) {
+                for (j = 0;j < d;j++) {
+                    SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                }
+                if (--i <= 0) break;
+                srcpos += srcinc;
+                dstpos += dstinc;
+                MOVE_SEQ_ACCESS(&sasrc,srcpos);
+                MOVE_SEQ_ACCESS(&sadst,dstpos);
+            }
+        } else {   /* dstposs is a dense plain list */
+            Int srcpos = GET_LOW_RANGE(srcposs);
+            Int srcinc = GET_INC_RANGE(srcposs);
+            i = GET_LEN_RANGE(srcposs);
+            if (srcpos < 1 || srcpos > srcl ||
+                srcpos + (i-1)*srcinc < 1 || srcpos + (i-1)*srcinc > srcl ||
+                GET_LEN_RANGE(srcposs) != LEN_PLIST(dstposs)) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                          "index out of range or unequal lengths");
+            }
+            INIT_SEQ_ACCESS(&sasrc,src,srcpos);
+            a = INT_INTOBJ(ELM_PLIST(dstposs,1));
+            if (a < 1 || a > dstl) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                         "index out of range");
+            }
+            INIT_SEQ_ACCESS(&sadst,dst,a);
+            i = 1;
+            while (1) {
+                for (j = 0;j < d;j++) {
+                    SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                }
+                if (++i > LEN_PLIST(dstposs)) break;
+                srcpos += srcinc;
+                MOVE_SEQ_ACCESS(&sasrc,srcpos);
+                a = INT_INTOBJ(ELM_PLIST(dstposs,i));
+                if (a < 1 || a > dstl) {
+                    return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                             "index out of range");
+                }
+                MOVE_SEQ_ACCESS(&sadst,a);
+            }
+        }
+    } else {   /* srcposs is a dense plain list */
+        if (IS_RANGE(dstposs)) {
+            Int dstpos = GET_LOW_RANGE(dstposs);
+            Int dstinc = GET_INC_RANGE(dstposs);
+            i = GET_LEN_RANGE(dstposs);
+            if (dstpos < 1 || dstpos > dstl ||
+                dstpos + (i-1)*dstinc < 1 || dstpos + (i-1)*dstinc > dstl ||
+                GET_LEN_RANGE(dstposs) != LEN_PLIST(srcposs)) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                          "index out of range or unequal lengths");
+            }
+            a = INT_INTOBJ(ELM_PLIST(srcposs,1));
+            if (a < 1 || a > srcl) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                         "index out of range");
+            }
+            INIT_SEQ_ACCESS(&sasrc,src,a);
+            INIT_SEQ_ACCESS(&sadst,dst,dstpos);
+            i = 1;
+            while (1) {
+                for (j = 0;j < d;j++) {
+                    SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                }
+                if (++i > LEN_PLIST(srcposs)) break;
+                dstpos += dstinc;
+                MOVE_SEQ_ACCESS(&sadst,dstpos);
+                a = INT_INTOBJ(ELM_PLIST(srcposs,i));
+                if (a < 1 || a > srcl) {
+                    return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                             "index out of range");
+                }
+                MOVE_SEQ_ACCESS(&sasrc,a);
+            }
+        } else {   /* dstposs is a dense plain list */
+            if (LEN_PLIST(srcposs) != LEN_PLIST(dstposs)) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                         "lengths not equal");
+            }
+            if (LEN_PLIST(srcposs) == 0) return 0L;
+            a = INT_INTOBJ(ELM_PLIST(srcposs,1));
+            b = INT_INTOBJ(ELM_PLIST(dstposs,1));
+            if (a < 1 || a > srcl || b < 1 || b > dstl) {
+                return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                         "index out of range");
+            }
+            INIT_SEQ_ACCESS(&sasrc,src,a);
+            INIT_SEQ_ACCESS(&sadst,dst,b);
+            i = 1;
+            while (1) {
+                for (j = 0;j < d;j++) {
+                    SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                }
+                if (++i > LEN_PLIST(srcposs)) break;
+                a = INT_INTOBJ(ELM_PLIST(srcposs,i));
+                b = INT_INTOBJ(ELM_PLIST(dstposs,i));
+                if (a < 1 || a > srcl || b < 1 || b > dstl) {
+                    return OurErrorBreakQuit("CVEC_SLICE_LIST: "
+                                             "index out of range");
+                }
+                MOVE_SEQ_ACCESS(&sasrc,a);
+                MOVE_SEQ_ACCESS(&sadst,b);
+            }
+        }
+    }
+
+    return 0L;
+}
+
+STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst, 
+     Obj srcrows, Obj dstrows, Obj srcposs, Obj dstposs)
+/* srcposs and dstposs may each be ranges or dense plain lists. src and
+ * dst must be lists of cvecs over the same field (this is not checked!).
+ * Position 1 is not used as for cmats. So position 2 is the first row.
+ * srcposs and dstposs must be lists of integers within 
+ * [1..Length(src[1])] and [1..Length(dst[1])] respectively. This is checked.
+ * srcrows and dstrows must be plain lists of integers in the ranges
+ * [1..Length(src)] and [1..Length(dst)] respectively. This is not checked.
+ * src and dst must have exactly one row! */
+{
+    PREPARE_clfi(ELM_PLIST(src,2),cl,fi);
+    PREPARE_clfi(ELM_PLIST(dst,2),cldst,fidst);
+    PREPARE_d(fi);
+    seqaccess sasrc,sadst;
+    register Int i,j;
+    Int srcl = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
+    Int dstl = INT_INTOBJ(ELM_PLIST(cldst,IDX_len));
+    Int a,b;
+    Int k;
+    Word *so,*de;
+
+    if (fi != fidst) {  /* we can do IsIdenticalObj here! */
+        return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: " 
+                                 "cvecs not over same field");
+    }
+
+    if (IS_RANGE(srcposs) && GET_INC_RANGE(srcposs) == 1 &&
+        IS_RANGE(dstposs) && GET_INC_RANGE(dstposs) == 1) {
+        PREPARE_epw(fi);
+        PREPARE_bpe(fi);
+        Int srcpos,len,dstpos;
+        srcpos = GET_LOW_RANGE(srcposs);
+        len = GET_LEN_RANGE(srcposs);
+        dstpos = GET_LOW_RANGE(dstposs);
+        if (srcpos < 1 || srcpos+len-1 > srcl) {
+            return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                     "source positions not valid");
+        }
+        if (dstpos < 1 || dstpos+len-1 > dstl) {
+            return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                     "destination positions not valid");
+        }
+        for (k = 1;k <= LEN_PLIST(srcrows);k++) {
+            so = DATA_CVEC(ELM_PLIST(src,INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+            de = DATA_CVEC(ELM_PLIST(dst,INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
+            SLICE_INT(so,de,srcpos,len,dstpos,d,elsperword,bitsperel);
+        }
+        return 0L;
+    }
+
+    /* In the other case we have to do it the nasty way, we still have
+     * four cases (note that ranges always have length at least 2!): */
+    if (IS_RANGE(srcposs)) {
+        if (IS_RANGE(dstposs)) {
+            Int srcpos = GET_LOW_RANGE(srcposs);
+            Int dstpos = GET_LOW_RANGE(dstposs);
+            Int srcinc = GET_INC_RANGE(srcposs);
+            Int dstinc = GET_INC_RANGE(dstposs);
+            i = GET_LEN_RANGE(srcposs);
+            if (srcpos < 1 || srcpos > srcl || dstpos < 1 || dstpos > dstl ||
+                srcpos + (i-1)*srcinc < 1 || srcpos + (i-1)*srcinc > srcl ||
+                dstpos + (i-1)*dstinc < 1 || dstpos + (i-1)*dstinc > dstl ||
+                i != GET_LEN_RANGE(dstposs)) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                         "index out of range or unequal lengths");
+            }
+            INIT_SEQ_ACCESS(&sasrc,ELM_PLIST(src,2),srcpos);
+            INIT_SEQ_ACCESS(&sadst,ELM_PLIST(dst,2),dstpos);
+            while (1) {
+                for (k = 1;k <= LEN_PLIST(srcrows);k++) {
+                    so = DATA_CVEC(ELM_PLIST(src,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    de = DATA_CVEC(ELM_PLIST(dst,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    for (j = 0;j < d;j++) {
+                        SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                    }
+                }
+                if (--i <= 0) break;
+                srcpos += srcinc;
+                dstpos += dstinc;
+                MOVE_SEQ_ACCESS(&sasrc,srcpos);
+                MOVE_SEQ_ACCESS(&sadst,dstpos);
+            }
+        } else {   /* dstposs is a dense plain list */
+            Int srcpos = GET_LOW_RANGE(srcposs);
+            Int srcinc = GET_INC_RANGE(srcposs);
+            i = GET_LEN_RANGE(srcposs);
+            if (srcpos < 1 || srcpos > srcl ||
+                srcpos + (i-1)*srcinc < 1 || srcpos + (i-1)*srcinc > srcl ||
+                GET_LEN_RANGE(srcposs) != LEN_PLIST(dstposs)) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                          "index out of range or unequal lengths");
+            }
+            INIT_SEQ_ACCESS(&sasrc,ELM_PLIST(src,2),srcpos);
+            a = INT_INTOBJ(ELM_PLIST(dstposs,1));
+            if (a < 1 || a > dstl) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                         "index out of range");
+            }
+            INIT_SEQ_ACCESS(&sadst,ELM_PLIST(dst,2),a);
+            i = 1;
+            while (1) {
+                for (k = 1;k <= LEN_PLIST(srcrows);k++) {
+                    so = DATA_CVEC(ELM_PLIST(src,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    de = DATA_CVEC(ELM_PLIST(dst,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    for (j = 0;j < d;j++) {
+                        SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                    }
+                }
+                if (++i > LEN_PLIST(dstposs)) break;
+                srcpos += srcinc;
+                MOVE_SEQ_ACCESS(&sasrc,srcpos);
+                a = INT_INTOBJ(ELM_PLIST(dstposs,i));
+                if (a < 1 || a > dstl) {
+                    return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                             "index out of range");
+                }
+                MOVE_SEQ_ACCESS(&sadst,a);
+            }
+        }
+    } else {   /* srcposs is a dense plain list */
+        if (IS_RANGE(dstposs)) {
+            Int dstpos = GET_LOW_RANGE(dstposs);
+            Int dstinc = GET_INC_RANGE(dstposs);
+            i = GET_LEN_RANGE(dstposs);
+            if (dstpos < 1 || dstpos > dstl ||
+                dstpos + (i-1)*dstinc < 1 || dstpos + (i-1)*dstinc > dstl ||
+                GET_LEN_RANGE(dstposs) != LEN_PLIST(srcposs)) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                          "index out of range or unequal lengths");
+            }
+            a = INT_INTOBJ(ELM_PLIST(srcposs,1));
+            if (a < 1 || a > srcl) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                         "index out of range");
+            }
+            INIT_SEQ_ACCESS(&sasrc,ELM_PLIST(src,2),a);
+            INIT_SEQ_ACCESS(&sadst,ELM_PLIST(dst,2),dstpos);
+            i = 1;
+            while (1) {
+                for (k = 1;k <= LEN_PLIST(srcrows);k++) {
+                    so = DATA_CVEC(ELM_PLIST(src,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    de = DATA_CVEC(ELM_PLIST(dst,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    for (j = 0;j < d;j++) {
+                        SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                    }
+                }
+                if (++i > LEN_PLIST(srcposs)) break;
+                dstpos += dstinc;
+                MOVE_SEQ_ACCESS(&sadst,dstpos);
+                a = INT_INTOBJ(ELM_PLIST(srcposs,i));
+                if (a < 1 || a > srcl) {
+                    return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                             "index out of range");
+                }
+                MOVE_SEQ_ACCESS(&sasrc,a);
+            }
+        } else {   /* dstposs is a dense plain list */
+            if (LEN_PLIST(srcposs) != LEN_PLIST(dstposs)) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                         "lengths not equal");
+            }
+            if (LEN_PLIST(srcposs) == 0) return 0L;
+            a = INT_INTOBJ(ELM_PLIST(srcposs,1));
+            b = INT_INTOBJ(ELM_PLIST(dstposs,1));
+            if (a < 1 || a > srcl || b < 1 || b > dstl) {
+                return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                         "index out of range");
+            }
+            INIT_SEQ_ACCESS(&sasrc,ELM_PLIST(src,2),a);
+            INIT_SEQ_ACCESS(&sadst,ELM_PLIST(dst,2),b);
+            i = 1;
+            while (1) {
+                for (k = 1;k <= LEN_PLIST(srcrows);k++) {
+                    so = DATA_CVEC(ELM_PLIST(src,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    de = DATA_CVEC(ELM_PLIST(dst,
+                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                    for (j = 0;j < d;j++) {
+                        SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
+                    }
+                }
+                if (++i > LEN_PLIST(srcposs)) break;
+                a = INT_INTOBJ(ELM_PLIST(srcposs,i));
+                b = INT_INTOBJ(ELM_PLIST(dstposs,i));
+                if (a < 1 || a > srcl || b < 1 || b > dstl) {
+                    return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: "
+                                             "index out of range");
+                }
+                MOVE_SEQ_ACCESS(&sasrc,a);
+                MOVE_SEQ_ACCESS(&sadst,b);
+            }
+        }
+    }
+
+    return 0L;
+}
+
 STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
 {
     PREPARE_clfi(v,cl,fi);
@@ -3546,6 +3923,14 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_SLICE", 5, "src, dst, srcpos, len, dstpos",
     SLICE,
     "cvec.c:SLICE" },
+
+  { "CVEC_SLICE_LIST", 4, "src, dst, srcposs, dstposs",
+    SLICE_LIST,
+    "cvec.c:SLICE_LIST" },
+
+  { "CVEC_COPY_SUBMATRIX", 6, "src, dst, srcrows, dstrows, srcposs, dstposs",
+    COPY_SUBMATRIX,
+    "cvec.c:COPY_SUBMATRIX" },
 
   { "CVEC_CVEC_TO_EXTREP", 2, "v, s",
     CVEC_TO_EXTREP,

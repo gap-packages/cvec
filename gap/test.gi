@@ -626,6 +626,284 @@ CVEC.TEST.SLICE := function(p,d)
   od;
 end;
 
+CVEC.TEST.SLICELIST := function(p,d)
+  local c,dstposs,f,i,j,l,len,li,one,po,q,srcposs,v,w;
+  q := p^d;
+  l := 256;
+  f := GF(p,d);
+  c := CVEC_NewCVecClass(p,d,l);
+  v := CVec(0*[1..l]+1,c);
+  one := v[1];
+  for i in [1..l] do
+      v[i] := Random(f);
+  od;
+  Print("Testing lists for srcposs and dstposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      srcposs := List([1..len],i->Random(1,256));
+      li := [1..l];
+      dstposs := [];
+      for j in [1..len] do
+          po := Random(1,Length(li));
+          Add(dstposs,Remove(li,po));
+      od;
+      w := CVEC_New(c);
+      CVEC_SLICE_LIST(v,w,srcposs,dstposs);
+      for j in [1..Length(li)] do
+          if not(IsZero(w[li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+      for j in [1..len] do
+          if w[dstposs[j]] <> v[srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+  od;
+  Print("Testing list for srcposs and range for dstposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      srcposs := List([1..len],i->Random(1,256));
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          dstposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          dstposs := [po,po-1..po-len+1];
+      fi;
+      li := Difference([1..l],Set(dstposs));
+      w := CVEC_New(c);
+      CVEC_SLICE_LIST(v,w,srcposs,dstposs);
+      for j in [1..Length(li)] do
+          if not(IsZero(w[li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+      for j in [1..len] do
+          if w[dstposs[j]] <> v[srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+  od;
+  Print("Testing list for dstposs and range for srcposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          srcposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          srcposs := [po,po-1..po-len+1];
+      fi;
+      li := [1..l];
+      dstposs := [];
+      for j in [1..len] do
+          po := Random(1,Length(li));
+          Add(dstposs,Remove(li,po));
+      od;
+      w := CVEC_New(c);
+      CVEC_SLICE_LIST(v,w,srcposs,dstposs);
+      for j in [1..Length(li)] do
+          if not(IsZero(w[li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+      for j in [1..len] do
+          if w[dstposs[j]] <> v[srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+  od;
+  Print("Testing ranges for srcposs and dstposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          srcposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          srcposs := [po,po-1..po-len+1];
+      fi;
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          dstposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          dstposs := [po,po-1..po-len+1];
+      fi;
+      li := Difference([1..l],Set(dstposs));
+      w := CVEC_New(c);
+      CVEC_SLICE_LIST(v,w,srcposs,dstposs);
+      for j in [1..Length(li)] do
+          if not(IsZero(w[li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+      for j in [1..len] do
+          if w[dstposs[j]] <> v[srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect v, w, srcposs, dstposs");
+          fi;
+      od;
+  od;
+end;
+
+CVEC.TEST.COPYSUBMATRIX := function(p,d)
+  local c,dstposs,f,i,ii,j,l,len,li,m,one,po,q,srcposs,v,w;
+  q := p^d;
+  l := 256;
+  f := GF(p,d);
+  c := CVEC_NewCVecClass(p,d,l);
+  m := MatrixNC([],CVEC_New(c));
+  for ii in [1..3] do
+      v := CVec(0*[1..l]+1,c);
+      one := v[1];
+      for i in [1..l] do
+          v[i] := Random(f);
+      od;
+      Add(m,v);
+  od;
+  Print("Testing lists for srcposs and dstposs...\n");
+  for i in [1..1000] do   # a randomized test
+      w := ZeroMutable(m);
+      len := Random(1,l);
+      srcposs := List([1..len],i->Random(1,256));
+      li := [1..l];
+      dstposs := [];
+      for j in [1..len] do
+          po := Random(1,Length(li));
+          Add(dstposs,Remove(li,po));
+      od;
+      CopySubMatrix(m,w,[3,2,1],[3,2,1],srcposs,dstposs);
+      for ii in [1..3] do
+        for j in [1..Length(li)] do
+          if not(IsZero(w[ii][li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+      for ii in [1..3] do
+        for j in [1..len] do
+          if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+  od;
+  Print("Testing list for srcposs and range for dstposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      srcposs := List([1..len],i->Random(1,256));
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          dstposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          dstposs := [po,po-1..po-len+1];
+      fi;
+      li := Difference([1..l],Set(dstposs));
+      w := ZeroMutable(m);
+      CopySubMatrix(m,w,[3,2,1],[3,2,1],srcposs,dstposs);
+      for ii in [1..3] do
+        for j in [1..Length(li)] do
+          if not(IsZero(w[ii][li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+      for ii in [1..3] do
+        for j in [1..len] do
+          if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+  od;
+  Print("Testing list for dstposs and range for srcposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          srcposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          srcposs := [po,po-1..po-len+1];
+      fi;
+      li := [1..l];
+      dstposs := [];
+      for j in [1..len] do
+          po := Random(1,Length(li));
+          Add(dstposs,Remove(li,po));
+      od;
+      w := ZeroMutable(m);
+      CopySubMatrix(m,w,[1,2,3],[1,2,3],srcposs,dstposs);
+      for ii in [1..3] do
+        for j in [1..Length(li)] do
+          if not(IsZero(w[ii][li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+      for ii in [1..3] do
+        for j in [1..len] do
+          if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+  od;
+  Print("Testing ranges for srcposs and dstposs...\n");
+  for i in [1..1000] do   # a randomized test
+      len := Random(1,l);
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          srcposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          srcposs := [po,po-1..po-len+1];
+      fi;
+      if Random(0,1) = 0 then
+          po := Random(1,l-len+1);
+          dstposs := [po..po+len-1];
+      else
+          po := Random(len,l);
+          dstposs := [po,po-1..po-len+1];
+      fi;
+      li := Difference([1..l],Set(dstposs));
+      w := ZeroMutable(m);
+      CopySubMatrix(m,w,[1..3],[1..3],srcposs,dstposs);
+      for ii in [1..3] do
+        for j in [1..Length(li)] do
+          if not(IsZero(w[ii][li[j]])) then
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+      for ii in [1..3] do
+        for j in [1..len] do
+          if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+                  Error("You can inspect m, w, srcposs, dstposs");
+          fi;
+        od;
+      od;
+  od;
+end;
+
 CVEC.TEST.IO := function(p,d)
   local l,m,mm,n,q;
   q := p^d;
@@ -890,6 +1168,32 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.SLICE(3,3);
   Print("Testing SLICE 2^4 (bitsperel=1)...\r");
   CVEC.TEST.SLICE(2,4);
+  Print("Testing SLICE_LIST 2^1 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE_LIST(2,1);
+  Print("Testing SLICE_LIST 3^1 (bitsperel=3)...\r");
+  CVEC.TEST.SLICE_LIST(3,1);
+  Print("Testing SLICE_LIST 5^1 (bitsperel=4)...\r");
+  CVEC.TEST.SLICE_LIST(5,1);
+  Print("Testing SLICE_LIST 11^1 (bitsperel=5)...\r");
+  CVEC.TEST.SLICE_LIST(11,1);
+  Print("Testing SLICE_LIST 19^1 (bitsperel=6)...\r");
+  CVEC.TEST.SLICE_LIST(19,1);
+  Print("Testing SLICE_LIST 37^1 (bitsperel=7)...\r");
+  CVEC.TEST.SLICE_LIST(37,1);
+  Print("Testing SLICE_LIST 101^1 (bitsperel=8)...\r");
+  CVEC.TEST.SLICE_LIST(101,1);
+  Print("Testing SLICE_LIST 2^2 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE_LIST(2,2);
+  Print("Testing SLICE_LIST 3^2 (bitsperel=3)...\r");
+  CVEC.TEST.SLICE_LIST(3,2);
+  Print("Testing SLICE_LIST 5^2 (bitsperel=4)...\r");
+  CVEC.TEST.SLICE_LIST(5,2);
+  Print("Testing SLICE_LIST 2^3 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE_LIST(2,3);
+  Print("Testing SLICE_LIST 3^3 (bitsperel=3)...\r");
+  CVEC.TEST.SLICE_LIST(3,3);
+  Print("Testing SLICE_LIST 2^4 (bitsperel=1)...\r");
+  CVEC.TEST.SLICE_LIST(2,4);
   CVEC.TEST.ALLCHEAP("IO", CVEC.TEST.IO);
   CVEC.TEST.ALLCONWAY("SCALAR_IN", CVEC.TEST.SCALAR_IN);
   Print("Testing SCALAR_IN 65537^1...\r");

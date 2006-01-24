@@ -159,6 +159,7 @@ DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject, IsInt] );
 DeclareOperation( "SemiEchelonRowsX", [IsObject] );
 DeclareOperation( "SemiEchelonRows", [IsObject] );
 DeclareOperation( "SemiEchelonRowsTX", [IsObject] );
+DeclareOperation( "SemiEchelonRowsXp", [IsObject] );
 DeclareOperation( "SemiEchelonRowsT", [IsObject] );
 DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
 DeclareOperation( "SemiEchelonNullspace", [IsObject] );

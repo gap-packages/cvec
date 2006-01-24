@@ -998,22 +998,23 @@ CVEC_Slice := function(src,dst,srcpos,len,dstpos)
   CVEC_SLICE(src,dst,srcpos,len,dstpos);
 end;
 
-InstallOtherMethod( \{\}, "for a cvec and a range", [IsCVecRep, IsRangeRep],
+CVEC_SliceList := function(src,dst,srcposs,dstposs)
+  if not(IsMutable(dst)) then
+      Error("CVEC_SliceList: destination vector immutable");
+      return;
+  fi;
+  CVEC_SLICE_LIST(src,dst,srcposs,dstposs);
+end;
+
+InstallOtherMethod( \{\}, "for a cvec and a range", 
+  [IsCVecRep, IsHomogeneousList and IsRangeRep],
   function(v,r)
     # note that ranges in IsRangeRep always have length at least 2!
-    local c,cl,first,inc,last,len,w;
-    first := r[1];
-    last := r[Length(r)];
-    inc := (last-first)/(Length(r)-1);
-    if inc <> 1 then
-        Error("CVEC_{} : slicing only for ranges with increment 1 available");
-        return;
-    fi;
+    local c,cl,w;
     cl := DataType(TypeObj(v));
-    len := last+1-first;
-    c := CVEC_NewCVecClassSameField(cl,len);
+    c := CVEC_NewCVecClassSameField(cl,Length(r));
     w := CVEC_NEW(c,c![CVEC_IDX_type]);
-    CVEC_SLICE(v,w,first,len,1);
+    CVEC_SLICE_LIST(v,w,r,[1..Length(r)]);
     if not(IsMutable(v)) then
         MakeImmutable(w);
     fi;
@@ -1023,73 +1024,25 @@ InstallOtherMethod( \{\}, "for a cvec and a range", [IsCVecRep, IsRangeRep],
 InstallOtherMethod( \{\}, "for a cvec and a list", 
   [IsCVecRep, IsHomogeneousList],
   function(v,l)
-    local c,cl,first,inc,last,len,w;
-    if Length(l) = 0 then
-        first := 1;
-        last := 0;
-    elif Length(l) = 1 then
-        first := l[1];
-        last := l[1];
-    else
-        first := l[1];
-        last := l[Length(l)];
-        inc := (last-first)/(Length(l)-1);
-        if not(IsRange(l)) or inc <> 1 then
-          Error("CVEC_{} : slicing only for ranges with increment 1 available");
-          return;
-        fi;
-    fi;
+    local c,cl,w;
     cl := DataType(TypeObj(v));
-    len := last+1-first;
-    c := CVEC_NewCVecClassSameField(cl,len);
+    c := CVEC_NewCVecClassSameField(cl,Length(l));
     w := CVEC_NEW(c,c![CVEC_IDX_type]);
-    if len > 0 then CVEC_SLICE(v,w,first,len,1); fi;
+    CVEC_SLICE_LIST(v,w,l,[1..Length(l)]);
     if not(IsMutable(v)) then
         MakeImmutable(w);
     fi;
+
     return w;
   end);
 
 InstallOtherMethod( CopySubVector, "for two cvecs and stuff",
-  [IsCVecRep, IsCVecRep and IsMutable, 
-   IsRangeRep and IsList, IsRangeRep and IsList],
+  [IsCVecRep, IsCVecRep and IsMutable, IsHomogeneousList, IsHomogeneousList],
   function(src,dst,scols,dcols)
-    local len,pos,to;
-    if Length(scols) <> Length(dcols) then
-        Error("CVEC_CopySubVector: ranges must have equal length");
-        return;
-    fi;
-    if Length(scols) = 0 then return; fi;
-    pos := scols[1];
-    len := Length(scols);
-    to := dcols[1];
-    CVEC_Slice(src,dst,pos,len,to);
+    if Length(scols) = 0 then return; fi;  # a little speedup
+    CVEC_SLICE_LIST(src,dst,scols,dcols);
   end );
 
-InstallMethod( CopySubVector, "for two cvecs and stuff",
-  [IsCVecRep, IsCVecRep and IsMutable, IsList, IsList],
-  function(src,dst,scols,dcols)
-    local len,pos,to,i;
-    if Length(scols) <> Length(dcols) then
-        Error("CVEC_CopySubVector: ranges must have equal length");
-        return;
-    fi;
-    if Length(scols) = 0 then return; fi;
-
-    pos := scols[1];
-    len := Length(scols);
-    to := dcols[1];
-    if scols <> [pos..pos+len-1] or     # Check for rangeness:
-       dcols <> [to..to+len-1] then
-        # This is horrible:
-        for i in [1..Length(scols)] do
-            dst[dcols[i]] := src[scols[i]];
-        od;
-        return;
-    fi;
-    CVEC_Slice(src,dst,pos,len,to);
-  end );
-    
 # Note that slicing assignment is intentionally not supported, because
 # this will usually be used only by inefficient code. Use CVEC_Slice
 # or even CVEC_SLICE instead.
@@ -1653,7 +1606,7 @@ CVEC_CopySubmatrix := function(src,dst,srcli,dstli,srcpos,len,dstpos)
   od;
 end;
 
-CVEC_CopySubmatrixHorrible := function(src,dst,srows,drows,scols,dcols)
+CVEC_CopySubmatrixUgly := function(src,dst,srows,drows,scols,dcols)
   # This handles the ugly case that scols and dcols are no ranges
   # with increment 1, we try to optimize using SLICE. We already
   # know, that they have equal nonzero length:
@@ -1734,65 +1687,88 @@ end;
 
 InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
-   IsList,IsList,IsList and IsRangeRep,IsList and IsRangeRep],
+   IsHomogeneousList,IsHomogeneousList,IsHomogeneousList,IsHomogeneousList],
   function( src,dst,srows,drows,scols,dcols )
-    local len,pos,to,i;
-    if Length(scols) <> Length(dcols) then
-        Error("CVEC_CopySubMatrix: ranges must have equal length");
-        return;
+    if Length(srows) <> Length(drows) then
+        Error("CVEC_CopySubMatrix: row lists must have equal length");
     fi;
-    if Length(scols) = 0 then return; fi;
-
-    pos := scols[1];
-    len := Length(scols);
-    to := dcols[1];
-    if scols[len] <> pos + len - 1 or
-       dcols[len] <> to + len - 1 then
-        # we do it by hand - horrible!
-        if Length(srows) <> Length(drows) then
-            Error("CVEC_CopySubMatrix: ranges must have same length");
-        else
-            CVEC_CopySubmatrixHorrible(src,dst,srows,drows,scols,dcols);
-        fi;
-        return;
+    if Length(scols) = 0 or Length(srows) = 0 then return; fi;
+    if not(ForAll(srows,x->x >= 1 and x <= src!.len) and
+           ForAll(drows,x->x >= 1 and x <= dst!.len)) then
+        Error("CVEC_CopySubMatrix: row indices out of range");
     fi;
-    CVEC_CopySubmatrix(src,dst,srows,drows,pos,len,to);
+    # These tests ensure that both matrices have at least one row!
+    # Not make sure that srows and drows are plain lists:
+    if IsRangeRep(srows) then
+        srows := 1*srows;  # unpack it!
+    fi;
+    if IsRangeRep(drows) then
+        drows := 1*drows;  # unpack it!
+    fi;
+    CVEC_COPY_SUBMATRIX(src!.rows,dst!.rows,srows,drows,scols,dcols);
   end );
 
-InstallMethod( CopySubMatrix, "for two cmats and stuff",
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
-   IsList,IsList,IsList,IsList],
-  function( src,dst,srows,drows,scols,dcols )
-    local len,pos,to,i;
-    if Length(scols) <> Length(dcols) then
-        Error("CVEC_CopySubmatrix: ranges must have equal length");
-        return;
-    fi;
-    if Length(scols) = 0 then return; fi;
+#InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
+#  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
+#   IsList,IsList,IsList and IsRangeRep,IsList and IsRangeRep],
+#  function( src,dst,srows,drows,scols,dcols )
+#    local len,pos,to,i;
+#    if Length(scols) <> Length(dcols) then
+#        Error("CVEC_CopySubMatrix: ranges must have equal length");
+#        return;
+#    fi;
+#    if Length(scols) = 0 then return; fi;
+#
+#    pos := scols[1];
+#    len := Length(scols);
+#    to := dcols[1];
+#    if scols[len] <> pos + len - 1 or
+#       dcols[len] <> to + len - 1 then
+#        # we do it by hand - horrible!
+#        if Length(srows) <> Length(drows) then
+#            Error("CVEC_CopySubMatrix: ranges must have same length");
+#        else
+#            CVEC_CopySubmatrixHorrible(src,dst,srows,drows,scols,dcols);
+#        fi;
+#        return;
+#    fi;
+#    CVEC_CopySubmatrix(src,dst,srows,drows,pos,len,to);
+#  end );
 
-    pos := scols[1];
-    len := Length(scols);
-    to := dcols[1];
-    if scols <> [pos..pos+len-1] or     # Check for rangeness:
-       dcols <> [to..to+len-1] then
-        # we do it by hand - horrible!
-        if Length(srows) <> Length(drows) then
-            Error("CVEC_CopySubMatrix: ranges must have same length");
-        else
-            CVEC_CopySubmatrixHorrible(src,dst,srows,drows,scols,dcols);
-        fi;
-        return;
-    fi;
-    CVEC_CopySubmatrix(src,dst,srows,drows,pos,len,to);
-  end );
+#InstallMethod( CopySubMatrix, "for two cmats and stuff",
+#  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
+#   IsList,IsList,IsList,IsList],
+#  function( src,dst,srows,drows,scols,dcols )
+#    local len,pos,to,i;
+#    if Length(scols) <> Length(dcols) then
+#        Error("CVEC_CopySubmatrix: ranges must have equal length");
+#        return;
+#    fi;
+#    if Length(scols) = 0 then return; fi;
+#
+#    pos := scols[1];
+#    len := Length(scols);
+#    to := dcols[1];
+#    if scols <> [pos..pos+len-1] or     # Check for rangeness:
+#       dcols <> [to..to+len-1] then
+#        # we do it by hand - horrible!
+#        if Length(srows) <> Length(drows) then
+#            Error("CVEC_CopySubMatrix: ranges must have same length");
+#        else
+#            CVEC_CopySubmatrixHorrible(src,dst,srows,drows,scols,dcols);
+#        fi;
+#        return;
+#    fi;
+#    CVEC_CopySubmatrix(src,dst,srows,drows,pos,len,to);
+#  end );
 
 InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
-  [IsCMatRep and IsMatrix, IsList, IsList],
+  [IsCMatRep and IsMatrix, IsHomogeneousList, IsHomogeneousList],
   function( mat, rows, cols )
-    local i,j,l,vcl;
+    local i,l,res,vcl;
     vcl := mat!.vecclass;
-    l := 0*[1..Length(rows)+1];
     if cols = [1..vcl![CVEC_IDX_len]] then
+        l := 0*[1..Length(rows)+1];
         for i in [1..Length(rows)] do
             l[i+1] := ShallowCopy(mat!.rows[rows[i]+1]);
         od;
@@ -1800,21 +1776,19 @@ InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
     elif Length(cols) <> vcl![CVEC_IDX_len] then
         vcl := CVEC_NewCVecClassSameField(vcl,Length(cols));
     fi;
-    if cols <> [cols[1]..cols[Length(cols)]] then
-        for i in [1..Length(rows)] do
-            l[i+1] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-            # FIXME: This is horribly inefficient!
-            for j in [1..Length(cols)] do
-                l[i+1][j] := mat!.rows[rows[i]+1][cols[j]];
-            od;
-        od;
-    else
-        for i in [1..Length(rows)] do
-            l[i+1] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-            CVEC_SLICE(mat!.rows[rows[i]+1],l[i+1],cols[1],Length(cols),1);
-        od;
+    if not(ForAll(rows,x->x >= 1 and x <= mat!.len)) then
+        Error("CVEC_ExtractSubMatrix: row indices out of range");
+        return;
     fi;
-    return CVEC_CMatMaker(l,vcl);
+    # Make rows a plain list:
+    res := CVEC_ZeroMat(Length(rows),vcl);
+    if Length(rows) = 0 then return res; fi;
+    if IsRangeRep(rows) then
+        rows := 1*rows;
+    fi;
+    CVEC_COPY_SUBMATRIX( mat!.rows, res!.rows,rows,1*[1..Length(rows)],
+                         cols, [1..Length(cols)] );
+    return res;
   end );
 
 InstallMethod( ExtractSubMatrix, "for a compressed gf2 matrix",
@@ -2292,7 +2266,7 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
         Error("\\*: incompatible base fields");
     fi;
     if m!.vecclass![CVEC_IDX_len] <> n!.len then
-        Error("\\*: lengths not fitting");
+        Error("\\*: lengths not matching");
     fi;
     # First make a new matrix:
     l := 0*[1..m!.len+1];
@@ -2335,7 +2309,7 @@ InstallOtherMethod(\*, "for two cmats, second one greased",
         Error("\\*: incompatible base fields");
     fi;
     if m!.vecclass![CVEC_IDX_len] <> n!.len then
-        Error("\\*: lengths not fitting");
+        Error("\\*: lengths not matching");
     fi;
     # First make a new matrix:
     l := 0*[1..m!.len+1];
@@ -2764,13 +2738,15 @@ InstallMethod( CleanRow,
 
 InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsObject],
   function( vec )
-    return rec( vectors := MatrixNC([],vec),pivots := [],helper := vec{[1]} );
+    return rec( vectors := MatrixNC([],vec),pivots := [],
+                helper := ZeroVector(vec,1) );
     # The helper is needed for the kernel cleaner for CVecs
   end );
 
 InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsCVecRep],
   function( vec )
-    return rec( vectors := MatrixNC([],vec),pivots := [],helper := vec{[1]} );
+    return rec( vectors := MatrixNC([],vec),pivots := [],
+                helper := ZeroVector(vec,1) );
     # The helper is needed for the kernel cleaner for CVecs
   end );
 
@@ -3123,7 +3099,7 @@ CVEC_GlueMatrices := function(l)
   pos := 1;
   for i in [1..Length(l)] do
       CopySubMatrix(l[i],m,[1..Length(l[i])],[pos..pos+Length(l[i])-1],
-                    [1..Length(l[i])],[pos..pos+Length(l[i])-1]);
+                           [1..Length(l[i])],[pos..pos+Length(l[i])-1]);
       pos := pos + Length(l[i]);
   od;
   Display(m);
