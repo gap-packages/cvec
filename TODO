@@ -1,8 +1,6 @@
 TODO aufraeumen:
 
   * FactorsOfCharacteristicPolynomial optimieren bei vielen gleichen
-  * Doppelslice  ==>  geht nicht, habe jetzt ExtractSubMatrix in GAP lib
-    und hier methods
   * InstallGlobalFunctions ueberall???
   
 
@@ -18,11 +16,6 @@ Diverses into library:
 
 Tasks to do:
 
-  * Bug in matrix product
-  * Bug in tests for ALLCONWAY (too much memory)
-  * BENCH.ADDOLD scheint nicht zu gehen
-  * Test fuer LazyGrease
-  * Random Vectors "RandomVec", (--> like matrices with one row)
   * matrix.g{d,i} look through for usability
   * test DeterminantMat
   * Documentation for matrices, run through pdf doc.
@@ -35,8 +28,6 @@ Tasks to do:
 Ideas for improvement:
 
   * Make integers as scalars behave like mod p or like p-adic expansion?
-  * Make CopySubmatrix an operation?
-  * Is -m!.rows a good way for AdditiveInverse of Matrix?
 
 Future plans:
 

@@ -590,10 +590,13 @@ InstallOtherMethod( AdditiveInverseSameMutability, "for cvecs", [IsCVecRep],
 # Multiplication of vectors by scalars:
 
 CVEC_VECTOR_TIMES_SCALAR := function(v,s)
+    # The scalar here must already be run through CVEC_HandleScalar 
+    # if necessary! Of course, integers and FFEs in internal representation
+    # of course is allowed.
     local u,vcl;
     vcl := DataType(TypeObj(v));
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-    CVEC_MUL2(u,v,CVEC_HandleScalar(vcl,s));
+    CVEC_MUL2(u,v,s);
     if not(IsMutable(v)) then MakeImmutable(u); fi;
     return u;
   end;
@@ -1815,14 +1818,18 @@ InstallMethod( ExtractSubMatrix, "for a compressed 8bit matrix",
 InstallOtherMethod( \+, "for cmats", 
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
-    local l,res;
+    local l,res,i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
         Error("\\+: cmats not compatible");
     fi;
     if m!.len <> n!.len then
         Error("\\+: cmats do not have equal length");
     fi;
-    l := m!.rows + n!.rows;
+    l := 0*[1..m!.len+1];
+    for i in [2..m!.len+1] do
+	l[i] := ShallowCopy(m!.rows[i]);
+	CVEC_ADD2(l[i],n!.rows[i],0,0);
+    od;
     res := CVEC_CMatMaker(l,m!.vecclass);
     if not(IsMutable(m)) and not(IsMutable(n)) then
         MakeImmutable(res);
@@ -1833,14 +1840,19 @@ InstallOtherMethod( \+, "for cmats",
 InstallOtherMethod( \-, "for cmats", 
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
-    local l,res;
+    local l,res,p,i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
         Error("\\-: cmats not compatible");
     fi;
     if m!.len <> n!.len then
         Error("\\-: cmats do not have equal length");
     fi;
-    l := m!.rows - n!.rows;
+    p := m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    l := 0*[1..m!.len+1];
+    for i in [2..m!.len+1] do
+	l[i] := ShallowCopy(m!.rows[i]);
+	CVEC_ADDMUL(l[i],n!.rows[i],p-1,0,0);
+    od;
     res := CVEC_CMatMaker(l,m!.vecclass);
     if not(IsMutable(m)) and not(IsMutable(n)) then
         MakeImmutable(res);
@@ -1851,8 +1863,11 @@ InstallOtherMethod( \-, "for cmats",
 InstallOtherMethod( AdditiveInverseSameMutability, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m)
-    local l,res;
-    l := -m!.rows;
+    local l,res,i;
+    l := 0*[1..m!.len+1];
+    for i in [2..m!.len+1] do
+	l[i] := -m!.rows[i];
+    od;
     res := CVEC_CMatMaker(l,m!.vecclass);
     if not(IsMutable(m)) then
         MakeImmutable(res);
@@ -1862,8 +1877,11 @@ InstallOtherMethod( AdditiveInverseSameMutability, "for a cmat",
 InstallOtherMethod( AdditiveInverseMutable, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m)
-    local l;
-    l := -m!.rows;
+    local l,i;
+    l := 0*[1..m!.len+1];
+    for i in [2..m!.len+1] do
+	l[i] := AdditiveInverseMutable(m!.rows[i]);
+    od;
     return CVEC_CMatMaker(l,m!.vecclass);
   end);
 
@@ -1935,7 +1953,10 @@ InstallOtherMethod( OneSameMutability, "for a cmat",
 CVEC_MATRIX_TIMES_SCALAR := function(m,s)
     local i,l,res;
     l := 0*[1..m!.len+1];
-    for i in [2..m!.len+1] do l[i] := s * m!.rows[i]; od;
+    s := CVEC_HandleScalar(m!.vecclass,s);
+    for i in [2..m!.len+1] do 
+        l[i] := CVEC_VECTOR_TIMES_SCALAR(m!.rows[i],s); 
+    od;
     res := CVEC_CMatMaker(l,m!.vecclass);
     if not(IsMutable(m)) then
         MakeImmutable(res);
@@ -1957,19 +1978,33 @@ InstallOtherMethod( \*, "for a cmat", [IsFFE,IsCMatRep and IsMatrix],
 InstallOtherMethod( \=, "for two cmats",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
+    local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) or m!.len <> n!.len then
         return false;
     fi;
-    return m!.rows = n!.rows;
+    for i in [2..m!.len] do
+        if m!.rows[i] <> n!.rows[i] then
+            return false;
+        fi;
+    od;
+    return true;
   end);
 
 InstallOtherMethod( \<, "for two cmats",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
+    local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) or m!.len <> n!.len then
         return fail;
     fi;
-    return m!.rows < n!.rows;
+    for i in [2..m!.len] do
+        if m!.rows[i] < n!.rows[i] then 
+            return true;
+        elif n!.rows[i] < m!.rows[i] then
+            return false;
+        fi;
+    od;
+    return false;
   end);
 
 InstallOtherMethod( IsZero, "for a cmat", [IsCMatRep and IsMatrix],

@@ -2881,7 +2881,7 @@ STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
                     so = DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
-                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                                       INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
                     for (j = 0;j < d;j++) {
                         SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
                     }
@@ -2915,7 +2915,7 @@ STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
                     so = DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
-                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                                       INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
                     for (j = 0;j < d;j++) {
                         SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
                     }
@@ -2955,7 +2955,7 @@ STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
                     so = DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
-                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                                       INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
                     for (j = 0;j < d;j++) {
                         SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
                     }
@@ -2990,7 +2990,7 @@ STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
                     so = DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
-                                       INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+                                       INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
                     for (j = 0;j < d;j++) {
                         SET_VEC_ELM(&sadst,de,j,GET_VEC_ELM(&sasrc,so,j));
                     }
