@@ -914,14 +914,14 @@ CVEC.TEST.IO := function(p,d)
   if m <> mm then
       Error("Alarm p=",p," d=",d," IO, you can inspect m and mm");
   fi;
-  IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED");
+  IO_unlink("TEMP_MATRIX_CAN_BE_REMOVED");
   CVEC_WriteMatsToFile("TEMP_MATRIX_CAN_BE_REMOVED.",[m,n]);
   l := CVEC_ReadMatsFromFile("TEMP_MATRIX_CAN_BE_REMOVED.");
   if l = fail or l[1] <> m or l[2] <> n then
       Error("Alarm p=",p," d=",d," IO, you can inspect m, n and l");
   fi;
-  IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED.1");
-  IO.unlink("TEMP_MATRIX_CAN_BE_REMOVED.2");
+  IO_unlink("TEMP_MATRIX_CAN_BE_REMOVED.1");
+  IO_unlink("TEMP_MATRIX_CAN_BE_REMOVED.2");
 end;
 
 CVEC.TEST.PROD_COEFFS_CVEC_PRIMEFIELD := function(p,d)

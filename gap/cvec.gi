@@ -1982,7 +1982,7 @@ InstallOtherMethod( \=, "for two cmats",
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) or m!.len <> n!.len then
         return false;
     fi;
-    for i in [2..m!.len] do
+    for i in [2..m!.len+1] do
         if m!.rows[i] <> n!.rows[i] then
             return false;
         fi;
@@ -1997,7 +1997,7 @@ InstallOtherMethod( \<, "for two cmats",
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) or m!.len <> n!.len then
         return fail;
     fi;
-    for i in [2..m!.len] do
+    for i in [2..m!.len+1] do
         if m!.rows[i] < n!.rows[i] then 
             return true;
         elif n!.rows[i] < m!.rows[i] then
@@ -2551,14 +2551,14 @@ CVEC_WriteMat := function(f,m)
   chead := CVEC_64BIT_NUMBER_TO_STRING_LITTLE_ENDIAN(
            c![CVEC_IDX_len]);
   header := Concatenation(magic,phead,dhead,rhead,chead);
-  if IO.Write(f,header) <> 40 then
+  if IO_Write(f,header) <> 40 then
       Info(InfoCVec,1,"CVEC_WriteMat: Write error during writing of header");
       return fail;
   fi;
   buf := "";  # will be made longer automatically
   for i in [1..m!.len] do
       CVEC_CVEC_TO_EXTREP(m!.rows[i+1],buf);
-      if IO.Write(f,buf) <> Length(buf) then
+      if IO_Write(f,buf) <> Length(buf) then
           Info(InfoCVec,1,"CVEC_WriteMat: Write error");
           return fail;
       fi;
@@ -2568,13 +2568,13 @@ end;
 
 CVEC_WriteMatToFile := function(fn,m)
   local f;
-  f := IO.File(fn,"w");
+  f := IO_File(fn,"w");
   if f = fail then
       Info(InfoCVec,1,"CVEC_WriteMatToFile: Cannot create file");
       return fail;
   fi;
   if CVEC_WriteMat(f,m) = fail then return fail; fi;
-  if IO.Close(f) = fail then
+  if IO_Close(f) = fail then
       Info(InfoCVec,1,"CVEC_WriteMatToFile: Cannot close file");
       return fail;
   fi;
@@ -2614,7 +2614,7 @@ CVEC_ReadMat := function(f)
       Error("CVEC_ReadMat: first argument must be a file");
       return fail;
   fi;
-  header := IO.Read(f,40);
+  header := IO_Read(f,40);
   if Length(header) < 40 then
       Info(InfoCVec,1,"CVEC_ReadMat: Cannot read header");
       return fail;
@@ -2643,7 +2643,7 @@ CVEC_ReadMat := function(f)
   fi;
 
   for i in [1..rows] do
-      buf := IO.Read(f,len);
+      buf := IO_Read(f,len);
       if len <> Length(buf) then
           Info(InfoCVec,1,"CVEC_ReadMat: Read error");
           Error();
@@ -2656,14 +2656,14 @@ end;
 
 CVEC_ReadMatFromFile := function(fn)
   local f,m;
-  f := IO.File(fn,"r");
+  f := IO_File(fn,"r");
   if f = fail then
       Info(InfoCVec,1,"CVEC_ReadMatFromFile: Cannot open file");
       return fail;
   fi;
   m := CVEC_ReadMat(f);
   if m = fail then return fail; fi;
-  IO.Close(f);
+  IO_Close(f);
   return m;
 end;
 
@@ -2673,19 +2673,19 @@ CVEC_ReadMatsFromFile := function(fnpref)
       Error("CVEC_ReadMatsFromFile: fnpref must be a string");
       return fail;
   fi;
-  f := IO.File(Concatenation(fnpref,"1"),"r");
+  f := IO_File(Concatenation(fnpref,"1"),"r");
   if f = fail then
       Error("CVEC_ReadMatsFromFile: no matrices there");
       return fail;
   else
-      IO.Close(f);
+      IO_Close(f);
   fi;
   l := [];
   i := 1;
   while true do
-      f := IO.File(Concatenation(fnpref,String(i)),"r");
+      f := IO_File(Concatenation(fnpref,String(i)),"r");
       if f = fail then break; fi;
-      IO.Close(f);
+      IO_Close(f);
       m := CVEC_ReadMatFromFile(Concatenation(fnpref,String(i)));
       if m = fail then
           return fail;
