@@ -1,6 +1,7 @@
 #############################################################################
 ##
-#W  cvec.gd               GAP 4 package `cvec'                Max Neunhoeffer
+#W  cvec.gd               GAP 4 package `cvec'                
+##                                                            Max Neunhoeffer
 ##
 #Y  Copyright (C)  2005,  Lehrstuhl D fuer Mathematik,  RWTH Aachen,  Germany
 ##
@@ -22,12 +23,20 @@ BindGlobal("CVecFieldInfoFamily",NewFamily("CVecFieldInfoFamily"));
 BindGlobal("CVecClassFamily",NewFamily("CVecClassFamily"));
 
 DeclareRepresentation( "IsCVecRep", IsDataObjectRep, [] );
-DeclareRepresentation( "IsCMatRep", IsComponentObjectRep, [] );
 DeclareFilter( "IsCVecRepOverSmallField" );
 
 #############################################################################
 ## Information about the base fields:
 #############################################################################
+
+DeclareGlobalVariable( "CVEC_q" );
+DeclareGlobalVariable( "CVEC_F" );
+DeclareGlobalVariable( "CVEC_lens" );
+DeclareGlobalVariable( "CVEC_classes" );
+DeclareGlobalVariable( "CVEC_BestGreaseTab" );
+
+DeclareGlobalFunction( "CVEC_NewCVecClass" );
+DeclareGlobalFunction( "CVEC_NewCVecClassSameField" );
 
 ## Do not change the following numbers without adjusting cvec.c!!!
 
@@ -70,34 +79,6 @@ DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ##         the latter are used for fast access to other cvec classes over
 ##         the same field.
 
-
-#############################################################################
-# Looking for nonzero entries from behind:
-#############################################################################
-
-DeclareOperation( "PositionLastNonZero", [IsList] );
-
-#############################################################################
-# Making of vectors and matrices, conversions:
-#############################################################################
-
-DeclareOperation( "CVec", [IsObject, IsPosInt, IsPosInt] );
-DeclareOperation( "CVec", [IsObject, IsObject] );
-DeclareOperation( "CVec", [IsObject] );
-DeclareOperation( "CMat", [IsList] );
-DeclareOperation( "CMat", [IsList, IsObject] );
-DeclareOperation( "CMat", [IsList, IsObject, IsBool] );
-DeclareOperation( "Unpack", [IsObject] );
-DeclareOperation( "IntegerRep", [IsObject] );
-
-DeclareOperation( "CVecNumber", [IsInt, IsCVecClass] );
-DeclareOperation( "CVecNumber", [IsInt, IsPosInt, IsPosInt, IsPosInt] );
-
-DeclareFilter( "HasGreaseTab" );
-DeclareOperation( "GreaseMat", [IsCMatRep, IsInt]);
-DeclareOperation( "UnGreaseMat", [IsCMatRep]);
-
-
 #############################################################################
 # Access to the base field:
 #############################################################################
@@ -107,61 +88,43 @@ DeclareOperation( "CVecClass", [IsObject, IsInt] );
 DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 
 
-DeclareOperation( "CleanRow", [IsRecord, IsObject, IsBool, IsObject] );
-# CleanRow ( basis, vec, extend, dec )
-#   basis is record with the following components:
-#       .vectors  : matrix bzw. liste von Vektoren
-#       .pivots   : spalten der pivots
-#   vec is a vector
-#   extend is true or false
-#     true:   clean, extend if necessary
-#     false:  clean, do not extend
-#   dec, if not equal to fail, must be a vectors over the same field of
-#     length at least the length of the basis
-#     (+1, if extend=true, because the coefficient of the new basis vector
-#     in a decomposition of vec is also written in to dec)
-# Cleans vec with basis. If vec lies in the span, true is returned, 
-# otherwise false. In case of false, if extend is true, the basis is
-# extended. If dec is not equal to fail, then the coefficients of the
-# linear combination of the vectors in the basis that represents vec
-# is put into dec.
+#############################################################################
+# Making of vectors and conversions:
+#############################################################################
 
-DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );
-# EmptySemiEchelonBasis is an operation:
-# EmptySemiEchelonBasis( vector )
-#   vector is a sample vector
+DeclareOperation( "CVec", [IsObject, IsPosInt, IsPosInt] );
+DeclareOperation( "CVec", [IsObject, IsObject] );
+DeclareOperation( "CVec", [IsObject] );
+DeclareOperation( "Unpack", [IsObject] );
+DeclareOperation( "IntegerRep", [IsObject] );
+DeclareOperation( "CVecNumber", [IsInt, IsCVecClass] );
+DeclareOperation( "CVecNumber", [IsInt, IsPosInt, IsPosInt, IsPosInt] );
 
-DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
+DeclareGlobalFunction( "CVEC_New" );
 
-DeclareOperation( "CharacteristicPolynomialOfMatrix", [IsObject] );
-DeclareOperation( "CharacteristicPolynomialOfMatrix", [IsObject, IsInt] );
-# Returns the characteristic polynomial of a matrix. Returns a record
-# with components "poly" (the polynomial) and "factors" (a list of
-# factors which happened to come out of the calculation, the product of 
-# which is the charpoly)
-# Second argument is indeterminate number.
+DeclareGlobalVariable( "CVEC_CharactersForDisplay" );
 
-DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject] );
-DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject, IsInt] );
-# Returns a list with the irreducible factors of the characteristic
-# polynomial of a matrix, sorted in ascending order by degree.
-# Second argument is indeterminate number.
+DeclareGlobalFunction( "CVEC_HandleScalar" );
 
-DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject] );
-DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject, IsInt] );
-# Returns a record with the following components:
-#  charpoly: characteristic polynomial
-#  irreds:   set of the irreducible factors of the char. poly
-#  mult:     multiplicities of the irreducible factors in the char. poly
-#  minpoly:  minimal polynomial
-#  multmin:  multiplicities of the irreducible factors in the minimal poly
- 
-DeclareOperation( "SemiEchelonRowsX", [IsObject] );
-DeclareOperation( "SemiEchelonRows", [IsObject] );
-DeclareOperation( "SemiEchelonRowsTX", [IsObject] );
-DeclareOperation( "SemiEchelonRowsXp", [IsObject] );
-DeclareOperation( "SemiEchelonRowsT", [IsObject] );
-DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
-DeclareOperation( "SemiEchelonNullspace", [IsObject] );
 
-DeclareGlobalFunction( "OverviewMat" );
+#############################################################################
+# Looking for nonzero entries from behind:
+#############################################################################
+
+DeclareOperation( "PositionLastNonZero", [IsList] );
+
+
+#############################################################################
+# Slicing and friends: 
+#############################################################################
+
+DeclareGlobalFunction( "CVEC_Slice" );
+DeclareGlobalFunction( "CVEC_SliceList" );
+DeclareGlobalFunction( "CVEC_Concatenation" );
+
+#############################################################################
+# The making of good hash functions:
+#############################################################################
+
+DeclareGlobalFunction( "CVEC_HashFunctionForCVecs" );
+

@@ -9,3 +9,6 @@
 ##  
 
 ReadPackage("cvec", "gap/cvec.gd");
+ReadPackage("cvec", "gap/cmat.gd");
+ReadPackage("cvec", "gap/linalg.gd");
+ReadPackage("cvec", "gap/matrix.gd");
