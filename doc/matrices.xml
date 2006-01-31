@@ -114,6 +114,8 @@ There are some methods to create <C>cmat</C>s of special form:
 </Description>
 </ManSection>
 
+<!-- MutableCopyMat -->
+
 </Section>
 
 <Section Label="matlists">
@@ -182,6 +184,23 @@ Unbind, -->
 +, -, -(unary), Zero{Mutable,...}, One{Mutable,...},
 * with scalars, =, <, IsZero, IsOne,
 MakeHashFunction, vec * mat, mat * mat, Inverse{Mutable,...}, TransposedMat,
+KroneckerProduct
+-->
+
+</Section>
+
+<Section Label="vectormat">
+<Heading>Vectors and matrices</Heading>
+
+</Section>
+
+<Section Label="slicingmat">
+<Heading>Slicing and submatrices</Heading>
+
+<!--
+  A word on double slicing
+  ExtractSubMatrix
+  CopySubMatrix
 -->
 
 </Section>

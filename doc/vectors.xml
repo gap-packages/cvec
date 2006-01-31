@@ -185,11 +185,34 @@ as <A>v</A>.
 </ManSection>
 
 <ManSection>
+<Meth Name="ZeroVector" Arg="v, l" Label="cvec"/>
+<Returns>A mutable copy of the zero <C>cvec</C> over the same
+field than <A>v</A> but with length <A>l</A>.</Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C> and <A>l</A> a &GAP; integer.
+</Description>
+</ManSection>
+
+<ManSection>
 <Meth Name="ShallowCopy" Arg="v" Label="cvec"/>
 <Returns>A mutable copy of <A>v</A>.
 </Returns>
 <Description>
 <A>v</A> must be a <C>cvec</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="Randomize" Arg="v" Label="cvec"/>
+<Meth Name="Randomize" Arg="v, rs" Label="cvec_randomsource"/>
+<Returns>The vector <A>v</A>.</Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C> and <A>rs</A> must be a random source
+object if given. This method changes the vector <A>v</A> in place by
+(pseudo) random values in the field over which the vector lives. If
+a random source is given, the pseudo random numbers used are taken from
+this source, otherwise the global random source in the &GAP; library
+is taken.
 </Description>
 </ManSection>
 
@@ -386,6 +409,21 @@ case of illegal positions used.
 </ManSection>
 
 <ManSection>
+<Meth Name="CopySubVector" Arg="src, dst, srcposs, dstposs"/>
+<Returns>nothing</Returns>
+<Description>
+Implements the operation <Ref Oper="CopySubVector" BookName="Ref"/>
+for <C>cvec</C>s <A>src</A> and <A>dst</A>, that is, <A>srcposs</A>
+and <A>dstposs</A> must be ranges or plain lists of integers of equal
+length such that all numbers contained lie between
+<M>1</M> and the length of <A>src</A> and <A>dst</A> respectively.
+The result is undefined if <A>src</A> and <A>dst</A> are the same
+objects. The method is particularly efficient if both <A>srcposs</A>
+and <A>dstposs</A> are ranges with increment <M>1</M>.
+</Description>
+</ManSection>
+
+<ManSection>
 <Meth Name="CVEC_Concatenation" Arg="arg"/>
 <Returns>a new <C>cvec</C> by concatenating all arguments</Returns>
 <Description>
@@ -555,6 +593,36 @@ base field. The result is a new <C>cvec</C>. A variable number of
 
 </Section>
 
+<Section>
+<Heading>Hashing techniques for <C>cvec</C>s</Heading>
+
+<ManSection>
+<Func Name="CVEC_HashFunctionForCVecs" Arg="v, data"/>
+<Returns>an integer hash value</Returns>
+<Description>
+    This is a hash function usable for the <Ref Oper="ChooseHashFunction"
+BookName="orb"/> framework. It takes as arguments a <C>cvec</C>
+<A>v</A> and a list <A>data</A> of length <M>2</M>. The first entry of
+<A>data</A> is the length of the hash table used and the second entry
+is the number of bytes looked at in the <C>cvec</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ChooseHashFunction" Arg="v, hashlen"/>
+<Returns>a record describing a hash function</Returns>
+<Description>
+Chooses a hash function to store <C>cvec</C>s like <A>v</A> in a hash table
+of length <A>hashlen</A>. The return value is a record with components
+<C>func</C> and <C>data</C> bound to <Ref
+Func="CVEC_HashFunctionForCVecs"/> and a list of length <M>2</M> to be
+given as a second argument to <Ref Func="CVEC_HashFunctionForCVecs"/>.
+This allows to use <C>cvec</C>s in the <Ref Oper="ChooseHashFunction"
+BookName="orb"/> framework.
+</Description>
+</ManSection>
+
+</Section>
 <!-- ############################################################ -->
 
 </Chapter>

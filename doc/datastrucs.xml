@@ -81,7 +81,7 @@ integer, such that <M>2^bitsperel > 2\cdot p-1</M>. This means, that
 we can store the numbers from <M>0</M> to <M>2\cdot p - 1</M> in
 <C>bitsperel</C> bits. <C>elsperword</C> is <M>32/bitsperel</M> rounded
 down to the next integer and multiplied by <M>2</M> if the length of a
-<C>Word</C> is <M>8</M>. Note that we thus store as many prime field
+<C>Word</C> is <M>8</M> bytes. Note that we thus store as many prime field
 elements as possible into one <C>Word</C>, however, on 64bit machines
 we store only twice as much as would fit into 32bit, even if we could
 pack one more into a <C>Word</C>. This has technical reasons to make
@@ -400,7 +400,8 @@ The <C>cvecclass</C> in the component <C>vecclass</C> determines the
 number of columns of the matrix by the length of the rows.<P/>
 
 The length of the list in component <C>rows</C> is
-<C>len+1</C>, because the first position is unbound such that the type
+<C>len+1</C>, because the first position is equal to the integer <M>0</M> 
+such that the type
 of the list <C>rows</C> can always be computed efficiently. The
 rows are then stored in positions 2 to <C>len+1</C>.<P/>
 

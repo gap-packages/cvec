@@ -1131,7 +1131,7 @@ InstallMethod( Randomize, "for a cvec and a random source",
 #############################################################################
 
 InstallGlobalFunction( CVEC_HashFunctionForCVecs, function(v,data)
-  return HASHKEY_BAG(v,101,4,data[2]) mod data[1] + 1;
+  return HASHKEY_BAG(v,101,CVEC_BYTESPERWORD,data[2]) mod data[1] + 1;
 end );
 
 InstallMethod( ChooseHashFunction, "for cvecs",

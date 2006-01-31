@@ -4,7 +4,8 @@
 ##  $Id: makedoc.g,v 1.4 2003/11/20 21:59:44 chevie Exp $
 ##  
 
-RequirePackage("GAPDoc");
+LoadPackage("GAPDoc");
+LoadPackage("orb");
 
 MakeGAPDocDoc("doc", "cvec", [], "cvec");
 
