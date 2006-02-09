@@ -966,6 +966,25 @@ InstallOtherMethod( IsZero, "for a cmat", [IsCMatRep and IsMatrix],
     return ForAll(m!.rows,IsZero);
   end);
 
+InstallOtherMethod( IsOne, "for a cmat", [IsCMatRep and IsMatrix],
+  function(m)
+    local i,v;
+    if m!.vecclass![CVEC_IDX_len] <> m!.len then
+        return false;
+    fi;
+    for i in [1..m!.len] do
+        if not(IsOne(m!.rows[i+1][i])) then
+            return false;
+        fi;
+        v := ShallowCopy(m!.rows[i+1]);
+        v[i] := 0;
+        if not(IsZero(v)) then
+            return false;
+        fi;
+    od;
+    return true;
+  end );
+
 
 #############################################################################
 # Access to the base field:

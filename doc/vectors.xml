@@ -167,35 +167,16 @@ see Section <Ref Sect="cvecs"/>.
 
 <ManSection>
 <Meth Name="ZeroSameMutability" Arg="v" Label="cvec"/>
-<Returns>The zero <C>cvec</C> in the same <C>cvecclass</C> as <A>v</A>.
+<Returns>the zero <C>cvec</C> in the same <C>cvecclass</C> as <A>v</A>
 </Returns>
 <Description>
 <A>v</A> must be a <C>cvec</C>.
-</Description>
-</ManSection>
-
-<ManSection>
-<Meth Name="ZeroMutable" Arg="v" Label="cvec"/>
-<Returns>A mutable copy of the zero <C>cvec</C> in the same <C>cvecclass</C> 
-as <A>v</A>.
-</Returns>
-<Description>
-<A>v</A> must be a <C>cvec</C>.
-</Description>
-</ManSection>
-
-<ManSection>
-<Meth Name="ZeroVector" Arg="v, l" Label="cvec"/>
-<Returns>A mutable copy of the zero <C>cvec</C> over the same
-field than <A>v</A> but with length <A>l</A>.</Returns>
-<Description>
-<A>v</A> must be a <C>cvec</C> and <A>l</A> a &GAP; integer.
 </Description>
 </ManSection>
 
 <ManSection>
 <Meth Name="ShallowCopy" Arg="v" Label="cvec"/>
-<Returns>A mutable copy of <A>v</A>.
+<Returns>a mutable copy of <A>v</A>
 </Returns>
 <Description>
 <A>v</A> must be a <C>cvec</C>.
@@ -205,7 +186,7 @@ field than <A>v</A> but with length <A>l</A>.</Returns>
 <ManSection>
 <Meth Name="Randomize" Arg="v" Label="cvec"/>
 <Meth Name="Randomize" Arg="v, rs" Label="cvec_randomsource"/>
-<Returns>The vector <A>v</A>.</Returns>
+<Returns>the vector <A>v</A></Returns>
 <Description>
 <A>v</A> must be a <C>cvec</C> and <A>rs</A> must be a random source
 object if given. This method changes the vector <A>v</A> in place by
@@ -248,7 +229,7 @@ addition! Larger integers than immediate integers are not supported.
 
 <ManSection>
 <Meth Name="\+" Arg="v, w" Label="cveccvec"/>
-<Returns>The sum <M><A>v</A>+<A>w</A></M> as a new <C>cvec</C>.</Returns>
+<Returns>the sum <M><A>v</A>+<A>w</A></M> as a new <C>cvec</C></Returns>
 <Description>
     For two <C>cvec</C>s <A>v</A> and <A>w</A>. Works as expected.
 </Description>
@@ -256,7 +237,7 @@ addition! Larger integers than immediate integers are not supported.
 
 <ManSection>
 <Meth Name="\-" Arg="v, w" Label="cveccvec"/>
-<Returns>The difference <M><A>v</A>-<A>w</A></M> as a new <C>cvec</C>.</Returns>
+<Returns>the difference <M><A>v</A>-<A>w</A></M> as a new <C>cvec</C></Returns>
 <Description>
     For two <C>cvec</C>s <A>v</A> and <A>w</A>. Works as expected.
 </Description>
@@ -264,7 +245,8 @@ addition! Larger integers than immediate integers are not supported.
 
 <ManSection>
 <Meth Name="AdditiveInverseSameMutability" Arg="v" Label="cvec"/>
-<Returns>The additive inverse of <A>v</A> as a new <C>cvec</C>.</Returns>
+<Meth Name="\-" Arg="v" Label="cvec"/>
+<Returns>the additive inverse of <A>v</A> as a new <C>cvec</C></Returns>
 <Description>
 For a <C>cvec</C> <A>v</A>. Works as expected.
 </Description>
@@ -272,7 +254,7 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 
 <ManSection>
 <Meth Name="AdditiveInverseMutable" Arg="v" Label="cvec"/>
-<Returns>The additive inverse of <A>v</A> as a new mutable <C>cvec</C>.
+<Returns>the additive inverse of <A>v</A> as a new mutable <C>cvec</C>
 </Returns>
 <Description>
 For a <C>cvec</C> <A>v</A>. Works as expected.
@@ -282,7 +264,7 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 <ManSection>
 <Meth Name="\*" Arg="v, s" Label="cvecsca"/>
 <Meth Name="\*" Arg="s, v" Label="scacvec"/>
-<Returns>The scalar multiple <A>s</A><M>\cdot</M><A>v</A>.</Returns>
+<Returns>the scalar multiple <A>s</A><M>\cdot</M><A>v</A></Returns>
 <Description>
     For a <C>cvec</C> <A>v</A> and a scalar <A>s</A>. For the format
     of the scalar see <Ref Subsect="scahandl"/>. Works as expected.
@@ -325,6 +307,38 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
     <C>Length(v)</C> respectively.
 </Description>
 </ManSection>
+
+<ManSection>
+<Meth Name="ScalarProduct" Arg="v, w" Label="cveccvec"/>
+<Returns>the scalar product</Returns>
+<Description>
+    Both <A>v</A> and <A>w</A> must be <C>cvec</C>s over the same field
+    with equal length. The function returns the scalar product of the
+    two vectors. Note that there is a very efficient method for prime
+    fields with <M>p &lt; 65536</M>. In the other cases the method taken
+    is not extremely fast.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ZeroMutable" Arg="v" Label="cvec"/>
+<Returns>a mutable copy of the zero <C>cvec</C> in the same <C>cvecclass</C> 
+as <A>v</A>
+</Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="ZeroVector" Arg="v, l" Label="cvec"/>
+<Returns>a mutable copy of the zero <C>cvec</C> over the same
+field than <A>v</A> but with length <A>l</A></Returns>
+<Description>
+<A>v</A> must be a <C>cvec</C> and <A>l</A> a &GAP; integer.
+</Description>
+</ManSection>
+
 </Section>
 
 <Section>
@@ -402,7 +416,7 @@ from <A>dstpos</A> in <A>dst</A>. Of course all positions must be within
 the vectors. <P/>
 
 Note that this functions is quite efficient, however, the ranges are
-checked. If you want to avoid this, use <C>CVEC_SLICE</C> instead (with
+checked. If you want to avoid this, use <C>CVEC&uscore;SLICE</C> instead (with
 same calling convention), but do not complain later if crashes occur in
 case of illegal positions used.
 </Description>
@@ -450,15 +464,16 @@ base field. The result is a new <C>cvec</C>. A variable number of
 </ManSection>
 
 <ManSection>
-<Meth Name="&lt;" Arg="v, w"/>
+    <Meth Name="LT" Arg="v, w"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
-    Returns <C>true</C> if the <C>cvec</C>s <A>v</A> is smaller than <A>w</A>.
+    Returns <C>true</C> if the <C>cvec</C> <A>v</A> is smaller than <A>w</A>.
     The vectors must be over the same field and must have equal
     length. The order implemented is very efficient but is <E>not</E> 
     compatible with lexicographic ordering of lists of
     finite field elements! This method should therefore only be used
     for binary search purposes.
+    Note that the operation <C>LT</C> is the same as <C>&bslash;&lt;</C>.
 </Description>
 </ManSection>
 
@@ -563,7 +578,7 @@ base field. The result is a new <C>cvec</C>. A variable number of
 
 <ManSection>
 <Meth Name="BaseField" Arg="v" Label="cvec"/>
-<Returns>Returns the base field of <A>v</A>.
+<Returns>the base field of <A>v</A>
 </Returns>
 <Description>
     For a <C>cvec</C> <A>v</A> this returns
@@ -577,7 +592,7 @@ base field. The result is a new <C>cvec</C>. A variable number of
 </Returns>
 <Description>
     Returns the characteristic of the base field of <A>v</A> (see
-    <Ref Meth="BaseField"/>).
+    <Ref Meth="BaseField" Label="cvec"/>).
 </Description>
 </ManSection>
 
@@ -587,7 +602,7 @@ base field. The result is a new <C>cvec</C>. A variable number of
 </Returns>
 <Description>
     Returns the degree of the base field of <A>v</A> over its prime field (see
-    <Ref Meth="BaseField"/>).
+    <Ref Meth="BaseField" Label="cvec"/>).
 </Description>
 </ManSection>
 

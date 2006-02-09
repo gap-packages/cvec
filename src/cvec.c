@@ -3658,6 +3658,9 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   if (dec == Fail)
       cldec = 0L;
   else {
+      if (!IS_CVEC(dec)) {
+          return OurErrorBreakQuit("CLEANROWKERNEL: dec is no cvec");
+      }
       cldec = ELM_PLIST(TYPE_DATOBJ(dec),POS_DATA_TYPE);
       /* Zero the decomposition vector: */
       MUL_INL(DATA_CVEC(dec),fi,0,INT_INTOBJ(ELM_PLIST(cldec,IDX_wordlen)));
@@ -3768,6 +3771,65 @@ STATIC Obj CVEC_EQINT(Obj self, Obj a, Obj b)
 {
     return (EQ( a, b ) ? True : False);
 }
+
+STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
+{
+    /* v and w must be cvecs over the same prime field with equal length! */
+    if (!IS_CVEC(v) || !IS_CVEC(w)) {
+        return OurErrorBreakQuit("CVEC_SCALAR_PRODUCT: no cvecs");
+    }
+    {
+        PREPARE_clfi(v,vcl,fi);
+        PREPARE_cl(w,wcl);
+        PREPARE_p(fi);
+        PREPARE_d(fi);
+        PREPARE_tab2(fi);
+        Int len = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+        seqaccess sa;
+        Int i;
+        Word res;
+        Word *vv,*ww;
+
+        if (vcl != wcl) {
+            return OurErrorBreakQuit("CVEC_SCALAR_PRODUCT: "
+                                     "cvecs not in same class");
+        }
+        if (d > 1) {
+            return TRY_NEXT_METHOD;
+        }
+        INIT_SEQ_ACCESS( &sa, v, 1 );
+        i = 1;
+        res = 0;
+        vv = DATA_CVEC(v);
+        ww = DATA_CVEC(w);
+        /* We distinguish 2 cases: 
+         * (1) 2*(p-1)*(p-1) does not fit into a Word
+         * (2) 2*(p-1)*(p-1) does fit into a Word */
+        if ((p-1)*(p-1) > (WORDALLONE >> 1)) {
+            while (1) {
+                res += (GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&sa,ww,0)) % p;
+                if (res >= p) res -= p;
+                if (++i > len) break;
+                STEP_RIGHT(&sa);
+            }
+        } else {
+            Word addsbeforereduce = WORDALLONE / ((p-1)*(p-1));
+            Word j = addsbeforereduce;
+            while (1) {
+                res += GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&sa,ww,0);
+                if (--j == 0) {
+                    j = addsbeforereduce;
+                    res %= p;
+                }
+                if (++i > len) break;
+                STEP_RIGHT(&sa);
+            }
+            res %= p;
+        }
+        return ELM_PLIST(tab2,res+1);
+    }
+}
+
 
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
@@ -3963,6 +4025,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_CLEANROWKERNEL", 4, "basis, vec, extend, dec",
     CLEANROWKERNEL, 
     "cvec.c:CLEANROWKERNEL" },
+
+  { "CVEC_SCALAR_PRODUCT", 2, "v, w",
+    CVEC_SCALAR_PRODUCT,
+    "cvec.c:CVEC_SCALAR_PRODUCT" },
 
   { 0 }
 

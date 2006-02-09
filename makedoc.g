@@ -5,11 +5,10 @@
 ##  
 
 LoadPackage("GAPDoc");
+LoadPackage("IO");
 LoadPackage("orb");
 
 MakeGAPDocDoc("doc", "cvec", [], "cvec");
 
 GAPDocManualLab("cvec");
-
-quit;
 

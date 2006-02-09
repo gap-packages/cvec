@@ -586,6 +586,15 @@ InstallOtherMethod( \*, "for cvecs", [IsFFE, IsCVecRep],
                 CVEC_HandleScalar(DataType(TypeObj(v)),s));
   end);
 
+InstallOtherMethod( ScalarProduct, "for two cvecs, kernel method", 
+  [ IsCVecRep and IsCVecRepOverSmallField, 
+    IsCVecRep and IsCVecRepOverSmallField], 1, CVEC_SCALAR_PRODUCT );
+InstallOtherMethod( ScalarProduct, "for two cvecs, GAP method", 
+  [ IsCVecRep, IsCVecRep ], 
+  function( v,w )
+    return PROD_LIST_LIST_DEFAULT( Unpack(v), Unpack(w), 0 );
+  end );
+
 # Comparison of vectors:
 
 InstallOtherMethod( \=, "for cvecs", [IsCVecRep, IsCVecRep], CVEC_CVEC_EQ );
