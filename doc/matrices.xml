@@ -122,6 +122,20 @@ There are some methods to create <C>cmat</C>s of special form:
 </Description>
 </ManSection>
 
+<ManSection>
+<Meth Name="Matrix" Arg="vectorlist, vector"/>
+<Meth Name="MatrixNC" Arg="vectorlist, vector"/>
+<Returns> a new mutable <C>cmat</C> </Returns>
+<Description>
+    Returns a new <C>cmat</C> containing the vectors in
+    <A>vectorlist</A> as rows. The elements in <A>vectorlist</A> must be
+    vectors of the same length as the sample vector <A>vector</A> and must
+    live over the same base field. The sample
+vector is always necessary to be able to use the method selection. The
+<A>vectorlist</A> may be empty. The NC method does not check the inputs.
+</Description>
+</ManSection>
+
 </Section>
 
 <Section Label="matlists">
@@ -323,7 +337,18 @@ For a <C>cmat</C> <A>m</A>. Works as expected.
 </ManSection>
 
 <ManSection>
-<Meth Name="\*" Arg="m, n" Label="cmatsca"/>
+<Meth Name="\^" Arg="v, m" Label="cveccmat"/>
+<Returns>the product <A>v</A><M>\cdot</M><A>m</A></Returns>
+<Description>
+    For a <C>cmat</C> <A>m</A> and a <C>cvec</C> <A>s</A> with the same
+    length as the number of rows of <A>m</A>. Works as expected. Note
+    that there is a very fast method for the case that <A>m</A> is
+    pre-greased (see <Ref Sect="greasemat"/>).
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="\*" Arg="m, n" Label="cmatcmat"/>
 <Returns>the product <A>m</A><M>\cdot</M><A>n</A></Returns>
 <Description>
     Of course, the <C>cmat</C> <A>m</A> must have as many columns as
@@ -448,7 +473,33 @@ For a <C>cmat</C> <A>m</A>. Works as expected.
 <Meth Name="IsOne" Arg="m"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
-    Returns <C>true</C> if the <C>cmat</C> <A>m</A> is equal to the identity
+    Returns <C>true</C> iff the <C>cmat</C> <A>m</A> is equal to the identity
+    matrix.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="IsDiagonalMat" Arg="m"/>
+<Returns><C>true</C> or <C>false</C></Returns>
+<Description>
+    Returns <C>true</C> iff the <C>cmat</C> <A>m</A> is a diagonal matrix.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="IsUpperTriangularMat" Arg="m"/>
+<Returns><C>true</C> or <C>false</C></Returns>
+<Description>
+    Returns <C>true</C> iff the <C>cmat</C> <A>m</A> is an upper triangular 
+    matrix.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="IsLowerTriangularMat" Arg="m"/>
+<Returns><C>true</C> or <C>false</C></Returns>
+<Description>
+    Returns <C>true</C> iff the <C>cmat</C> <A>m</A> is a lower triangular 
     matrix.
 </Description>
 </ManSection>
@@ -745,6 +796,26 @@ object if given. This method changes the matrix <A>m</A> in place by
 a random source is given, the pseudo random numbers used are taken from
 this source, otherwise the global random source in the &GAP; library
 is taken.
+</Description>
+</ManSection>
+
+<ManSection>
+<Func Name="OverviewMat" Arg="m" Label="cmat"/>
+<Returns> nothing </Returns>
+<Description>
+    An ASCII art overview over the <C>cmat</C> <A>m</A> is printed.
+    Stars indicate nonzero blocks in the matrix and dots zero blocks.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="Unpack" Arg="m" Label="cmat"/>
+<Returns>a list of lists of finite field elements</Returns>
+<Description>
+    This operation unpacks a <C>cmat</C> <A>m</A>. A new plain list of plain
+    lists containing
+    the corresponding numbers as &GAP; finite field elements. Note that
+    the matrix <A>m</A> remains unchanged.
 </Description>
 </ManSection>
 

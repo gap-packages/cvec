@@ -43,8 +43,12 @@ DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
 DeclareOperation( "SemiEchelonRowsX", [IsObject] );
 DeclareOperation( "SemiEchelonRows", [IsObject] );
 DeclareOperation( "SemiEchelonRowsTX", [IsObject] );
-DeclareOperation( "SemiEchelonRowsXp", [IsObject] );
 DeclareOperation( "SemiEchelonRowsT", [IsObject] );
+DeclareOperation( "SemiEchelonRowsPX", [IsObject] );
+DeclareOperation( "SemiEchelonRowsP", [IsObject] );
+# For compatibility:
+DeclareOperation( "SemiEchelonRowsXp", [IsObject] );
+
 DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
 DeclareOperation( "SemiEchelonNullspace", [IsObject] );
 
@@ -73,6 +77,9 @@ DeclareOperation( "FactorsOfCharacteristicPolynomial", [IsObject, IsInt] );
 
 DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject] );
 DeclareOperation( "MinimalPolynomialOfMatrix", [IsObject, IsInt] );
+
+DeclareOperation( "CharAndMinimalPolynomialOfMatrix", [IsObject] );
+DeclareOperation( "CharAndMinimalPolynomialOfMatrix", [IsObject, IsInt] );
 # Returns a record with the following components:
 #  charpoly: characteristic polynomial
 #  irreds:   set of the irreducible factors of the char. poly

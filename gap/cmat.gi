@@ -342,13 +342,9 @@ InstallMethod( Unpack, "for a cmat", [IsCMatRep],
   function(m)
     local mm,q,i;
     mm := [];
-    q := Size(BaseField(m));
     for i in [2..m!.len+1] do
         Add(mm,Unpack(m!.rows[i]));
     od;
-    if q <= 256 and Length(mm) > 0 then
-        ConvertToMatrixRep(mm,q);
-    fi;
     return mm;
   end );
 
@@ -657,60 +653,6 @@ InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
     fi;
     CVEC_COPY_SUBMATRIX(src!.rows,dst!.rows,srows,drows,scols,dcols);
   end );
-
-#InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
-#  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
-#   IsList,IsList,IsList and IsRangeRep,IsList and IsRangeRep],
-#  function( src,dst,srows,drows,scols,dcols )
-#    local len,pos,to,i;
-#    if Length(scols) <> Length(dcols) then
-#        Error("CVEC_CopySubMatrix: ranges must have equal length");
-#        return;
-#    fi;
-#    if Length(scols) = 0 then return; fi;
-#
-#    pos := scols[1];
-#    len := Length(scols);
-#    to := dcols[1];
-#    if scols[len] <> pos + len - 1 or
-#       dcols[len] <> to + len - 1 then
-#        # we do it by hand - horrible!
-#        if Length(srows) <> Length(drows) then
-#            Error("CVEC_CopySubMatrix: ranges must have same length");
-#        else
-#            CVEC_CopySubMatrixHorrible(src,dst,srows,drows,scols,dcols);
-#        fi;
-#        return;
-#    fi;
-#    CVEC_CopySubMatrix(src,dst,srows,drows,pos,len,to);
-#  end );
-
-#InstallMethod( CopySubMatrix, "for two cmats and stuff",
-#  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
-#   IsList,IsList,IsList,IsList],
-#  function( src,dst,srows,drows,scols,dcols )
-#    local len,pos,to,i;
-#    if Length(scols) <> Length(dcols) then
-#        Error("CVEC_CopySubMatrix: ranges must have equal length");
-#        return;
-#    fi;
-#    if Length(scols) = 0 then return; fi;
-#
-#    pos := scols[1];
-#    len := Length(scols);
-#    to := dcols[1];
-#    if scols <> [pos..pos+len-1] or     # Check for rangeness:
-#       dcols <> [to..to+len-1] then
-#        # we do it by hand - horrible!
-#        if Length(srows) <> Length(drows) then
-#            Error("CVEC_CopySubMatrix: ranges must have same length");
-#        else
-#            CVEC_CopySubMatrixHorrible(src,dst,srows,drows,scols,dcols);
-#        fi;
-#        return;
-#    fi;
-#    CVEC_CopySubMatrix(src,dst,srows,drows,pos,len,to);
-#  end );
 
 InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
   [IsCMatRep and IsMatrix, IsHomogeneousList, IsHomogeneousList],
