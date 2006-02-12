@@ -185,7 +185,7 @@ see Section <Ref Sect="cvecs"/>.
 
 <ManSection>
 <Meth Name="Randomize" Arg="v" Label="cvec"/>
-<Meth Name="Randomize" Arg="v, rs" Label="cvec_randomsource"/>
+<Meth Name="Randomize" Arg="v, rs" Label="cvecrandomsource"/>
 <Returns>the vector <A>v</A></Returns>
 <Description>
 <A>v</A> must be a <C>cvec</C> and <A>rs</A> must be a random source
