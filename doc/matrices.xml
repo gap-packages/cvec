@@ -787,7 +787,7 @@ pre-greasing.
 
 <ManSection>
 <Meth Name="Randomize" Arg="m" Label="cmat"/>
-<Meth Name="Randomize" Arg="m, rs" Label="cmat_randomsource"/>
+<Meth Name="Randomize" Arg="m, rs" Label="cmatrandomsource"/>
 <Returns>the matrix <A>m</A></Returns>
 <Description>
 <A>m</A> must be a <C>cmat</C> and <A>rs</A> must be a random source
