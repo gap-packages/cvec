@@ -50,6 +50,7 @@ Germany
 <#Include SYSTEM "datastrucs.xml">
 <#Include SYSTEM "vectors.xml">
 <#Include SYSTEM "matrices.xml">
+<#Include SYSTEM "linalg.xml">
 <#Include SYSTEM "performance.xml">
 <#Include SYSTEM "gaplib.xml">
 <#Include SYSTEM "examples.xml">

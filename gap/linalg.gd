@@ -49,6 +49,8 @@ DeclareOperation( "SemiEchelonRowsP", [IsObject] );
 # For compatibility:
 DeclareOperation( "SemiEchelonRowsXp", [IsObject] );
 
+DeclareOperation( "MutableNullspaceMatX", [IsObject] );
+DeclareOperation( "MutableNullspaceMat", [IsObject] );
 DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
 DeclareOperation( "SemiEchelonNullspace", [IsObject] );
 

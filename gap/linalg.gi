@@ -152,7 +152,7 @@ InstallMethod( SemiEchelonRowsTX, "for a cmat", [IsCMatRep and IsMutable],
         b.relations := rec( vectors := MatrixNC([],dec), pivots := [] );
     fi;
     coeffs := MatrixNC([],dec);
-    relations := EmptySemiEchelonBasis( dec );
+    relations := MatrixNC([], dec );
     i := 0;  # is length of coeffs
     mo := -One(dec[1]);
     for j in [1..Length(m)] do
@@ -176,13 +176,14 @@ InstallMethod( SemiEchelonRowsTX, "for a cmat", [IsCMatRep and IsMutable],
             if i > 0 then
                 newrelation := dec{[1..i]} * coeffs;
                 newrelation[j] := mo;
-                CleanRow(relations,newrelation,true,fail);
+                #CleanRow(relations,newrelation,true,fail);
             else
                 newrelation := ShallowCopy(dec);
                 newrelation[j] := -mo;
-                Add(relations.vectors,newrelation);
-                Add(relations.pivots,j);
+                #Add(relations.vectors,newrelation);
+                #Add(relations.pivots,j);
             fi;
+            Add(relations,newrelation);
         fi;
     od;
     b.coeffs := coeffs;
@@ -197,45 +198,6 @@ InstallMethod( SemiEchelonRowsTX, "for an immutable cmat", [IsCMatRep],
   function( m )
     return SemiEchelonRowsTX( MutableCopyMat( m ) );
   end );
-
-# Temporary for compatibility:
-InstallMethod( SemiEchelonRowsXp, "for a cmat", [IsCMatRep],
-  function( m )
-    local b,p,dec,j,v,zerov, decl;
-    b := EmptySemiEchelonBasis( m!.vecclass );
-    zerov := CVEC_New(m!.vecclass);
-    decl := Minimum( 100, m!.len );
-    dec := ZeroVector(zerov,decl);
-    if m!.len = 0 then
-        b.p := MatrixNC( [], dec );
-        return b;
-    fi;
-    p := [];
-    for j in [1..m!.len] do
-        v := m[j];
-        if Length( b.vectors ) >= decl then
-            decl := Maximum( decl + 100, m!.len );
-            dec := ZeroVector( dec, decl );
-        fi;
-        CleanRow(b,v,true,dec);
-        Add( p, ShallowCopy( dec ) );
-    od;
-    decl := Length( b.vectors );
-    j := 1;
-    while j <= Length( p ) and Length( p[ j ] ) < decl do
-        dec := ZeroVector( p[ j ], decl );
-        CopySubVector( p[ j ], dec, [1..Length(p[j])],[1..Length(p[j])] );
-        p[j] := dec;
-        j := j + 1;
-    od;
-    while j <= Length( p ) do
-        p[ j ] := p[ j ]{[1..decl]};
-        j := j + 1;
-    od;
-    b.p := CMat( p );
-    return b;
-  end);
-###
 
 InstallMethod( SemiEchelonRowsPX, "for a cmat", 
   [IsCMatRep and IsMutable],
@@ -283,28 +245,28 @@ InstallMethod( SemiEchelonRowsPX, "for an immutable cmat", [IsCMatRep],
     return SemiEchelonRowsPX( MutableCopyMat( m ) );
   end );
 
-InstallMethod( SemiEchelonNullspaceX, "for an immutable cmat", [IsCMatRep],
+InstallMethod( MutableNullspaceMatX, "for an immutable cmat", [IsCMatRep],
   function( m )
     local b;
     b := SemiEchelonRowsTX( MutableCopyMat( m ) );
     return b.relations;
   end );
-InstallMethod( SemiEchelonNullspaceX, "for a cmat", [IsCMatRep and IsMutable],
+InstallMethod( MutableNullspaceMatX, "for a cmat", [IsCMatRep and IsMutable],
   function( m )
     local b;
     b := SemiEchelonRowsTX(m);
     return b.relations;
   end );
-InstallMethod( SemiEchelonNullspace, "for a cmat", [IsCMatRep],
+InstallMethod( MutableNullspaceMat, "for a cmat", [IsCMatRep],
   function( m )
-    return SemiEchelonNullspaceX( MutableCopyMat( m ) );
+    return MutableNullspaceMatX( MutableCopyMat( m ) );
   end );
 
 InstallOtherMethod( NullspaceMatDestructive, "for a cmat", 
   [IsCMatRep and IsOrdinaryMatrix],
   function( m )
     local res;
-    res := SemiEchelonNullspaceX( m );
+    res := MutableNullspaceMatX( m );
     MakeImmutable(res);
     return res;
   end );
@@ -313,9 +275,24 @@ InstallOtherMethod( NullspaceMat, "for a cmat",
   [IsCMatRep and IsOrdinaryMatrix],
   function( m )
     local res;
-    res := SemiEchelonNullspaceX( MutableCopyMat( m ) );
+    res := MutableNullspaceMatX( MutableCopyMat( m ) );
     MakeImmutable(res);
     return res;
+  end );
+
+InstallMethod( SemiEchelonNullspaceX, "for a cmat",
+  [IsCMatRep],
+  function( m )
+    local n;
+    n := MutableNullspaceMatX( m );
+    return SemiEchelonRowsX( n );
+  end );
+InstallMethod( SemiEchelonNullspace, "for a cmat",
+  [IsCMatRep],
+  function( m )
+    local n;
+    n := MutableNullspaceMat( m );
+    return SemiEchelonRowsX( n );
   end );
 
 #############################################################################
