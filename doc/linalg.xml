@@ -1,0 +1,276 @@
+<!-- 
+
+  linalg.xml            cvec package documentation           Max Neunhoeffer
+
+         Copyright (C) 2005, Lehrstuhl D für Mathematik, RWTH-Aachen
+
+This chapter explains the mid-level linear algebra routines.
+
+-->
+
+<Chapter Label="linalg">
+<Heading>Linear Algebra routines</Heading>
+
+<Section Label="semiechelon">
+<Heading>Semi echelonised bases and cleaning</Heading>
+
+A semi echelonised basis is a record with the following components:
+<C>vectors</C> is a list of vectors of equal length, optionally
+(and optimally) they can be wrapped to a matrix. <C>pivots</C>
+is a list of integers. The number <M>i</M> in position <M>j</M> indicates
+that the <M>j</M>th vector in <C>vectors</C> has a one in column number
+<M>i</M> and all vectors with a number bigger than <M>j</M> in <C>vectors</C>
+have a zero in column number <M>i</M>.
+
+<P/>
+Note that for technical reasons another component <C>helper</C> is bound
+containing a <C>cvec</C> of length <M>1</M> over the same field.
+
+<P/>
+Note further that the output of the &GAP; library operation 
+<Ref Oper="SemiEchelonMat" BookName="Ref"/> is not compatible to this
+setup, because it contains a component <C>heads</C> that contains at 
+position <M>i</M>, if nonzero, the number of the row
+for that the pivot element is in column <M>i</M>.
+
+<ManSection>
+<Meth Name="EmptySemiEchelonBasis" Arg="v"/>
+<Returns> a new mutable empty semi echelonised basis </Returns>
+<Description>
+    The argument <A>v</A> must be a sample vector. Also a <C>cvecclass</C>
+    can be given instead.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="MakeSemiEchelonBasis" Arg="b"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Turns the output <A>b</A> of <Ref Oper="SemiEchelonMat" BookName="Ref"/>
+    into a valid semi echelonised basis in the sense of the 
+    <Package>cvec</Package> package. This means that the component
+    <C>pivots</C> is calculated from the component <C>heads</C>.
+    Use this function only if necessary. Directly use 
+    <Ref Meth="SemiEchelonRows"/> instead.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CleanRow" Arg="b, v, extend, dec"/>
+<Returns> <C>true</C> or <C>false</C> </Returns>
+<Description>
+    This is the basic operation for cleaning with a semi echelonised basis
+    <A>b</A>. The vector <A>v</A> is cleaned with the vectors in the
+    semi echelonised basis. The function returns <C>true</C> if <A>v</A>
+    lies in the span of <A>b</A> and false otherwise. 
+    <P/>
+    The boolean
+    value <A>extend</A> indicates, whether the basis should be extended
+    in the latter case by the newly cleaned vector. 
+    <P/>
+    The argument
+    <A>dec</A> is either <C>fail</C> in which case it is not used or
+    a vector over the same field as <A>v</A> that is at least as long
+    as the number <M>n</M>of vectors in <A>b</A> (plus one if <A>extend</A> is
+    <C>true</C>). In this case, the first <M>n</M> components of <A>dec</A>
+    are changed such that 
+    <M>\sum_{{i=1}}^{n} <A>dec</A>_i <A>b</A>_i</M>
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonRows" Arg="m"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    The argument <A>m</A> must be a <C>cmat</C>. This method calculates
+    a semi echelonised basis for the row space of <A>m</A>. 
+    <P/>
+    There are a
+    number of similar operations the names of which are derived from 
+    <Ref Meth="SemiEchelonRows"/> by appending single letters: The letters
+    <Q>P</Q>, <Q>T</Q> and <Q>X</Q> are modifiers and there are operations
+    for most of the <M>8</M> combinations of those letters being present or not
+    respectively. Always give the present letters in alphabetical order.
+    <P/>
+    The <Q>X</Q> indicates, that the input matrix may be
+    destroyed, that is, the rows of <A>m</A> will be changed and the
+    very same objects be used in the semi echelonised result basis.
+    <P/>
+    The <Q>T</Q> indicates, that the transformation is calculated, that is,
+    the resulting record <C>r</C> will have a compontent <C>coeffs</C>, such
+    that <C>r.coeffs * <A>m</A></C> is equal to <C>r.vectors</C> component
+    of the semi echelonised result. Further, with given letter <Q>T</Q>
+    there will be a component <C>relations</C> which is a basis for the
+    (left) nullspace of <A>m</A>.
+    <P/>
+    The <Q>P</Q> indicates, that a component <C>r.p</C> is calculated such
+    that <C>r.p * r.vectors</C> is the original matrix <A>m</A>.
+    <P/>
+    Currently the variants with <Q>P</Q> and <Q>T</Q> both present are not
+    implement because they will probably not be very useful.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonRowsX" Arg="m"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Same as <Ref Meth="SemiEchelonRows"/> but destructive in <A>m</A>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonRowsT" Arg="m"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Same as <Ref Meth="SemiEchelonRows"/> but in addition stores the
+    transformation, see <Ref Meth="SemiEchelonMatRows"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonRowsTX" Arg="m"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Same as <Ref Meth="SemiEchelonRowsT"/> but destructive in <A>m</A>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonRowsP" Arg="m"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Same as <Ref Meth="SemiEchelonRows"/> but in addition stores the
+    inverse transformation, see <Ref Meth="SemiEchelonMatRows"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonRowsPX" Arg="m"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Same as <Ref Meth="SemiEchelonRowsP"/> but destructive in <A>m</A>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="MutableNullspaceMat" Arg="m"/>
+<Returns> a <C>cmat</C> </Returns>
+<Description>
+    Returns a <C>cmat</C> the rows of which are a basis of the (left) nullspace
+    of the <C>cmat</C> <A>m</A>. Internally, <Ref Meth="SemiEchelonRowsT"/>
+    is used and the component <C>relations</C> of the result is returned.
+    The result is mutable, which is the reason for the introduction of 
+    a new operation besides <Ref Oper="NullspaceMat" BookName="Ref"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="MutableNullspaceMatX" Arg="m"/>
+<Returns> a <C>cmat</C> </Returns>
+<Description>
+    Same as <Ref Meth="MutableNullspaceMat"/> but destructive in <A>m</A>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="NullspaceMat" Arg="m"/>
+<Returns> an immutable <C>cmat</C> </Returns>
+<Description>
+    Behaves exactly as expected. <A>m</A> must be a <C>cmat</C>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="NullspaceMatDestructive" Arg="m"/>
+<Returns> an immutable <C>cmat</C> </Returns>
+<Description>
+    Behaves exactly as expected. <A>m</A> must be a <C>cmat</C>.
+</Description>
+</ManSection>
+
+</Section>
+
+<Section Label="polynomials">
+    <Heading>Characteristic and minimal polynomial</Heading>
+
+<ManSection>
+<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m"/>
+<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m, indetnr"/>
+<Returns> a record </Returns>
+<Description>
+    Calculates the characteristic polynomial of the <C>cmat</C> <A>m</A>
+    over its base field. Because during the calculations the polynomial
+    automatically comes as a product of some not necessarily irreducible
+    factors, the result is returned in a record with two components.
+    The <C>poly</C> component contains the full characteristic polynomial.
+    The <C>factors</C> component contains a list of not necessarily 
+    irreducibly factors the product of which is the characteristic polynomial.
+    If an indeterminate number is given as second argument, the polynomials
+    are written in that indeterminate, otherwise in the first indeterminate
+    over the base field.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="FactorsOfCharacteristicPolynomial" Arg="m"/>
+<Meth Name="FactorsOfCharacteristicPolynomial" Arg="m, indetnr"/>
+<Returns> a list </Returns>
+<Description>
+    Calculates the characteristic polynomial of the <C>cmat</C> <A>m</A>
+    over its base field. The result is a list of irreducible factors of
+    the characteristic polynomial of <A>m</A>, the product of which is
+    the characteristic polynomial. Because during the calculations the 
+    polynomial
+    automatically comes as a product of some not necessarily irreducible
+    factors, this is more efficient than just calculating the characteristic
+    polynomial and then factoring it.
+    If an indeterminate number is given as second argument, the polynomials
+    are written in that indeterminate, otherwise in the first indeterminate
+    over the base field.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="MinimalPolynomialOfMatrix" Arg="m"/>
+<Meth Name="MinimalPolynomialOfMatrix" Arg="m, indetnr"/>
+<Returns> a polynomial over the base field of <A>m</A> </Returns>
+<Description>
+    Calculates the minimal polynomial of the <C>cmat</C> <A>m</A>
+    over its base field. The polynomial is returned.
+    If an indeterminate number is given as second argument, the polynomials
+    are written in that indeterminate, otherwise in the first indeterminate
+    over the base field.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CharAndMinimalPolynomialOfMatrix" Arg="m"/>
+<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m, indetnr"/>
+<Returns> a record </Returns>
+<Description>
+    Calculates the characteristic and minimal polynomial of the 
+    <C>cmat</C> <A>m</A>
+    over its base field. Because during the calculation of the minimal 
+    polynomial the characteristic polynomial is calculated anyway, the
+    result is returned in a record with five components:
+    The <C>charpoly</C> component contains the full characteristic polynomial.
+    The <C>irreds</C> component contains the set of irreducible factors
+    of the characteristic polynomial as a list. The <C>mult</C> component
+    contains a corresponding list of multiplicities, that is in position
+    <M>i</M> is the multiplicity of the irreducible factor number <M>i</M>
+    in the characteristic polynomial. The component <C>minpoly</C> contains
+    the minimal polynomial and the component <C>multmin</C> the corresponding
+    multiplicities of the irreducible factors of the characteristic polynomial
+    in the minimal polynomial.
+    If an indeterminate number is given as second argument, the polynomials
+    are written in that indeterminate, otherwise in the first indeterminate
+    over the base field.
+</Description>
+</ManSection>
+         
+</Section>
+
+<!-- ############################################################ -->
+
+</Chapter>
