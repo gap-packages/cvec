@@ -1,0 +1,127 @@
+Dear All,
+
+Recently I noticed that a common problem in implementing code that
+uses compressed vectors and matrices over finite fields is that
+objects "lose their representation" or that it is not easy to get
+hold of similar objects "in the same representation".
+
+Examples:
+
+m a compressed matrix:
+==>  m{[1..2]} is no longer a compressed matrix but a list of 
+     compressed vectors
+
+v a compressed vector
+==>  It is difficult to create a vector of a different length
+     that is in the same (compressed) representation.
+
+These problems could all be overcome for the objects that are already
+implemented in the GAP library. However, when one wants to implement
+different representations of vectors and matrices (for example
+other kinds of compressed objects or sparse representations), there is no 
+infrastructure in the GAP library to support this with respect to
+the above problems.
+
+Therefore I propose to introduce the following operations (together with
+implementations for the standard compressed vectors and matrices):
+
+The common idea behind many of these operations is to give "sample objects"
+to choose the representation of the result. This idea already has turned
+out to be very useful in code I have written.
+
+The word "representation" is not to be taken too literally. In particular,
+I do not want to guarantee in the definition of the operation what the
+GAP type of the result is. I think in practice this can be decided
+more sensibly with in each method.
+ 
+
+ZeroVector( <vector>, <len> )
+
+returns a new mutable zero vector in the same representation as
+<vector> of a possibly different length <len>. The idea behind this
+is to be able to write code that preserves for example compression
+over a finite field but returning a vector of different length.
+
+
+ZeroMatrix( <matrix>, <rows>, <cols> )
+
+returns a new mutable zero matrix in the same representation as
+<matrix> of possibly different dimensions. The number of rows of
+the new matrix is <rows> and the number of columns is <cols>.
+The idea behind this is to be able to write code that preserves
+for example compression over a finite field.
+
+
+IdentityMatrix( <matrix>, <rows> )
+
+returns a new mutable identity matrix in the same representation as
+<matrix> with <rows> rows. Note that IdentityMat currently is a
+global function the arguments of which say nothing about the representation
+the result should come in.
+
+
+BaseField( <matrixorvector> )
+
+returns the base field of a matrix or a vector. This is only defined
+for wrapped matrices and vectors, not for plain lists. That is, for
+a plain list the operation returns fail. It is guaranteed
+that a call to this operation is only a very fast lookup.
+
+
+Matrix( <vectorlist>, <vector> )
+MatrixNC( <vectorlist>, <vector> )
+
+returns a matrix containing the vectors in <vectorlist> as rows.
+The idea behind this operation is to be able to return a wrapped
+matrix object containing the vectors in <vectorlist> rather than
+just a list of vectors to be able to use the method selection
+later on. The representation of the result is determined by the
+sample vector <vector>.
+The elements in <vectorlist> must be vectors of the same length
+as the sample vector <vector>. The sample vector is always necessary
+to be able to use the method selection. The <vectorlist> may be empty.
+Note that this currently violates the definition of
+`IsMatrix' which implies `IsTable' which implies non-emptyness.
+The NC method does not check the inputs.
+The default method simply returns <vectorlist>.
+For example a list of compressed vectors over the same field could
+be compressed into a compressed matrix object.
+
+
+CopySubVector( <src>, <dst>, <scols>, <dcols> )
+
+returns nothing. Does `<dst>{<dcols>} := <src>{<scols>}'
+without creating an intermediate object and thus - at least in
+special cases - much more efficiently. For certain objects like
+compressed vectors this might be significantly more efficient if 
+<scols> and <dcols> are ranges with increment 1.
+
+
+CopySubMatrix( <src>, <dst>, <srows>, <drows>, <scols>, <dcols> )
+
+returns nothing. Does `<dst>{<drows>}{<dcols>} := <src>{<srows>}{<scols>}'
+without creating an intermediate object and thus - at least in
+special cases - much more efficiently. For certain objects like
+compressed vectors this might be significantly more efficient if <scols>
+and <dcols> are ranges with increment 1.
+
+
+ExtractSubMatrix( <mat>, <rows>, <cols> )
+
+Does <mat>{<rows>}{<cols>} and returns the result. Preserves the
+representation of the matrix.
+
+
+Note that the latter three are there to overcome efficiency issues 
+with the standard slicing operations using {}. Note also that
+double slicing {}{} is not an operation and thus not overloadable.
+
+
+Most of these I have already put in an experimental version in matrix.g{d,i}
+in the development version.
+
+If we agree on this I would volunteer to finish the implementation and
+document it.
+
+Best regards,
+  Max
