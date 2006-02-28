@@ -249,7 +249,7 @@ InstallGlobalFunction( CVEC_RandomMat, function(arg)
       fi;
       c := CVEC_NewCVecClass(p,d,x);
   else
-      Error("Usage: CVEC_RandomMat( rows, [ cvecclass | cols, p, d ] )");
+      Print("Usage: CVEC_RandomMat( rows, [ cvecclass | cols, p, d ] )\n");
       return;
   fi;
   l := 0*[1..y+1];

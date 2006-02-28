@@ -97,3 +97,7 @@ DeclareGlobalFunction( "CVEC_GlueMatrices" );
 DeclareGlobalFunction( "CVEC_MakeJordanBlock" );
 DeclareGlobalFunction( "CVEC_MakeExample" );
 
+DeclareGlobalFunction( "CVEC_RelativeOrderPoly" );
+DeclareGlobalFunction( "CVEC_CalcOrderPoly" );
+DeclareGlobalFunction( "CVEC_NewMinimalPolynomial" );
+

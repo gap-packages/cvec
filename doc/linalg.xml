@@ -71,10 +71,14 @@ for that the pivot element is in column <M>i</M>.
     The argument
     <A>dec</A> is either <C>fail</C> in which case it is not used or
     a vector over the same field as <A>v</A> that is at least as long
-    as the number <M>n</M>of vectors in <A>b</A> (plus one if <A>extend</A> is
+    as the number <M>n</M> of vectors in <A>b</A> (plus one if <A>extend</A> is
     <C>true</C>). In this case, the first <M>n</M> components of <A>dec</A>
     are changed such that 
-    <M>\sum_{{i=1}}^{n} <A>dec</A>_i <A>b</A>_i</M>
+    <M>\sum_{{i=1}}^{n} <A>dec</A>_i <A>b</A>_i</M>. If <A>extend</A> is
+    <C>true</C> and <A>v</A> is not contained in the span of the vectors
+    in <A>b</A> and <A>dec</A> is a vector, then the first <M>n+1</M> 
+    components of <A>dec</A> are changed such that 
+    <M>\sum_{{i=1}}^{n+1} <A>dec</A>_i <A>b</A>_i</M>.
 </Description>
 </ManSection>
 
@@ -124,7 +128,7 @@ for that the pivot element is in column <M>i</M>.
 <Returns> a semi echelonised basis </Returns>
 <Description>
     Same as <Ref Meth="SemiEchelonRows"/> but in addition stores the
-    transformation, see <Ref Meth="SemiEchelonMatRows"/>.
+    transformation, see <Ref Meth="SemiEchelonRows"/>.
 </Description>
 </ManSection>
 
@@ -141,7 +145,7 @@ for that the pivot element is in column <M>i</M>.
 <Returns> a semi echelonised basis </Returns>
 <Description>
     Same as <Ref Meth="SemiEchelonRows"/> but in addition stores the
-    inverse transformation, see <Ref Meth="SemiEchelonMatRows"/>.
+    inverse transformation, see <Ref Meth="SemiEchelonRows"/>.
 </Description>
 </ManSection>
 

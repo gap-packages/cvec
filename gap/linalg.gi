@@ -688,4 +688,196 @@ InstallGlobalFunction( CVEC_MakeExample, function(f,p,l)
   return CVEC_GlueMatrices(ll);
 end );
 
+InstallGlobalFunction( CVEC_RelativeOrderPoly, function( m, v, subb, indetnr )
+  # v must not lie in subb, a semi echelonised basis of a subspace W, m a matrix
+  # v must already be cleaned with subb!
+  # Returns a record:
+  # Gives back a new semi echelonised basis of V/W (component b), together 
+  # with the relative order polynomial of v+W in V/W (component ordpol),
+  # v'=v*ordpol(m) in subb, and an invertible square matrix A with
+  # A*[v,vm,vm^2,...,vm^{d-1}] = b (to write vectors in V/W in terms of
+  # [v+W,vm+W,...]. Also a list vl containing [v,v*m,v*m^2,...,v*m^{d-1}]
+  # is bound.
+  # The original v is untouched!
+  local A,B,b,closed,d,dec,f,fam,i,l,lambda,o,ordpol,vcopy,vl,vv;
+  f := BaseField(m);
+  o := One(f);
+  fam := FamilyObj(o);
+  b := EmptySemiEchelonBasis(v);
+  dec := ZeroMutable(v);
+  CleanRow(b,ShallowCopy(v),true,dec);  # this puts v into b as first vector
+  lambda := [dec{[1]}];
+  vl := [v];
+  while true do
+      v := v * m;
+      Add(vl,v);
+      vcopy := ShallowCopy(v);
+      CleanRow(subb,vcopy,false,fail);
+      closed := CleanRow(b,vcopy,true,dec);
+      if closed then break; fi;
+      # now dec{[1..Length(b.vectors)]} * b.vectors = v
+      # however, we need to express vectors in terms of the v's, so we 
+      # have to invert the matrix of the dec's, this we do later on:
+      Add(lambda,dec{[1..Length(b.pivots)]});
+  od;
+  d := Length(b.pivots);
+  Unbind(vl[d+1]);  # this is linear dependent from the first d vectors!
+  # we have the lambdas, expressing v*m^(i-1) in terms of the semiechelon
+  # basis, now we have to express v*m^d in terms of the v*m^(i-1), that
+  # means inverting a matrix: 
+  B := CVEC_ZeroMat(d,CVecClass(lambda[d]));
+  for i in [1..d] do
+      CopySubVector(lambda[i],B[i],[1..i],[1..i]);
+  od;
+  A := B^-1;
+  l := - dec{[1..d]} * A;
+  l := Unpack(l);
+  Add(l,o);
+  ConvertToVectorRep(l,Size(f));
+  ordpol := UnivariatePolynomialByCoefficients(fam,l,indetnr);
+  vv := l[1] * vl[1];
+  for i in [2..Length(vl)] do
+      AddRowVector(vv,vl[i],l[i]);
+  od;
+  return rec( b := b, A := A, ordpol := ordpol, v := vv, vl := vl );
+end );
 
+InstallGlobalFunction( CVEC_CalcOrderPoly, 
+function( opi, v, i, indetnr )
+  local coeffs,g,h,j,ordpol,w;
+  ordpol := [];  # comes factorised
+  while i >= 1 do
+      coeffs := v{opi.ranges[i]};
+      if IsZero(coeffs) then
+          i := i - 1;
+          Print(".\c");
+          continue;
+      fi;
+      coeffs := Unpack(coeffs);
+      h := UnivariatePolynomialByCoefficients(opi.fam,coeffs,indetnr);
+      g := opi.rordpols[i]/Gcd(opi.rordpols[i],h);
+      Add(ordpol,g);
+      if i > 1 then Print("Relative order pol: ",g,"\n"); fi;
+      # This is the part coming from the ith cyclic space, now go down:
+      coeffs := CoefficientsOfUnivariatePolynomial(g);
+      w := coeffs[1]*v;
+      for j in [2..Length(coeffs)] do
+          v := v * opi.mm;
+          AddRowVector(w,v,coeffs[j]);
+      od;
+      # Now w is one subspace lower
+      v := w;
+      i := i - 1;
+      if IsZero(v) then break; fi;
+      #Print("i=",i," new vector: ");
+      #Display(v);
+  od;
+  return Product(ordpol);
+end );
+    
+BindGlobal( "CVEC_CalcOrderPolyEstimate", 
+function( est, opi, v, i, indetnr )
+  local c,coeffs,g,h,j,k,op,ordpol,w;
+  ordpol := [];  # comes factorised
+  op := UnivariatePolynomialByCoefficients(opi.fam,[opi.o],indetnr);
+  k := i;
+  while true do   # break is used near the end
+      coeffs := Unpack(v{opi.ranges[k]});
+      h := UnivariatePolynomialByCoefficients(opi.fam,coeffs,indetnr);
+      c := Gcd(opi.rordpols[k],h);
+      g := opi.rordpols[k]/c;
+      Add(ordpol,g);
+      op := op * g;
+      #Print("Relative order pol: ",g,"\n");
+      # This is the part coming from the ith cyclic space, now go down:
+      coeffs := CoefficientsOfUnivariatePolynomial(g);
+      w := coeffs[1]*v;
+      for j in [2..Length(coeffs)] do
+          v := v * opi.mm;
+          AddRowVector(w,v,coeffs[j]);
+      od;
+      # Now w is one subspace lower
+      v := w;
+      k := k - 1;
+      if IsZero(v) then break; fi;
+      if k = 0 then break; fi;
+      #Print("Check:",Degree(est[i-1])," ", Degree(est[k]*op),"\n");
+      if IsZero(est[i-1] mod (est[k] * op)) then
+          Print("|\c");
+          return est[i-1];
+      fi;
+      #Print("i=",i," new vector: ");
+      #Display(v);
+  od;
+  return op;
+end );
+    
+InstallGlobalFunction( CVEC_NewMinimalPolynomial, function( m, indetnr )
+  # a new try using Cheryl's ideas for cyclic matrices generalised to 
+  # an arbitrary matrix m
+  local A,b,d,est,g,i,l,opi,ordpol,p,pivs,re,v,vl,vli,w,zero;
+  zero := ZeroMutable(m[1]);
+  pivs := [1..Length(m)];
+  b := EmptySemiEchelonBasis(zero);
+  v := MatrixNC([],m[1]);   # start vectors for the spinning
+  vl := MatrixNC([],m[1]);  # start vectors together with their images under m
+  A := [];   # base changes within each subquotient
+  l := [];   # a list of semi echelon bases for the subquotients
+  # order polynomial infrastructure (grows over time):
+  opi := rec( f := BaseField(m),
+              d := [],
+              ranges := [],
+              rordpols := [],   # list of relative order polynomials
+              ordpols := [],    # list of real order polynomials
+              mm := fail,       # will be base-changed m later on
+            );  
+  opi.o := One(opi.f);
+  opi.fam := FamilyObj(opi.o);
+  Print(Length(m),":\c");
+  while Length(pivs) > 0 do
+      p := pivs[1];
+      w := ShallowCopy(zero);
+      w[p] := opi.o;
+      Add(v,w);   # FIXME: needed?
+      re := CVEC_RelativeOrderPoly(m,w,b,indetnr);
+      d := Degree(re.ordpol);
+      Print(d," \c");
+      Add(opi.rordpols,re.ordpol);
+      Add(opi.d,d);
+      Add(opi.ranges,[Length(b.vectors)+1..Length(b.vectors)+d]);
+      Add(l,re.b);  # FIXME: needed?
+      Add(A,re.A);  # FIXME: needed?
+      Append(vl,re.vl);
+      pivs := Difference(pivs,re.b.pivots);
+      # Add re.b to b:
+      Append(b.vectors,re.b.vectors);
+      Append(b.pivots,re.b.pivots);
+      # Note that the latter does not cost too much memory as the vectors
+      # are not copied.
+  od;
+  Print("\nDoing basechange...\c");
+  # Now we have spun up the whole space, that is, vl is a basis of the full
+  # row space
+  # Now we do the base change:
+  vli := vl^-1;
+  opi.mm := vl*m*vli;
+  Unbind(vl);  # no longer needed
+  Unbind(vli); # dito
+  ordpol := opi.rordpols[1];
+  Print("done\nCalculating order polynomials...\c");
+  est := [opi.rordpols[1]];
+  for i in [2..Length(opi.rordpols)] do
+      v := ShallowCopy(zero);
+      v[opi.ranges[i][1]] := opi.o;
+      g := CVEC_CalcOrderPolyEstimate(est,opi,v,i,indetnr);
+      if g <> ordpol then
+          ordpol := Lcm(ordpol,g);
+      fi;
+      est[i] := ordpol;
+      Print(i,"(",Length(opi.rordpols),"):",Degree(ordpol)," \c");
+      if Degree(ordpol) = Length(m) then   # a cyclic matrix!
+          break;
+      fi;
+  od;
+  return rec(minpoly := ordpol,charpoly := Product( opi.rordpols ),opi := opi);
+end );
