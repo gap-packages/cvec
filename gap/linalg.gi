@@ -750,14 +750,12 @@ function( opi, v, i, indetnr )
       coeffs := v{opi.ranges[i]};
       if IsZero(coeffs) then
           i := i - 1;
-          Print(".\c");
           continue;
       fi;
       coeffs := Unpack(coeffs);
       h := UnivariatePolynomialByCoefficients(opi.fam,coeffs,indetnr);
       g := opi.rordpols[i]/Gcd(opi.rordpols[i],h);
       Add(ordpol,g);
-      if i > 1 then Print("Relative order pol: ",g,"\n"); fi;
       # This is the part coming from the ith cyclic space, now go down:
       coeffs := CoefficientsOfUnivariatePolynomial(g);
       w := coeffs[1]*v;
@@ -812,6 +810,409 @@ function( est, opi, v, i, indetnr )
   return op;
 end );
     
+InstallGlobalFunction( CVEC_FactorMultiplicity,
+function( p, f )
+  local m,r;
+  m := 0;
+  while true do   # we use break
+    r := QuotientRemainder( p, f );
+    if not(IsZero(r[2])) then break; fi;
+    m := m + 1;
+    p := r[1];
+  od;
+  return m;
+end );
+
+InstallGlobalFunction( CVEC_NewMinimalPolynomialMCTuned, 
+function( m, eps, verify, indetnr )
+  # a new try using Cheryl's ideas for cyclic matrices generalised to 
+  # an arbitrary matrix m
+  # eps is a cyclotomic which is an upper bound for the error probability
+  # verify is a boolean indicating, whether the result should be verified,
+  # thereby proving correctness
+  # indetnr is the number of an indeterminate
+  local L,Li,b,coeffs,col,d,dec,g,i,irreds,j,l,lowbounds,mm,mult,
+        multmin,nrunclear,ns,opi,ordpol,ordpolsinv,p,pivs,prob,proof,r,s,vl,
+        vli,w,wcopy,ww,zero;
+  r := Runtime();
+  zero := ZeroMutable(m[1]);
+  pivs := [1..Length(m)];
+  b := EmptySemiEchelonBasis(zero);
+  vl := MatrixNC([],m[1]);  # start vectors together with their images under m
+  # order polynomial infrastructure (grows over time):
+  opi := rec( f := BaseField(m),
+              d := [],
+              ranges := [],
+              rordpols := [],   # list of relative order polynomials
+              mm := fail,       # will be base-changed m later on
+            );  
+  opi.o := One(opi.f);
+  opi.fam := FamilyObj(opi.o);
+  L := MatrixNC([],zero);
+  ordpolsinv := []; # here we collect information to be used for the order pols
+
+  Info(InfoCVec,2,"Spinning up vectors...");
+  while Length(b.vectors) < Length(m) do
+      p := pivs[1];
+      w := ShallowCopy(zero);
+      w[p] := opi.o;
+      # The following randomisation seems to cost a lot because of 
+      # non-sparseness, so we stick to the standard basis vectors.
+      #w := ShallowCopy(zero);
+      #repeat
+      #    Print(".\c");
+      #    Randomize(w);
+      #    CleanRow(b,w,false,fail);
+      #until not(IsZero(w));
+      #Print("!\c");
+
+      #re := CVEC_RelativeOrderPoly(m,w,b,indetnr);
+      # We inline a relative order calculation mod the current b:
+      d := Length(b.vectors);  # dimension of subspace:
+      Add(vl,ShallowCopy(w));
+      Add(b.vectors,w);
+      Add(b.pivots,p);
+      ww := ShallowCopy(zero);
+      ww[d+1] := opi.o;
+      Add(L,ww);
+      while true do
+          dec := ShallowCopy(zero);
+          w := w * m;
+          wcopy := ShallowCopy(w);
+          if CleanRow(b,wcopy,true,dec) then break; fi;
+          Add(vl,w);
+          Add(L,dec);
+      od;
+      # Now we have extended the basis b together with L and vl, such that
+      # we still have vl = L * b. The latest dec has the relative order 
+      # polynomial stuff in it in components d+1 .. Length(b.vectors)
+      # However we postpone calculating the order pols until we have inverted L.
+      Add(ordpolsinv,-dec{[d+1..Length(vl)]});
+      Add(opi.d,Length(vl)-d);  # the degree of the order polynomial
+      Add(opi.ranges,[d+1..Length(vl)]);
+      for i in [d+1..Length(vl)] do
+          RemoveSet(pivs,b.pivots[i]);
+      od;
+  od;
+
+  Print("Runtime so far: ",Runtime()-r,"\n");
+  Info(InfoCVec,2,"Inverting triangular base change matrix...");
+  Li := L^-1;
+  #Unbind(L);  # no longer used
+
+  Print("Runtime so far: ",Runtime()-r,"\n");
+  Info(InfoCVec,2,"Calculating relativ order polynomials...");
+  # Now calculate the order polynomials:
+  for i in [1..Length(ordpolsinv)] do
+      coeffs := ordpolsinv[i] * ExtractSubMatrix(Li,opi.ranges[i],
+                                                    opi.ranges[i]);
+      coeffs := Unpack(coeffs);
+      Add(coeffs,opi.o);
+      ConvertToVectorRep(coeffs,Size(opi.f));
+      Add(opi.rordpols,
+          UnivariatePolynomialByCoefficients(opi.fam,coeffs,indetnr));
+  od;
+
+  Print("Runtime so far: ",Runtime()-r,"\n");
+  Info(InfoCVec,2,"Factoring relative order polynomials...");
+  # Factor all parts:
+  col := List(opi.rordpols,f->Collected(Factors(f)));
+  # Collect all irreducible factors:
+  irreds := [];
+  mult := [];
+  lowbounds := [];
+  multmin := [];
+  for l in col do
+      for i in l do
+          p := Position(irreds,i[1]);
+          if p = fail then
+              Add(irreds,i[1]);
+              Add(mult,i[2]);
+              Add(lowbounds,i[2]);
+              Add(multmin,0);
+              p := Sortex(irreds);
+              mult := Permuted(mult,p);
+              lowbounds := Permuted(lowbounds,p);
+          else
+              mult[p] := mult[p] + i[2];
+              if i[2] > lowbounds[p] then
+                  lowbounds[p] := i[2];
+              fi;
+          fi;
+      od;
+  od;
+  nrunclear := 0;   # number of irreducible factors the multiplicity of which
+                    # are not yet known
+  for i in [1..Length(irreds)] do
+      if mult[i] > lowbounds[i] then
+          nrunclear := nrunclear + 1;
+      fi;
+  od;
+  Print("Runtime so far: ",Runtime()-r,"\n");
+  Info(InfoCVec,2,"Number of irreducible factors in charpoly: ",Length(irreds),
+                  " mult. in minpoly unknown: ",nrunclear);
+
+  ordpol := Lcm(Set(opi.rordpols)); # this is a lower bound for the minpoly
+                               # in particular, it is a multiple of rordpols[1]
+  Print("Runtime so far: ",Runtime()-r,"\n");
+
+  if nrunclear > 0 then
+      Info(InfoCVec,2,"Doing basechange...");
+      # Now we have spun up the whole space, that is, vl is a basis of the full
+      # row space
+      # Now we do the base change:
+      # We want: vli := vl^-1;
+      # We know: b = Li * vl, thus to find vl^-1, we just have to
+      # Calculate b^-1 * Li:
+      vli := b.vectors^-1 * Li;
+      Unbind(Li);  # no longer needed
+      Unbind(b);   # no longer needed
+      opi.mm := vl*m;
+      Unbind(vl);  # no longer needed
+      opi.mm := opi.mm*vli;
+      Unbind(vli); # no longer needed
+
+      i := 2;
+      p := 1/Size(opi.f);
+      proof := false;
+      repeat   # until verification said "OK"
+          Print("Runtime so far: ",Runtime()-r,"\n");
+          # This is an upper estimate of the probability not to find a generator
+          # of a cyclic space:
+          prob := p;   # we already have for one vector the order polynomial
+          Info(InfoCVec,2,"Calculating order polynomials...");
+          while i <= Length(opi.rordpols) do
+              w := ShallowCopy(zero);
+              w[opi.ranges[i][1]] := opi.o;
+              g := CVEC_CalcOrderPoly(opi,w,i,indetnr);
+              if not(IsZero(ordpol mod g)) then
+                  ordpol := Lcm(ordpol,g);
+              fi;
+              if Degree(ordpol) = Length(m) then   # a cyclic matrix!
+                  proof := true;
+                  break;
+              fi;
+              prob := prob * p;  # probability to have missed one Jordan block
+              Print( "Probability to have them all (%%): ",
+                     Int((1-prob)^nrunclear*1000),"\n");
+              if 1-(1-prob)^nrunclear < eps then
+                  break;   # this is the probability to have missed one
+              fi;
+              i := i + 1;
+          od;
+
+          Print("Runtime so far: ",Runtime()-r,"\n");
+          Info(InfoCVec,2,"Checking multiplicities...");
+          nrunclear := 0;
+          for j in [1..Length(irreds)] do
+              multmin[j] := CVEC_FactorMultiplicity(ordpol,irreds[j]);
+              if multmin[j] < mult[j] then
+                  nrunclear := nrunclear + 1;
+              fi;
+          od;
+          if nrunclear = 0 then proof := true; break; fi;   # result is correct!
+
+          Print("Runtime so far: ",Runtime()-r,"\n");
+          if verify then
+              Info(InfoCVec,2,"Verifying result (",nrunclear,
+                   " unclear multiplicities) ...");
+              proof := true;  # will be set to false once we discover something
+              for j in [1..Length(irreds)] do
+                  if multmin[j] < mult[j] then
+                      Info(InfoCVec,2,"Working on factor: ",irreds[j],
+                                      " multiplicity: ",multmin[j]);
+                      mm := Value(irreds[j],opi.mm)^multmin[j];
+                      ns := MutableNullspaceMatX(mm);
+                      Print("Runtime so far: ",Runtime()-r,"\n");
+                      if Length(ns) < mult[j] then
+                          proof := false;
+                          break;
+                      fi;
+                  fi;
+              od;
+          fi;
+      until not(verify) or proof;
+  else
+      proof := true;
+  fi;
+
+  return rec(minpoly := ordpol,
+             charpoly := Product( opi.rordpols ),
+             opi := opi,
+             irreds := irreds,
+             mult := mult,
+             multmin := multmin,
+             proof := proof);
+end );
+
+InstallGlobalFunction( CVEC_NewMinimalPolynomialMC, 
+function( m, eps, verify, indetnr )
+  # a new try using Cheryl's ideas for cyclic matrices generalised to 
+  # an arbitrary matrix m
+  # eps is a cyclotomic which is an upper bound for the error probability
+  # verify is a boolean indicating, whether the result should be verified,
+  # thereby proving correctness
+  # indetnr is the number of an indeterminate
+  local A,b,col,d,g,i,irreds,j,l,lowbounds,mm,mult,multmin,nrunclear,ns,opi,
+        ordpol,p,pivs,prob,proof,re,v,vl,vli,w,zero;
+  zero := ZeroMutable(m[1]);
+  pivs := [1..Length(m)];
+  b := EmptySemiEchelonBasis(zero);
+  v := MatrixNC([],m[1]);   # start vectors for the spinning
+  vl := MatrixNC([],m[1]);  # start vectors together with their images under m
+  A := [];   # base changes within each subquotient
+  l := [];   # a list of semi echelon bases for the subquotients
+  # order polynomial infrastructure (grows over time):
+  opi := rec( f := BaseField(m),
+              d := [],
+              ranges := [],
+              rordpols := [],   # list of relative order polynomials
+              ordpols := [],    # list of real order polynomials
+              mm := fail,       # will be base-changed m later on
+            );  
+  opi.o := One(opi.f);
+  opi.fam := FamilyObj(opi.o);
+  Print(Length(m),":\c");
+  while Length(pivs) > 0 do
+      p := pivs[1];
+      w := ShallowCopy(zero);
+      w[p] := opi.o;
+      Add(v,w);   # FIXME: needed?
+      re := CVEC_RelativeOrderPoly(m,w,b,indetnr);
+      d := Degree(re.ordpol);
+      Print(d," \c");
+      Add(opi.rordpols,re.ordpol);
+      Add(opi.d,d);
+      Add(opi.ranges,[Length(b.vectors)+1..Length(b.vectors)+d]);
+      Add(l,re.b);  # FIXME: needed?
+      Add(A,re.A);  # FIXME: needed?
+      Append(vl,re.vl);
+      pivs := Difference(pivs,re.b.pivots);
+      # Add re.b to b:
+      Append(b.vectors,re.b.vectors);
+      Append(b.pivots,re.b.pivots);
+      # Note that the latter does not cost too much memory as the vectors
+      # are not copied.
+  od;
+  Print("\n");
+  if Degree(opi.rordpols[1]) = Length(m) then
+      return rec( minpoly := opi.rordpols[1],
+                  charpoly := opi.rordpols[1],
+                  opi := opi );
+      # FIXME: Return a consistent result!
+  fi;
+  Info(InfoCVec,2,"Doing basechange...");
+  # Now we have spun up the whole space, that is, vl is a basis of the full
+  # row space
+  # Now we do the base change:
+  vli := vl^-1;
+  opi.mm := vl*m*vli;
+  Unbind(vl);  # no longer needed
+  Unbind(vli); # dito
+
+  Info(InfoCVec,2,"Factoring relative order polynomials...");
+  # Factor all parts:
+  col := List(opi.rordpols,f->Collected(Factors(f)));
+  # Collect all irreducible factors:
+  irreds := [];
+  mult := [];
+  lowbounds := [];
+  multmin := [];
+  for l in col do
+      for i in l do
+          p := Position(irreds,i[1]);
+          if p = fail then
+              Add(irreds,i[1]);
+              Add(mult,i[2]);
+              Add(lowbounds,i[2]);
+              Add(multmin,0);
+              p := Sortex(irreds);
+              mult := Permuted(mult,p);
+              lowbounds := Permuted(lowbounds,p);
+          else
+              mult[p] := mult[p] + i[2];
+              if i[2] > lowbounds[p] then
+                  lowbounds[p] := i[2];
+              fi;
+          fi;
+      od;
+  od;
+  nrunclear := 0;   # number of irreducible factors the multiplicity of which
+                    # are not yet known
+  for i in [1..Length(irreds)] do
+      if mult[i] > lowbounds[i] then
+          nrunclear := nrunclear + 1;
+      fi;
+  od;
+  Info(InfoCVec,2,"Number of irreducible factors in charpoly: ",Length(irreds),
+                  " mult. in minpoly unknown: ",nrunclear);
+
+  ordpol := Lcm(opi.rordpols); # this is a lower bound for the minpoly
+                               # in particular, it is a multiple of rordpols[1]
+  i := 2;
+  p := 1/Size(opi.f);
+  proof := false;
+  repeat   # until verification said "OK"
+      # This is an upper estimate of the probability not to find a generator
+      # of a cyclic space:
+      prob := p;   # we already have for one vector the order polynomial
+      Info(InfoCVec,2,"Calculating order polynomials...");
+      while i <= Length(opi.rordpols) do
+          v := ShallowCopy(zero);
+          v[opi.ranges[i][1]] := opi.o;
+          g := CVEC_CalcOrderPoly(opi,v,i,indetnr);
+          if not(IsZero(ordpol mod g)) then
+              ordpol := Lcm(ordpol,g);
+          fi;
+          if Degree(ordpol) = Length(m) then   # a cyclic matrix!
+              break;
+          fi;
+          prob := prob * p;  # probability to have missed one Jordan block
+          Print( "Probability to have them all (%%): ",
+                 Int((1-prob)^nrunclear*1000),"\n");
+          if 1-(1-prob)^nrunclear < eps then
+              break;   # this is the probability to have missed one
+          fi;
+          i := i + 1;
+      od;
+
+      Info(InfoCVec,2,"Checking multiplicities...");
+      nrunclear := 0;
+      for j in [1..Length(irreds)] do
+          multmin[j] := CVEC_FactorMultiplicity(ordpol,irreds[j]);
+          if multmin[j] < mult[j] then
+              nrunclear := nrunclear + 1;
+          fi;
+      od;
+      if nrunclear = 0 then proof := true; break; fi;   # result is correct!
+
+      if verify then
+          Info(InfoCVec,2,"Verifying result (",nrunclear,
+               " unclear multiplicities) ...");
+          proof := true;  # will be set to false once we discover something
+          for j in [1..Length(irreds)] do
+              if multmin[j] < mult[j] then
+                  Info(InfoCVec,2,"Working on factor: ",irreds[j],
+                                  " multiplicity: ",multmin[j]);
+                  mm := Value(irreds[j],opi.mm)^multmin[j];
+                  ns := MutableNullspaceMatX(mm);
+                  if Length(ns) < mult[j] then
+                      proof := false;
+                      break;
+                  fi;
+              fi;
+          od;
+      fi;
+  until not(verify) or proof;
+
+  return rec(minpoly := ordpol,
+             charpoly := Product( opi.rordpols ),
+             opi := opi,
+             irreds := irreds,
+             mult := mult,
+             multmin := multmin);
+end );
+
 InstallGlobalFunction( CVEC_NewMinimalPolynomial, function( m, indetnr )
   # a new try using Cheryl's ideas for cyclic matrices generalised to 
   # an arbitrary matrix m
