@@ -99,6 +99,7 @@ DeclareGlobalFunction( "CVEC_MakeExample" );
 
 DeclareGlobalFunction( "CVEC_RelativeOrderPoly" );
 DeclareGlobalFunction( "CVEC_CalcOrderPoly" );
+DeclareGlobalFunction( "CVEC_CalcOrderPolyTuned" );
 DeclareGlobalFunction( "CVEC_NewMinimalPolynomial" );
 DeclareGlobalFunction( "CVEC_FactorMultiplicity" );
 DeclareGlobalFunction( "CVEC_NewMinimalPolynomialMCTuned" );
