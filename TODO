@@ -1,3 +1,6 @@
+Use new MinimalPolynomial method with verification
+document MC method
+
 Document SemiEchelonNullspace[X]
 
 What happens for old compressed matrices with SemiEchelonRows and friends?
@@ -5,6 +8,8 @@ What happens for old compressed matrices with SemiEchelonRows and friends?
 SemiEchelonMat for cmats better?
 
 Things in matrix.gi for cmats???
+
+Monomiale Operation
 
 TODO aufraeumen:
 

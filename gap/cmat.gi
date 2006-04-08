@@ -985,9 +985,10 @@ InstallGlobalFunction( CVEC_HashFunctionForCMats, function(x,data)
   local i,res;
   res := 0;
   for i in [2..x!.len+1] do
-      res := res + CVEC_HashFunctionForCVecs(x!.rows[i],data);
+      res := (res * 1001 + CVEC_HashFunctionForCVecs(x!.rows[i],data)) 
+             mod data[1]+1;
   od;
-  return res mod data[1] + 1;
+  return res;
 end );
 
 InstallMethod( ChooseHashFunction, "for cmats",
