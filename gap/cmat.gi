@@ -33,8 +33,7 @@ InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
     od;
     ty := NewType(CollectionsFamily(CollectionsFamily(
                         cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam])),
-                  IsMatrix and IsOrdinaryMatrix and HasLength and
-                  IsComponentObjectRep and IsCMatRep and IsMutable);
+                  IsCMatRep and IsMutable);
     return Objectify(ty,m);
 end );
 

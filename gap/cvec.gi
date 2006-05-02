@@ -158,13 +158,9 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
 
       # Now the starting filter list:
       if size = 0 then
-          filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
-                   IsCopyable and CanEasilyCompareElements and
-                   CanEasilySortElements and IsCVecRepOverSmallField;
+          filts := IsCVecRep and IsCVecRepOverSmallField;
       else
-          filts := IsCVecRep and IsNoImmediateMethodsObject and HasLength and
-                   IsCopyable and CanEasilyCompareElements and
-                   CanEasilySortElements;
+          filts := IsCVecRep;
       fi;
 
       # Note that IsMutable is added below, when we create the vector type

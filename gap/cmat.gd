@@ -13,7 +13,8 @@
 ## The technical stuff for typing:
 #############################################################################
 
-DeclareRepresentation( "IsCMatRep", IsComponentObjectRep, [] );
+DeclareRepresentation( "IsCMatRep", 
+  IsComponentObjectRep and IsMatrix and IsOrdinaryMatrix and HasLength, [] );
 
 
 #############################################################################

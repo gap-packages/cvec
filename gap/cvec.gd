@@ -22,7 +22,11 @@ DeclareInfoClass( "InfoCVec" );
 BindGlobal("CVecFieldInfoFamily",NewFamily("CVecFieldInfoFamily"));
 BindGlobal("CVecClassFamily",NewFamily("CVecClassFamily"));
 
-DeclareRepresentation( "IsCVecRep", IsDataObjectRep, [] );
+DeclareRepresentation( "IsCVecRep", 
+  IsDataObjectRep and HasLength and IsCopyable and CanEasilyCompareElements and
+  CanEasilySortElements and IsListDefault and IsSmallList and 
+  IsConstantTimeAccessList and IsFinite, [] );
+  # How about IsNoImmediateMethodsObject???
 DeclareFilter( "IsCVecRepOverSmallField" );
 
 #############################################################################
