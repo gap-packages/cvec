@@ -842,7 +842,7 @@ InstallMethod( IntegerRep, "for cvecs", [IsCVecRep],
   end);
 
 InstallOtherMethod( NumberFFVector, "for a cvec, and a field size",
-  [IsCVecRep, IsPosInt],
+  [IsCVecRep and IsRowVector and IsFFECollection, IsPosInt],
   function(v,sz)
     local bas,c,f,halfword,i,l,res,wordlen;
     c := DataType(TypeObj(v));
@@ -872,7 +872,8 @@ InstallOtherMethod( NumberFFVector, "for a cvec, and a field size",
     return res;
   end);
 
-InstallOtherMethod( NumberFFVector, "for a cvec", [IsCVecRep],
+InstallOtherMethod( NumberFFVector, "for a cvec", 
+  [IsCVecRep and IsRowVector and IsFFECollection],
   function(v)
     local c;
     c := DataType(TypeObj(v));
