@@ -1753,3 +1753,24 @@ InstallMethod( Fold, "for a cvec and an integer",
     return CVEC_CMatMaker(l,cl);
   end );
 
+#############################################################################
+# (Un-)Pickling:
+#############################################################################
+
+InstallMethod( IO_Pickle, "for cmats",
+  [IsFile, IsCMatRep and IsList],
+  function( f, m )
+    if IO_Write(f,"CMAT") = IO_Error then return IO_Error; fi;
+    if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
+    return IO_OK;
+  end );
+
+IO_Unpicklers.CMAT :=
+  function( f )
+    local m;
+    m := CVEC_ReadMat( f );
+    if m = fail then return IO_Error; fi;
+    return m;
+  end;
+
+

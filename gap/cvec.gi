@@ -1150,3 +1150,27 @@ InstallMethod( ChooseHashFunction, "for cvecs",
                 data := [hashlen,bytelen] );
   end );
 
+
+#############################################################################
+# (Un-)Pickling:
+#############################################################################
+
+InstallMethod( IO_Pickle, "for cvecs",
+  [IsFile, IsCVecRep and IsList],
+  function( f, v )
+    local m;
+    if IO_Write(f,"CVEC") = IO_Error then return IO_Error; fi;
+    m := CVEC_CMatMaker( [0,v], DataType(TypeObj(v)) );
+    if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
+    return IO_OK;
+  end );
+
+IO_Unpicklers.CVEC :=
+  function( f )
+    local m;
+    m := CVEC_ReadMat( f );
+    if m = fail then return IO_Error; fi;
+    return m[1];
+  end;
+
+
