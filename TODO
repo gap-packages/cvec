@@ -1,5 +1,6 @@
 Use new MinimalPolynomial method with verification
 document MC method
+Document Fold and Unfold
 
 Document destructiveness of Matrix{NC} and CMat
 
