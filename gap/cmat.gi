@@ -1712,3 +1712,44 @@ InstallMethod( KroneckerProduct, "for cmats",
       return AxB;
     end );
 
+#############################################################################
+# Folding of matrices and vectors:
+#############################################################################
+
+InstallMethod( Unfold, "for a cmat",
+  [ IsCMatRep ],
+  function( m )
+    local cl,i,v,vcl,x,y;
+    cl := m!.vecclass;
+    x := cl![CVEC_IDX_len];
+    y := m!.len;
+    vcl := CVEC_NewCVecClassSameField(cl,x*y);
+    v := CVEC_New(vcl);
+    for i in [1..y] do
+        CVEC_SLICE(m!.rows[i+1],v,1,x,x*(i-1)+1);
+    od;
+    return v;
+  end );
+
+InstallMethod( Fold, "for a cvec and an integer",
+  [ IsCVecRep, IsInt ],
+  function( v, x )
+    local cl,i,l,len,q,vcl,w;
+    vcl := DataType(TypeObj(v));
+    cl := CVEC_NewCVecClassSameField( vcl, x );
+    len := vcl![CVEC_IDX_len];
+    q := QuotientRemainder(len,x);
+    if q[2] <> 0 then
+        Error("x must be a divisor of the length of v");
+        return;
+    fi;
+    q := q[1];
+    l := 0*[q+1];
+    for i in [2..q+1] do
+        w := CVEC_New(cl);
+        CVEC_SLICE(v,w,(i-2)*x+1,x,1);
+        l[i] := w;
+    od;
+    return CVEC_CMatMaker(l,cl);
+  end );
+

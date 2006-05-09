@@ -1,6 +1,8 @@
 Use new MinimalPolynomial method with verification
 document MC method
 
+Document destructiveness of Matrix{NC} and CMat
+
 Document SemiEchelonNullspace[X]
 
 What happens for old compressed matrices with SemiEchelonRows and friends?

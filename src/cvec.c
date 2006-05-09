@@ -3624,6 +3624,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
             vectors : matrix of basis vectors in semi echelon form
                       must be a cmat here!
             pivots  : integer list of pivot columns of basis matrix
+                      must be a plain list rep!!!
      vec : vector of same length as basis vectors
            must be a cvec here
      extend : either true or false, indicating, whether the basis is extended
@@ -3654,6 +3655,11 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   Int i,j;
   Int newpiv;
   int fnzcounter = 0;
+
+  if (TNUM_OBJ(pivots) < FIRST_PLIST_TNUM || 
+      TNUM_OBJ(pivots) > LAST_PLIST_TNUM) {
+      return OurErrorBreakQuit("CLEANROWKERNEL: pivots is not in plist rep");
+  }
 
   if (dec == Fail)
       cldec = 0L;
