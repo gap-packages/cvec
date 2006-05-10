@@ -1760,16 +1760,28 @@ InstallMethod( Fold, "for a cvec and an integer",
 InstallMethod( IO_Pickle, "for cmats",
   [IsFile, IsCMatRep and IsList],
   function( f, m )
-    if IO_Write(f,"CMAT") = IO_Error then return IO_Error; fi;
+    local tag;
+    if IsMutable(m) then tag := "MCMA";
+    else tag := "ICMA"; fi;
+    if IO_Write(f,tag) = IO_Error then return IO_Error; fi;
     if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
     return IO_OK;
   end );
 
-IO_Unpicklers.CMAT :=
+IO_Unpicklers.MCMA :=
   function( f )
     local m;
     m := CVEC_ReadMat( f );
     if m = fail then return IO_Error; fi;
+    return m;
+  end;
+
+IO_Unpicklers.ICMA :=
+  function( f )
+    local m;
+    m := CVEC_ReadMat( f );
+    if m = fail then return IO_Error; fi;
+    MakeImmutable(m);
     return m;
   end;
 

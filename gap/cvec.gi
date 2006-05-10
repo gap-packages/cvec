@@ -1158,19 +1158,27 @@ InstallMethod( ChooseHashFunction, "for cvecs",
 InstallMethod( IO_Pickle, "for cvecs",
   [IsFile, IsCVecRep and IsList],
   function( f, v )
-    local m;
-    if IO_Write(f,"CVEC") = IO_Error then return IO_Error; fi;
+    local m,tag;
+    if IsMutable(v) then tag := "MCVC";
+    else tag := "ICVC"; fi;
+    if IO_Write(f,tag) = IO_Error then return IO_Error; fi;
     m := CVEC_CMatMaker( [0,v], DataType(TypeObj(v)) );
     if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
     return IO_OK;
   end );
 
-IO_Unpicklers.CVEC :=
+IO_Unpicklers.MCVC :=
   function( f )
     local m;
-    m := CVEC_ReadMat( f );
-    if m = fail then return IO_Error; fi;
+    m := CVEC_ReadMat( f ); if m = fail then return IO_Error; fi;
     return m[1];
   end;
 
+IO_Unpicklers.ICVC :=
+  function( f )
+    local m;
+    m := CVEC_ReadMat( f ); if m = fail then return IO_Error; fi;
+    MakeImmutable(m);
+    return m[1];
+  end;
 
