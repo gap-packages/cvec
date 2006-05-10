@@ -38,3 +38,15 @@ doc/manual.six: doc/cvec.xml doc/intro.xml doc/install.xml doc/datastrucs.xml \
 
 clean:
 	rm -rf bin/@GAPARCH@ Makefile
+
+archive: doc
+	(cd .. ; tar czvf cvec.tar.gz --exclude ".svn" --exclude @GAPARCH@ cvec)
+
+WEBPOS=/home/antares/neunhoef/mywebpage/Computer/Software/Gap/cvec
+
+towww: archive
+	cp PackageInfo.g ${WEBPOS}
+	cp README ${WEBPOS}/README.cvec
+	cp doc/manual.pdf ${WEBPOS}/cvec.pdf
+	cp ../cvec.tar.gz ${WEBPOS}
+
