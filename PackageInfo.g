@@ -267,9 +267,9 @@ Dependencies := rec(
 ##  done automatically and need not be included in this function.
 #AvailabilityTest := ReturnTrue,
 AvailabilityTest := function()
-  if not "io" in SHOW_STAT() and
+  if not "cvec" in SHOW_STAT() and
      Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") = fail then
-    Info(InfoWarning, 1, "cvec: kernel cvec functions not available.");
+    #Info(InfoWarning, 1, "cvec: kernel cvec functions not available.");
     return fail;
   fi;
   return true;
