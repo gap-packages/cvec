@@ -675,7 +675,7 @@ STATIC Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
             res = res * p + ((wo >> shift) & maskp);
         if (split == True) {
             SET_ELM_PLIST(l,2*i-1,
-                 INTOBJ_INT(res & ((1 << (4*BYTESPERWORD)) - 1L)));
+                 INTOBJ_INT(res & ((1UL << (4*BYTESPERWORD)) - 1UL)));
             SET_ELM_PLIST(l,2*i,
                  INTOBJ_INT(res >> (4*BYTESPERWORD)));
         } else {
@@ -2523,10 +2523,10 @@ STATIC void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
         if (stanr*bitsperel == 8*BYTESPERWORD)
             stamask = WORDALLONE;
         else
-            stamask = ((1UL << (stanr*bitsperel))-1) 
+            stamask = ((1UL << (stanr*bitsperel))-1UL) 
                                   << ((fr % elsperword) * bitsperel);
         endnr = (fr+le) % elsperword;
-        endmask = (1UL << (endnr*bitsperel))-1;
+        endmask = (1UL << (endnr*bitsperel))-1UL;
         {
             register Word *v = src + (fr/elsperword)*d;
             register Word *w = dst + (to/elsperword)*d;
@@ -2553,20 +2553,20 @@ STATIC void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
         shiftr = elsperword-shiftl;
         shiftl *= bitsperel;
         shiftr *= bitsperel;
-        kdomask = ((1UL << shiftl)-1);
+        kdomask = ((1UL << shiftl)-1UL);
         upmask = kdomask << shiftr;
         kdomask = ~kdomask;
-        domask = (1UL << shiftr)-1;
+        domask = (1UL << shiftr)-1UL;
         kupmask = ~(domask << shiftl);
         stanr = elsperword - (fr % elsperword);
         if (stanr > le) stanr = le;
         if (stanr*bitsperel == 8*BYTESPERWORD)
             stamask = WORDALLONE;
         else
-            stamask = ((1UL << (stanr*bitsperel))-1) 
+            stamask = ((1UL << (stanr*bitsperel))-1UL) 
                                   << ((fr % elsperword) * bitsperel);
         endnr = (fr+le) % elsperword;
-        endmask = (1UL << (endnr*bitsperel))-1;
+        endmask = (1UL << (endnr*bitsperel))-1UL;
 
         {
             register Word *v = src + (fr/elsperword)*d;
@@ -3057,7 +3057,7 @@ STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     Int elsperword32 = elsperword/2;
     /* note that elsperword is always even on 64bit machines! */
     Word wordlen32 = (len + elsperword32 - 1)/elsperword32;
-    Word mask = (1UL << (elsperword32 * bitsperel))-1;
+    Word mask = (1UL << (elsperword32 * bitsperel))-1UL;
     register Word *p;
     register Word wo;
     register int shift = elsperword32 * bitsperel;
@@ -3075,7 +3075,7 @@ STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     GrowString(s,wordlen32*4*d);
     SET_LEN_STRING(s,wordlen32*4*d);
 
-    if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
+    if ((wordlen32 & 1) != 0) wordlen--;  /* Do not copy last word */
     p = DATA_CVEC(v);
     q = (Word32 *) CHARS_STRING(s);
     while (--wordlen >= 0) {
@@ -3087,7 +3087,7 @@ STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
         }
         q += d;   /* Skip upper halves in result */
     }
-    if (wordlen32 & 1 != 0) {  /* Handle last half of word: */
+    if ((wordlen32 & 1) != 0) {  /* Handle last half of word: */
         for (k = d-1;k >= 0;k--)
             *q++ = (Word32) (*p++ & mask);
     }
@@ -3195,7 +3195,7 @@ STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
 
     wordlen /= d;   /* We remember the factor d ourselves! */
 
-    if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
+    if ((wordlen32 & 1) != 0) wordlen--;  /* Do not copy last word */
     p = (Word32 *) CHARS_STRING(s);
     q = DATA_CVEC(v);
     while (--wordlen >= 0) {
@@ -3205,7 +3205,7 @@ STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
         }
         p += d;   /* Skip upper halves in result */
     }
-    if (wordlen32 & 1 != 0) {  /* Handle last half of word: */
+    if ((wordlen32 & 1) != 0) {  /* Handle last half of word: */
         for (k = d-1;k >= 0;k--)
             *q++ = (Word) (*p++);
     }
