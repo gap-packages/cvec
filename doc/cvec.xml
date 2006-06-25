@@ -16,7 +16,7 @@
     <Title>GAP 4 Package <Package>cvec</Package></Title>
     <Subtitle>Compact vectors over finite fields</Subtitle>
     <Version>
-      <#Include SYSTEM "../VERSION">
+      Version <#Include SYSTEM "../VERSION">
     </Version>
     <Author>Max Neunhöffer
 <Address>
