@@ -440,7 +440,7 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
   end);
 
 InstallOtherMethod( \{\}, "for a cmat, and a list",
-  [IsCMatRep and IsMatrix, IsHomogeneousList],
+  [IsCMatRep and IsMatrix, IsList],
   function(m,li)
     local l;
     l := m!.rows{li+1};
@@ -448,7 +448,7 @@ InstallOtherMethod( \{\}, "for a cmat, and a list",
   end);
 
 InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
-  [IsCMatRep and IsMatrix and IsMutable, IsHomogeneousList, 
+  [IsCMatRep and IsMatrix and IsMutable, IsList, 
    IsCMatRep and IsMatrix],
   function(m,l,n)
     local i;
@@ -632,7 +632,7 @@ end );
 
 InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
-   IsHomogeneousList,IsHomogeneousList,IsHomogeneousList,IsHomogeneousList],
+   IsList,IsList,IsList,IsList],
   function( src,dst,srows,drows,scols,dcols )
     if Length(srows) <> Length(drows) then
         Error("CVEC_CopySubMatrix: row lists must have equal length");
@@ -654,7 +654,7 @@ InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
   end );
 
 InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
-  [IsCMatRep and IsMatrix, IsHomogeneousList, IsHomogeneousList],
+  [IsCMatRep and IsMatrix, IsList, IsList],
   function( mat, rows, cols )
     local i,l,res,vcl;
     vcl := mat!.vecclass;
