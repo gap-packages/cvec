@@ -130,6 +130,14 @@ InstallMethod( MatrixNC, "for a list of cvecs and a cvec",
     return CVEC_CMatMaker(l,DataType(TypeObj(v)));
   end );
 
+InstallMethod( MatrixNC, "for a list of cvecs and a cmat",
+  [IsList and IsMutable, IsCMatRep],
+  function(l,m)
+    local c;
+    Add(l,0,1);
+    return CVEC_CMatMaker(l,m!.vecclass);
+  end );
+
 InstallMethod( MatrixNC, "for an immutable list of cvecs and a cvec",
   [IsList, IsCVecRep],
   function(l,v)
@@ -137,6 +145,17 @@ InstallMethod( MatrixNC, "for an immutable list of cvecs and a cvec",
     li := [0];
     Append(li,l);
     m := CVEC_CMatMaker(li,DataType(TypeObj(v)));
+    MakeImmutable(m);
+    return m;
+  end );
+
+InstallMethod( MatrixNC, "for an immutable list of cvecs and a cmat",
+  [IsList, IsCMatRep],
+  function(l,n)
+    local li,m;
+    li := [0];
+    Append(li,l);
+    m := CVEC_CMatMaker(li,n!.vecclass);
     MakeImmutable(m);
     return m;
   end );
@@ -153,6 +172,20 @@ InstallMethod( Matrix, "for a list of cvecs and a cvec",
         fi;
     od;
     return MatrixNC(l,v);
+  end );
+
+InstallMethod( Matrix, "for a list of cvecs and a cmat",
+  [IsList, IsCMatRep],
+  function(l,m)
+    local cl,i;
+    cl := m!.vecclass;
+    for i in [1..Length(l)] do
+        if not(IsCVecRep(l[i])) or 
+           not(IsIdenticalObj(DataType(TypeObj(l[i])),cl)) then
+            Error("vectors not all in same cvecclass");
+        fi;
+    od;
+    return MatrixNC(l,m);
   end );
 
 # Some methods to make special matrices:
@@ -439,6 +472,18 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
     m!.rows[pos+1] := v;
   end);
 
+InstallMethod( ElmMatrix, "for a cmat and two positions",
+  [IsCMatRep and IsMatrix, IsPosInt, IsPosInt],
+  function( m, row, col )
+    return m!.rows[row+1][col];
+  end );
+
+InstallMethod( AssMatrix, "for a cmat, two positions, and an ffe",
+  [IsCMatRep and IsMatrix, IsPosInt, IsPosInt, IsObject],
+  function( m, row, col, el )
+    m!.rows[row+1][col] := el;
+  end );
+
 InstallOtherMethod( \{\}, "for a cmat, and a list",
   [IsCMatRep and IsMatrix, IsList],
   function(m,li)
@@ -464,6 +509,14 @@ InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
 InstallOtherMethod( Length, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m) return m!.len; end);
+
+InstallMethod( Dimensions, "for a cmat",
+  [IsCMatRep and IsMatrix and IsMatrixObj],
+  function(m) return [m!.len,m!.vecclass![2]]; end );
+
+InstallMethod( RowLength, "for a cmat",
+  [IsCMatRep and IsMatrix and IsMatrixObj],
+  function(m) return m!.vecclass![2]; end );
 
 InstallOtherMethod( ShallowCopy, "for a cmat",
   [IsCMatRep and IsMatrix],
@@ -939,6 +992,13 @@ InstallOtherMethod( Characteristic, "for a cmat", [IsCMatRep and IsMatrix],
 InstallOtherMethod( DegreeFFE, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     return m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+  end);
+    
+InstallMethod( BaseDomain, "for a cmat", [IsCMatRep and IsMatrix],
+  function(m)
+    local c;
+    c := m!.vecclass;
+    return c![CVEC_IDX_GF];
   end);
     
 InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
@@ -1607,6 +1667,28 @@ end );
 #############################################################################
 # Further handling of matrices: 
 #############################################################################
+
+InstallMethod( PositionNonZero, "for a cmat",
+  [ IsCMatRep and IsMatrix ],
+  function(m)
+    local i;
+    i := 1;
+    while i <= m!.len and IsZero(m!.rows[i+1]) do i := i + 1; od;
+    return i;
+  end );
+
+InstallMethod( PositionNonZero, "for a cmat, and an integer",
+  [ IsCMatRep and IsMatrix, IsInt ],
+  function(m,j)
+    local i;
+    i := j+1;
+    while i <= m!.len and IsZero(m!.rows[i+1]) do i := i + 1; od;
+    if i > m!.len then
+        return m!.len + 1;
+    else
+        return i;
+    fi;
+  end );
 
 InstallMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)

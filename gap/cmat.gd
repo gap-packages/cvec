@@ -14,7 +14,8 @@
 #############################################################################
 
 DeclareRepresentation( "IsCMatRep", 
-  IsComponentObjectRep and IsMatrix and IsOrdinaryMatrix and HasLength, [] );
+  IsComponentObjectRep and IsMatrix and IsOrdinaryMatrix and HasLength and
+  IsRowListMatrix, [] );
 
 
 #############################################################################

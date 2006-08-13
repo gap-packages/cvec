@@ -8,6 +8,10 @@
 ##  Initialization of the cvec package
 ##  
 
+if not(IsBound(IsMatrixObj)) then
+    ReadPackage("cvec", "gap/matobj.gd");
+fi;
+
 ReadPackage("cvec", "gap/cvec.gd");
 ReadPackage("cvec", "gap/cmat.gd");
 ReadPackage("cvec", "gap/linalg.gd");

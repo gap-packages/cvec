@@ -712,8 +712,8 @@ InstallOtherMethod( ZeroSameMutability, "for cvecs", [IsCVecRep],
   end);
 
 InstallMethod( ZeroVector, "for a cvec and an integer",
-  [IsCVecRep, IsInt],
-  function(v,len)
+  [IsInt, IsCVecRep],
+  function(len,v)
     local cl;
     cl := CVEC_NewCVecClassSameField(DataType(TypeObj(v)),len);
     return CVEC_NEW(cl,cl![CVEC_IDX_type]);
@@ -779,6 +779,18 @@ InstallOtherMethod( CVec, "for a compressed 8bit vector",
     CVEC_INTREP_TO_CVEC(v,w);
     return w;
   end);
+
+InstallMethod( Vector, "for a list of finite field elements, and a cvec",
+  [IsList, IsCVecRep],
+  function( l, v )
+    local c;
+    if Length(l) = Length(v) then
+        return CVec(l,DataType(TypeObj(v)));
+    else
+        c := CVEC_NewCVecClassSameField(DataType(TypeObj(v)),Length(l));
+        return CVec(l,c);
+    fi;
+  end );
 
 # And the way back:
 
@@ -936,6 +948,13 @@ InstallOtherMethod( DegreeFFE, "for cvecs", [IsCVecRep],
     local c;
     c := DataType(TypeObj(v));
     return c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+  end);
+    
+InstallMethod( BaseDomain, "for cvecs", [IsCVecRep],
+  function(v)
+    local c;
+    c := DataType(TypeObj(v));
+    return c![CVEC_IDX_GF];
   end);
     
 InstallMethod( BaseField, "for cvecs", [IsCVecRep],

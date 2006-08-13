@@ -25,7 +25,7 @@ BindGlobal("CVecClassFamily",NewFamily("CVecClassFamily"));
 DeclareRepresentation( "IsCVecRep", 
   IsDataObjectRep and HasLength and IsCopyable and CanEasilyCompareElements and
   CanEasilySortElements and IsListDefault and IsSmallList and 
-  IsConstantTimeAccessList and IsFinite, [] );
+  IsConstantTimeAccessList and IsFinite and IsRowVectorObj, [] );
   # How about IsNoImmediateMethodsObject???
 DeclareFilter( "IsCVecRepOverSmallField" );
 
@@ -99,7 +99,7 @@ DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 DeclareOperation( "CVec", [IsObject, IsPosInt, IsPosInt] );
 DeclareOperation( "CVec", [IsObject, IsObject] );
 DeclareOperation( "CVec", [IsObject] );
-DeclareOperation( "Unpack", [IsObject] );
+DeclareOperation( "Unpack", [IsCVecRep] );
 DeclareOperation( "IntegerRep", [IsObject] );
 DeclareOperation( "CVecNumber", [IsInt, IsCVecClass] );
 DeclareOperation( "CVecNumber", [IsInt, IsPosInt, IsPosInt, IsPosInt] );
