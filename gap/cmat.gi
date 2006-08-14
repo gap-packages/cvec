@@ -223,6 +223,18 @@ InstallGlobalFunction( CVEC_ZeroMat, function(arg)
   return CVEC_CMatMaker(l,c);
 end );
 
+InstallMethod( ZeroMatrix, "for two integers and a cmat",
+  [ IsInt, IsInt, IsCMatRep ],
+  function( y, x, m )
+    local c;
+    if x = m!.vecclass![CVEC_IDX_len] then
+        return CVEC_ZeroMat(y,m!.vecclass);
+    else
+        c := CVEC_NewCVecClassSameField(m!.vecclass,x);
+        return CVEC_ZeroMat(y,c);
+    fi;
+  end );
+
 InstallGlobalFunction( CVEC_IdentityMat, function(arg)
   local c,d,i,l,p,y;
   if Length(arg) = 1 then
