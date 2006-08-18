@@ -269,6 +269,15 @@ InstallMethod( CVecClass, "for three integers", [IsPosInt, IsPosInt, IsInt],
     return CVEC_NewCVecClass(p,d,l);
   end );
 
+InstallMethod( CVecClass, "for a finite field and an integer", 
+  [IsField and IsFinite, IsInt],
+  function(f,l)
+    local p,d;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    return CVEC_NewCVecClass(p,d,l);
+  end );
+
 InstallGlobalFunction( CVEC_New, function(arg)
   local c,d,l,p;
   if Length(arg) = 1 then
@@ -279,6 +288,11 @@ InstallGlobalFunction( CVEC_New, function(arg)
       if IsCVecClass(c) then
           return CVEC_NEW(c,c![CVEC_IDX_type]);
       fi;
+  elif Length(arg) = 2 then
+      p := Characteristic(arg[1]);
+      d := DegreeOverPrimeField(arg[1]);
+      l := arg[2];
+      
   elif Length(arg) = 3 then
       p := arg[1];
       d := arg[2];
@@ -289,7 +303,7 @@ InstallGlobalFunction( CVEC_New, function(arg)
           return CVEC_NEW(c,c![CVEC_IDX_type]);
       fi;
   fi;
-  Error("Usage: CVEC_New( [ cvec | cvecclass | p,d,l ] )");
+  Error("Usage: CVEC_New( [ cvec | cvecclass | field,l | p,d,l ] )");
 end );
 
 ##############################
@@ -510,7 +524,7 @@ InstallOtherMethod( \+, "for cvecs", [IsCVecRep, IsCVecRep],
     vcl := DataType(TypeObj(v));
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_ADD3(u,v,w);
-    if not(IsMutable(v)) or not(IsMutable(w)) then MakeImmutable(u); fi;
+    if not(IsMutable(v)) and not(IsMutable(w)) then MakeImmutable(u); fi;
     return u;
   end);
 
@@ -524,7 +538,7 @@ InstallOtherMethod( \-, "for cvecs", [IsCVecRep, IsCVecRep],
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_COPY(v,u);
     CVEC_ADDMUL(u,w,p-1,0,0);
-    if not(IsMutable(v)) or not(IsMutable(w)) then MakeImmutable(u); fi;
+    if not(IsMutable(v)) and not(IsMutable(w)) then MakeImmutable(u); fi;
     return u;
   end);
 
@@ -669,7 +683,7 @@ InstallOtherMethod( PositionNot, "for cvecs",
   [IsCVecRep, IsFFE, IsInt], 
   function(v,z,i)
     local j;
-    if z <> Zero(z) or i <> 0 then
+    if not(IsZero(z)) or i <> 0 then
         for j in [i+1..Length(v)] do
             if v[j] <> z then
                 return j;
@@ -715,7 +729,10 @@ InstallMethod( ZeroVector, "for a cvec and an integer",
   [IsInt, IsCVecRep],
   function(len,v)
     local cl;
-    cl := CVEC_NewCVecClassSameField(DataType(TypeObj(v)),len);
+    cl := DataType(TypeObj(v));
+    if cl![CVEC_IDX_len] <> len then
+        cl := CVEC_NewCVecClassSameField(cl,len);
+    fi;
     return CVEC_NEW(cl,cl![CVEC_IDX_type]);
   end);
 
@@ -727,7 +744,7 @@ InstallMethod( CVec, "for a cvec class",
     return CVEC_NEW(c,c![CVEC_IDX_type]);
   end);
 InstallMethod( CVec, "for a homogeneous list and two posints", 
-  [IsHomogeneousList, IsPosInt, IsPosInt],
+  [IsList, IsPosInt, IsPosInt],
   function(l,p,d)
     local c,v;
     if IsSmallIntRep(p^d) then
@@ -737,8 +754,21 @@ InstallMethod( CVec, "for a homogeneous list and two posints",
     fi;
     return CVec(l,c);  # Delegate to the following routine
   end);
+InstallMethod( CVec, "for a homogeneous list and a finite field", 
+  [IsList, IsField and IsFinite],
+  function(l,f)
+    local c,p,d,v;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    if IsSmallIntRep(p^d) then
+        c := CVEC_NewCVecClass(p,d,Length(l));
+    else
+        c := CVEC_NewCVecClass(p,d,Length(l)/d);
+    fi;
+    return CVec(l,c);  # Delegate to the following routine
+  end);
 InstallMethod( CVec, "for a homogeneous list and a cvec class",
-  [IsHomogeneousList, IsCVecClass],
+  [IsList, IsCVecClass],
   function(l,c)
     local v;
     v := CVEC_NEW(c,c![CVEC_IDX_type]);
@@ -757,7 +787,7 @@ InstallMethod( CVec, "for a homogeneous list and a cvec class",
     return v;
   end);
 InstallOtherMethod( CVec, "for a compressed gf2 vector",
-  [IsHomogeneousList and IsGF2VectorRep],
+  [IsList and IsGF2VectorRep],
   function(v)
     local c,w;
     v := ShallowCopy(v);
@@ -768,7 +798,7 @@ InstallOtherMethod( CVec, "for a compressed gf2 vector",
     return w;
   end);
 InstallOtherMethod( CVec, "for a compressed 8bit vector",
-  [IsHomogeneousList and Is8BitVectorRep],
+  [IsList and Is8BitVectorRep],
   function(v)
     local c,pd,w;
     pd := Factors(Size(Field(v)));
@@ -1001,7 +1031,7 @@ InstallGlobalFunction( CVEC_SliceList, function(src,dst,srcposs,dstposs)
 end );
 
 InstallOtherMethod( \{\}, "for a cvec and a range", 
-  [IsCVecRep, IsHomogeneousList and IsRangeRep],
+  [IsCVecRep, IsList and IsRangeRep],
   function(v,r)
     # note that ranges in IsRangeRep always have length at least 2!
     local c,cl,w;
@@ -1016,7 +1046,7 @@ InstallOtherMethod( \{\}, "for a cvec and a range",
   end);
 
 InstallOtherMethod( \{\}, "for a cvec and a list", 
-  [IsCVecRep, IsHomogeneousList],
+  [IsCVecRep, IsList],
   function(v,l)
     local c,cl,w;
     cl := DataType(TypeObj(v));
@@ -1031,7 +1061,7 @@ InstallOtherMethod( \{\}, "for a cvec and a list",
   end);
 
 InstallOtherMethod( CopySubVector, "for two cvecs and stuff",
-  [IsCVecRep, IsCVecRep and IsMutable, IsHomogeneousList, IsHomogeneousList],
+  [IsCVecRep, IsCVecRep and IsMutable, IsList, IsList],
   function(src,dst,scols,dcols)
     if Length(scols) = 0 then return; fi;  # a little speedup
     CVEC_SLICE_LIST(src,dst,scols,dcols);

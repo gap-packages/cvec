@@ -1,4 +1,4 @@
-RowListMatrixObjTester := function( m )
+RowListMatrixObjTester := function( m, level )
   local MyError,a,bd,dims,errors,i,j,k,l,n,nn,one,s,three,two,u,v,w,wi,wit,wt,
         z,zero,vi;
   
@@ -24,7 +24,7 @@ RowListMatrixObjTester := function( m )
   three := two+one;
 
   # Let's first look at its attributes:
-  dims := Dimensions(m);
+  dims := DimensionsMat(m);
   if dims[1] <> Length(m) then MyError(1); fi;
   if dims[2] <> RowLength(m) then MyError(2); fi;
 
@@ -260,8 +260,8 @@ RowListMatrixObjTester := function( m )
   n := Matrix([[zero,zero],[one,two],[zero,zero]],m);
   if PositionNonZero(n) <> 2 then MyError(71); fi;
   if PositionNonZero(n,2) <> 4 then MyError(72); fi;
-  #if PositionLastNonZero(n) <> 2 then MyError(73); fi;
-  #if PositionLastNonZero(n,2) <> 0 then MyError(74); fi;
+  if PositionLastNonZero(n) <> 2 then MyError(73); fi;
+  if PositionLastNonZero(n,2) <> 0 then MyError(74); fi;
   v := Vector([one,two],m[1]);
   if Position(n,v) <> 2 then MyError(75); fi;
   v[2] := one;
@@ -464,21 +464,21 @@ RowListMatrixObjTester := function( m )
   if not(IsOne(u)) then MyError(157); fi;
   if not(IsMutable(u)) or not(IsMutable(u[1])) then MyError(158); fi;
 
-  # ZeroMatrix, IsDiagonalMatrix, Is{Upper,Lower}TriangularMatrix:
+  # ZeroMatrix, IsDiagonalMat, Is{Upper,Lower}TriangularMat:
   u := ZeroMatrix(3,3,m);
   if not(IsMutable(u)) then MyError(159); fi;
   if not(IsZero(u)) then MyError(160); fi;
   u[1][1] := one;
   u[2][1] := one;
   u[1][2] := one;
-  if IsDiagonalMatrix(u) then MyError(161); fi;
-  if IsLowerTriangularMatrix(u) then MyError(162); fi;
-  if IsUpperTriangularMatrix(u) then MyError(163); fi;
+  if IsDiagonalMat(u) then MyError(161); fi;
+  if IsLowerTriangularMat(u) then MyError(162); fi;
+  if IsUpperTriangularMat(u) then MyError(163); fi;
   u[1][2] := zero;
-  if not(IsLowerTriangularMatrix(u)) then MyError(164); fi;
+  if not(IsLowerTriangularMat(u)) then MyError(164); fi;
   u[2][1] := zero;
-  if not(IsUpperTriangularMatrix(u)) then MyError(165); fi;
-  if not(IsDiagonalMatrix(u)) then MyError(166); fi;
+  if not(IsUpperTriangularMat(u)) then MyError(165); fi;
+  if not(IsDiagonalMat(u)) then MyError(166); fi;
 
   # IdentityMatrix, Matrix:
   u := IdentityMatrix(7,m);
@@ -495,6 +495,9 @@ RowListMatrixObjTester := function( m )
   if v <> -u then MyError(169); fi;
 
   # Vector times matrix:
+  w := MutableCopyMat(m);
+  wi := MutableCopyMat(w);
+  MakeImmutable(wi);
   u := Matrix(List(w,v->v*wt),w);
   if u <> w*wt then MyError(170); fi;
   v := w[1];
@@ -570,7 +573,50 @@ RowListMatrixObjTester := function( m )
   if IsMutable(u) or IsMutable(u[1]) then MyError(204); fi;
   if not(IsOne(u*wi)) then MyError(205); fi;
 
-  Print("Matrix test completed.\n\n");
+  # Folding/Unfolding:
+  v := Vector([zero,one,two,three],w[1]);
+  if Unfold(w,v) <> v then MyError(206); fi;
+  if Fold(v,2,w) <> w then MyError(207); fi;
+
+  if level = 0 then
+      Print("Standard matrix tests completed.\n\n");
+      Print("Errors: ",errors,"\n");
+      return;
+  fi;
+
+  Print("Standard matrix tests completed, the rest is a bit strange!\n\n");
+
+  # A few more absurd tests:
+
+  # Try empty matrices and vectors:
+  v := w[1];
+  u := v{[]};
+  if not(IsRowVectorObj(u)) then
+      Print("Warning: Empty vector is not in IsRowVectorObj!\n");
+  fi;
+  if Length(u) <> 0 then MyError(213); fi;
+  u := w{[]};
+  if not(IsMatrixObj(u)) then
+      Print("Warning: Matrix with no rows is not in IsMatrixObj!\n");
+  fi;
+  if Length(u) <> 0 then MyError(214); fi;
+  u := ExtractSubMatrix(w,[1..2],[]);
+  if not(IsMatrixObj(u)) then
+      Print("Warning: Matrix with empty rows is not in IsMatrixObj!\n");
+  fi;
+  if RowLength(u) <> 0 then MyError(215); fi;
+  if Length(u) <> 2 then MyError(216); fi;
+
+  w := Matrix( [[one,two]],2,m );
+  if IsOne(w) <> false then MyError(208); fi;
+  # IsOne is a property and hence must only return false or true
+  if OneMutable(w) <> fail then MyError(209); fi;
+  if Inverse(w) <> fail then MyError(210); fi;
+  # Error 211 taken out.
+  w := Matrix( [[one,zero],[one,zero]],2,m );
+  if Inverse(w) <> fail then MyError(212); fi;
+
+  Print("Strange tests completed.\n\n");
 
   Print("Errors: ",errors,"\n");
   return;

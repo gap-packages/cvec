@@ -160,32 +160,49 @@ InstallMethod( MatrixNC, "for an immutable list of cvecs and a cmat",
     return m;
   end );
 
-InstallMethod( Matrix, "for a list of cvecs and a cvec",
-  [IsList, IsCVecRep],
-  function(l,v)
-    local cl,i;
-    cl := DataType(TypeObj(v));
-    for i in [1..Length(l)] do
-        if not(IsCVecRep(l[i])) or 
-           not(IsIdenticalObj(DataType(TypeObj(l[i])),cl)) then
-            Error("vectors not all in same cvecclass");
-        fi;
-    od;
-    return MatrixNC(l,v);
-  end );
+#InstallMethod( Matrix, "for a list of cvecs and a cvec",
+#  [IsList, IsCVecRep],
+#  function(l,v)
+#    local cl,i;
+#    cl := DataType(TypeObj(v));
+#    for i in [1..Length(l)] do
+#        if not(IsCVecRep(l[i])) or 
+#           not(IsIdenticalObj(DataType(TypeObj(l[i])),cl)) then
+#            Error("vectors not all in same cvecclass");
+#        fi;
+#    od;
+#    return MatrixNC(l,v);
+#  end );
 
-InstallMethod( Matrix, "for a list of cvecs and a cmat",
-  [IsList, IsCMatRep],
-  function(l,m)
-    local cl,i;
+InstallMethod( Matrix, "for a list of cvecs, an integer, and a cmat",
+  [IsList, IsInt, IsCMatRep],
+  function(l,rl,m)
+    local cl,i,li;
     cl := m!.vecclass;
-    for i in [1..Length(l)] do
-        if not(IsCVecRep(l[i])) or 
-           not(IsIdenticalObj(DataType(TypeObj(l[i])),cl)) then
-            Error("vectors not all in same cvecclass");
+    if Length(l) = 0 then
+        li := [0];
+        return CVEC_CMatMaker(li,cl);
+    fi;
+    if IsCVecRep(l[1]) then
+        cl := DataType(TypeObj(l[1]));
+        li := [0];
+        Append(li,l);
+        return CVEC_CMatMaker(li,cl);
+    elif IsList(l[1]) then
+        if Length(l[1]) <> cl![CVEC_IDX_len] then
+            cl := CVEC_NewCVecClassSameField(cl,rl);
+        else
+            cl := DataType(TypeObj(l[1]));
         fi;
-    od;
-    return MatrixNC(l,m);
+        li := [0];
+        for i in [1..Length(l)] do
+            Add(li,CVec(l[i],cl));
+        od;
+        return CVEC_CMatMaker(li,cl);
+    else
+        Error("Matrix for cmats: flat initializer not yet implemented");
+        return;
+    fi;
   end );
 
 # Some methods to make special matrices:
@@ -243,6 +260,7 @@ InstallGlobalFunction( CVEC_IdentityMat, function(arg)
           Error("Usage: CVEC_IdentityMat(cvecclass)");
           return;
       fi;
+      y := c![CVEC_IDX_len];
   elif Length(arg) = 3 then
       y := arg[1];
       p := arg[2];
@@ -265,6 +283,18 @@ InstallGlobalFunction( CVEC_IdentityMat, function(arg)
   od;
   return CVEC_CMatMaker(l,c);
 end );
+
+InstallMethod( IdentityMatrix, "for an integer and a cmat",
+  [ IsInt, IsCMatRep ],
+  function( rows, m)
+    local c;
+    if rows = m!.vecclass![CVEC_IDX_len] then
+        return CVEC_IdentityMat(m!.vecclass);
+    else
+        c := CVEC_NewCVecClassSameField(m!.vecclass,rows);
+        return CVEC_IdentityMat(c);
+    fi;
+  end );
 
 InstallGlobalFunction( CVEC_RandomMat, function(arg)
   local c,d,i,j,l,li,p,q,x,y;
@@ -522,8 +552,8 @@ InstallOtherMethod( Length, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m) return m!.len; end);
 
-InstallMethod( Dimensions, "for a cmat",
-  [IsCMatRep and IsMatrix and IsMatrixObj],
+InstallMethod( DimensionsMat, "for a cmat",
+  [IsCMatRep and IsMatrixObj],
   function(m) return [m!.len,m!.vecclass![2]]; end );
 
 InstallMethod( RowLength, "for a cmat",
@@ -880,7 +910,7 @@ InstallOtherMethod( OneMutable, "for a cmat",
   function(m)
     local i,l,one,v,w;
     if m!.vecclass![CVEC_IDX_len] <> m!.len then
-        Error("OneMutable: cmat is not square");
+        #Error("OneMutable: cmat is not square");
         return fail;
     fi;
     v := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
@@ -1206,7 +1236,7 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
     fi;
     res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC_PROD_CVEC_CMAT_NOGREASE(res,v,m!.rows);
-    if not(IsMutable(v)) then
+    if not(IsMutable(v) or IsMutable(m)) then
         MakeImmutable(res);
     fi;
     return res;
@@ -1226,7 +1256,7 @@ InstallOtherMethod(\^, "for a cvec and a cmat, without greasing",
     fi;
     res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC_PROD_CVEC_CMAT_NOGREASE(res,v,m!.rows);
-    if not(IsMutable(v)) then
+    if not(IsMutable(v) or IsMutable(m)) then
         MakeImmutable(res);
     fi;
     return res;
@@ -1246,7 +1276,7 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
     fi;
     res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC_PROD_CVEC_CMAT_GREASED(res,v,m!.greasetab,m!.spreadtab,m!.greaselev);
-    if not(IsMutable(v)) then
+    if not(IsMutable(v) or IsMutable(m)) then
         MakeImmutable(res);
     fi;
     return res;
@@ -1266,7 +1296,7 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
     fi;
     res := CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);  # the result
     CVEC_PROD_CVEC_CMAT_GREASED(res,v,m!.greasetab,m!.spreadtab,m!.greaselev);
-    if not(IsMutable(v)) then
+    if not(IsMutable(v) or IsMutable(m)) then
         MakeImmutable(res);
     fi;
     return res;
@@ -1311,6 +1341,9 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
             CVEC_PROD_CMAT_CMAT_WITHGREASE(l,m!.rows,n!.rows,greasetab,
                                            spreadtab,lev);
         fi;
+    fi;
+    if not(IsMutable(m) or IsMutable(n)) then
+        MakeImmutable(res);
     fi;
     return res;
   end);
@@ -1681,7 +1714,7 @@ end );
 #############################################################################
 
 InstallMethod( PositionNonZero, "for a cmat",
-  [ IsCMatRep and IsMatrix ],
+  [ IsCMatRep and IsMatrix and IsMatrixObj ],
   function(m)
     local i;
     i := 1;
@@ -1693,13 +1726,31 @@ InstallMethod( PositionNonZero, "for a cmat, and an integer",
   [ IsCMatRep and IsMatrix, IsInt ],
   function(m,j)
     local i;
-    i := j+1;
+    i := Maximum(j+1,1);
     while i <= m!.len and IsZero(m!.rows[i+1]) do i := i + 1; od;
     if i > m!.len then
         return m!.len + 1;
     else
         return i;
     fi;
+  end );
+
+InstallMethod( PositionLastNonZero, "for a cmat",
+  [ IsCMatRep and IsMatrix and IsMatrixObj ],
+  function(m)
+    local i;
+    i := m!.len;;
+    while i >= 1 and IsZero(m!.rows[i+1]) do i := i - 1; od;
+    return i;
+  end );
+
+InstallMethod( PositionLastNonZero, "for a cmat, and an integer",
+  [ IsCMatRep and IsMatrix and IsMatrixObj, IsInt ],
+  function(m,j)
+    local i;
+    i := Minimum(j-1,m!.len);
+    while i >= 1 and IsZero(m!.rows[i+1]) do i := i - 1; od;
+    return i;
   end );
 
 InstallMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
@@ -1767,7 +1818,8 @@ InstallMethod( IsLowerTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
 # Copying of matrices:
 #############################################################################
 
-InstallMethod( MutableCopyMat, "for a cmat", [IsCMatRep and IsMatrix],
+InstallMethod( MutableCopyMat, "for a cmat", 
+  [IsCMatRep and IsMatrixObj],
   function(m)
     local l,i;
     l := 0*[1..m!.len+1];
@@ -1783,7 +1835,7 @@ InstallMethod( MutableCopyMat, "for a cmat", [IsCMatRep and IsMatrix],
 #############################################################################
 
 InstallMethod( KroneckerProduct, "for cmats", 
-               [ IsMatrix and IsCMatRep, IsMatrix and IsCMatRep],
+               [ IsCMatRep and IsMatrixObj, IsCMatRep and IsMatrixObj ],
   function( A, B )
     local rowsA, rowsB, colsA, colsB, newclass, AxB, i, j;
       rowsA := Length(A);
@@ -1811,8 +1863,8 @@ InstallMethod( KroneckerProduct, "for cmats",
 #############################################################################
 
 InstallMethod( Unfold, "for a cmat",
-  [ IsCMatRep ],
-  function( m )
+  [ IsCMatRep and IsMatrixObj, IsCVecRep ],
+  function( m, w )
     local cl,i,v,vcl,x,y;
     cl := m!.vecclass;
     x := cl![CVEC_IDX_len];
@@ -1826,8 +1878,8 @@ InstallMethod( Unfold, "for a cmat",
   end );
 
 InstallMethod( Fold, "for a cvec and an integer",
-  [ IsCVecRep, IsInt ],
-  function( v, x )
+  [ IsCVecRep, IsPosInt, IsCMatRep ],
+  function( v, x, m )
     local cl,i,l,len,q,vcl,w;
     vcl := DataType(TypeObj(v));
     cl := CVEC_NewCVecClassSameField( vcl, x );

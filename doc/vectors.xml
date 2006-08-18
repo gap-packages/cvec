@@ -95,6 +95,19 @@ of a calculation necessary to create <C>cvec</C>s explicitly.
 </Description>
 </ManSection>
 
+<ManSection>
+<Meth Name="CVec" Arg="coeffs, f" Label="coefflff"/>
+<Returns>a new mutable <C>cvec</C></Returns>
+<Description>
+    This method takes a coefficient list and a finite field
+    <A>f</A> as arguments. A new <C>cvec</C> over <A>f</A>
+    will be created. Let <M>q := </M><C>Size(</C><A>f</A><C>)</C>.<P/>
+    For a description of the possible values of the coefficient list 
+    <A>coeffs</A> see the description of the method <Ref Meth="CVec"
+    Label="coefflcvecclass"/>.
+</Description>
+</ManSection>
+
 After having encountered the concept of a <C>cvecclass</C> already
 a few times it is time to learn how to create one. The following
 operation is used first to create new <C>cvecclass</C>es and second
@@ -160,6 +173,18 @@ The method returns the corresponding <C>cvecclass</C> for vectors
 over the same field as those in <A>c</A> but with length <A>l</A>. 
 This is much faster than producing the same object by giving <M>p</M> and
 <M>d</M>.
+For an explanation of the term <C>cvecclass</C> and its data structure
+see Section <Ref Sect="cvecs"/>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="CVecClass" Arg="f, l"/>
+<Returns>a <C>cvecclass</C></Returns>
+<Description>
+The argument <A>f</A> must be a <C>finite field</C>.
+The method returns the corresponding <C>cvecclass</C> for vectors
+over the field <A>f</A> with length <A>l</A>. 
 For an explanation of the term <C>cvecclass</C> and its data structure
 see Section <Ref Sect="cvecs"/>.
 </Description>
@@ -575,6 +600,16 @@ base field. The result is a new <C>cvec</C>. A variable number of
 
 <Section>
 <Heading>Access to the base field</Heading>
+
+<ManSection>
+<Meth Name="BaseDomain" Arg="v" Label="cvec"/>
+<Returns>the base field of <A>v</A>
+</Returns>
+<Description>
+    For a <C>cvec</C> <A>v</A> this returns
+    the &GAP; object <C>GF(p,d)</C>. 
+</Description>
+</ManSection>
 
 <ManSection>
 <Meth Name="BaseField" Arg="v" Label="cvec"/>

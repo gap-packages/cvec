@@ -34,10 +34,6 @@
 # For various reasons these two classes have to be distinguished
 # already with respect to the definition of the operations for them.
 #
-# Every representation of matrices has a corresponding vector
-# representation. The same vector representation can be used for
-# more than one matrix representation.
-#
 # In particular vectors and matrices know their BaseDomain and their
 # dimensions. Note that the basic condition is that the elements of
 # vectors and matrices must either lie in the BaseDomain or naturally
@@ -49,6 +45,19 @@
 # BaseDomain. Matrices are equal with respect to "=" if they have the
 # same dimensions and the same entries. It is possible that not for all
 # pairs of representations methods exist.
+#
+# It is not guaranteed that all rows of a matrix have the same vector type!
+# It is for example thinkable that a matrix stores some of its rows in a
+# sparse representation and some in a dense one!
+# However, it is guaranteed that the rows of matrices in the same 
+# representation are compatible in the sense that all vector operations
+# defined in this interface can be applied to them and that new matrices
+# in the same representation as the original matrix can be formed out of
+# them.
+# Note that there is neither a default mapping from the set of matrix 
+# representations to the set of vector representations nor one in the 
+# reverse direction! There is nothing like an "associated" vector
+# representation to a matrix representation or vice versa.
 #
 # The way to write code that preserves the representation basically
 # works by using constructor operations that take template objects
@@ -82,14 +91,15 @@ DeclareCategory( "IsRowVectorObj", IsVector and IsCopyable );
 # All the arithmetical filters come from IsVector.
 # RowVectors are no longer necessarily lists, since they do not promise all 
 # list operations. Of course, in specific implementations the objects
-# may still be lists.
+# may still be lists. But beware: Some matrix representations might
+# rely on the fact that vectors cannot change their length!
 # The family of an object in IsRowVectorObj is the same as the family of
 # the base domain.
 
 # There are one main category for matrices and two disjoint sub-categories:
 
 DeclareCategory( "IsMatrixObj", IsVector and IsScalar and IsCopyable );
-# All the arithmetical filters come from IsVector and IsRingElement.
+# All the arithmetical filters come from IsVector and IsScalar.
 # In particular, matrices are in "IsMultiplicativeElement" which defines
 # powering with a positive integer by the (kernel) method for POW_OBJ_INT.
 # Note that this is at least strange for non-associative base domains.
@@ -129,10 +139,10 @@ DeclareCategory( "IsFlatMatrix", IsMatrixObj );
 #  \in
 #  Characteristic
 #  IsFinite
-#     if finite:  Size, and possibly DegreeFFE for fields
-# Elements of the base domain must implement + and *.
+#     if finite:  Size, and possibly DegreeOverPrimeField for fields
+# Elements of the base domain must implement +, -, * and /.
 # "Automatically" embedded elements may occur in vectors and matrices.
-# Example: An integer i may occur in a matrix with BaseDomain a polynomial
+# Example: An integer may occur in a matrix with BaseDomain a polynomial
 #          ring over the Rationals.
 ############################################################################
 
@@ -141,7 +151,7 @@ DeclareCategory( "IsFlatMatrix", IsMatrixObj );
 DeclareAttribute( "BaseDomain", IsRowVectorObj );
 # Typically, the base domain will be a ring, it need not be commutative
 # nor associative. For non-associative base domains powering of matrices
-# is defined to be A^3 = (A*A)*A .
+# is defined by the behaviour of POW_OBJ_INT.
 
 DeclareAttribute( "Length", IsRowVectorObj );    # can be zero
 
@@ -238,7 +248,9 @@ DeclareOperation( "ListOp", [IsRowVectorObj,IsFunction] );
 # The following binary arithmetical operations are possible for vectors
 # over the same BaseDomain with equal length:
 #    +, -, <, =
-# Note: It is not guaranteed that sorting is done lexicographically!
+# Note1: It is not guaranteed that sorting is done lexicographically!
+# Note2: If sorting is not done lexicographically then the objects
+#        in that representation cannot be lists!
 
 # The following "in place" operations exist with the same restrictions:
 DeclareOperation( "AddRowVector", 
@@ -254,7 +266,7 @@ DeclareOperation( "MultRowVector",
 
 # The following operations for scalars and vectors are possible of course
 # only for scalars in the BaseDomain:
-#    *, /
+#    *, / (of course only vector/scalar)
 
 # The following unary arithmetical operations are possible for vectors:
 #    AdditiveInverseImmutable, AdditiveInverseMutable, 
@@ -272,7 +284,7 @@ DeclareOperation( "ZeroVector", [IsInt,IsRowVectorObj] );
 
 DeclareOperation( "Vector", [IsList,IsRowVectorObj]);
 # Creates a new vector in the same representation but with entries from list.
-# The length is given by the length of the list.
+# The length is given by the length of the first argument.
 
 
 ############################################################################
@@ -283,7 +295,10 @@ DeclareOperation( "Randomize", [IsRowVectorObj] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
 
-# Already in the library:
+# DeclareOperation( "Randomize", [IsRowVectorObj,IsRandomSource] );
+# This is the future as soon as we have random sources in the library.
+
+# Already in the library, the declarations need to be adjusted:
 # DeclareOperation( "CopySubVector", [IsRowVectorObj,IsRowVectorObj,
 #                                     IsList,IsList] );
 # CopySubVector(a,b,src,dst) does b{dst} := a{src} efficiently without
@@ -306,13 +321,13 @@ DeclareOperation( "Randomize", [IsRowVectorObj] );
 DeclareAttribute( "BaseDomain", IsMatrixObj );
 # Typically, the base domain will be a ring, it need not be commutative
 # nor associative. For non-associative base domains powering of matrices
-# is defined to be A^3 = (A*A)*A .
+# is defined by the behaviour of POW_OBJ_INT in the kernel.
 
 DeclareAttribute( "Length", IsMatrixObj );
 
 DeclareAttribute( "RowLength", IsMatrixObj );
 
-DeclareAttribute( "Dimensions", IsMatrixObj );   # returns [rows,cols]
+DeclareAttribute( "DimensionsMat", IsMatrixObj );   # returns [rows,cols]
 
 
 ############################################################################
@@ -354,7 +369,8 @@ DeclareOperation( "PositionSorted", [IsMatrixObj, IsRowVectorObj, IsFunction] );
 # Explicit copying operations:
 ############################################################################
 
-# The following are already in the library:
+# The following are already in the library, these declarations should be
+# adjusted:
 #DeclareOperation( "CopySubMatrix", [IsMatrixObj,IsMatrixObj,
 #                                    IsList,IsList,IsList,IsList] );
 #DeclareOperation( "ExtractSubMatrix", [IsMatrixObj,IsList,IsList] );
@@ -406,7 +422,7 @@ DeclareOperation( "AssMatrix", [IsMatrixObj,IsPosInt,IsPosInt,IsObject] );
 #    +, *, -
 # The following are also allowed for different dimensions:
 #    <, =
-# Note: It is not guaranteed that sorting is done lexicographically!
+# Note1: It is not guaranteed that sorting is done lexicographically!
 # Note2: If sorting is not done lexicographically then the objects
 #        in that representation cannot be lists!
 
@@ -434,8 +450,13 @@ DeclareOperation( "AssMatrix", [IsMatrixObj,IsPosInt,IsPosInt,IsObject] );
 # One for non-square matrices.
 # Inverse for non-square matrices
 # Inverse for square, non-invertible matrices.
-# Powering for non-square matrices.
-# IsOne for non-square matrices.
+#
+# An exception are properties:
+# IsOne for non-square matrices returns false.
+#
+# To detect errors more easily:
+# Matrix/vector and matrix/matrix product run into errors if not defined
+# mathematically (like for example a 1x2 - matrix times itself.
 ############################################################################
 
 ############################################################################
@@ -444,7 +465,8 @@ DeclareOperation( "AssMatrix", [IsMatrixObj,IsPosInt,IsPosInt,IsObject] );
 
 DeclareOperation( "ZeroMatrix", [IsInt,IsInt,IsMatrixObj] );
 # Returns a new mutable zero matrix in the same rep as the given one with
-# possibly different dimensions.
+# possibly different dimensions. First argument is number of rows, second
+# is number of columns.
 
 DeclareOperation( "IdentityMatrix", [IsInt,IsMatrixObj] );
 # Returns a new mutable identity matrix in the same rep as the given one with
@@ -453,9 +475,43 @@ DeclareOperation( "IdentityMatrix", [IsInt,IsMatrixObj] );
 # The following are already declared in the library:
 # Eventually here will be the right place to do this.
 
-# DeclareOperation( "Matrix", [IsList,IsMatrixObj]);
-# Creates a new matrix in the same representation but with entries from list,
-# which must be a list of vectors or a list of lists of values.
+DeclareOperation( "Matrix", [IsList,IsInt,IsMatrixObj]);
+# Creates a new matrix in the same representation as the fourth argument
+# but with entries from list, the second argument is the number of
+# columns. The first argument can be:
+#  - a plain list of vectors of the correct row length in a representation 
+#          fitting to the matrix rep.
+#  - a plain list of plain lists where each sublist has the length of the rows
+#  - a plain list with length rows*cols with matrix entries given row-wise
+# If the first argument is empty, then the number of rows is zero.
+# Otherwise the first entry decides which case is given.
+# The outer list is guaranteed to be copied, however, the entries of that
+# list (the rows) need not be copied.
+# The following convenience versions exist:
+# With two arguments the first must not be empty and must not be a flat
+# list. Then the number of rows is deduced from the length of the first
+# argument and the number of columns is deduced from the length of the
+# element of the first argument (done with a generic method):
+#DeclareOperation( "Matrix", [IsList,IsMatrixObj] );
+# --> A declaration is already in the library, this needs cleanup
+
+InstallMethod( Matrix, "generic convenience method with 2 args",
+  [IsList,IsMatrixObj],
+  function( l, m )
+    if Length(l) = 0 then
+        Error("Matrix: two-argument version not allowed with empty first arg");
+        return;
+    fi;
+    if not(IsList(l[1]) or IsRowVectorObj(l[1])) then
+        Error("Matrix: flat data not supported in two-argument version");
+        return;
+    fi;
+    return Matrix(l,Length(l[1]),m);
+  end );
+
+# Note that it is not possible to generate a matrix via "Matrix" without
+# a template matrix object. Use the representation-specific constructor
+# methods instead.
 
 
 ############################################################################
@@ -463,19 +519,61 @@ DeclareOperation( "IdentityMatrix", [IsInt,IsMatrixObj] );
 ############################################################################
 
 DeclareOperation( "Randomize", [IsMatrixObj] );
+# DeclareOperation( "Randomize", [IsMatrixObj,IsRandomSource] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
+# The second version will come when we have random sources.
 
 DeclareAttribute( "TransposedMatImmutable", IsMatrixObj );
 DeclareOperation( "TransposedMatMutable", [IsMatrixObj] );
 
-DeclareOperation( "IsDiagonalMatrix", [IsMatrixObj] );
+DeclareOperation( "IsDiagonalMat", [IsMatrixObj] );
 
-DeclareOperation( "IsUpperTriangularMatrix", [IsMatrixObj] );
-DeclareOperation( "IsLowerTriangularMatrix", [IsMatrixObj] );
+DeclareOperation( "IsUpperTriangularMat", [IsMatrixObj] );
+DeclareOperation( "IsLowerTriangularMat", [IsMatrixObj] );
 
 DeclareOperation( "KroneckerProduct", [IsMatrixObj,IsMatrixObj] );
 # The result is fully mutable.
+
+DeclareOperation( "Unfold", [IsMatrixObj, IsRowVectorObj] );
+# Concatenates all rows of a matrix to one single vector in the same
+# representation as the given template vector. Usually this must
+# be compatible with the representation of the matrix given.
+DeclareOperation( "Fold", [IsRowVectorObj, IsPosInt, IsMatrixObj] );
+# Cuts the row vector into pieces of length the second argument
+# and forms a matrix out of the pieces in the same representation 
+# as the third argument. The length of the vector must be a multiple
+# of the second argument.
+
+# Here come two generic methods using only other interface operations:
+InstallMethod( Unfold, "for a matrix object, and a vector object",
+  [ IsMatrixObj, IsRowVectorObj ],
+  function( m, w )
+    local v,i,l;
+    if Length(m) = 0 then
+        return ZeroVector(0,w);
+    else
+        l := RowLength(m);
+        v := ZeroVector(Length(m)*l,w);
+        for i in [1..Length(m)] do
+            CopySubVector( m[i], v, [1..l], [(i-1)*l+1..i*l] );
+        od;
+        return v;
+    fi;
+  end );
+  
+InstallMethod( Fold, "for a vector, a positive int, and a matrix",
+  [ IsRowVectorObj, IsPosInt, IsMatrixObj ],
+  function( v, rl, t )
+    local rows,i,tt,m;
+    m := Matrix([],rl,t);
+    tt := ZeroVector(rl,v);
+    for i in [1..Length(v)/rl] do
+        CopySubVector(v,tt,[(i-1)*rl+1..i*rl],[1..rl]);
+        Add(m,ShallowCopy(tt));
+    od;
+    return m;
+  end );
 
 
 ############################################################################
@@ -491,7 +589,7 @@ DeclareOperation( "KroneckerProduct", [IsMatrixObj,IsMatrixObj] );
 
 DeclareOperation( "[]:=", [IsRowListMatrix,IsPosInt,IsObject] );
 # Only guaranteed to work for the position in [1..Length(VECTOR)] and only
-# for elements in the corresponding vector type.
+# for elements in a suitable vector type.
 # Behaviour otherwise is undefined (from "unpacking" to Error all is possible)
 
 DeclareOperation( "{}", [IsRowListMatrix,IsList] );
@@ -549,7 +647,7 @@ DeclareOperation( "Unpack", [IsRowListMatrix] );
 
 DeclareOperation( "[]:=", [IsFlatMatrix,IsPosInt,IsObject] );
 # Only guaranteed to work for the position in [1..Length(VECTOR)] and only
-# for elements in the corresponding vector type.
+# for elements in a suitable vector type.
 # Here this is always a copying operation!
 # Behaviour otherwise is undefined (from "unpacking" to Error all is possible)
 
