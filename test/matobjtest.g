@@ -257,7 +257,7 @@ RowListMatrixObjTester := function( m, level )
   fi;
 
   # PositionNonZero and friends:
-  n := Matrix([[zero,zero],[one,two],[zero,zero]],m);
+  n := Matrix([[zero,zero],[one,two],[zero,zero]],2,m);
   if PositionNonZero(n) <> 2 then MyError(71); fi;
   if PositionNonZero(n,2) <> 4 then MyError(72); fi;
   if PositionLastNonZero(n) <> 2 then MyError(73); fi;
@@ -267,7 +267,7 @@ RowListMatrixObjTester := function( m, level )
   v[2] := one;
   if Position(n,v) <> fail then MyError(76); fi;
   v[2] := two;
-  n := Matrix([[one,two],[zero,zero]],m);
+  n := Matrix([[one,two],[zero,zero]],2,m);
   if n[1] > n[2] then n := n{[2,1]}; fi;
   if not(n[1] <= n[2]) then MyError(78); fi;
   if PositionSorted(n,v) <> Position(n,v) then MyError(79); fi;
@@ -316,7 +316,7 @@ RowListMatrixObjTester := function( m, level )
   if not(m=n and IsIdenticalObj(m[1],n[1])) then MyError(92); fi;
 
   # Printing and viewing:
-  n := Matrix([[zero,one],[two,three]],m);
+  n := Matrix([[zero,one],[two,three]],2,m);
   Print("A matrix is printed as follows:\n",n,"\n\n");
   Print("ViewObj does the following to it:\n");
   ViewObj(n);
@@ -442,7 +442,7 @@ RowListMatrixObjTester := function( m, level )
   if IsMutable(u) or IsMutable(u[1]) then MyError(146); fi;
 
   # One*
-  w := Matrix([[zero,one],[two,three]],m);
+  w := Matrix([[zero,one],[two,three]],2,m);
   wi := MutableCopyMat(w);
   MakeImmutable(wi);
   u := OneSameMutability(w);
@@ -484,21 +484,21 @@ RowListMatrixObjTester := function( m, level )
   u := IdentityMatrix(7,m);
   if not(Length(u) = 7) or not(RowLength(u) = 7) or not(IsOne(u)) or
      not(IsMutable(u)) or not(IsMutable(u[1])) then MyError(167); fi;
-  v := Matrix(List(u),m);
+  v := Matrix(List(u),7,m);
   if u <> v or not(IsMutable(v)) or not(IsMutable(v[1])) then MyError(168); fi;
 
   # Randomize:
   Randomize(u);
 
   # List:
-  v := Matrix(List(u,x->-x),u);
+  v := Matrix(List(u,x->-x),7,u);
   if v <> -u then MyError(169); fi;
 
   # Vector times matrix:
   w := MutableCopyMat(m);
   wi := MutableCopyMat(w);
   MakeImmutable(wi);
-  u := Matrix(List(w,v->v*wt),w);
+  u := Matrix(List(w,v->v*wt),RowLength(w),w);
   if u <> w*wt then MyError(170); fi;
   v := w[1];
   vi := ShallowCopy(v);
@@ -518,10 +518,10 @@ RowListMatrixObjTester := function( m, level )
   if u <> List(m,List) then MyError(176); fi;
   
   # KroneckerProduct:
-  w := Matrix([[zero,one],[two,three]],m);
+  w := Matrix([[zero,one],[two,three]],2,m);
   wi := MutableCopyMat(w);
   MakeImmutable(wi);
-  u := Matrix([[zero,one],[one,one]],m);
+  u := Matrix([[zero,one],[one,one]],2,m);
   a := KroneckerProduct(u,w);
   if not(IsZero(ExtractSubMatrix(a,[1,2],[1,2]))) then MyError(177); fi;
   if ExtractSubMatrix(a,[1,2],[3,4]) <> w then MyError(178); fi;
