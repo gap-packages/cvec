@@ -761,7 +761,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
   l := 256;
   f := GF(p,d);
   c := CVEC_NewCVecClass(p,d,l);
-  m := MatrixNC([],CVEC_New(c));
+  m := CMat([],CVEC_New(c));
   for ii in [1..3] do
       v := CVec(0*[1..l]+1,c);
       one := v[1];

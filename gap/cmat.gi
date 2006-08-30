@@ -123,77 +123,27 @@ InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value",
     return CVEC_CMatMaker(l,cl);
   end);
 
-InstallMethod( MatrixNC, "for a list of cvecs and a cvec",
-  [IsList and IsMutable, IsCVecRep],
-  function(l,v)
-    Add(l,0,1);
-    return CVEC_CMatMaker(l,DataType(TypeObj(v)));
-  end );
-
-InstallMethod( MatrixNC, "for a list of cvecs and a cmat",
-  [IsList and IsMutable, IsCMatRep],
-  function(l,m)
-    local c;
-    Add(l,0,1);
-    return CVEC_CMatMaker(l,m!.vecclass);
-  end );
-
-InstallMethod( MatrixNC, "for an immutable list of cvecs and a cvec",
-  [IsList, IsCVecRep],
-  function(l,v)
-    local li,m;
-    li := [0];
-    Append(li,l);
-    m := CVEC_CMatMaker(li,DataType(TypeObj(v)));
-    MakeImmutable(m);
-    return m;
-  end );
-
-InstallMethod( MatrixNC, "for an immutable list of cvecs and a cmat",
-  [IsList, IsCMatRep],
-  function(l,n)
-    local li,m;
-    li := [0];
-    Append(li,l);
-    m := CVEC_CMatMaker(li,n!.vecclass);
-    MakeImmutable(m);
-    return m;
-  end );
-
-#InstallMethod( Matrix, "for a list of cvecs and a cvec",
-#  [IsList, IsCVecRep],
-#  function(l,v)
-#    local cl,i;
-#    cl := DataType(TypeObj(v));
-#    for i in [1..Length(l)] do
-#        if not(IsCVecRep(l[i])) or 
-#           not(IsIdenticalObj(DataType(TypeObj(l[i])),cl)) then
-#            Error("vectors not all in same cvecclass");
-#        fi;
-#    od;
-#    return MatrixNC(l,v);
-#  end );
-
 InstallMethod( Matrix, "for a list of cvecs, an integer, and a cmat",
   [IsList, IsInt, IsCMatRep],
   function(l,rl,m)
     local cl,i,li;
     cl := m!.vecclass;
+    if rl <> cl![CVEC_IDX_len] then
+        cl := CVEC_NewCVecClassSameField(cl,rl);
+    fi;
     if Length(l) = 0 then
         li := [0];
         return CVEC_CMatMaker(li,cl);
     fi;
     if IsCVecRep(l[1]) then
-        cl := DataType(TypeObj(l[1]));
+        if not(IsIdenticalObj(cl,DataType(TypeObj(l[1])))) then
+            Error("Matrix: cvec not in correct class");
+            return fail;
+        fi;
         li := [0];
         Append(li,l);
         return CVEC_CMatMaker(li,cl);
     elif IsList(l[1]) then
-        if Length(l[1]) <> cl![CVEC_IDX_len] then
-            cl := CVEC_NewCVecClassSameField(cl,rl);
-        else
-            cl := DataType(TypeObj(l[1]));
-        fi;
         li := [0];
         for i in [1..Length(l)] do
             Add(li,CVec(l[i],cl));

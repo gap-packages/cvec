@@ -14,11 +14,33 @@
 #############################################################################
 
 
-DeclareOperation( "CleanRow", [IsRecord, IsObject, IsBool, IsObject] );
+DeclareOperation( "SEBMaker", [IsRowListMatrix,IsList] );
+DeclareOperation( "EmptySemiEchelonBasis", [ IsRowListMatrix ] );
+DeclareOperation( "SemiEchelonBasisMutable", [ IsRowListMatrix ] );
+DeclareOperation( "SemiEchelonBasisMutable", [ IsRecord ] );
+DeclareOperation( "SemiEchelonBasisMutableX", [IsRowListMatrix] );
+DeclareOperation( "SemiEchelonBasisMutableTX", [IsRowListMatrix] );
+DeclareOperation( "SemiEchelonBasisMutableT", [IsRowListMatrix] );
+DeclareOperation( "SemiEchelonBasisMutablePX", [IsRowListMatrix] );
+DeclareOperation( "SemiEchelonBasisMutableP", [IsRowListMatrix] );
+
+DeclareFilter( "IsCMatSEB" );
+DeclareFilter( "HasPivots" );
+
+# A shortcut:
+BindGlobal( "SEBType", 
+  IsBasis and IsSemiEchelonized and HasPivots and IsComponentObjectRep );
+
+# Operations for semi echolon basis:
+DeclareOperation( "Vectors", [SEBType] );
+DeclareOperation( "Pivots", [SEBType] );
+
+DeclareOperation( "CleanRow", 
+ [SEBType,IsRowVectorObj,IsBool,IsObject]);
 # CleanRow ( basis, vec, extend, dec )
 #   basis is record with the following components:
-#       .vectors  : matrix bzw. liste von Vektoren
-#       .pivots   : spalten der pivots
+#       .vectors  : matrix whose rows are the vectors
+#       .pivots   : pivot columns
 #   vec is a vector
 #   extend is true or false
 #     true:   clean, extend if necessary
@@ -33,26 +55,22 @@ DeclareOperation( "CleanRow", [IsRecord, IsObject, IsBool, IsObject] );
 # linear combination of the vectors in the basis that represents vec
 # is put into dec.
 
-DeclareOperation( "EmptySemiEchelonBasis", [IsObject] );
-# EmptySemiEchelonBasis is an operation:
-# EmptySemiEchelonBasis( vector )
-#   vector is a sample vector
+DeclareOperation( "LinearCombination", [SEBType, IsRowVectorObj] );
 
-DeclareOperation( "MakeSemiEchelonBasis", [IsObject] );
+DeclareOperation( "NullspaceMatMutableX", [IsRowListMatrix] );
+DeclareOperation( "NullspaceMatMutable", [IsRowListMatrix] );
+DeclareOperation( "SemiEchelonBasisNullspaceX", [IsRowListMatrix] );
+DeclareOperation( "SemiEchelonBasisNullspace", [IsRowListMatrix] );
 
-DeclareOperation( "SemiEchelonRowsX", [IsObject] );
-DeclareOperation( "SemiEchelonRows", [IsObject] );
-DeclareOperation( "SemiEchelonRowsTX", [IsObject] );
-DeclareOperation( "SemiEchelonRowsT", [IsObject] );
-DeclareOperation( "SemiEchelonRowsPX", [IsObject] );
-DeclareOperation( "SemiEchelonRowsP", [IsObject] );
-# For compatibility:
-DeclareOperation( "SemiEchelonRowsXp", [IsObject] );
 
-DeclareOperation( "MutableNullspaceMatX", [IsObject] );
-DeclareOperation( "MutableNullspaceMat", [IsObject] );
-DeclareOperation( "SemiEchelonNullspaceX", [IsObject] );
-DeclareOperation( "SemiEchelonNullspace", [IsObject] );
+#############################################################################
+# Intersections and sums of spaces given by bases:
+#############################################################################
+
+DeclareOperation( "IntersectionAndSumRowSpaces", 
+                  [SEBType,SEBType] );
+DeclareOperation( "IntersectionAndSumRowSpaces", 
+                  [IsRowListMatrix,IsRowListMatrix] );
 
 
 #############################################################################

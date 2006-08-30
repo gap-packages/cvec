@@ -725,11 +725,22 @@ InstallOtherMethod( ZeroSameMutability, "for cvecs", [IsCVecRep],
     return u;
   end);
 
-InstallMethod( ZeroVector, "for a cvec and an integer",
+InstallMethod( ZeroVector, "for an integer and a cvec",
   [IsInt, IsCVecRep],
   function(len,v)
     local cl;
     cl := DataType(TypeObj(v));
+    if cl![CVEC_IDX_len] <> len then
+        cl := CVEC_NewCVecClassSameField(cl,len);
+    fi;
+    return CVEC_NEW(cl,cl![CVEC_IDX_type]);
+  end);
+
+InstallMethod( ZeroVector, "for an integer and a cmat",
+  [IsInt, IsCMatRep],
+  function(len,m)
+    local cl;
+    cl := m!.vecclass;
     if cl![CVEC_IDX_len] <> len then
         cl := CVEC_NewCVecClassSameField(cl,len);
     fi;

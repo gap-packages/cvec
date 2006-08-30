@@ -282,6 +282,10 @@ DeclareOperation( "ZeroVector", [IsInt,IsRowVectorObj] );
 # Returns a new mutable zero vector in the same rep as the given one with
 # a possible different length.
 
+DeclareOperation( "ZeroVector", [IsInt,IsMatrixObj] );
+# Returns a new mutable zero vector in a rep that is compatible with
+# the matrix but of possibly different length.
+
 DeclareOperation( "Vector", [IsList,IsRowVectorObj]);
 # Creates a new vector in the same representation but with entries from list.
 # The length is given by the length of the first argument.
@@ -492,8 +496,7 @@ DeclareOperation( "Matrix", [IsList,IsInt,IsMatrixObj]);
 # list. Then the number of rows is deduced from the length of the first
 # argument and the number of columns is deduced from the length of the
 # element of the first argument (done with a generic method):
-#DeclareOperation( "Matrix", [IsList,IsMatrixObj] );
-# --> A declaration is already in the library, this needs cleanup
+DeclareOperation( "Matrix", [IsList,IsMatrixObj] );
 
 InstallMethod( Matrix, "generic convenience method with 2 args",
   [IsList,IsMatrixObj],
@@ -693,4 +696,3 @@ DeclareOperation( "{}", [IsFlatMatrix,IsList] );
 # AsList
 # AddCoeffs
 
-# Throw-out candidates: VectorNC and MatrixNC

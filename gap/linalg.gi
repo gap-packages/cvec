@@ -9,18 +9,98 @@
 ##  some linear algebra routines for compact vectors over finite fields. 
 ##
 
+
 #############################################################################
-# Cleaning and semi-echelonised bases:
+# Creation of semi-echelonised basis:
+#############################################################################
+
+InstallMethod( SEBMaker, "generic method",
+  [ IsRowListMatrix, IsList],
+  function( vectors, pivots )
+    local b;
+    b := rec( vectors := vectors, pivots := pivots );
+    return Objectify(NewType(FamilyObj(b.vectors),SEBType and IsMutable),b);
+  end );
+
+InstallMethod( SEBMaker, "for a cmat, and an integer list",
+  [ IsCMatRep, IsList ],
+  function( vectors, pivots )
+    local b,cl;
+    b := rec( vectors := vectors, pivots := pivots );
+    cl := CVEC_NewCVecClassSameField(b.vectors!.vecclass,1);
+    b.helper := CVEC_New(cl);
+    return Objectify(NewType(FamilyObj(b.vectors),
+                             SEBType and IsMutable and IsCMatSEB),b);
+  end );
+
+InstallMethod( SemiEchelonBasisMutable, "for a semi echelonised basis record",
+  [IsRecord],
+  function(b)
+    local i;
+    b.pivots := [];
+    for i in [1..RowLength(b.vectors)] do
+        if IsBound(b.heads[i]) and b.heads[i] > 0 then
+            b.pivots[b.heads[i]] := i;
+        fi;
+    od;
+    return SEBMaker(b.vectors,b.pivots);
+  end);
+
+InstallMethod( EmptySemiEchelonBasis, "for a row list matrix",
+  [ IsRowListMatrix ],
+  function( m )
+    return SEBMaker( Matrix([],RowLength(m),m), [] );
+  end );
+
+InstallMethod( Vectors, "for a semi echelonsised basis", [ SEBType ],
+  function(b)
+    return b!.vectors;
+  end );
+
+InstallMethod( BasisVectors, "for a semi echelonised basis", [ SEBType ],
+  function(b)
+    return b!.vectors;
+  end );
+
+InstallMethod( Pivots, "for a semi echelonised basis", [ SEBType ],
+  function(b)
+    return b!.pivots;
+  end );
+
+InstallMethod( ViewObj, "for a semi echelonised basis",
+  [ SEBType ],
+  function(b)
+    Print("<");
+    if not(IsMutable(b)) or not(IsMutable(b!.vectors)) then
+        Print("immutable ");
+    fi;
+    Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
+          Length(b!.vectors),">");
+  end);
+
+InstallMethod( Display, "for a semi echelonised basis",
+  [ SEBType ],
+  function(b)
+    Print("<");
+    if not(IsMutable(b)) or not(IsMutable(b!.vectors)) then
+        Print("immutable ");
+    fi;
+    Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
+          Length(b!.vectors),"\n");
+    Display(b!.vectors);
+    Print(">");
+  end );
+
+#############################################################################
+# High speed cleaning of vectors, semi-echelonised matrices:
 #############################################################################
 
 BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
   local c,firstnz,i,j,lc,len,lev,mo,newpiv,pivs;
   # INPUT
-  # basis: record with fields
+  # basis: component object with fields
   #        pivots   : integer list of pivot columns of basis matrix
   #        vectors : matrix of basis vectors in semi echelon form
-  # and optionally:
-  #        lazygreaser : a lazygreaser object for the vectors
   # vec  : vector of same length as basis vectors
   # extend : boolean value indicating whether the basis will we extended
   #          note that for the greased case also the basis vectors before
@@ -43,17 +123,17 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
       return true;
   fi;
 
-  len := Length(basis.vectors);
+  len := Length(basis!.vectors);
   i := 1;
 
   for j in [i..len] do
-    if basis.pivots[j] >= firstnz then
-      c := vec[ basis.pivots[ j ] ];
+    if basis!.pivots[j] >= firstnz then
+      c := vec[ basis!.pivots[ j ] ];
       if not IsZero( c ) then
         if dec <> fail then
           dec[ j ] := c;
         fi;
-        AddRowVector( vec, basis.vectors[ j ], -c );
+        AddRowVector( vec, basis!.vectors[ j ], -c );
       fi;
     fi;
   od;
@@ -68,106 +148,98 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
       if dec <> fail then
         dec[len+1] := c;
       fi;
-      Add( basis.vectors, vec );
-      Add( basis.pivots, newpiv );
+      Add( basis!.vectors, vec );
+      Add( basis!.pivots, newpiv );
     fi;
     return false;
   fi;
 end );
     
 InstallMethod( CleanRow, 
-  "GAP method for a record, a vector, and a boolean or vector", 
-  [IsRecord, IsObject, IsBool, IsObject], CVEC_CleanRow );
+  "GAP method for a semi echelon basis, a vector, and a boolean or vector", 
+  [SEBType and IsMutable, IsRowVectorObj, IsBool, IsObject], CVEC_CleanRow );
 
 InstallMethod( CleanRow, 
   "kernel method for a record, a cvec, and a boolean or cvec", 
-  [IsRecord, IsCVecRep, IsBool, IsObject], CVEC_CLEANROWKERNEL );
+  [SEBType and IsMutable and IsCMatSEB, IsCVecRep, IsBool, IsObject], 
+   CVEC_CLEANROWKERNEL );
 
-InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsObject],
-  function( vec )
-    return rec( vectors := MatrixNC([],vec),pivots := [],
-                helper := ZeroVector(vec,1) );
-    # The helper is needed for the kernel cleaner for CVecs
+InstallMethod( Coefficients, "for a semi echelonized basis, and a vector",
+  [SEBType, IsRowVectorObj],
+  function(b,v)
+    local dec;
+    dec := ZeroVector(Length(b),v);
+    if CleanRow(b,ShallowCopy(v),false,dec) then
+        return dec;
+    else
+        return fail;
+    fi;
   end );
 
-InstallMethod( EmptySemiEchelonBasis, "for a sample vector", [IsCVecRep],
-  function( vec )
-    return rec( vectors := MatrixNC([],vec),pivots := [],
-                helper := ZeroVector(vec,1) );
-    # The helper is needed for the kernel cleaner for CVecs
+InstallMethod( LinearCombination, "for a semi echelonized basis, and a vector",
+  [SEBType, IsRowVectorObj],
+  function(b,v)
+    return v * b!.vectors;
   end );
 
-InstallMethod( EmptySemiEchelonBasis, "for a cvecclass", [IsCVecClass],
-  function( cl )
-    local cl1;
-    cl1 := CVEC_NewCVecClassSameField( cl, 1 );
-    return rec( vectors := CMat([],cl), pivots := [],
-                helper :=  CVEC_New( cl1 ) );
-    # The helper is needed for the kernel cleaner for CVecs
-  end );
-
-InstallMethod( MakeSemiEchelonBasis, "for a semi echelonised matrix",
-  [IsRecord],
-  function(b)
-    local i;
-    if IsBound(b.pivots) then return b; fi;
-    b.pivots := [];
-    for i in [1..Length(b.vectors[1])] do
-        if IsBound(b.heads[i]) and b.heads[i] > 0 then
-            b.pivots[b.heads[i]] := i;
-        fi;
-    od;
-    b.helper := b.vectors[1]{[1]};
-    return b;
-  end);
 
 #############################################################################
-# High speed cleaning of vectors, semi-echelonised matrices:
+# Computing semi-echelonised bases from matrices:
 #############################################################################
 
-InstallMethod( SemiEchelonRowsX, "for a cmat", [IsCMatRep and IsMutable],
+InstallMethod( SemiEchelonBasisMutableX, "for a row list matrix", 
+  [IsRowListMatrix and IsMutable],
   function( m )
     local b,v;
-    b := EmptySemiEchelonBasis( m!.vecclass );
+    b := EmptySemiEchelonBasis(m);
     for v in m do CleanRow(b,v,true,fail); od;
     return b;
   end );
-InstallMethod( SemiEchelonRows, "for a cmat", [IsCMatRep],
+InstallMethod( SemiEchelonBasisMutable, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return SemiEchelonRowsX( MutableCopyMat( m ) );
+    return SemiEchelonBasisMutableX( MutableCopyMat( m ) );
   end );
-InstallMethod( SemiEchelonRowsX, "for a cmat", [IsCMatRep],
+InstallMethod( SemiEchelonBasisMutableX, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return SemiEchelonRowsX( MutableCopyMat( m ) );
+    return SemiEchelonBasisMutableX( MutableCopyMat( m ) );
   end );
 
-InstallMethod( SemiEchelonRowsTX, "for a cmat", [IsCMatRep and IsMutable],
+InstallMethod( SemiEchelonBasisMutableTX, "for a row list matrix", 
+  [IsRowListMatrix and IsMutable],
   function( m )
-    local b,coeffs,dec,i,j,mo,newcoeffs,newrelation,relations,v,zerov;
-    b := EmptySemiEchelonBasis( m!.vecclass );
-    zerov := CVEC_New(m!.vecclass);
-    dec := ZeroVector(zerov,m!.len);  # Maximal length of the basis
-    if m!.len = 0 then
-        b.coeffs := MatrixNC([],dec);
-        b.relations := rec( vectors := MatrixNC([],dec), pivots := [] );
+    local b,coeffs,dec,i,j,mo,newcoeffs,newrelation,relations,rl,s,v,zerov;
+    rl := RowLength(m);
+    b := EmptySemiEchelonBasis( m );
+    zerov := ZeroVector(rl,m);
+    dec := ZeroVector(Length(m),zerov);  # Maximal length of the basis
+    if Length(m) = 0 then
+        b!.coeffs := Matrix([],0,m);
+        b!.relations := rec( vectors := Matrix([],0,m), pivots := [] );
+        return b;
     fi;
-    coeffs := MatrixNC([],dec);
-    relations := MatrixNC([], dec );
-    i := 0;  # is length of coeffs
-    mo := -One(dec[1]);
+    # In the end, we want: coeffs * m = b!.vectors:
+    coeffs := Matrix([],Length(m),m);
+    # In the end, we want relations to be a basis for the nullspace of m:
+    relations := Matrix([],Length(m),m);
+    i := 0;  # this is the length of coeffs
+    mo := -One(BaseDomain(m));
     for j in [1..Length(m)] do
         v := m[j];
         if not CleanRow(b,v,true,dec) then
             # a new vector in the basis, we have to produce a coeff line:
-            # now dec * b.vectors = v (original one)
-            # need: coeffs * mat = b.vectors[Length(b.vectors)]
-            # ==> need to use
+            # now dec * b!.vectors = v (original one)
+            # need: coeffs * mat = b!.vectors[Length(b!.vectors)]
+            # ==> we use b!.vectors[Length(b!.vectors)]
+            #               = (v-dec{[1..i]}*b!.vectors)/dec[i+1]
             if i > 0 then
-                newcoeffs := ((-dec[i+1]^-1) * dec{[1..i]}) * coeffs;
-                newcoeffs[j] := dec[i+1]^-1;
+                s := dec[i+1]^-1;
+                newcoeffs := ((-s) * dec{[1..i]}) * coeffs;
+                newcoeffs[j] := s;
                 Add(coeffs,newcoeffs);
             else
-                newcoeffs := ShallowCopy(dec);
+                newcoeffs := ZeroMutable(dec);
                 newcoeffs[1] := dec[1]^-1;
                 Add(coeffs,newcoeffs);
             fi;
@@ -176,97 +248,103 @@ InstallMethod( SemiEchelonRowsTX, "for a cmat", [IsCMatRep and IsMutable],
             if i > 0 then
                 newrelation := dec{[1..i]} * coeffs;
                 newrelation[j] := mo;
-                #CleanRow(relations,newrelation,true,fail);
             else
-                newrelation := ShallowCopy(dec);
-                newrelation[j] := -mo;
-                #Add(relations.vectors,newrelation);
-                #Add(relations.pivots,j);
+                newrelation := ZeroMutable(dec);
+                newrelation[j] := mo;
             fi;
             Add(relations,newrelation);
         fi;
     od;
-    b.coeffs := coeffs;
-    b.relations := relations;
+    b!.coeffs := coeffs;
+    b!.relations := relations;
     return b;
   end);
-InstallMethod( SemiEchelonRowsT, "for a cmat", [IsCMatRep],
+InstallMethod( SemiEchelonBasisMutableT, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return SemiEchelonRowsTX( MutableCopyMat( m ) );
+    return SemiEchelonBasisMutableTX( MutableCopyMat( m ) );
   end );
-InstallMethod( SemiEchelonRowsTX, "for an immutable cmat", [IsCMatRep],
+InstallMethod( SemiEchelonBasisMutableTX, "for an immutable row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return SemiEchelonRowsTX( MutableCopyMat( m ) );
+    return SemiEchelonBasisMutableTX( MutableCopyMat( m ) );
   end );
 
-InstallMethod( SemiEchelonRowsPX, "for a cmat", 
-  [IsCMatRep and IsMutable],
+InstallMethod( SemiEchelonBasisMutablePX, "for a row list matrix", 
+  [IsRowListMatrix and IsMutable],
   function( m )
+    # In the end we want b!.p * b!.vectors = m
     local b,p,dec,j,v,zerov, decl;
-    b := EmptySemiEchelonBasis( m!.vecclass );
-    zerov := CVEC_New(m!.vecclass);
-    decl := Minimum( 100, m!.len );
-    dec := ZeroVector(zerov,decl);
-    if m!.len = 0 then
-        b.p := MatrixNC( [], dec );
+    b := EmptySemiEchelonBasis( m );
+    zerov := ZeroVector(RowLength(m),m);
+    decl := Minimum( 100, Length(m) );
+    dec := ZeroVector(decl,zerov);
+    if Length(m) = 0 then
+        b!.p := Matrix( [], 0, m );
         return b;
     fi;
-    p := [];
-    for j in [1..m!.len] do
+    p := [];   # we collect the vectors in a list because we do not know
+               # their final length
+    for j in [1..Length(m)] do
         v := m[j];
-        if Length( b.vectors ) >= decl then
-            decl := Maximum( decl + 100, m!.len );
-            dec := ZeroVector( dec, decl );
+        if Length( b!.vectors ) >= decl then
+            decl := Maximum( decl + 100, Length(m) );
+            dec := ZeroVector( decl, dec );
         fi;
         CleanRow(b,v,true,dec);
         Add( p, ShallowCopy( dec ) );
     od;
-    decl := Length( b.vectors );
+    decl := Length( b!.vectors );
+    b!.p := Matrix([],decl,m);
     j := 1;
     while j <= Length( p ) and Length( p[ j ] ) < decl do
-        dec := ZeroVector( p[ j ], decl );
+        dec := ZeroVector( decl, dec );
         CopySubVector( p[ j ], dec, [1..Length(p[j])],[1..Length(p[j])] );
-        p[j] := dec;
+        Add(b!.p,dec);
         j := j + 1;
     od;
     while j <= Length( p ) do
-        p[ j ] := p[ j ]{[1..decl]};
+        Add(b!.p,p[ j ]{[1..decl]});
         j := j + 1;
     od;
-    b.p := CMat( p );
     return b;
   end);
-InstallMethod( SemiEchelonRowsP, "for a cmat", [IsCMatRep],
+InstallMethod( SemiEchelonBasisMutableP, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return SemiEchelonRowsPX( MutableCopyMat( m ) );
+    return SemiEchelonBasisMutablePX( MutableCopyMat( m ) );
   end );
-InstallMethod( SemiEchelonRowsPX, "for an immutable cmat", [IsCMatRep],
+InstallMethod( SemiEchelonBasisMutablePX, "for an immutable row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return SemiEchelonRowsPX( MutableCopyMat( m ) );
+    return SemiEchelonBasisMutablePX( MutableCopyMat( m ) );
   end );
 
-InstallMethod( MutableNullspaceMatX, "for an immutable cmat", [IsCMatRep],
+InstallMethod( NullspaceMatMutableX, "for an immutable row list matrix", 
+  [IsRowListMatrix],
   function( m )
     local b;
-    b := SemiEchelonRowsTX( MutableCopyMat( m ) );
-    return b.relations;
+    b := SemiEchelonBasisMutableTX( MutableCopyMat( m ) );
+    return b!.relations;
   end );
-InstallMethod( MutableNullspaceMatX, "for a cmat", [IsCMatRep and IsMutable],
+InstallMethod( NullspaceMatMutableX, "for a row list matrix", 
+  [IsRowListMatrix and IsMutable],
   function( m )
     local b;
-    b := SemiEchelonRowsTX(m);
-    return b.relations;
+    b := SemiEchelonBasisMutableTX(m);
+    return b!.relations;
   end );
-InstallMethod( MutableNullspaceMat, "for a cmat", [IsCMatRep],
+InstallMethod( NullspaceMatMutable, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
-    return MutableNullspaceMatX( MutableCopyMat( m ) );
+    return NullspaceMatMutableX( MutableCopyMat( m ) );
   end );
 
 InstallOtherMethod( NullspaceMatDestructive, "for a cmat", 
   [IsCMatRep and IsOrdinaryMatrix],
   function( m )
     local res;
-    res := MutableNullspaceMatX( m );
+    res := NullspaceMatMutableX( m );
     MakeImmutable(res);
     return res;
   end );
@@ -275,24 +353,120 @@ InstallOtherMethod( NullspaceMat, "for a cmat",
   [IsCMatRep and IsOrdinaryMatrix],
   function( m )
     local res;
-    res := MutableNullspaceMatX( MutableCopyMat( m ) );
+    res := NullspaceMatMutableX( MutableCopyMat( m ) );
     MakeImmutable(res);
     return res;
   end );
 
-InstallMethod( SemiEchelonNullspaceX, "for a cmat",
-  [IsCMatRep],
+InstallMethod( SemiEchelonBasisNullspaceX, "for a row list matrix",
+  [IsRowListMatrix],
   function( m )
     local n;
-    n := MutableNullspaceMatX( m );
-    return SemiEchelonRowsX( n );
+    n := NullspaceMatMutableX( m );
+    return SemiEchelonBasisMutableX( n );
   end );
-InstallMethod( SemiEchelonNullspace, "for a cmat",
-  [IsCMatRep],
+InstallMethod( SemiEchelonBasisNullspace, "for a row list matrix",
+  [IsRowListMatrix],
   function( m )
     local n;
-    n := MutableNullspaceMat( m );
-    return SemiEchelonRowsX( n );
+    n := NullspaceMatMutable( m );
+    return SemiEchelonBasisMutableX( n );
+  end );
+
+
+#############################################################################
+# Intersections and sums of spaces given by bases:
+#############################################################################
+
+InstallMethod( IntersectionAndSumRowSpaces, "for two semi echelonised bases",
+  [ SEBType and IsMutable, SEBType and IsMutable ],
+  function( b1, b2 )
+    # Here is a proof why the following works. It is obviously better
+    # than Zassenhaus' algorithm as it only works with vectors of the
+    # original size rather than vectors of double length. It also
+    # can profit from b1 and b2 already being semi-echelonised.
+    #
+    # Let V be the full row space and W be the row space generated by b1.
+    # The semi-echenolised basis b1 defines a direct sum decomposition
+    # V = W + W_0 where W_0 is the subspace of V of vectors having zeros
+    # in the pivot columns of b1. Cleaning with b1 is an algorithm that
+    # computes the projection p_0 onto W_0. The resulting dec contains 
+    # coefficients such that the corresponding linear combination of b1
+    # produces the result of the projection p onto W. Thus we can effectively
+    # compute both projections.
+    #
+    # Let U be the span of b2.
+    #
+    # If d1 is the dimension of b1 and d2 that of b2 and s the dimension
+    # of the sum, then the intersection has dimension d1+d2-s.
+    #
+    # By cleaning every vector of b2 with b1 we essentially compute
+    # the image of U under the projection p_0. Computing a semi-echelonised
+    # basis of the image in the variable "extension" computes this
+    # image p_0(U) and at the same time produces generators for the
+    # kernel, since every relation found in p_0(U) gives rise to an
+    # element of the kernel, which is exactly the intersection U \cap W.
+    # On the other hand these generators for the kernel are automatically
+    # linearly independent, since the last non-zero entry is in different
+    # columns. Thus they span the kernel by a dimension argument.
+    #
+    local d,dec,extension,images,res,v,w;
+    images := Matrix([],RowLength(b1!.vectors),b1!.vectors);
+    dec := ZeroVector( Length(b2), b1!.vectors );
+    d := Length(b1!.vectors);
+    # Calculate image:
+    for v in b2!.vectors do
+        w := ShallowCopy(v);
+        CleanRow(b1,w,false,fail);
+        Add(images,w);
+    od;
+    extension := SemiEchelonBasisMutableTX(images);
+    res := rec( intersection := extension!.relations * b2!.vectors,
+                sum := SEBMaker(ShallowCopy(b1!.vectors),
+                                ShallowCopy(b1!.pivots)) );
+    Append(res.sum!.vectors,extension!.vectors);
+    Append(res.sum!.pivots,extension!.pivots);
+    return res;
+  end );
+
+InstallMethod( IntersectionAndSumRowSpaces, "for two row list matrices",
+  [ IsRowListMatrix, IsRowListMatrix ],
+  function( m1, m2 )
+    local b1, b2;
+    b1 := SemiEchelonBasisMutable(m1);
+    b2 := SemiEchelonBasisMutable(m2);
+    return IntersectionAndSumRowSpaces(b1,b2);
+  end );
+
+# Just an experiment:
+BindGlobal( "SumIntersectionMatCMat", 
+  function(m1,m2)
+    local i,int,mat,n,sum,v,w,zero;
+    n := RowLength(m1);
+    mat := Matrix([],2*n,m1);
+    zero := ZeroVector(2*n,m1);
+    for v in m1 do
+        w := ShallowCopy(zero);
+        CopySubVector(v,w,[1..n],[1..n]);
+        CopySubVector(v,w,[1..n],[n+1..2*n]);
+        Add(mat,w);
+    od;
+    for v in m2 do
+        w := ShallowCopy(zero);
+        CopySubVector(v,w,[1..n],[1..n]);
+        Add(mat,w);
+    od;
+    mat := SemiEchelonBasisMutableX(mat);
+    sum := Matrix([],n,m1);
+    int := Matrix([],n,m1);
+    for i in [1..Length(mat!.vectors)] do
+        if mat!.pivots[i] > n then
+            Add(int,mat!.vectors[i]{[n+1..2*n]});
+        else
+            Add(sum,mat!.vectors[i]{[1..n]});
+        fi;
+    od;
+    return [sum,int];
   end );
 
 #############################################################################
@@ -304,12 +478,12 @@ function(m,indetnr)
   # m must be square
   local L,b,b2,closed,d,dec,f,facs,fam,i,l,lambda,newlambda,o,p,
         newpiv,pivs,subdim,v,vcopy,zero;
-  zero := ZeroMutable(m[1]);
+  zero := ZeroVector(RowLength(m),m);
   d := Length(m);
-  b := EmptySemiEchelonBasis(zero);
+  b := EmptySemiEchelonBasis(m);
   pivs := [1..d];
   facs := [];
-  f := BaseField(m);
+  f := BaseDomain(m);
   o := One(f);
   fam := FamilyObj(o);
   dec := ShallowCopy(zero);
@@ -318,9 +492,9 @@ function(m,indetnr)
       p := pivs[1];
       v := ShallowCopy(zero);
       v[p] := o;
-      b2 := EmptySemiEchelonBasis(v);
-      Add(b2.vectors,v);
-      Add(b2.pivots,p);
+      b2 := EmptySemiEchelonBasis(m);
+      Add(b2!.vectors,v);
+      Add(b2!.pivots,p);
       lambda := [dec{[1]}];
       lambda[1][1] := o;
       RemoveSet(pivs,p);
@@ -330,14 +504,14 @@ function(m,indetnr)
           CleanRow(b,vcopy,false,fail);
           closed := CleanRow(b2,vcopy,true,dec);
           if closed then break; fi;
-          Add(lambda,dec{[1..Length(b2.pivots)]});
-          RemoveSet(pivs,b2.pivots[Length(b2.pivots)]);
+          Add(lambda,dec{[1..Length(b2!.pivots)]});
+          RemoveSet(pivs,b2!.pivots[Length(b2!.pivots)]);
       od;
-      d := Length(b2.pivots);
+      d := Length(b2!.pivots);
       # we have the lambdas, expressing v*m^(i-1) in terms of the semiechelon
       # basis, now we have to express v*m^d in terms of the v*m^(i-1), that
       # means inverting a matrix: 
-      L := CVEC_ZeroMat(d,CVecClass(lambda[d]));
+      L := ZeroMatrix(d,Length(lambda[d]),m);
       for i in [1..d] do
           CopySubVector(lambda[i],L[i],[1..i],[1..i]);
       od;
@@ -347,35 +521,38 @@ function(m,indetnr)
       ConvertToVectorRep(l,Size(f));
       Add(facs,UnivariatePolynomialByCoefficients(fam,l,indetnr));
       # Add b2 to b:
-      Append(b.vectors,b2.vectors);
-      Append(b.pivots,b2.pivots);
+      Append(b!.vectors,b2!.vectors);
+      Append(b!.pivots,b2!.pivots);
   od;
   return facs;
 end );
 
-InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat and an indet nr", 
-  [IsCMatRep, IsPosInt],
+InstallMethod( CharacteristicPolynomialOfMatrix, 
+  "for a row list matrix and an indet nr", 
+  [IsRowListMatrix, IsPosInt],
   function( m, indetnr )
     local facs;
     facs := CVEC_CharacteristicPolynomialFactors(m, indetnr);
     return rec( poly := Product(facs), factors := facs );
   end );
 
-InstallMethod( CharacteristicPolynomialOfMatrix, "for a cmat", 
-  [IsCMatRep],
+InstallMethod( CharacteristicPolynomialOfMatrix, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
     local facs;
     facs := CVEC_CharacteristicPolynomialFactors(m, 1);
     return rec( poly := Product(facs), factors := facs );
   end );
 
-InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat", [IsCMatRep],
+InstallMethod( FactorsOfCharacteristicPolynomial, "for a row list matrix", 
+  [IsRowListMatrix],
   function( m )
     return FactorsOfCharacteristicPolynomial(m,1);
   end );
 
-InstallMethod( FactorsOfCharacteristicPolynomial, "for a cmat and an indet nr", 
-  [IsCMatRep, IsPosInt],
+InstallMethod( FactorsOfCharacteristicPolynomial, 
+  "for a row list matrix and an indet nr", 
+  [IsRowListMatrix, IsPosInt],
   function( m, indetnr )
     local f,facs,irrfacs;
     facs := CVEC_CharacteristicPolynomialFactors(m,indetnr);
@@ -399,15 +576,14 @@ BindGlobal( "CVEC_ActionOnQuotient", function( gens, basis )
   # on the quotient space induced by 'basis'
   # NOTES
   # 
-  dimsubspc := Length( basis.vectors );
-  dimfullspc := Length( basis.vectors[ 1 ] );
+  dimsubspc := Length( basis!.vectors );
+  dimfullspc := RowLength( basis!.vectors );
   dimquotspc := dimfullspc - dimsubspc;
-  diff := Difference( [1..dimfullspc], basis.pivots );
-  zerov := ZeroVector( basis.vectors[1], 
-	               dimquotspc ); #prepare vector type
+  diff := Difference( [1..dimfullspc], basis!.pivots );
+  zerov := ZeroVector( dimquotspc, basis!.vectors ); #prepare vector type
   imgens := []; # stores result
   for i in [ 1 .. Length( gens ) ] do
-    imgens[ i ] := CVEC_ZeroMat( dimquotspc, CVecClass(zerov) );
+    imgens[ i ] := ZeroMatrix( dimquotspc, dimquotspc, basis!.vectors );
     # grab rows corresponding to added basis vectors:
     x := MutableCopyMat(gens[ i ]{ diff }); 
     for k in [1..Length(x)] do # clean rows with subspace basis
@@ -422,11 +598,12 @@ end );
 
 InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
   # m must be square
+  # This is the old algorithm, implemented for RowListMatrices
   local L,b,b2,closed,d,dec,f,fam,i,l,lambda,o,p,pivs,poly,subdim,v,vcopy,zero;
 
-  zero := ZeroMutable(m[1]);
+  zero := ZeroVector(RowLength(m),m);
   d := Length(m);
-  b := EmptySemiEchelonBasis(zero);
+  b := EmptySemiEchelonBasis(m);
   pivs := [1..d];
   f := BaseField(m);
   poly := One(PolynomialRing(f,[1]));
@@ -434,13 +611,13 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
   fam := FamilyObj(o);
   dec := ShallowCopy(zero);
   while Length(pivs) > 0 do
-      subdim := Length(b.pivots);
+      subdim := Length(b!.pivots);
       p := pivs[1];
       v := ShallowCopy(zero);
       v[p] := o;
-      b2 := EmptySemiEchelonBasis(v);
-      Add(b2.vectors,v);
-      Add(b2.pivots,p);
+      b2 := EmptySemiEchelonBasis(m);
+      Add(b2!.vectors,v);
+      Add(b2!.pivots,p);
       lambda := [dec{[1]}];
       lambda[1][1] := o;
       RemoveSet(pivs,p);
@@ -456,7 +633,7 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
       # we have the lambdas, expressing v*m^(i-1) in terms of the semiechelon
       # basis, now we have to express v*m^d in terms of the v*m^(i-1), that
       # means inverting a matrix: 
-      L := CVEC_ZeroMat(d,CVecClass(lambda[d]));
+      L := ZeroMatrix(d,d,m);
       for i in [1..d] do
           CopySubVector(lambda[i],L[i],[1..i],[1..i]);
       od;
@@ -466,9 +643,9 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
       ConvertToVectorRep(l,Size(f));
       poly := Lcm(poly,UnivariatePolynomialByCoefficients(fam,l,1));
       # Add b2 to b:
-      for v in b2.vectors do
+      for v in b2!.vectors do
           if not(CleanRow(b,v,true,fail)) then
-              RemoveSet(pivs,b.pivots[Length(b.pivots)]);
+              RemoveSet(pivs,b!.pivots[Length(b!.pivots)]);
           fi;
       od;
   od;
@@ -476,6 +653,8 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
 end );
 
 InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
+  # This is an early try to implement a deterministic, faster minimal
+  # polynomial algorithm. It now uses the RowListMatrix interface.
   local col,deg,facs,havedim,i,irreds,l,lowbound,lowbounds,mp,mult,
         multfactoredout,multmin,nrblocks,ns,p,targetmult,upbound,x;
   # First the characteristic polynomial:
@@ -550,8 +729,8 @@ InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
               # First calculate a nullspace and get some estimates:
               Info(InfoCVec,2,"Target multiplicity: ",targetmult,
                    ", already factored out: ",multfactoredout);
-              ns := SemiEchelonNullspace(x);
-              havedim := Length(ns.vectors);
+              ns := SemiEchelonBasisNullspace(x);
+              havedim := Length(ns!.vectors);
               Info(InfoCVec,2,"Found nullspace of dimension ",havedim);
               # We have a lower bound for the multiplicity in the minpoly
               # from earlier and one from the number of generalized Jordan 
@@ -574,8 +753,8 @@ InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
               targetmult := targetmult - nrblocks;
               x := x^lowbound;
               Info(InfoCVec,2,"Target multiplicity: ",targetmult);
-              ns := SemiEchelonNullspace(x);
-              havedim := Length(ns.vectors);
+              ns := SemiEchelonBasisNullspace(x);
+              havedim := Length(ns!.vectors);
               Info(InfoCVec,2,"Found nullspace of dimension ",havedim);
 
               # Check, whether we have the complete generalized eigenspace:
@@ -631,11 +810,12 @@ InstallMethod( MinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
 
 InstallGlobalFunction( CVEC_GlueMatrices, function(l)
   # all elements of the list l must be CMats over the same field
+  # l must not be empty
   local d,g,i,m,n,p,pos,x;
   n := Sum(l,Length);
   p := Characteristic(l[1]);
   d := DegreeFFE(l[1]);
-  m := CVEC_ZeroMat(n,n,p,d);
+  m := ZeroMatrix(n,n,l[1]);
   pos := 1;
   for i in [1..Length(l)] do
       CopySubMatrix(l[i],m,[1..Length(l[i])],[pos..pos+Length(l[i])-1],
@@ -688,11 +868,13 @@ InstallGlobalFunction( CVEC_MakeExample, function(f,p,l)
   return CVEC_GlueMatrices(ll);
 end );
 
+# The following function is used in the Monte Carlo minimal polynomial
+# algorithm:
 InstallGlobalFunction( CVEC_CalcOrderPolyTuned, 
 function( opi, v, i, indetnr )
   local coeffs,g,h,j,k,ordpol,vv,w,Top,top;
   
-  Top := function( range ) return range[Length(range)]; end;
+  Top := range -> range[Length(range)];
 
   ordpol := [];  # comes factorised
   while i >= 1 do
@@ -737,6 +919,8 @@ function( opi, v, i, indetnr )
   return Product(ordpol);
 end );
     
+# The following function is used in the Monte Carlo minimal polynomial
+# algorithm:
 InstallGlobalFunction( CVEC_FactorMultiplicity,
 function( p, f )
   local m,r;
@@ -767,7 +951,7 @@ function( m, eps, verify, indetnr )
               d := [],          # Degrees of the relative cyclic spaces
               ranges := [],     # numbers of basis vectors
               rordpols := [],   # list of relative order polynomials
-              mm := MatrixNC([],zero), # will be crucial rows of base-changed m
+              mm := Matrix([],zero), # will be crucial rows of base-changed m
             );  
   opi.o := One(opi.f);
   opi.z := Zero(opi.f);
@@ -776,8 +960,8 @@ function( m, eps, verify, indetnr )
   #  Y = [x_1,x_1*m,x_1*m^2,...,x_1*(m^(d_1-1)),x_2,...,x_2*m^(d_2-1),...]
   # and the semi echelonised basis S by keeping Y=A*S and S=B*Y at the same 
   # time. Be are only interested in B, but we get A as a byproduct.
-  A := MatrixNC([],zero);
-  B := MatrixNC([],zero);
+  A := Matrix([],zero);
+  B := Matrix([],zero);
   ordpolsinv := []; # here we collect information to be used for the order pols
 
   Info(InfoCVec,2,"Spinning up vectors...");
@@ -935,7 +1119,7 @@ function( m, eps, verify, indetnr )
                       Info(InfoCVec,2,"Working on factor: ",irreds[j],
                                       " multiplicity: ",multmin[j]);
                       mm := Value(irreds[j],m)^multmin[j];
-                      ns := MutableNullspaceMatX(mm);
+                      ns := NullspaceMatMutableX(mm);
                       if Length(ns) < mult[j] then
                           proof := false;
                           break;
@@ -1094,8 +1278,8 @@ function( m, eps, verify, indetnr )
   zero := ZeroMutable(m[1]);
   pivs := [1..Length(m)];
   b := EmptySemiEchelonBasis(zero);
-  v := MatrixNC([],m[1]);   # start vectors for the spinning
-  vl := MatrixNC([],m[1]);  # start vectors together with their images under m
+  v := Matrix([],m[1]);   # start vectors for the spinning
+  vl := Matrix([],m[1]);  # start vectors together with their images under m
   A := [];   # base changes within each subquotient
   l := [];   # a list of semi echelon bases for the subquotients
   # order polynomial infrastructure (grows over time):
@@ -1231,7 +1415,7 @@ function( m, eps, verify, indetnr )
                   Info(InfoCVec,2,"Working on factor: ",irreds[j],
                                   " multiplicity: ",multmin[j]);
                   mm := Value(irreds[j],opi.mm)^multmin[j];
-                  ns := MutableNullspaceMatX(mm);
+                  ns := NullspaceMatMutableX(mm);
                   if Length(ns) < mult[j] then
                       proof := false;
                       break;
@@ -1256,8 +1440,8 @@ InstallGlobalFunction( CVEC_NewMinimalPolynomial, function( m, indetnr )
   zero := ZeroMutable(m[1]);
   pivs := [1..Length(m)];
   b := EmptySemiEchelonBasis(zero);
-  v := MatrixNC([],m[1]);   # start vectors for the spinning
-  vl := MatrixNC([],m[1]);  # start vectors together with their images under m
+  v := Matrix([],m[1]);   # start vectors for the spinning
+  vl := Matrix([],m[1]);  # start vectors together with their images under m
   A := [];   # base changes within each subquotient
   l := [];   # a list of semi echelon bases for the subquotients
   # order polynomial infrastructure (grows over time):
