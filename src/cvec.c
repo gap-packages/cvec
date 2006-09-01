@@ -7,7 +7,7 @@
 **  
 */
 
-const char * Revision_pl_c =
+const char * Revision_cvec_c =
    "$Id: cvec.c,v$";
 
 #include <stdlib.h>
@@ -4131,13 +4131,17 @@ static StructInitInfo module = {
  /* postRestore = */ 0
 };
 
+#ifndef CVECSTATIC
 StructInitInfo * Init__Dynamic ( void )
 {
- return &module;
+  module.revision_c = Revision_cvec_c;
+  return &module;
 }
+#endif
 
 StructInitInfo * Init__cvec ( void )
 {
+  module.revision_c = Revision_cvec_c;
   return &module;
 }
 

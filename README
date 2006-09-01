@@ -46,12 +46,22 @@ Go into the main GAP directory and then into `bin/..bindir..'. Here
 compiling `gap'. This directory also contains the GAP compiler script
 `gac'. Assuming CVEC in the standard location you can then say
 
-   ./gac -o gap-static -P "-static" ../../pkg/cvec/src/cvec.c
+   ./gac -o gap-static -p "-DCVECSTATIC" -P "-static" ../../pkg/cvec/src/cvec.c
 
 Then copy your `gap' start script to, say, `gapbig' and change the
 references to the GAP binary to `gap-static'. On my Linux system with
 2GB RAM and kernel compiled with 4GB memory support I can nicely run
 `gapbig -m 1800m -K 1800m' and after loading CVEC.
+
+If you want to install more than one package with a C-part like this
+package, you can still create a statically linked GAP executable by
+combining all the compile and link options and all the .c files as
+in the ./gac command above. For the cvec package, you have to add
+  -DCVECSTATIC
+to the string of the -p option and the file
+  ../../pkg/io/src/cvec.c
+somewhere on the command line.
+
 ----------------------------------------------------------------------------
 
 Recompiling the documentation is possible by the command `gap makedoc.g'
