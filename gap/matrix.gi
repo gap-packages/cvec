@@ -19,10 +19,9 @@
 #  functionality of AddRowVector and MultRowVectors here):
 
 InstallMethod( SemiEchelonMatDestructive, "for a cmat",
-    [ IsMatrix and IsMutable and IsCMatRep ],
+    [ IsMutable and IsCMatRep ],
     function( mat )
-    local zero,      # zero of the field of <mat>
-          nrows,     # number of rows in <mat>
+    local nrows,     # number of rows in <mat>
           ncols,     # number of columns in <mat>
           vectors,   # list of basis vectors
           heads,     # list of pivot positions in `vectors'
@@ -34,9 +33,7 @@ InstallMethod( SemiEchelonMatDestructive, "for a cmat",
           inv;       # inverse of a matrix entry
 
     nrows:= Length( mat );
-    ncols:= Length( mat[1] );
-
-    zero:= Zero( mat[1][1] );
+    ncols:= RowLength( mat );
 
     heads:= ListWithIdenticalEntries( ncols, 0 );
     nzheads := [];
@@ -46,7 +43,7 @@ InstallMethod( SemiEchelonMatDestructive, "for a cmat",
         # Reduce the row with the known basis vectors.
         for j in [ 1 .. Length(nzheads) ] do
             x := row[nzheads[j]];
-            if x <> zero then
+            if not(IsZero(x)) then
               AddRowVector( row, vectors[ j ], - x , nzheads[j],ncols);
             fi;
         od;
@@ -68,16 +65,15 @@ InstallMethod( SemiEchelonMatDestructive, "for a cmat",
     return rec( heads   := heads,
                 vectors := vectors );
     end );
-InstallMethod( SemiEchelonMat, "for a cmat", [ IsMatrix and IsCMatRep ],
+InstallMethod( SemiEchelonMat, "for a cmat", [ IsCMatRep ],
     function( mat )
       return SemiEchelonMatDestructive( MutableCopyMat( mat ) );
     end );
 
 InstallMethod( SemiEchelonMatTransformationDestructive,
-    "for a cmat", [ IsMatrix and IsMutable and IsCMatRep ],
+    "for a cmat", [ IsMutable and IsCMatRep ],
     function( mat )
-    local zero,      # zero of the field of <mat>
-          nrows,     # number of rows in <mat>
+    local nrows,     # number of rows in <mat>
           ncols,     # number of columns in <mat>
           vectors,   # list of basis vectors
           heads,     # list of pivot positions in 'vectors'
@@ -89,25 +85,21 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
           row, head, x, row2, one, cl, zv;
             
     nrows := Length( mat );
-    ncols := Length( mat[1] );
+    ncols := RowLength( mat );
 
-    zero  := Zero( mat[1][1] );
-    one   := One( mat[1][1] );
+    one   := One( BaseDomain( mat ) );
 
     heads   := ListWithIdenticalEntries( ncols, 0 );
-    vectors := CMat([],mat!.vecclass);
+    vectors := Matrix([],ncols,mat);
     
-    cl := CVEC_NewCVecClass( mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p], 
-                             mat!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
-                             nrows );
-    zv := CVEC_NEW(cl,cl![CVEC_IDX_type]);
-    T := CMat([],cl);
+    zv := ZeroVector(nrows,mat);
+    T := Matrix([],nrows,mat);
     for i in [1..nrows] do
         Add(T,ShallowCopy(zv));
         T[i][i] := one;
     od;
-    coeffs    := CMat([],cl);
-    relations := CMat([],cl);
+    coeffs    := Matrix([],nrows,mat);
+    relations := Matrix([],nrows,mat);
     
     for i in [ 1 .. nrows ] do
         row := mat[i];
@@ -118,7 +110,7 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
             head := heads[j];
             if head <> 0 then
                 x := - row[j];
-                if x <> zero then
+                if not(IsZero(x)) then
                     AddRowVector( row2, coeffs[ head ],  x );
                     AddRowVector( row,  vectors[ head ], x, j, ncols );
                 fi;
@@ -143,7 +135,7 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
                 relations := relations );
 end );
 InstallMethod( SemiEchelonMatTransformation, 
-    "for a cmat", [ IsMatrix and IsCMatRep ],
+    "for a cmat", [ IsCMatRep ],
     function( mat )
       return SemiEchelonMatTransformationDestructive( MutableCopyMat( mat ) );
     end );

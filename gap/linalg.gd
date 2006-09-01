@@ -115,13 +115,11 @@ DeclareGlobalFunction( "CVEC_GlueMatrices" );
 DeclareGlobalFunction( "CVEC_MakeJordanBlock" );
 DeclareGlobalFunction( "CVEC_MakeExample" );
 
+
+#############################################################################
+# A Monte-Carlo algorithm for the minimal polynomial:
+#############################################################################
+
 DeclareGlobalFunction( "CVEC_CalcOrderPolyTuned" );
 DeclareGlobalFunction( "CVEC_FactorMultiplicity" );
 DeclareGlobalFunction( "CVEC_MinimalPolynomialMC" );
-
-# The rest can probably be deleted later on:
-DeclareGlobalFunction( "CVEC_RelativeOrderPoly" );
-DeclareGlobalFunction( "CVEC_CalcOrderPoly" );
-DeclareGlobalFunction( "CVEC_NewMinimalPolynomial" );
-DeclareGlobalFunction( "CVEC_NewMinimalPolynomialMC" );
-
