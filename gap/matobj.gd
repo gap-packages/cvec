@@ -356,8 +356,9 @@ DeclareOperation( "PositionLastNonZero", [IsMatrixObj, IsInt] );
 DeclareOperation( "Position", [IsMatrixObj, IsRowVectorObj] );
 DeclareOperation( "Position", [IsMatrixObj, IsRowVectorObj, IsInt] );
 
-DeclareOperation( "PositionSorted", [IsMatrixObj, IsRowVectorObj] );
-DeclareOperation( "PositionSorted", [IsMatrixObj, IsRowVectorObj, IsFunction] );
+# This allows for usage of PositionSorted:
+DeclareOperation( "PositionSortedOp", [IsMatrixObj, IsRowVectorObj] );
+DeclareOperation( "PositionSortedOp",[IsMatrixObj,IsRowVectorObj,IsFunction]);
 
 # I intentionally left out "PositionNot" here.
 

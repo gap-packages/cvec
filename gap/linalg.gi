@@ -488,7 +488,7 @@ function(m,indetnr)
   fam := FamilyObj(o);
   dec := ShallowCopy(zero);
   while Length(pivs) > 0 do
-      subdim := Length(b.pivots);
+      subdim := Length(b!.pivots);
       p := pivs[1];
       v := ShallowCopy(zero);
       v[p] := o;
@@ -626,10 +626,10 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
           vcopy := ShallowCopy(v);
           closed := CleanRow(b2,vcopy,true,dec);
           if closed then break; fi;
-          Add(lambda,dec{[1..Length(b2.pivots)]});
-          RemoveSet(pivs,b2.pivots[Length(b2.pivots)]);
+          Add(lambda,dec{[1..Length(b2!.pivots)]});
+          RemoveSet(pivs,b2!.pivots[Length(b2!.pivots)]);
       od;
-      d := Length(b2.pivots);
+      d := Length(b2!.pivots);
       # we have the lambdas, expressing v*m^(i-1) in terms of the semiechelon
       # basis, now we have to express v*m^d in terms of the v*m^(i-1), that
       # means inverting a matrix: 
@@ -655,6 +655,9 @@ end );
 InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
   # This is an early try to implement a deterministic, faster minimal
   # polynomial algorithm. It now uses the RowListMatrix interface.
+  # Currently, this does not work properly, the method works in principle,
+  # but there is something wrong with the factoring out of subspaces and
+  # the corresponding lower and upper bounds. DO NOT USE!
   local col,deg,facs,havedim,i,irreds,l,lowbound,lowbounds,mp,mult,
         multfactoredout,multmin,nrblocks,ns,p,targetmult,upbound,x;
   # First the characteristic polynomial:
@@ -769,7 +772,7 @@ InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
                    " and going to power ",lowbound);
               x := CVEC_ActionOnQuotient([x],ns)[1];
               multfactoredout := multfactoredout + 1 + lowbound;
-              targetmult := targetmult - Length(ns.vectors)/deg;
+              targetmult := targetmult - Length(ns!.vectors)/deg;
               lowbound := 0;   # we do not know anything about this quotient
               upbound := targetmult;
           od;
@@ -785,12 +788,12 @@ end );
 InstallMethod( CharAndMinimalPolynomialOfMatrix, "for a matrix and an indet nr",
   [IsCMatRep, IsPosInt],
   function( m, indetnr )
-    return CVEC_CharAndMinimalPolynomial(m,indetnr);
+    return CVEC_MinimalPolynomialMC(m,1/100,true,indetnr);
   end );
 
 InstallMethod( CharAndMinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
   function( m )
-    return CVEC_CharAndMinimalPolynomial(m,1);
+    return CVEC_MinimalPolynomialMC(m,1/100,true,1);
   end );
 
 InstallMethod( MinimalPolynomialOfMatrix, "for a matrix and an indet nr",
@@ -822,11 +825,18 @@ InstallGlobalFunction( CVEC_GlueMatrices, function(l)
                            [1..Length(l[i])],[pos..pos+Length(l[i])-1]);
       pos := pos + Length(l[i]);
   od;
-  Display(m);
+  if InfoLevel(InfoCVec) >= 2 then 
+      Display(m);
+      Print("\nOf course, I do a random basechange... :-)\n\n");
+  fi;
   g := GL(n,p^d);
   g := Group(List(GeneratorsOfGroup(g),CMat));
   x := PseudoRandom(g);
-  return x * m * x^-1;
+  m := x * m * x^-1;
+  if InfoLevel(InfoCVec) >= 2 then
+      Display(m);
+  fi;
+  return m;
   #return m;
 end );
   
@@ -1012,7 +1022,7 @@ function( m, eps, verify, indetnr )
       # we still have Y = A*S and S = B*Y. The latest dec expresses 
       # x*m^something in terms of S, first express it in terms of Y, then
       # we can read off the relative order polynomial from components
-      # components d+1 .. Length(S.vectors).
+      # components d+1 .. Length(S!.vectors).
       dec := dec{[1..l]} * B;
       Add(opi.mm,dec);
       coeffs := -dec{[d+1..l]};
@@ -1023,7 +1033,7 @@ function( m, eps, verify, indetnr )
           UnivariatePolynomialByCoefficients(opi.fam,coeffs,indetnr));
       Add(opi.d,l-d);  # the degree of the order polynomial
       Add(opi.ranges,[d+1..l]);
-      SubtractSet(pivs,S.pivots{[d+1..l]});
+      SubtractSet(pivs,S!.pivots{[d+1..l]});
   od;
 
   # Release some memory:
@@ -1093,8 +1103,8 @@ function( m, eps, verify, indetnr )
                   break;
               fi;
               prob := prob * p;  # probability to have missed one Jordan block
-              Print( "Probability to have them all (%%): ",
-                     Int((1-prob)^nrunclear*1000),"\n");
+              Info( InfoCVec, 2, "Probability to have them all (%%): ",
+                     Int((1-prob)^nrunclear*1000));
               if 1-(1-prob)^nrunclear < eps then
                   break;   # this is the probability to have missed one
               fi;
