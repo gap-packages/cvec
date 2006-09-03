@@ -94,22 +94,3 @@ DeclareGlobalFunction( "CVEC_ReadMatsFromFile" );
 DeclareOperation( "Unfold", [ IsCMatRep ] );
 DeclareOperation( "Fold", [ IsCVecRep, IsInt ] );
 
-#############################################################################
-# Memory usage information:
-#############################################################################
-
-InstallMethod( Memory, "for a cmat", [ IsCMatRep ],
-  function( m )
-    local bpw,bpb;
-    # Bytes per word:
-    bpw := GAPInfo.BytesPerVariable;
-    # Bytes per bag (in addition to content):
-    bpb := 8 + bpw + 4;   # this counts the header and the master pointer!
-    if Length(m) = 0 then
-        return 2*bpb + SHALLOW_SIZE(m) + SHALLOW_SIZE(m!.rows);
-    else
-        return 2*bpb + SHALLOW_SIZE(m) + SHALLOW_SIZE(m!.rows)
-               + Length(m) * Memory(m!.rows[2]);
-    fi;
-    # FIXME: this does not include greased data!
-  end );
