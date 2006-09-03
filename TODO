@@ -1,3 +1,4 @@
+Memory for cmats should look at grease tables
 Use new MinimalPolynomial method with verification
 document MC method
 Document Fold and Unfold

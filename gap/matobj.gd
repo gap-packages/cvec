@@ -308,6 +308,8 @@ DeclareOperation( "Randomize", [IsRowVectorObj] );
 # CopySubVector(a,b,src,dst) does b{dst} := a{src} efficiently without
 # generating an intermediate object.
 
+DeclareOperation( "Memory", [ IsRowVectorObj ] );
+# Returns the amount of memory needed for a row vector in bytes
 
 
 ############################################################################
@@ -579,6 +581,8 @@ InstallMethod( Fold, "for a vector, a positive int, and a matrix",
     return m;
   end );
 
+DeclareOperation( "Memory", [ IsMatrixObj ] );
+# Returns the amount of memory needed for a matrix in bytes
 
 ############################################################################
 ############################################################################
