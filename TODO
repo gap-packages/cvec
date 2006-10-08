@@ -1,3 +1,8 @@
+Adjust interface to allow for base domain changes: At least make it possible
+to create zero matrices in "similar" representation over different fields,
+then use unpacking and repacking...
+Fix DegreeFFE according to documentation -> really find smallest possible!
+Update documentation of vector/matrix interface operations, ZeroVector ...
 Memory for cmats should look at grease tables
 Use new MinimalPolynomial method with verification
 document MC method
