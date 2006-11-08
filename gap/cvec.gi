@@ -1221,7 +1221,7 @@ InstallMethod( IO_Pickle, "for cvecs",
     local m,tag;
     if IsMutable(v) then tag := "MCVC";
     else tag := "ICVC"; fi;
-    if IO_Write(f,tag) = IO_Error then return IO_Error; fi;
+    if IO_Write(f,tag) = fail then return IO_Error; fi;
     m := CVEC_CMatMaker( [0,v], DataType(TypeObj(v)) );
     if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
     return IO_OK;

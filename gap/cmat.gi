@@ -1576,7 +1576,7 @@ InstallGlobalFunction( CVEC_ReadMat, function(f)
       Error("CVEC_ReadMat: first argument must be a file");
       return fail;
   fi;
-  header := IO_Read(f,40);
+  header := IO_ReadBlock(f,40);
   if Length(header) < 40 then
       Info(InfoCVec,1,"CVEC_ReadMat: Cannot read header");
       return fail;
@@ -1605,7 +1605,7 @@ InstallGlobalFunction( CVEC_ReadMat, function(f)
   fi;
 
   for i in [1..rows] do
-      buf := IO_Read(f,len);
+      buf := IO_ReadBlock(f,len);
       if len <> Length(buf) then
           Info(InfoCVec,1,"CVEC_ReadMat: Read error");
           Error();
@@ -1859,7 +1859,7 @@ InstallMethod( IO_Pickle, "for cmats",
     local tag;
     if IsMutable(m) then tag := "MCMA";
     else tag := "ICMA"; fi;
-    if IO_Write(f,tag) = IO_Error then return IO_Error; fi;
+    if IO_Write(f,tag) = fail then return IO_Error; fi;
     if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
     return IO_OK;
   end );
