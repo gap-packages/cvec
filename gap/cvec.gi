@@ -833,6 +833,15 @@ InstallMethod( Vector, "for a list of finite field elements, and a cvec",
     fi;
   end );
 
+InstallMethod( ChangeBaseDomain, "for a cvec and a finite field",
+  [IsCVecRep,IsField and IsFinite],
+  function( v, f )
+    local cl;
+    cl := CVEC_NewCVecClass(Characteristic(f),DegreeOverPrimeField(f),
+                            Length(v));
+    return CVec(Unpack(v),cl);
+  end );
+
 # And the way back:
 
 InstallMethod( Unpack, "for cvecs", [IsCVecRep],

@@ -27,11 +27,11 @@ Subtitle := "Compact vectors over finite fields",
 ##  See '?Extending: Version Numbers' in GAP help for an explanation
 ##  of valid version numbers. For an automatic package distribution update
 ##  you must provide a new version number even after small changes.
-Version := "1.3",
+Version := "1.4",
 
 ##  Release date of the current version in dd/mm/yyyy format.
 # 
-Date := "18/08/2006",
+Date := "08/11/2006",
 
 ##  URL of the archive(s) of the current package release, but *without*
 ##  the format extension(s), like '.zoo', which are given next.
@@ -242,7 +242,7 @@ Dependencies := rec(
   # list of pairs [package name, (least) version],  package name is case
   # insensitive, least version denoted with '>=' prepended to version string.
   # without these, the package will not load
-  NeededOtherPackages := [["GAPDoc", ">= 0.99"],["IO", ">=1.0"],
+  NeededOtherPackages := [["GAPDoc", ">= 0.99"],["IO", ">= 1.5"],
                           ["orb", ">= 0.1"]],
   # without these the package will issue a warning while loading
   # SuggestedOtherPackages := [],
@@ -283,13 +283,13 @@ end,
 ##  in this file. If you are not happy with it, you can provide a string
 ##  here that is used as a banner. GAP decides when the banner is shown and
 ##  when it is not shown. *optional* (note the ~-syntax in this example)
-BannerString := Concatenation( 
-  "---------------------------------------------------------------------\n",
-  "Loading  cvec ", ~.Version, "\n",
-  "by ", ~.Persons[1].FirstNames, " ", ~.Persons[1].LastName,
-        " (", ~.Persons[1].WWWHome, ")\n",
-  "For help, type: ?cvec package \n",
-  "---------------------------------------------------------------------\n" ),
+#BannerString := Concatenation( 
+#  "---------------------------------------------------------------------\n",
+#  "Loading  cvec ", ~.Version, "\n",
+#  "by ", ~.Persons[1].FirstNames, " ", ~.Persons[1].LastName,
+#        " (", ~.Persons[1].WWWHome, ")\n",
+#  "For help, type: ?cvec package \n",
+#  "---------------------------------------------------------------------\n" ),
 
 ##  Suggest here if the package should be *automatically loaded* when GAP is 
 ##  started.  This should usually be 'false'. Say 'true' only if your package 

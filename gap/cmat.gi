@@ -300,6 +300,20 @@ InstallGlobalFunction( CVEC_RandomMat, function(arg)
   return CVEC_CMatMaker(l,c);
 end );
 
+InstallMethod( ChangeBaseDomain, "for a cmat and a finite field",
+  [IsCMatRep,IsField and IsFinite],
+  function( m, f )
+    local cl,i,l;
+    cl := CVEC_NewCVecClass(Characteristic(f),DegreeOverPrimeField(f),
+                            m!.vecclass![CVEC_IDX_len]);
+    l := [0];
+    for i in [2..m!.len+1] do
+        l[i] := CVec(Unpack(m!.rows[i]),cl);
+    od;
+    return CVEC_CMatMaker(l,cl);
+  end );
+
+
 
 #############################################################################
 # Viewing, Printing, Displaying of cmats:

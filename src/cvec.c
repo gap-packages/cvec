@@ -1550,7 +1550,8 @@ STATIC Obj MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
         PREPARE_clfi(u,ucl,ufi);
         PREPARE_d(ufi);
         Int *sc;
-        Int start,end;
+        Int start = 0;  /* Just to please modern C compilers */
+        Int end = 0;
 
         /* Now handle the scalar: */
         sc = prepare_scalar(ufi,s); if (!sc) return 0L;
@@ -1704,7 +1705,8 @@ STATIC Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
         PREPARE_d(ufi);
         PREPARE_clfi(v,vcl,vfi);
         Int *sc;
-        Int start,end;
+        Int start = 0; /* Just to please modern C compilers */
+        Int end = 0;
 
         /* Check fields and lengths: */
         if (ufi != vfi || 
