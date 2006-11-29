@@ -8,6 +8,7 @@
 
   - Adjust to new buffered I/O.
   - New operation ChangeBaseDomain with methods for cvecs and cmats.
+  - Put revision 212 as version 1.4 on the web.
 
 
 ==========================
