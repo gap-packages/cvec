@@ -1,0 +1,32 @@
+Auf draco (P4 2.5 GHz, 512kB cache:
+
+15.5s fuer 8193x8193 ueber GF(2,1) normal
+14.0s mit Winograd limit=4097 (1x teilen)
+
+bei 4097x4097 brachte es noch nichts
+
+==> fuer GF(2) lohnt es sich ab etwa 8192x8192
+
+
+194s fuer 8193x8193 ueber GF(7,1) normal
+172s mit Winograd limit=2049 (2x teilen)
+175s mit Winograd limit=2048 (3x teilen)
+180s mit Winograd limit=4097 (1x teilen)
+
+==> fuer GF(7) lohnt es sich ab etwa 4096x4096
+
+
+Auf algol (P4 3.2 GHz, 1024kB cache:
+
+52s fuer 16384x16384 ueber GF(2,1) normal
+47s mit Winograd limit=8192 (1x teilen)
+
+bei 8192x8192 brachte es noch nichts
+
+==> fuer GF(2) lohnt es sich ab etwa 16384x16384
+
+
+841s fuer 16384x16384 ueber GF(7,1) normal
+747s mit Winograd limit=4096 (2x teilen)
+
+==> fuer GF(7) lohnt es sich ab etwa 8192x8192
