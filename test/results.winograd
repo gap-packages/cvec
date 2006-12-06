@@ -30,3 +30,339 @@ bei 8192x8192 brachte es noch nichts
 747s mit Winograd limit=4096 (2x teilen)
 
 ==> fuer GF(7) lohnt es sich ab etwa 8192x8192
+
+
+gap> MatMulSpeedTest(2,1,[1000,2000..60000]);
+Randomizing 2 matrices n=60000...#G  PART   25332/  62063kb+live
+47342K/3804549mb+dead  2590090/   3000mb free
+#G  PART    8079/  59252kb+live   47335K/2202362mb+dead  2530712/   3000mb
+free
+#G  PART    8078/  59245kb+live   47327K/0600288mb+dead  2471340/   3000mb
+free
+#G  PART    8077/  59237kb+live   47319K/8998900mb+dead  2411976/   3000mb
+free
+#G  PART    8075/  59223kb+live   47311K/7397366mb+dead  2352627/   3000mb
+free
+#G  PART    8075/  59215kb+live   47303K/5796435mb+dead  2293285/   3000mb
+free
+#G  PART    8073/  59201kb+live   47295K/4195424mb+dead  2233958/   3000mb
+free
+#G  PART    9128/  60688kb+live   47286K/2361141mb+dead  2173127/   3000mb
+free
+#G  PART    8070/  59179kb+live   47278K/0760700mb+dead  2113821/   3000mb
+free
+#G  PART    8069/  59179kb+live   47270K/9160826mb+dead  2054516/   3000mb
+free
+#G  PART    8068/  59164kb+live   47263K/7560600mb+dead  1995226/   3000mb
+free
+#G  PART    8065/  59149kb+live   47255K/5961452mb+dead  1935950/   3000mb
+free
+#G  PART    8009/  58738kb+live   46922K/7308042mb+dead  1877086/   3000mb
+free
+#G  PART    7765/  56948kb+live   45495K/8278745mb+dead  1820016/   3000mb
+free
+done.
+#G  PART   10467/  55466kb+live   43695K/0703782mb+dead  1764377/   3000mb
+free
+Field: GF(2,1), size: 1000, time: 13.1387 [ms]
+Field: GF(2,1), size: 2000, time: 140.857 [ms]
+Field: GF(2,1), size: 3000, time: 394.417 [ms]
+Field: GF(2,1), size: 4000, time: 827 [ms]
+Field: GF(2,1), size: 5000, time: 1529.33 [ms]
+Field: GF(2,1), size: 6000, time: 2514 [ms]
+Field: GF(2,1), size: 7000, time: 3886 [ms]
+Field: GF(2,1), size: 8000, time: 5572 [ms]
+Field: GF(2,1), size: 9000, time: 7791 [ms]
+Field: GF(2,1), size: 10000, time: 10487 [ms]
+Field: GF(2,1), size: 11000, time: 13783 [ms]
+Field: GF(2,1), size: 12000, time: 17794 [ms]
+Field: GF(2,1), size: 13000, time: 22161 [ms]
+Field: GF(2,1), size: 14000, time: 27389 [ms]      
+Field: GF(2,1), size: 15000, time: 33350 [ms]      
+Field: GF(2,1), size: 16000, time: 40496 [ms]
+Field: GF(2,1), size: 17000, time: 48029 [ms]
+Field: GF(2,1), size: 18000, time: 56488 [ms]
+Field: GF(2,1), size: 19000, time: 66230 [ms]
+Field: GF(2,1), size: 20000, time: 77053 [ms]
+Field: GF(2,1), size: 21000, time: 89688 [ms]
+Field: GF(2,1), size: 22000, time: 102688 [ms]
+#G  PART   85118/ 218635kb+live  2020518/5179494mb+dead  1544417/   3000mb
+free
+Field: GF(2,1), size: 23000, time: 118027 [ms]
+Field: GF(2,1), size: 24000, time: 131605 [ms]
+Field: GF(2,1), size: 25000, time: 147842 [ms]
+Field: GF(2,1), size: 26000, time: 165942 [ms]
+Field: GF(2,1), size: 27000, time: 186638 [ms]
+Field: GF(2,1), size: 28000, time: 207835 [ms]
+#G  PART  105845/ 360664kb+live   682054/1385803mb+dead  1182099/   3000mb
+free
+Field: GF(2,1), size: 29000, time: 230298 [ms]
+Field: GF(2,1), size: 30000, time: 254380 [ms]
+Field: GF(2,1), size: 31000, time: 279937 [ms]
+Field: GF(2,1), size: 32000, time: 310108 [ms]
+#G  PART  123873/ 476143kb+live   403219/3017208mb+dead   704019/   3000mb
+free
+Field: GF(2,1), size: 33000, time: 338118 [ms]
+#G  PART  136186/ 560201kb+live   134432/7602113mb+dead   141689/   3000mb
+free
+Field: GF(2,1), size: 34000, time: 369305 [ms]
+#G  PART   33394/ 139527kb+live    35064/2426100mb+dead     1640/   3000mb
+free
+#G  PART     382/   1635kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  532467/   1317mb live  707294K/0784956mb dead  1332771/   3000mb
+free
+Field: GF(2,1), size: 35000, time: 399472 [ms]
+Field: GF(2,1), size: 36000, time: 433839 [ms]
+#G  PART  156133/ 696207kb+live   323819/1287151mb+dead   634123/   3000mb
+free
+Field: GF(2,1), size: 37000, time: 475818 [ms]
+#G  PART  135353/ 627253kb+live    76121/3561133mb+dead     4755/   3000mb
+free
+#G  PART    1020/   4741kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  577694/   1567mb live   647219/9536767mb dead  1075748/   3000mb
+free
+Field: GF(2,1), size: 38000, time: 512952 [ms]
+Field: GF(2,1), size: 39000, time: 555202 [ms]
+#G  PART  141501/ 688255kb+live   236506/8014084mb+dead   385281/   3000mb
+free
+Field: GF(2,1), size: 40000, time: 596520 [ms]
+#G  PART   76052/ 379603kb+live    82094/9006812mb+dead     4489/   3000mb
+free
+#G  PART     893/   4478kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  565606/   1556mb live   549134/8909575mb dead  1087228/   3000mb
+free
+Field: GF(2,1), size: 41000, time: 640595 [ms]
+Field: GF(2,1), size: 42000, time: 688888 [ms]
+#G  PART  168685/ 867761kb+live   168726/9789617mb+dead   216830/   3000mb
+free
+#G  PART   40554/ 213845kb+live    43022/5218514mb+dead     2352/   3000mb
+free
+#G  PART     447/   2350kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  571264/   1618mb live   415774/3907943mb dead  1023872/   3000mb
+free
+Field: GF(2,1), size: 43000, time: 737254 [ms]
+#G  PART  189639/    989mb+live    88400/1242683mb+dead     7204/   3000mb
+free
+#G  PART    1335/   7186kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  592223/   1750mb live   258414/1456255mb dead   888303/   3000mb
+free
+Field: GF(2,1), size: 44000, time: 794238 [ms]
+Field: GF(2,1), size: 45000, time: 848433 [ms]
+#G  PART  158898/ 876603kb+live   136445/8303856mb+dead     9216/   3000mb
+free
+#G  PART    1634/   9191kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  577484/   1698mb live   311716/7041391mb dead   942118/   3000mb
+free
+Field: GF(2,1), size: 46000, time: 896381 [ms]
+#G  PART  164650/ 932646kb+live    93373/3048828mb+dead     6899/   3000mb
+free
+#G  PART    1197/   6882kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  608317/   1888mb live   228387/0811075mb dead   747077/   3000mb
+free
+Field: GF(2,1), size: 47000, time: 962195 [ms]
+#G  PART  127527/ 738036kb+live    95373/3736357mb+dead     7047/   3000mb
+free
+#G  PART    1199/   7034kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  599029/   1856mb live   233387/9287281mb dead   779846/   3000mb
+free
+Field: GF(2,1), size: 48000, time: 1.02244e+06 [ms]
+#G  PART  130745/ 770607kb+live    97373/1775734mb+dead     7196/   3000mb
+free
+#G  PART    1198/   7178kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  589958/   1822mb live   238387/1595173mb dead   814429/   3000mb
+free
+Field: GF(2,1), size: 49000, time: 1.09613e+06 [ms]
+#G  PART  133997/ 804988kb+live    99373/2479961mb+dead     7347/   3000mb
+free
+#G  PART    1199/   7334kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  581140/   1789mb live   243387/2840423mb dead   848627/   3000mb
+free
+#G  PART  137617/ 842964kb+live    50049/7083837mb+dead     3512/   3000mb
+free
+#G  PART     573/   3505kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  621320/   2041mb live   148059/1712058mb dead   589921/   3000mb
+free
+Field: GF(2,1), size: 50000, time: 1.1566e+06 [ms] 
+#G  PART   93493/ 582878kb+live   102094/5498716mb+dead     5582/   3000mb
+free
+#G  PART     894/   5573kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  616442/   2028mb live   201359/0637408mb dead   603370/   3000mb
+free
+Field: GF(2,1), size: 51000, time: 1.22395e+06 [ms]
+#G  PART   95040/ 597430kb+live    52343/8524578mb+dead     4454/   3000mb
+free
+#G  PART     699/   4445kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  612168/   2017mb live   152356/1228920mb dead   614466/   3000mb
+free
+#G  PART   95628/ 609315kb+live    52049/8427360mb+dead     3657/   3000mb
+free
+#G  PART     574/   3650kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  606360/   1994mb live   154059/4513395mb dead   638701/   3000mb
+free
+Field: GF(2,1), size: 52000, time: 1.2954e+06 [ms] 
+#G  PART   97813/ 631374kb+live   106094/7554410mb+dead     5799/   3000mb
+free
+#G  PART     893/   5790kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  601800/   1980mb live   209360/0792035mb dead   652696/   3000mb
+free
+Field: GF(2,1), size: 53000, time: 1.38198e+06 [ms]
+#G  PART   99344/ 646519kb+live    54343/9221112mb+dead     4624/   3000mb
+free
+#G  PART     699/   4614kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  597831/   1969mb live   158355/6037703mb dead   664226/   3000mb
+free
+#G  PART   99628/ 659296kb+live    54041/9102234mb+dead     3373/   3000mb
+free
+#G  PART     510/   3366kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  591959/   1943mb live   160051/3266585mb dead   690249/   3000mb
+free
+Field: GF(2,1), size: 54000, time: 1.44938e+06 [ms]
+#G  PART  102896/ 686063kb+live    55064/9466891mb+dead     2578/   3000mb
+free
+#G  PART     383/   2576kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  641966/   2278mb live   108336/8336215mb dead   347042/   3000mb
+free
+#G  PART   50910/ 343241kb+live    55022/9482982mb+dead     3005/   3000mb
+free
+#G  PART     446/   3000kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  639312/   2267mb live   109032/8609518mb dead   358178/   3000mb
+free
+#G  PART   52938/ 356923kb+live       19/   6709mb+dead      427/   3000mb
+free
+#G  PART      64/    430kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  638306/   2267mb live    54027/9145202mb dead   358176/   3000mb
+free
+Field: GF(2,1), size: 55000, time: 1.53033e+06 [ms]
+#G  PART   51939/ 354741kb+live    56064/9841946mb+dead     2623/   3000mb
+free
+#G  PART     383/   2621kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  636362/   2266mb live   110328/5707069mb dead   359488/   3000mb
+free
+#G  PART   51845/ 355621kb+live    56022/6490726mb+dead     3057/   3000mb
+free
+#G  PART     446/   3052kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  633644/   2254mb live   111031/5928674mb dead   371679/   3000mb
+free
+#G  PART   53999/ 370403kb+live       19/   6715mb+dead      432/   3000mb
+free
+#G  PART      64/    438kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  632699/   2254mb live    55027/9461211mb dead   371681/   3000mb
+free
+Field: GF(2,1), size: 56000, time: 1.61199e+06 [ms]
+#G  PART   53115/ 368176kb+live    57064/0166800mb+dead     2674/   3000mb
+free
+#G  PART     383/   2669kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  630932/   2253mb live   112329/9750089mb dead   373028/   3000mb
+free
+#G  PART   52847/ 369085kb+live    57020/0178970mb+dead     3117/   3000mb
+free
+#G  PART     447/   3115kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  628218/   2241mb live   113028/0013785mb dead   385004/   3000mb
+free
+#G  PART   54937/ 383705kb+live       19/   6774mb+dead      440/   3000mb
+free
+#G  PART      64/    446kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  627215/   2241mb live    56023/9829350mb dead   384556/   3000mb
+free
+Field: GF(2,1), size: 57000, time: 1.71196e+06 [ms]
+#G  PART   54153/ 380991kb+live    58064/0538787mb+dead     2718/   3000mb
+free
+#G  PART     383/   2716kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  625478/   2239mb live   114336/0427884mb dead   386808/   3000mb
+free
+#G  PART   53845/ 382798kb+live    58022/0459134mb+dead     3168/   3000mb
+free
+#G  PART     446/   3163kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  622759/   2227mb live   115032/7329771mb dead   399005/   3000mb
+free
+#G  PART   55937/ 397681kb+live       19/   6744mb+dead      450/   3000mb
+free
+#G  PART      64/    454kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  621752/   2227mb live    57027/0186132mb dead   399004/   3000mb
+free
+Field: GF(2,1), size: 58000, time: 1.79437e+06 [ms]
+#G  PART   55389/ 395374kb+live    59064/0873276mb+dead     2764/   3000mb
+free
+#G  PART     383/   2761kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  620260/   2226mb live   116328/1131236mb dead   400388/   3000mb
+free
+#G  PART   54841/ 396305kb+live    59022/0868658mb+dead     3225/   3000mb
+free
+#G  PART     447/   3223kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  617539/   2214mb live   117031/1455334mb dead   413246/   3000mb
+free
+#G  PART   56997/ 411895kb+live       19/   6785mb+dead      461/   3000mb
+free
+#G  PART      64/    461kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  616592/   2214mb live    58027/7870301mb dead   413257/   3000mb
+free
+Field: GF(2,1), size: 59000, time: 1.89137e+06 [ms]
+#G  PART   56812/ 411340kb+live    20295/7169708mb+dead     1028/   3000mb
+free
+#G  PART     140/   1019kb+live      277/  97117mb+dead        6/   3000mb
+free
+#G  FULL  615280/   2212mb live    78836/7269647mb dead   414677/   3000mb
+free
+#G  PART   55581/ 408171kb+live   111167/8900761mb+dead     5645/   3000mb
+free
+#G  PART     758/   5553kb+live     1515/ 534703mb+dead       73/   3000mb
+free
+#G  FULL  612613/   2200mb live   171688/0243803mb dead   426901/   3000mb
+free
+#G  PART   57271/ 420583kb+live   106806/7455228mb+dead     5423/   3000mb
+free
+#G  PART     738/   5413kb+live        0/      0kb+dead  869183M/   3000mb
+free
+#G  FULL  611616/   2200mb live   165812/8366520mb dead   426826/   3000mb
+free
+Field: GF(2,1), size: 60000, time: 1.99262e+06 [ms]
+[ [ 1000, 13.1387 ], [ 2000, 140.857 ], [ 3000, 394.417 ], [ 4000, 827 ],
+  [ 5000, 1529.33 ], [ 6000, 2514 ], [ 7000, 3886 ], [ 8000, 5572 ],
+  [ 9000, 7791 ], [ 10000, 10487 ], [ 11000, 13783 ], [ 12000, 17794 ],
+  [ 13000, 22161 ], [ 14000, 27389 ], [ 15000, 33350 ], [ 16000, 40496 ],
+  [ 17000, 48029 ], [ 18000, 56488 ], [ 19000, 66230 ], [ 20000, 77053 ],
+  [ 21000, 89688 ], [ 22000, 102688 ], [ 23000, 118027 ], [ 24000, 131605 ],
+  [ 25000, 147842 ], [ 26000, 165942 ], [ 27000, 186638 ], [ 28000, 207835 ],
+  [ 29000, 230298 ], [ 30000, 254380 ], [ 31000, 279937 ], [ 32000, 310108 ],
+  [ 33000, 338118 ], [ 34000, 369305 ], [ 35000, 399472 ], [ 36000, 433839 ],
+  [ 37000, 475818 ], [ 38000, 512952 ], [ 39000, 555202 ], [ 40000, 596520 ],
+  [ 41000, 640595 ], [ 42000, 688888 ], [ 43000, 737254 ], [ 44000, 794238 ],
+  [ 45000, 848433 ], [ 46000, 896381 ], [ 47000, 962195 ],
+  [ 48000, 1.02244e+06 ], [ 49000, 1.09613e+06 ], [ 50000, 1.1566e+06 ],
+  [ 51000, 1.22395e+06 ], [ 52000, 1.2954e+06 ], [ 53000, 1.38198e+06 ],
+  [ 54000, 1.44938e+06 ], [ 55000, 1.53033e+06 ], [ 56000, 1.61199e+06 ],
+  [ 57000, 1.71196e+06 ], [ 58000, 1.79437e+06 ], [ 59000, 1.89137e+06 ],
+  [ 60000, 1.99262e+06 ] ]                         
+
