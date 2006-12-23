@@ -2,6 +2,7 @@ Attention: INTREP_TO_CVEC is dangerous: looking at first element
    might be wrong when converting to non-prime-fields...
 Check ChangeBaseDomain for vectors and matrices.
 
+Documentation of ZeroVector is wrong
 
 Adjust interface to allow for base domain changes: At least make it possible
 to create zero matrices in "similar" representation over different fields,
