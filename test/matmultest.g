@@ -49,6 +49,7 @@ QuickRandomMat := function(n,m,p,d)
           r{[1+(j-1)*le..j*le]} := 
                tab[RandomIntegerMT(rs!.state,10) mod le + 1];
       od;
+      while Length(r) > n do Unbind(r[Length(r)]); od;
       l[i] := CVec(r,cl);
   od;
   return CMat(l,cl);
