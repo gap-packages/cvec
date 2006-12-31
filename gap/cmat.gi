@@ -1269,7 +1269,7 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
 InstallOtherMethod(\*, "for two cmats, second one not greased",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
-    local greasetab,i,j,l,lev,res,spreadtab,tablen,vcl,q;
+    local greasetab,i,j,l,lev,res,spreadtab,tablen,vcl,q,d;
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
@@ -1285,10 +1285,17 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     res := CVEC_CMatMaker(l,n!.vecclass);
     if m!.len > 0 then
         q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+        d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
         lev := n!.greasehint;
         if lev = 0 or 
-           n!.len * (q-1) * lev <= (n!.len + q^lev) * q then   
-            # no greasing at all!
+           3 * d * m!.len * (q-1) * lev <= (m!.len + q^lev) * q then   
+           # the old - very bad - formula: (extremely bad for lev=1!)
+           #m!.len * (q-1) * lev <= (m!.len + q^lev) * q then   
+           # This formula is a compromise: We want to grease already for
+           # smaller matrices since we cannot predict the performance of
+           # scalar multiplication nicely. Thus we added the factor
+           # here. This is heuristics!
+            # no greasing at all in this case!
             CVEC_PROD_CMAT_CMAT_NOGREASE2(l,m!.rows,n!.rows);
             # we use version 2, which unpacks full rows of m instead of
             # extracting single field entries.

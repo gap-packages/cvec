@@ -1,3 +1,6 @@
+optimize \* with grease by adding a factor to take care of scalar mult
+improve FILL_GREASE_TAB by multiplying vectors only by p, not by p^k
+investigate, why greased multiply for q=3^5 so bad --> must be FILL_GREASE_TAB
 Attention: INTREP_TO_CVEC is dangerous: looking at first element
    might be wrong when converting to non-prime-fields...
 Check ChangeBaseDomain for vectors and matrices.
