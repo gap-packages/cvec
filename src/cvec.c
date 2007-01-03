@@ -2383,7 +2383,8 @@ STATIC Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
         for (pos = 1;pos <= k;pos += lev) {
             /* First fill the greasetab: */
             FILL_GREASE_TAB(self,n,INTOBJ_INT(pos+1),glev,greasetab,
-                            INTOBJ_INT(LEN_PLIST(greasetab)-2),INTOBJ_INT(1));
+                            INTOBJ_INT(LEN_PLIST(greasetab)-1-lev),
+                            INTOBJ_INT(1));
             EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
             for (j = 2;j <= t+1;j++) {
                 val = (*Vector_Extract_Worker)(DATA_CVEC(ELM_PLIST(m,j)));
