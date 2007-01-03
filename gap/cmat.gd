@@ -94,3 +94,9 @@ DeclareGlobalFunction( "CVEC_ReadMatsFromFile" );
 DeclareOperation( "Unfold", [ IsCMatRep ] );
 DeclareOperation( "Fold", [ IsCVecRep, IsInt ] );
 
+#############################################################################
+# Grease calibration:
+#############################################################################
+
+DeclareGlobalFunction( "GreaseCalibration" );
+

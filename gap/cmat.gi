@@ -1923,3 +1923,27 @@ InstallMethod( Memory, "for a cmat", [ IsCMatRep ],
     # FIXME: this does not include greased data!
   end );
 
+
+#############################################################################
+# Grease calibration:
+#############################################################################
+
+InstallGlobalFunction( GreaseCalibration,
+  function()
+    local d,f,gr,greasedata,l,p,q;
+    l := Filtered([2..1024],IsPrimePowerInt);
+    greasedata := [];
+    for q in l do
+        f := Factors(q);
+        p := f[1];
+        d := Length(f);
+        # Make a short and a long vector:
+
+        gr := [];
+        greasedata[q] := gr;
+    od;
+    return greasedata;
+  end );
+
+
+
