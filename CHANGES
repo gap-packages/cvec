@@ -3,6 +3,15 @@
 =============================================================================
 
 ==========================
+ Changes from 1.4 -> 1.5:
+==========================
+
+  - Improve usage of grease, in particular for level 1 for 2 < q < 257
+  - Improve FILL_GREASE_TAB by using trick coming from analysis: we only
+    have to multiply a few times by the primitive root, not by powers of it.
+
+
+==========================
  Changes from 1.3 -> 1.4:
 ==========================
 

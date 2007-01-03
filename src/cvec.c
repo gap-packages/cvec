@@ -2199,7 +2199,7 @@ STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
 /* This function does the precalculation for greasing. This is the internal
  * version to be called from GAP. tab must already be long enough, no
  * checks are done. "Long enough" means that there must be room for
- * all pre-computed linear combinations and for two more vectors, used
+ * all pre-computed linear combinations and for l+1 more vectors, used
  * during the calculation. 
  * 
  * li     is a plist of vectors
@@ -2209,7 +2209,7 @@ STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
  * offset is the first index in tab used 
  * tab    is a plist to cache the linear combinations, length must already
  *        be long enough, such that from offset on there is room for
- *        tablen+2 vectors, all those places must be filled with vectors
+ *        tablen+l+1 vectors, all those places must be filled with vectors
  * 
  * of course, all vectors must be prepared and be compatible. */
 {
@@ -2220,31 +2220,40 @@ STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
     PREPARE_clfi(v,cl,fi);
     PREPARE_p(fi);
     PREPARE_d(fi);
-    Obj w,u,x,y;
+    Obj u,x,y;
     Int len;
-    Int po;
     Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
     Int offs = INT_INTOBJ(offset);
+    Int start,end;
+    Int *sc;
 
     /* First put the zero vector into the tab at the beginning: */
-    w = ELM_PLIST(tab,offs);
     memset(DATA_CVEC(ELM_PLIST(tab,offs)),0,sizeof(Word)*wordlen);
 
-    /* We have two more vectors for intermediate results: */
-    w = ELM_PLIST(tab,offs+INT_INTOBJ(tablen));
-    u = ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1);
+    /* We have one more vectors for intermediate results: */
+    u = ELM_PLIST(tab,offs+INT_INTOBJ(tablen));
+
+    /* We copy the vectors such that we can mess around with them, note
+     * that we have enough space in the grease tab: */
+    for (kk = 0;kk < INT_INTOBJ(l);kk++) {
+        if (INT_INTOBJ(i)+kk > LEN_PLIST(li))
+            /* Take the zero vector: */
+            memset(DATA_CVEC(ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1+kk)),
+                   0,sizeof(Word)*wordlen);
+        else
+            memcpy(DATA_CVEC(ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1+kk)),
+                   DATA_CVEC(ELM_PLIST(li,INT_INTOBJ(i)+kk)),
+                   sizeof(Word)*wordlen);
+    }
 
     len = 1;  /* Current length of vector list */
-    for (k = 0,po = 1;k < d;k++,po *= p) {
+    for (k = 0;k < d;k++) {
         for (kk = 0;kk < INT_INTOBJ(l);kk++) {
-            if (INT_INTOBJ(i)+kk > LEN_PLIST(li))
-                /* Take the zero vector: */
-                v = ELM_PLIST(tab,offs);
-            else
-                v = ELM_PLIST(li,INT_INTOBJ(i)+kk);
-            memcpy(DATA_CVEC(w),DATA_CVEC(v),sizeof(Word)*wordlen);
-            MUL1(self,w,INTOBJ_INT(po),INTOBJ_INT(0),INTOBJ_INT(0));
-            memcpy(DATA_CVEC(u),DATA_CVEC(w),sizeof(Word)*wordlen);
+            /* was: v = ELM_PLIST(li,INT_INTOBJ(i)+kk); */
+            v = ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1+kk);
+            /* memcpy(DATA_CVEC(w),DATA_CVEC(v),sizeof(Word)*wordlen); */
+            /* MUL1(self,w,INTOBJ_INT(po),INTOBJ_INT(0),INTOBJ_INT(0)); */
+            memcpy(DATA_CVEC(u),DATA_CVEC(v),sizeof(Word)*wordlen);
             jj = len;
             for (kkk = p-1;kkk > 0;kkk--) {
                 for (j = 0;j < len;j++) {
@@ -2252,9 +2261,20 @@ STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
                     y = ELM_PLIST(tab,offs + j);
                     ADD3_INL(DATA_CVEC(x),DATA_CVEC(u),DATA_CVEC(y),fi,wordlen);
                 }
-                if (kkk > 0) ADD2_INL(DATA_CVEC(u),DATA_CVEC(w),fi,wordlen);
+                if (kkk > 1) ADD2_INL(DATA_CVEC(u),DATA_CVEC(v),fi,wordlen);
             }
             len = jj;
+        }
+        /* Multiply all input vectors by the primitive root if we are not
+         * yet done: */
+        if (k < d-1) {
+            /* Prepare for multiplication with scalar: */
+            sc = prepare_scalar(fi,INTOBJ_INT(p));
+            handle_hints(cl,fi,INTOBJ_INT(0),INTOBJ_INT(0),&start,&end);
+            for (kk = 0;kk < INT_INTOBJ(l);kk++) {
+                MUL1_INT(ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1+kk),
+                         cl,fi,d,sc,start,end);
+            }
         }
     }
     return 0L;

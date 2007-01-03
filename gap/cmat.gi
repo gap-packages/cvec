@@ -1139,8 +1139,8 @@ InstallMethod( GreaseMat, "for a cmat, and a level",
     m!.greaseblo := nrblocks;
     m!.greasetab := 0*[1..nrblocks];
     for i in [1..nrblocks] do
-        m!.greasetab[i] := 0*[1..tablen+2];
-        for j in [1..tablen+2] do
+        m!.greasetab[i] := 0*[1..tablen+1+l];
+        for j in [1..tablen+1+l] do
             m!.greasetab[i][j] := 
                 CVEC_NEW(m!.vecclass,m!.vecclass![CVEC_IDX_type]);
         od;
@@ -1305,8 +1305,8 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
                  vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
                  lev, vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_bitsperel]);
             tablen := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q]^lev;
-            greasetab := 0*[1..tablen+2];
-            for j in [1..tablen+2] do
+            greasetab := 0*[1..tablen+1+lev];
+            for j in [1..tablen+1+lev] do
               greasetab[j] := CVEC_NEW(n!.vecclass,n!.vecclass![CVEC_IDX_type]);
             od;
             CVEC_PROD_CMAT_CMAT_WITHGREASE(l,m!.rows,n!.rows,greasetab,
@@ -1409,9 +1409,9 @@ InstallGlobalFunction (CVEC_InverseWithGrease,
          vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d],
          lev, vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_bitsperel]);
     tablen := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q]^lev;
-    greasetab1 := 0*[1..tablen+2];
-    greasetab2 := 0*[1..tablen+2];
-    for i in [1..tablen+2] do
+    greasetab1 := 0*[1..tablen+1+lev];
+    greasetab2 := 0*[1..tablen+1+lev];
+    for i in [1..tablen+1+lev] do
       greasetab1[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
       greasetab2[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     od;
