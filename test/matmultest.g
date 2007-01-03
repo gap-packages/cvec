@@ -47,7 +47,7 @@ QuickRandomMat := function(n,m,p,d)
   for i in [1..n] do
       for j in [1..nrblocks] do
           r{[1+(j-1)*le..j*le]} := 
-               tab[RandomIntegerMT(rs!.state,10) mod le + 1];
+               tab[RandomIntegerMT(rs!.state,10) mod q^le + 1];
       od;
       while Length(r) > n do Unbind(r[Length(r)]); od;
       l[i] := CVec(r,cl);
