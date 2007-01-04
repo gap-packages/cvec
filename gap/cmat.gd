@@ -98,5 +98,8 @@ DeclareOperation( "Fold", [ IsCVecRep, IsInt ] );
 # Grease calibration:
 #############################################################################
 
+DeclareGlobalFunction( "CVEC_ComputeVectorLengthsForCalibration" );
+DeclareGlobalVariable( "CVEC_CalibrationTable" );
+DeclareGlobalFunction( "CVEC_FastFill" );
 DeclareGlobalFunction( "GreaseCalibration" );
 

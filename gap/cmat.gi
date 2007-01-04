@@ -1928,21 +1928,153 @@ InstallMethod( Memory, "for a cmat", [ IsCMatRep ],
 # Grease calibration:
 #############################################################################
 
+CVEC.MaximumGreaseCalibration := 1024;
+
+InstallGlobalFunction( CVEC_ComputeVectorLengthsForCalibration,
+  function()
+    local bpw,cl,epw,f,i,l,le,lencache,lennocache;
+    l := Filtered([2..CVEC.MaximumGreaseCalibration],IsPrimePowerInt);
+    le := Length(l);
+    for i in [1..le] do
+        f := Factors(l[i]);
+        l[i] := [f[1],Length(f),l[i]];
+    od;
+    cl := List([1..le],i->CVecClass(l[i][1],l[i][2],1));
+    lencache := 0*[1..le];
+    lennocache := 0*[1..le];
+    bpw := GAPInfo.BytesPerVariable;
+    for i in [1..le] do
+        epw := cl[i]![CVEC_IDX_fieldinfo]![CVEC_IDX_elsperword];
+        # 64kB is surely in the cache:
+        lencache[i] := QuoInt(65536 / bpw * epw,
+                              cl[i]![CVEC_IDX_fieldinfo]![CVEC_IDX_d]);
+        # 16MB is supposedly out of the cache:
+        lennocache[i] := QuoInt(16*1024*1024 / bpw * epw,
+                                cl[i]![CVEC_IDX_fieldinfo]![CVEC_IDX_d]);
+    od;
+    return rec( pdq := l, le := le, lencache := lencache, 
+                lennocache := lennocache );
+  end );
+
+InstallValue( CVEC_CalibrationTable, [] );
+
+InstallGlobalFunction( CVEC_FastFill,
+  function( v )
+    local cl,d,e,i,l,p,q,x;
+    cl := CVecClass(v);
+    p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+    d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+    q := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+    x := 1;
+    l := Length(v);
+    for i in [1..Minimum(Length(v),1000)] do
+        v[i] := x;
+        x := x + 1;
+        if x = q then x := 1; fi;
+    od;
+    i := 1;
+    while 1000*i+1 <= Length(v) do
+        e := Minimum(Length(v),1000*(i+1));
+        CopySubVector(v,v,[1..e-1000*i],[1000*i+1..e]);
+        i := i + 1;
+    od;
+  end );
+
 InstallGlobalFunction( GreaseCalibration,
   function()
-    local d,f,gr,greasedata,l,p,q;
-    l := Filtered([2..1024],IsPrimePowerInt);
-    greasedata := [];
-    for q in l do
-        f := Factors(q);
-        p := f[1];
-        d := Length(f);
-        # Make a short and a long vector:
+    local CVEC_CalibrationTable,cl,d,gd,i,info,j,mult,p,q,sc,t,t1,t2,t3,v1,
+          v2,v3;
+    info := CVEC_ComputeVectorLengthsForCalibration();
+    gd := rec();
+    gd.info := info;
+    gd.tfCache := 0*[1..info.le];
+    gd.tfNoCache := 0*[1..info.le];
+    gd.tfPrimRootCache := 0*[1..info.le];
+    gd.tfPrimRootNoCache := 0*[1..info.le];
+    for i in [1..info.le] do
+        p := info.pdq[i][1];
+        d := info.pdq[i][2];
+        q := info.pdq[i][3];
 
-        gr := [];
-        greasedata[q] := gr;
+        # Make a short vector:
+        cl := CVecClass(p,d,info.lencache[i]);
+
+        v1 := CVEC_New(cl);
+        CVEC_FastFill(v1);
+        v2 := ShallowCopy(v1);
+        v3 := CVEC_New(cl);
+
+        # Calibrate mult:
+        mult := 0;
+        t := Runtime();
+        while Runtime()-t < 10 do
+            mult := mult + 1;
+            CVEC_ADD3(v3,v1,v2);
+        od;
+
+        t := Runtime();
+        for j in [1..mult] do CVEC_ADD3(v3,v1,v2); od;
+        t1 := Runtime() - t;
+        if d = 1 then
+            t := Runtime();
+            sc := 2^Log2Int(p)-1;
+            for j in [1..mult] do CVEC_MUL2(v3,v1,sc); od;
+            t2 := Runtime() - t;
+            gd.tfCache[i] := Maximum(1,QuoInt(t2,t1));
+        else
+            t := Runtime();
+            for j in [1..mult] do CVEC_MUL2(v3,v1,p); od;
+            t2 := Runtime() - t;
+            t := Runtime();
+            for j in [1..mult] do CVEC_ADDMUL(v3,v1,q-1,0,0); od;
+            t3 := Runtime()-t;
+            gd.tfPrimRootCache[i] := Maximum(1,QuoInt(t2,t1));
+            gd.tfCache[i] := Maximum(1,QuoInt(t3,t1));
+        fi;
+
+        # Make long vectors:
+        cl := CVecClass(p,d,info.lennocache[i]);
+
+        v1 := CVEC_New(cl);
+        CVEC_FastFill(v1);
+        v2 := ShallowCopy(v1);
+        v3 := CVEC_New(cl);
+
+        # Calibrate mult:
+        mult := 0;
+        t := Runtime();
+        while Runtime()-t < 10 do
+            mult := mult + 1;
+            CVEC_ADD3(v3,v1,v2);
+        od;
+
+        t := Runtime();
+        for j in [1..mult] do CVEC_ADD3(v3,v1,v2); od;
+        t1 := Runtime() - t;
+        if d = 1 then
+            t := Runtime();
+            sc := 2^Log2Int(p)-1;
+            for j in [1..mult] do CVEC_MUL2(v3,v1,sc); od;
+            t2 := Runtime() - t;
+            gd.tfNoCache[i] := Maximum(1,QuoInt(t2,t1));
+        else
+            t := Runtime();
+            for j in [1..mult] do CVEC_MUL2(v3,v1,p); od;
+            t2 := Runtime() - t;
+            t := Runtime();
+            for j in [1..mult] do CVEC_ADDMUL(v3,v1,q-1,0,0); od;
+            t3 := Runtime()-t;
+            gd.tfPrimRootNoCache[i] := Maximum(1,QuoInt(t2,t1));
+            gd.tfNoCache[i] := Maximum(1,QuoInt(t3,t1));
+        fi;
+        Print(i,"/",info.le,"\r");
     od;
-    return greasedata;
+    Print("\n");
+
+    # Now we can determine the best grease levels:
+
+    CVEC_CalibrationTable := gd;
+    return gd;
   end );
 
 
