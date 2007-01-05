@@ -1982,8 +1982,8 @@ InstallGlobalFunction( CVEC_FastFill,
 
 InstallGlobalFunction( GreaseCalibration,
   function()
-    local CVEC_CalibrationTable,cl,d,gd,i,info,j,mult,p,q,sc,t,t1,t2,t3,v1,
-          v2,v3;
+    local CVEC_CalibrationTable,cl,d,gd,i,info,inters,j,l,limits,minpos,mult,
+          p,q,sc,t,t1,t2,t3,v1,v2,v3;
     info := CVEC_ComputeVectorLengthsForCalibration();
     gd := rec();
     gd.info := info;
@@ -2005,16 +2005,19 @@ InstallGlobalFunction( GreaseCalibration,
         v3 := CVEC_New(cl);
 
         # Calibrate mult:
-        mult := 0;
-        t := Runtime();
-        while Runtime()-t < 10 do
-            mult := mult + 1;
-            CVEC_ADD3(v3,v1,v2);
-        od;
+        repeat    # a garbage collection can happen during calibration:
+            mult := 0;
+            t := Runtime();
+            while Runtime()-t < 10 do
+                mult := mult + 1;
+                CVEC_ADD3(v3,v1,v2);
+            od;
 
-        t := Runtime();
-        for j in [1..mult] do CVEC_ADD3(v3,v1,v2); od;
-        t1 := Runtime() - t;
+            t := Runtime();
+            for j in [1..mult] do CVEC_ADD3(v3,v1,v2); od;
+            t1 := Runtime() - t;
+        until t1 > 0;
+
         if d = 1 then
             t := Runtime();
             sc := 2^Log2Int(p)-1;
@@ -2041,16 +2044,19 @@ InstallGlobalFunction( GreaseCalibration,
         v3 := CVEC_New(cl);
 
         # Calibrate mult:
-        mult := 0;
-        t := Runtime();
-        while Runtime()-t < 10 do
-            mult := mult + 1;
-            CVEC_ADD3(v3,v1,v2);
-        od;
+        repeat    # a garbage collection can happen during calibration:
+            mult := 0;
+            t := Runtime();
+            while Runtime()-t < 10 do
+                mult := mult + 1;
+                CVEC_ADD3(v3,v1,v2);
+            od;
 
-        t := Runtime();
-        for j in [1..mult] do CVEC_ADD3(v3,v1,v2); od;
-        t1 := Runtime() - t;
+            t := Runtime();
+            for j in [1..mult] do CVEC_ADD3(v3,v1,v2); od;
+            t1 := Runtime() - t;
+        until t1 > 0;
+
         if d = 1 then
             t := Runtime();
             sc := 2^Log2Int(p)-1;
@@ -2072,7 +2078,28 @@ InstallGlobalFunction( GreaseCalibration,
     Print("\n");
 
     # Now we can determine the best grease levels:
-
+    for i in [1..info.le] do
+        # First for in-cache:
+        # Compute intersections of cost lines for levels 1..10:
+        limits := List([1..9],l->q^l*(l*q-l-1));
+        # Now compute intersection of each cost line with level 0:
+        inters := [];
+        for l in [1..9] do
+            if not IsZero( (q-1)/q*(gd.tfCache[i]+1)-1/l ) then
+                inters[l] := (q^l/l-d+(d-1)*gd.tfPrimRootCache[i])/
+                                 ((q-1)/q*(gd.tfCache[i]+1)-1/l);
+            else
+                inters[l] := infinity;
+            fi;
+        od;
+        minpos := 1;
+        for j in [1..9] do
+            if inters[j] < inters[minpos] then minpos := j; fi;
+        od;
+        # Do not use grease levels < minpos:
+        Add(limits,0,1);
+        #...
+    od;
     CVEC_CalibrationTable := gd;
     return gd;
   end );
