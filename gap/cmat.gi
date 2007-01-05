@@ -1186,6 +1186,133 @@ end );
 # Arithmetic between vectors and matrices, especially multiplication:
 #############################################################################
     
+CVEC_CalibrationTableCache := 
+[ , [ 2, 0, 4, 16, 48, 128, 320, 768 ], 
+  [ 4, 3, 27, 135, 567, 2187, 8019, 28431 ], 
+  [ 1, 8, 80, 512, 2816, 14336, 69632, 327680 ], 
+  [ 1, 15, 175, 1375, 9375, 59375, 359375 ],, 
+  [ 2, 35, 539, 5831, 55223, 487403 ], [ 1, 48, 832, 10240, 110592 ], 
+  [ 2, 63, 1215, 16767, 203391 ],, [ 2, 99, 2299, 38599, 570999 ],, 
+  [ 2, 143, 3887, 76895 ],,, [ 1, 224, 7424, 180224 ], 
+  [ 2, 255, 8959, 230911 ],, [ 3, 323, 12635, 363527 ],,,, 
+  [ 3, 483, 22747, 790855 ],, [ 3, 575, 29375 ],, [ 2, 675, 37179 ],, 
+  [ 4, 783, 46255 ],, [ 5, 899, 56699 ], [ 2, 960, 62464 ],,,,, 
+  [ 4, 1295, 97199 ],,,, [ 5, 1599, 132799 ],, [ 5, 1763, 153467 ],,,, 
+  [ 5, 2115, 201019 ],, [ 4, 2303, 228095 ],,,, [ 6, 2703, 289327 ],,,,,, 
+  [ 7, 3363, 400315 ],, [ 7, 3599, 442799 ],,, [ 3, 3968, 512000 ],,, 
+  [ 6, 4355, 588059 ],,,, [ 7, 4899, 700699 ],, [ 7, 5183, 762047 ],,,,,, 
+  [ 7, 6083, 967355 ],, [ 5, 6399 ],, [ 8, 6723 ],,,,,, [ 8, 7743 ],,,,,,,, 
+  [ 9, 9215 ],,,, [ 10, 9999 ],, [ 11, 10403 ],,,, [ 11, 11235 ],, 
+  [ 10, 11663 ],,,, [ 12, 12543 ],,,,,,,, [ 12, 14399 ],,,, [ 7, 15375 ],, 
+  [ 12, 15875 ], [ 3, 16128 ],,, [ 10, 16899 ],,,,,, [ 12, 18495 ],, 
+  [ 15, 19043 ],,,,,,,,,, [ 12, 21903 ],, [ 12, 22499 ],,,,,, [ 14, 24335 ],,,
+  ,,, [ 14, 26243 ],,,, [ 13, 27555 ],, [ 13, 28223 ],,,, [ 15, 29583 ],,,,,, 
+  [ 16, 31683 ],, [ 16, 32399 ],,,,,,,,,, [ 15, 36099 ],, [ 17, 36863 ],,,, 
+  [ 17, 38415 ],, [ 18, 39203 ],,,,,,,,,,,, [ 21, 44099 ],,,,,,,,,,,, 
+  [ 18, 49283 ],,,, [ 20, 51075 ],, [ 20, 51983 ],,,, [ 21, 53823 ],,,,,, 
+  [ 23, 56643 ],, [ 21, 57599 ],, [ 10, 58563 ],,,,,,,, [ 22, 62499 ],,,,, 
+  [ 5, 65024 ], [ 21, 65535 ],,,,,, [ 20, 68643 ],,,,,, [ 20, 71823 ],, 
+  [ 20, 72899 ],,,,,, [ 21, 76175 ],,,, [ 23, 78399 ],, [ 23, 79523 ],,,,,, 
+  [ 21, 82943 ],,,, [ 22, 85263 ],,,,,,,,,,,,,, [ 25, 93635 ],,,, 
+  [ 18, 96099 ],, [ 24, 97343 ],,,, [ 26, 99855 ],,,,,,,,,,,,,, 
+  [ 23, 108899 ],,,,,, [ 25, 112895 ],,,,,, [ 20, 116963 ],,,, [ 26, 119715 ],
+  , [ 26, 121103 ],,,, [ 25, 123903 ],,,,,, [ 27, 128163 ],, [ 25, 129599 ],,,
+  ,,, [ 28, 133955 ],,,,,, [ 26, 138383 ],,,,,, [ 29, 142883 ],,,, 
+  [ 29, 145923 ],,,,,, [ 29, 150543 ],,,,,,,, [ 30, 156815 ],,,, 
+  [ 30, 159999 ],,,,,,,, [ 31, 166463 ],,,,,,,,,, [ 32, 174723 ],, 
+  [ 35, 176399 ],,,,,,,,,, [ 33, 184899 ],, [ 33, 186623 ],,,,,, 
+  [ 33, 191843 ],,,, [ 36, 195363 ],,,,,, [ 34, 200703 ],,,,,,,, 
+  [ 35, 207935 ],,,, [ 38, 211599 ],, [ 35, 213443 ],,,, [ 35, 217155 ],,,,,,,
+  ,,,,, [ 39, 228483 ],,,,,,,, [ 37, 236195 ],,,, [ 37, 240099 ],,,,,,,, 
+  [ 38, 248003 ],,,, [ 38, 252003 ],,,,,, [ 39, 258063 ],,, [ 8, 261120 ],,,,,
+  ,,,, [ 40, 270399 ],, [ 34, 272483 ],,,,,, [ 34, 278783 ],,,,,,,,,,,, 
+  [ 36, 291599 ],,,,,, [ 39, 298115 ],,,,,,,,,, [ 39, 309135 ],,,,,, 
+  [ 40, 315843 ],,,,,, [ 40, 322623 ],, [ 40, 324899 ],,,,,, [ 41, 331775 ],,,
+  ,,,,,,, [ 39, 343395 ],,,,,, [ 42, 350463 ],,,,,, [ 42, 357603 ],, 
+  [ 42, 359999 ],,,,,, [ 43, 367235 ],,,,,, [ 40, 374543 ],,,, [ 44, 379455 ],
+  , [ 44, 381923 ],,,,,, [ 29, 389375 ],,,,,, [ 45, 396899 ],,,,,,,,,, 
+  [ 53, 409599 ],, [ 45, 412163 ],,,, [ 46, 417315 ],,,,,, [ 43, 425103 ],,,,,
+  , [ 43, 432963 ],, [ 47, 435599 ],,,,,,,,,,,, [ 44, 451583 ],,,, 
+  [ 45, 456975 ],,,,,, [ 48, 465123 ],,,,,,,, [ 46, 476099 ],,,,,,,,,, 
+  [ 50, 489999 ],,,,,,,, [ 47, 501263 ],,,,,,,,,, [ 51, 515523 ],,,,,,,, 
+  [ 51, 527075 ],, [ 24, 529983 ],,,, [ 48, 535823 ],,,,,, [ 49, 544643 ],,,, 
+  [ 53, 550563 ],,,,,,,, [ 53, 562499 ],,,,,, [ 54, 571535 ],,,, 
+  [ 50, 577599 ],,,,,,,, [ 51, 589823 ],,,, [ 55, 595983 ],,,,,,,,,,,,,, 
+  [ 56, 617795 ],,,,,,,,,, [ 49, 633615 ],,,,,,,,,,,, [ 57, 652863 ],, 
+  [ 54, 656099 ],,,,,,,,,, [ 58, 672399 ],, [ 58, 675683 ],,,, [ 55, 682275 ],
+  , [ 59, 685583 ],,,,,,,,,, [ 55, 702243 ],, [ 47, 705599 ],,,,,,,,,,,, 
+  [ 56, 725903 ],,,, [ 50, 732735 ],, [ 61, 736163 ],,,, [ 57, 743043 ],,,,,,,
+  ,,,,,,, [ 73, 767375 ],,,, [ 58, 774399 ],, [ 63, 777923 ],,,, 
+  [ 59, 784995 ],,,,,,,,,,,,,,,,,,,, [ 36, 820835 ],,,, [ 65, 828099 ],,,,,,,
+  , [ 65, 842723 ],,,,,,,,,, [ 66, 861183 ],,,,,,,, [ 62, 876095 ],,,, 
+  [ 62, 883599 ],,,,,, [ 67, 894915 ],,,,,, [ 68, 906303 ],,,,,,,, 
+  [ 65, 921599 ],,,,,, [ 96, 933155 ],,,, [ 64, 940899 ],,,,,, [ 69, 952575 ],
+  ,,,,, [ 70, 964323 ],,,,,,,, [ 70, 980099 ],,,,,, [ 66, 992015 ],,,,,,,,,,,
+  , [ 67 ],,,, [ 77 ],,,,,, [ 72 ],, [ 72 ],,, [ 17 ] ];
+CVEC_CalibrationTableNoCache := 
+[ , [ 2, 2, 4, 16, 48, 128, 320, 768 ], 
+  [ 4, 4, 27, 135, 567, 2187, 8019, 28431 ], 
+  [ 1, 8, 80, 512, 2816, 14336, 69632, 327680 ], 
+  [ 1, 15, 175, 1375, 9375, 59375, 359375 ],, 
+  [ 2, 35, 539, 5831, 55223, 487403 ], [ 1, 48, 832, 10240, 110592 ], 
+  [ 2, 63, 1215, 16767, 203391 ],, [ 2, 99, 2299, 38599, 570999 ],, 
+  [ 2, 143, 3887, 76895 ],,, [ 1, 224, 7424, 180224 ], 
+  [ 2, 255, 8959, 230911 ],, [ 3, 323, 12635, 363527 ],,,, 
+  [ 3, 483, 22747, 790855 ],, [ 3, 575, 29375 ],, [ 2, 675, 37179 ],, 
+  [ 4, 783, 46255 ],, [ 5, 899, 56699 ], [ 2, 960, 62464 ],,,,, 
+  [ 4, 1295, 97199 ],,,, [ 5, 1599, 132799 ],, [ 5, 1763, 153467 ],,,, 
+  [ 5, 2115, 201019 ],, [ 4, 2303, 228095 ],,,, [ 6, 2703, 289327 ],,,,,, 
+  [ 7, 3363, 400315 ],, [ 7, 3599, 442799 ],,, [ 3, 3968, 512000 ],,, 
+  [ 6, 4355, 588059 ],,,, [ 7, 4899, 700699 ],, [ 7, 5183, 762047 ],,,,,, 
+  [ 7, 6083, 967355 ],, [ 5, 6399 ],, [ 8, 6723 ],,,,,, [ 8, 7743 ],,,,,,,, 
+  [ 9, 9215 ],,,, [ 10, 9999 ],, [ 11, 10403 ],,,, [ 11, 11235 ],, 
+  [ 10, 11663 ],,,, [ 12, 12543 ],,,,,,,, [ 12, 14399 ],,,, [ 7, 15375 ],, 
+  [ 12, 15875 ], [ 3, 16128 ],,, [ 10, 16899 ],,,,,, [ 12, 18495 ],, 
+  [ 15, 19043 ],,,,,,,,,, [ 12, 21903 ],, [ 12, 22499 ],,,,,, [ 14, 24335 ],,,
+  ,,, [ 14, 26243 ],,,, [ 13, 27555 ],, [ 13, 28223 ],,,, [ 15, 29583 ],,,,,, 
+  [ 16, 31683 ],, [ 16, 32399 ],,,,,,,,,, [ 15, 36099 ],, [ 17, 36863 ],,,, 
+  [ 17, 38415 ],, [ 18, 39203 ],,,,,,,,,,,, [ 21, 44099 ],,,,,,,,,,,, 
+  [ 18, 49283 ],,,, [ 20, 51075 ],, [ 20, 51983 ],,,, [ 21, 53823 ],,,,,, 
+  [ 23, 56643 ],, [ 21, 57599 ],, [ 10, 58563 ],,,,,,,, [ 22, 62499 ],,,,, 
+  [ 5, 65024 ], [ 21, 65535 ],,,,,, [ 20, 68643 ],,,,,, [ 20, 71823 ],, 
+  [ 20, 72899 ],,,,,, [ 21, 76175 ],,,, [ 23, 78399 ],, [ 23, 79523 ],,,,,, 
+  [ 21, 82943 ],,,, [ 22, 85263 ],,,,,,,,,,,,,, [ 25, 93635 ],,,, 
+  [ 18, 96099 ],, [ 24, 97343 ],,,, [ 26, 99855 ],,,,,,,,,,,,,, 
+  [ 23, 108899 ],,,,,, [ 25, 112895 ],,,,,, [ 20, 116963 ],,,, [ 26, 119715 ],
+  , [ 26, 121103 ],,,, [ 25, 123903 ],,,,,, [ 27, 128163 ],, [ 25, 129599 ],,,
+  ,,, [ 28, 133955 ],,,,,, [ 26, 138383 ],,,,,, [ 29, 142883 ],,,, 
+  [ 29, 145923 ],,,,,, [ 29, 150543 ],,,,,,,, [ 30, 156815 ],,,, 
+  [ 30, 159999 ],,,,,,,, [ 31, 166463 ],,,,,,,,,, [ 32, 174723 ],, 
+  [ 35, 176399 ],,,,,,,,,, [ 33, 184899 ],, [ 33, 186623 ],,,,,, 
+  [ 33, 191843 ],,,, [ 36, 195363 ],,,,,, [ 34, 200703 ],,,,,,,, 
+  [ 35, 207935 ],,,, [ 38, 211599 ],, [ 35, 213443 ],,,, [ 35, 217155 ],,,,,,,
+  ,,,,, [ 39, 228483 ],,,,,,,, [ 37, 236195 ],,,, [ 37, 240099 ],,,,,,,, 
+  [ 38, 248003 ],,,, [ 38, 252003 ],,,,,, [ 39, 258063 ],,, [ 8, 261120 ],,,,,
+  ,,,, [ 40, 270399 ],, [ 34, 272483 ],,,,,, [ 34, 278783 ],,,,,,,,,,,, 
+  [ 36, 291599 ],,,,,, [ 39, 298115 ],,,,,,,,,, [ 39, 309135 ],,,,,, 
+  [ 40, 315843 ],,,,,, [ 40, 322623 ],, [ 40, 324899 ],,,,,, [ 41, 331775 ],,,
+  ,,,,,,, [ 39, 343395 ],,,,,, [ 42, 350463 ],,,,,, [ 42, 357603 ],, 
+  [ 42, 359999 ],,,,,, [ 43, 367235 ],,,,,, [ 40, 374543 ],,,, [ 44, 379455 ],
+  , [ 44, 381923 ],,,,,, [ 29, 389375 ],,,,,, [ 45, 396899 ],,,,,,,,,, 
+  [ 53, 409599 ],, [ 45, 412163 ],,,, [ 46, 417315 ],,,,,, [ 43, 425103 ],,,,,
+  , [ 43, 432963 ],, [ 47, 435599 ],,,,,,,,,,,, [ 44, 451583 ],,,, 
+  [ 45, 456975 ],,,,,, [ 48, 465123 ],,,,,,,, [ 46, 476099 ],,,,,,,,,, 
+  [ 50, 489999 ],,,,,,,, [ 47, 501263 ],,,,,,,,,, [ 51, 515523 ],,,,,,,, 
+  [ 51, 527075 ],, [ 24, 529983 ],,,, [ 48, 535823 ],,,,,, [ 49, 544643 ],,,, 
+  [ 53, 550563 ],,,,,,,, [ 53, 562499 ],,,,,, [ 54, 571535 ],,,, 
+  [ 50, 577599 ],,,,,,,, [ 51, 589823 ],,,, [ 55, 595983 ],,,,,,,,,,,,,, 
+  [ 56, 617795 ],,,,,,,,,, [ 49, 633615 ],,,,,,,,,,,, [ 57, 652863 ],, 
+  [ 54, 656099 ],,,,,,,,,, [ 58, 672399 ],, [ 58, 675683 ],,,, [ 55, 682275 ],
+  , [ 59, 685583 ],,,,,,,,,, [ 55, 702243 ],, [ 47, 705599 ],,,,,,,,,,,, 
+  [ 56, 725903 ],,,, [ 50, 732735 ],, [ 61, 736163 ],,,, [ 57, 743043 ],,,,,,,
+  ,,,,,,, [ 73, 767375 ],,,, [ 58, 774399 ],, [ 63, 777923 ],,,, 
+  [ 59, 784995 ],,,,,,,,,,,,,,,,,,,, [ 36, 820835 ],,,, [ 65, 828099 ],,,,,,,
+  , [ 65, 842723 ],,,,,,,,,, [ 66, 861183 ],,,,,,,, [ 62, 876095 ],,,, 
+  [ 62, 883599 ],,,,,, [ 67, 894915 ],,,,,, [ 68, 906303 ],,,,,,,, 
+  [ 65, 921599 ],,,,,, [ 96, 933155 ],,,, [ 64, 940899 ],,,,,, [ 69, 952575 ],
+  ,,,,, [ 70, 964323 ],,,,,,,, [ 70, 980099 ],,,,,, [ 66, 992015 ],,,,,,,,,,,
+  , [ 67 ],,,, [ 77 ],,,,,, [ 72 ],, [ 72 ],,, [ 17 ] ];
+
 InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
   [IsCVecRep, IsCMatRep and IsMatrix],
   function(v,m)
@@ -1269,7 +1396,7 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
 InstallOtherMethod(\*, "for two cmats, second one not greased",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
-    local greasetab,i,j,l,lev,res,spreadtab,tablen,vcl,q,d;
+    local d,greasetab,i,j,l,lev,q,res,spreadtab,tab,tablen,vcl;
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
@@ -1286,15 +1413,20 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     if m!.len > 0 then
         q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
         d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
-        lev := n!.greasehint;
-        if lev = 0 or 
-           3 * d * m!.len * (q-1) * lev <= (m!.len + q^lev) * q then   
-           # the old - very bad - formula: (extremely bad for lev=1!)
-           #m!.len * (q-1) * lev <= (m!.len + q^lev) * q then   
-           # This formula is a compromise: We want to grease already for
-           # smaller matrices since we cannot predict the performance of
-           # scalar multiplication nicely. Thus we added the factor
-           # here. This is heuristics!
+        if q > CVEC.MaximumGreaseCalibration or
+           not(IsBound(CVEC_CalibrationTableNoCache[q])) then
+            lev := 0;
+        else
+            i := 1;
+            if vcl![CVEC_IDX_wordlen] <= 32768 then
+                tab := CVEC_CalibrationTableCache[q];
+            else
+                tab := CVEC_CalibrationTableNoCache[q];
+            fi;
+            while i <= Length(tab) and m!.len >= tab[i] do i := i + 1; od;
+            lev := i-1;
+        fi;
+        if lev = 0 then
             # no greasing at all in this case!
             CVEC_PROD_CMAT_CMAT_NOGREASE2(l,m!.rows,n!.rows);
             # we use version 2, which unpacks full rows of m instead of
@@ -1956,8 +2088,6 @@ InstallGlobalFunction( CVEC_ComputeVectorLengthsForCalibration,
                 lennocache := lennocache );
   end );
 
-InstallValue( CVEC_CalibrationTable, [] );
-
 InstallGlobalFunction( CVEC_FastFill,
   function( v )
     local cl,d,e,i,l,p,q,x;
@@ -1982,8 +2112,9 @@ InstallGlobalFunction( CVEC_FastFill,
 
 InstallGlobalFunction( GreaseCalibration,
   function()
-    local CVEC_CalibrationTable,cl,d,gd,i,info,inters,j,l,limits,minpos,mult,
-          p,q,sc,t,t1,t2,t3,v1,v2,v3;
+    local cl,d,gd,i,info,inters,j,l,limits,minpos,mult,p,q,sc,t,t1,t2,t3,
+          v1,v2,v3;
+
     info := CVEC_ComputeVectorLengthsForCalibration();
     gd := rec();
     gd.info := info;
@@ -1991,6 +2122,8 @@ InstallGlobalFunction( GreaseCalibration,
     gd.tfNoCache := 0*[1..info.le];
     gd.tfPrimRootCache := 0*[1..info.le];
     gd.tfPrimRootNoCache := 0*[1..info.le];
+    CVEC_CalibrationTableCache := [];
+    CVEC_CalibrationTableNoCache := [];
     for i in [1..info.le] do
         p := info.pdq[i][1];
         d := info.pdq[i][2];
@@ -2073,18 +2206,16 @@ InstallGlobalFunction( GreaseCalibration,
             gd.tfPrimRootNoCache[i] := Maximum(1,QuoInt(t2,t1));
             gd.tfNoCache[i] := Maximum(1,QuoInt(t3,t1));
         fi;
-        Print(i,"/",info.le,"\r");
-    od;
-    Print("\n");
 
-    # Now we can determine the best grease levels:
-    for i in [1..info.le] do
+        # Now we can determine the best grease levels:
+
         # First for in-cache:
-        # Compute intersections of cost lines for levels 1..10:
-        limits := List([1..9],l->q^l*(l*q-l-1));
+        # Compute intersections of cost lines for levels 1..8:
+        limits := List([1..7],l->q^l*(l*q-l-1));
+        limits := Filtered(limits,x->x <= 1000000);
         # Now compute intersection of each cost line with level 0:
         inters := [];
-        for l in [1..9] do
+        for l in [1..Length(limits)+1] do
             if not IsZero( (q-1)/q*(gd.tfCache[i]+1)-1/l ) then
                 inters[l] := (q^l/l-d+(d-1)*gd.tfPrimRootCache[i])/
                                  ((q-1)/q*(gd.tfCache[i]+1)-1/l);
@@ -2093,16 +2224,76 @@ InstallGlobalFunction( GreaseCalibration,
             fi;
         od;
         minpos := 1;
-        for j in [1..9] do
+        for j in [2..Length(inters)] do
             if inters[j] < inters[minpos] then minpos := j; fi;
         od;
         # Do not use grease levels < minpos:
-        Add(limits,0,1);
-        #...
+        Add(limits,Int(inters[minpos]),1);
+        for j in [2..minpos] do limits[j] := limits[1]; od;
+        CVEC_CalibrationTableCache[q] := limits;
+
+        # Now out of cache:
+        # Compute intersections of cost lines for levels 1..8:
+        limits := List([1..7],l->q^l*(l*q-l-1));
+        limits := Filtered(limits,x->x <= 1000000);
+        # Now compute intersection of each cost line with level 0:
+        inters := [];
+        for l in [1..Length(limits)+1] do
+            if not IsZero( (q-1)/q*(gd.tfCache[i]+1)-1/l ) then
+                inters[l] := (q^l/l-d+(d-1)*gd.tfPrimRootNoCache[i])/
+                                 ((q-1)/q*(gd.tfNoCache[i]+1)-1/l);
+            else
+                inters[l] := infinity;
+            fi;
+        od;
+        minpos := 1;
+        for j in [2..Length(inters)] do
+            if inters[j] < inters[minpos] then minpos := j; fi;
+        od;
+        # Do not use grease levels < minpos:
+        Add(limits,Int(inters[minpos]),1);
+        for j in [2..minpos] do limits[j] := limits[1]; od;
+        CVEC_CalibrationTableNoCache[q] := limits;
+
+        Print(i,"/",info.le,"\r");
     od;
-    CVEC_CalibrationTable := gd;
+    Print("\n");
+
+    CVEC.greasedata := gd;
     return gd;
   end );
 
+InstallGlobalFunction( CVEC_StoreGreaseCalibration,
+  function()
+    # Prints the current grease calibration data into a file from where it can
+    # read after later startups.
+    local MyStringList,f,i;
+    MyStringList := function(l)
+        return JoinStringsWithSeparator(List(l,String),",");
+    end;
+    f := IO_File("greasecalibration.g","w");
+    IO_Write(f,"# This is grease calibration data:\n");
+    IO_Write(f,"CVEC_CalibrationTableCache := [");
+    for i in [1..Length(CVEC_CalibrationTableCache)] do
+        if IsBound(CVEC_CalibrationTableCache[i]) then
+            IO_Write(f,"\n# q=",i,":\n");
+            IO_Write(f,"[",MyStringList(CVEC_CalibrationTableCache[i]),"],");
+        else
+            IO_Write(f,",");
+        fi;
+    od;
+    IO_Write(f,"];\n\n");
+    IO_Write(f,"CVEC_CalibrationTableNoCache := [");
+    for i in [1..Length(CVEC_CalibrationTableNoCache)] do
+        if IsBound(CVEC_CalibrationTableNoCache[i]) then
+          IO_Write(f,"\n# q=",i,":\n");
+          IO_Write(f,"[",MyStringList(CVEC_CalibrationTableNoCache[i]),"],");
+        else
+          IO_Write(f,",");
+        fi;
+    od;
+    IO_Write(f,"];\n\n");
+    IO_Close(f);
+  end );
 
 

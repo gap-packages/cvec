@@ -6,6 +6,7 @@
 ##
 
 ReadPackage("cvec","gap/cvec.gi");
+ReadPackage("cvec","gap/greasecalibration.gi");
 ReadPackage("cvec","gap/cmat.gi");
 ReadPackage("cvec","gap/linalg.gi");
 ReadPackage("cvec","gap/matrix.gi");

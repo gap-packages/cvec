@@ -99,7 +99,7 @@ DeclareOperation( "Fold", [ IsCVecRep, IsInt ] );
 #############################################################################
 
 DeclareGlobalFunction( "CVEC_ComputeVectorLengthsForCalibration" );
-DeclareGlobalVariable( "CVEC_CalibrationTable" );
 DeclareGlobalFunction( "CVEC_FastFill" );
 DeclareGlobalFunction( "GreaseCalibration" );
+DeclareGlobalFunction( "CVEC_StoreGreaseCalibration" );
 
