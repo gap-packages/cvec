@@ -132,7 +132,7 @@ FindWinogradLimit := function(p,d)
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
   until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
 
-  dec := QuoInt(size,50);
+  dec := QuoInt(size,30);
   repeat
       repeat
           size := size - dec;
