@@ -109,7 +109,7 @@ FindWinogradLimit := function(p,d)
       a := m*n;
       count := count + 1;
       time := Runtime() - t;
-  until time > 10;
+  until time > 20;
   Print("Using repetition count of ",count,"\n");
 
   t := Runtime();
@@ -132,7 +132,7 @@ FindWinogradLimit := function(p,d)
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
   until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
 
-  dec := QuoInt(size,20);
+  dec := QuoInt(size,50);
   repeat
       size := size - dec;
       m := ExtractSubMatrix(m,[1..size],[1..size]);
