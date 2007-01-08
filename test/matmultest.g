@@ -155,7 +155,7 @@ FindWinogradLimit := function(p,d)
       dec := QuoInt(dec,2);
   until dec <= 3;
   Print("Result: limit=",size," memory for such matrices: ",
-        Memory(m),"\n\n");
+        Memory(mm),"\n\n");
   return size;
 end;
 
