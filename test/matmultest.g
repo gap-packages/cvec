@@ -90,6 +90,9 @@ MatMulSpeedTest := function(p,d,what)
       Print("Field: GF(",p,",",d,"), size: ",n,", time: ",
             STRING_FLOAT(ti)," [ms]\n");
   od;
+  for i in [1..Length(what)] do
+      Print(l[i][1]," ",l[i][2],"\n");
+  od;
   return l;
 end;
 

@@ -211,7 +211,7 @@ MultiplyWinograd2 := function(M,N,R,limit)
   b21 := ZeroMutable(a11);
   CopySubMatrix(N,b21,hi,hilo,lo,lo);
   s8 := s6-b21;
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
 
   # To save allocations:
   Unbind(a21);
@@ -219,19 +219,19 @@ MultiplyWinograd2 := function(M,N,R,limit)
 
   # Now the multiplications:
   m1 := MultiplyWinograd2(s2,s6,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   m2 := MultiplyWinograd2(a11,b11,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   m3 := MultiplyWinograd2(a12,b21,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   m4 := MultiplyWinograd2(s3,s7,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   m5 := MultiplyWinograd2(s1,s5,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   m6 := MultiplyWinograd2(s4,b22,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   m7 := MultiplyWinograd2(a22,s8,false,limit);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
 
   Unbind(s1); Unbind(s2); Unbind(s3); Unbind(s4);
   Unbind(s5); Unbind(s6); Unbind(s7); Unbind(s8);
@@ -240,7 +240,7 @@ MultiplyWinograd2 := function(M,N,R,limit)
   AddMat(t1,m2,o);
   t2 := m4;
   AddMat(t2,t1,o);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
   
   Unbind(m1);
 
@@ -258,7 +258,7 @@ MultiplyWinograd2 := function(M,N,R,limit)
   CopySubMatrix(t2-m7,R,hilo,hi,lo,lo);
   AddMat(t2,m5,o);
   CopySubMatrix(t2,R,hilo,hi,hilo,hi);
-  Print(Runtime()-t,"\n"); t := Runtime();
+  #Print(Runtime()-t,"\n"); t := Runtime();
 
   return R;
 end;
