@@ -97,7 +97,7 @@ MatMulSpeedTest := function(p,d,what)
 end;
 
 FindWinogradLimit := function(p,d)
-  local a,count,dec,i,lasttime,m,mm,n,nn,size,sizeh,t,time,time2;
+  local a,count,dec,i,lasttime,m,mm,mmm,n,nn,nnn,size,sizeh,t,time,time2;
   lasttime := infinity;
   size := 100;
   m := QuickRandomMat(size,size,p,d);
