@@ -96,3 +96,60 @@ MatMulSpeedTest := function(p,d,what)
   return l;
 end;
 
+FindWinogradLimit := function(p,d)
+  local a,count,dec,i,lasttime,m,mm,n,nn,size,sizeh,t,time,time2;
+  lasttime := infinity;
+  size := 100;
+  m := QuickRandomMat(size,size,p,d);
+  n := QuickRandomMat(size,size,p,d);
+  GASMAN("collect");
+  count := 0;
+  t := Runtime();
+  repeat
+      a := m*n;
+      count := count + 1;
+      time := Runtime() - t;
+  until time > 10;
+  Print("Using repetition count of ",count,"\n");
+
+  t := Runtime();
+  for i in [1..count] do a := m*n; od;
+  time := Runtime() - t;
+  Print("Size=",size," time=",time,"\n");
+
+  # now count is the repetition
+
+  repeat
+      lasttime := time;
+      size := size * 2;
+      m := QuickRandomMat(size,size,p,d);
+      n := QuickRandomMat(size,size,p,d);
+      GASMAN("collect");
+      t := Runtime();
+      for i in [1..count] do a := m*n; od;
+      time := Runtime() - t;
+      Print("Size=",size," time=",time," factor=",
+            FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
+  until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
+
+  dec := QuoInt(size,20);
+  repeat
+      size := size - dec;
+      m := ExtractSubMatrix(m,[1..size],[1..size]);
+      n := ExtractSubMatrix(n,[1..size],[1..size]);
+      sizeh := QuoInt(size,2);
+      mm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
+      nn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
+      GASMAN("collect");
+      t := Runtime();
+      for i in [1..count] do a := m*n; od;
+      time := Runtime() - t;
+      t := Runtime();
+      for i in [1..count] do a := mm*nn; od;
+      time2 := Runtime() - t;
+      Print("Size=",size," time=",time," time2=",time2," factor=",
+            FLOAT_INT(time)/FLOAT_INT(time2),"\n");
+  until 15 * time2 > 2 * time;
+  return size + dec;
+end;
+
