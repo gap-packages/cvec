@@ -136,24 +136,24 @@ FindWinogradLimit := function(p,d)
   repeat
       repeat
           size := size - dec;
-          m := ExtractSubMatrix(m,[1..size],[1..size]);
-          n := ExtractSubMatrix(n,[1..size],[1..size]);
+          mm := ExtractSubMatrix(m,[1..size],[1..size]);
+          nn := ExtractSubMatrix(n,[1..size],[1..size]);
           sizeh := QuoInt(size,2);
-          mm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
-          nn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
+          mmm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
+          nnn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
           GASMAN("collect");
           t := Runtime();
-          for i in [1..count] do a := m*n; od;
+          for i in [1..count] do a := mm*nn; od;
           time := Runtime() - t;
           t := Runtime();
-          for i in [1..count] do a := mm*nn; od;
+          for i in [1..count] do a := mmm*nnn; od;
           time2 := Runtime() - t;
           Print("Size=",size," time=",time," time2=",time2," factor=",
                 FLOAT_INT(time)/FLOAT_INT(time2),"\n");
       until 15 * time2 > 2 * time;
       size := size + dec;
       dec := QuoInt(dec,2);
-  until dec < 5;
+  until dec <= 3;
   Print("Result: limit=",size," memory for such matrices: ",
         Memory(m),"\n\n");
   return size;
