@@ -134,22 +134,42 @@ FindWinogradLimit := function(p,d)
 
   dec := QuoInt(size,50);
   repeat
-      size := size - dec;
-      m := ExtractSubMatrix(m,[1..size],[1..size]);
-      n := ExtractSubMatrix(n,[1..size],[1..size]);
-      sizeh := QuoInt(size,2);
-      mm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
-      nn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
-      GASMAN("collect");
-      t := Runtime();
-      for i in [1..count] do a := m*n; od;
-      time := Runtime() - t;
-      t := Runtime();
-      for i in [1..count] do a := mm*nn; od;
-      time2 := Runtime() - t;
-      Print("Size=",size," time=",time," time2=",time2," factor=",
-            FLOAT_INT(time)/FLOAT_INT(time2),"\n");
-  until 15 * time2 > 2 * time;
-  return size + dec;
+      repeat
+          size := size - dec;
+          m := ExtractSubMatrix(m,[1..size],[1..size]);
+          n := ExtractSubMatrix(n,[1..size],[1..size]);
+          sizeh := QuoInt(size,2);
+          mm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
+          nn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
+          GASMAN("collect");
+          t := Runtime();
+          for i in [1..count] do a := m*n; od;
+          time := Runtime() - t;
+          t := Runtime();
+          for i in [1..count] do a := mm*nn; od;
+          time2 := Runtime() - t;
+          Print("Size=",size," time=",time," time2=",time2," factor=",
+                FLOAT_INT(time)/FLOAT_INT(time2),"\n");
+      until 15 * time2 > 2 * time;
+      size := size + dec;
+      dec := QuoInt(dec,2);
+  until dec < 5;
+  Print("Result: limit=",size," memory for such matrices: ",
+        Memory(m),"\n\n");
+  return size;
+end;
+
+FindAllWinogradLimits := function()
+  local d,f,facs,i,p,q;
+  q := Filtered([2..1024],IsPrimePowerInt);
+  f := List(q,Factors);
+  p := List(f,x->x[1]);
+  d := List(f,x->Length(x));
+  facs := [];
+  for i in [1..Length(q)] do
+      Print("Testing q=",q[i]," p=",p[i]," d=",d[i],"...\n");
+      facs[q[i]] := FindWinogradLimit(p[i],d[i]);
+  od;
+  return facs;
 end;
 
