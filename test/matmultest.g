@@ -137,7 +137,7 @@ FindWinogradLimit := function(p,d)
   until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
 
   # now reduce count :
-  count := Maximum(QuoInt(count,4),1);
+  count := Maximum(QuoInt(count,Maximum(1,QuoInt(time,2000))),1);
   Print("Changing repetition count to ",count,"\n");
 
   uplim := size;
@@ -161,13 +161,13 @@ FindWinogradLimit := function(p,d)
       GASMAN("message");
       Print("Size=",size," time=",time," time2=",time2," factor=",
             FLOAT_INT(time)/FLOAT_INT(time2),"\n");
-      if time > 1000 then
-          count := Maximum(QuoInt(count,2),1);
-          Print("Changing repetition count to ",count,"\n");
-      elif time < 300 then
-          count := count * 2;
-          Print("Changing repetition count to ",count,"\n");
-      fi;
+      #if time > 1000 then
+      #    count := Maximum(QuoInt(count,2),1);
+      #    Print("Changing repetition count to ",count,"\n");
+      #elif time < 300 then
+      #    count := count * 2;
+      #    Print("Changing repetition count to ",count,"\n");
+      #fi;
       if time/time2 > 15/2 then
           uplim := size;
       else
