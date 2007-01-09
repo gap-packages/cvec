@@ -132,7 +132,7 @@ FindWinogradLimit := function(p,d)
       Print("Size=",size," time=",time," factor=",
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
   until 15 * lasttime < 2 * time or     # time > 7.5 * lasttime
-        size = 3200;   # in case a mistake in measurement occurs
+        size = 1600;   # in case a mistake in measurement occurs
 
   if time/lasttime < 15/2 then   # something strange has happened:
       Print("Giving up, very strange, using limit=100000...\n\n");
