@@ -97,7 +97,8 @@ MatMulSpeedTest := function(p,d,what)
 end;
 
 FindWinogradLimit := function(p,d)
-  local a,count,dec,i,lasttime,m,mm,mmm,n,nn,nnn,size,sizeh,t,time,time2;
+  local a,count,i,lasttime,lowlim,m,mm,mmm,n,nn,nnn,size,sizeh,t,time,time2,
+        uplim;
   lasttime := infinity;
   size := 100;
   m := QuickRandomMat(size,size,p,d);
@@ -136,38 +137,40 @@ FindWinogradLimit := function(p,d)
   count := Maximum(QuoInt(count,4),1);
   Print("Changing repetition count to ",count,"\n");
 
-  dec := QuoInt(size,10);
-  repeat
-      repeat
-          size := size - dec;
-          mm := ExtractSubMatrix(m,[1..size],[1..size]);
-          nn := ExtractSubMatrix(n,[1..size],[1..size]);
-          sizeh := QuoInt(size,2);
-          mmm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
-          nnn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
-          GASMAN("collect");
-          t := Runtime();
-          for i in [1..count] do a := mm*nn; od;
-          time := Runtime() - t;
-          t := Runtime();
-          for i in [1..count] do a := mmm*nnn; od;
-          time2 := Runtime() - t;
-          Print("Size=",size," time=",time," time2=",time2," factor=",
-                FLOAT_INT(time)/FLOAT_INT(time2),"\n");
-          if time > 1000 then
-              count := Maximum(QuoInt(count,2),1);
-              Print("Changing repetition count to ",count,"\n");
-          elif time < 300 then
-              count := count * 2;
-              Print("Changing repetition count to ",count,"\n");
-          fi;
-      until 15 * time2 > 2 * time;
-      size := size + dec;
-      dec := QuoInt(dec,2);
-  until dec <= 1;
-  Print("Result: limit=",size," memory for such matrices: ",
-        Memory(mm),"\n\n");
-  return size;
+  uplim := size;
+  lowlim := size/2;
+  while uplim-lowlim > 1 do
+      size := QuoInt(uplim+lowlim,2);
+      mm := ExtractSubMatrix(m,[1..size],[1..size]);
+      nn := ExtractSubMatrix(n,[1..size],[1..size]);
+      sizeh := QuoInt(size,2);
+      mmm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
+      nnn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
+      GASMAN("collect");
+      t := Runtime();
+      for i in [1..count] do a := mm*nn; od;
+      time := Runtime() - t;
+      t := Runtime();
+      for i in [1..count] do a := mmm*nnn; od;
+      time2 := Runtime() - t;
+      Print("Size=",size," time=",time," time2=",time2," factor=",
+            FLOAT_INT(time)/FLOAT_INT(time2),"\n");
+      if time > 1000 then
+          count := Maximum(QuoInt(count,2),1);
+          Print("Changing repetition count to ",count,"\n");
+      elif time < 300 then
+          count := count * 2;
+          Print("Changing repetition count to ",count,"\n");
+      fi;
+      if time/time2 > 15/2 then
+          uplim := size;
+      else
+          lowlim := size;
+      fi;
+  od;
+  Print("Result: limit=",uplim," memory for such matrices: ",
+        Memory(ExtractSubMatrix(m,[1..uplim],[1..uplim])),"\n\n");
+  return uplim;
 end;
 
 FindAllWinogradLimits := function()
