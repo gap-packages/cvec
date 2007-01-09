@@ -126,9 +126,12 @@ FindWinogradLimit := function(p,d)
       m := QuickRandomMat(size,size,p,d);
       n := QuickRandomMat(size,size,p,d);
       GASMAN("collect");
+      GASMAN("message");
+      GASMAN("message");
       t := Runtime();
       for i in [1..count] do a := m*n; od;
       time := Runtime() - t;
+      GASMAN("message");
       Print("Size=",size," time=",time," factor=",
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
   until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
@@ -147,12 +150,15 @@ FindWinogradLimit := function(p,d)
       mmm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
       nnn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
       GASMAN("collect");
+      GASMAN("message");
+      GASMAN("message");
       t := Runtime();
       for i in [1..count] do a := mm*nn; od;
       time := Runtime() - t;
       t := Runtime();
       for i in [1..count] do a := mmm*nnn; od;
       time2 := Runtime() - t;
+      GASMAN("message");
       Print("Size=",size," time=",time," time2=",time2," factor=",
             FLOAT_INT(time)/FLOAT_INT(time2),"\n");
       if time > 1000 then
