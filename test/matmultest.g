@@ -96,6 +96,8 @@ MatMulSpeedTest := function(p,d,what)
   return l;
 end;
 
+fishy := [];
+
 FindWinogradLimit := function(p,d)
   local a,count,i,lasttime,lowlim,m,mm,mmm,n,nn,nnn,size,sizeh,t,time,time2,
         uplim;
@@ -167,6 +169,10 @@ FindWinogradLimit := function(p,d)
           lowlim := size;
       fi;
   od;
+  if time/time2 < 7 or time/time2 > 8 then
+      Add(fishy,[p,d,FLOAT_INT(time)/FLOAT_INT(time2),uplim]);
+  fi;
+      
   Print("Result: limit=",uplim," memory for such matrices: ",
         Memory(ExtractSubMatrix(m,[1..uplim],[1..uplim])),"\n\n");
   return uplim;
@@ -175,6 +181,7 @@ end;
 FindAllWinogradLimits := function()
   local d,f,facs,i,p,q;
   CVEC_WinogradBounds := [];
+  fishy := [];
   q := Filtered([2..1024],IsPrimePowerInt);
   f := List(q,Factors);
   p := List(f,x->x[1]);
