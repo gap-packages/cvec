@@ -1338,16 +1338,28 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
 InstallOtherMethod(\*, "for two cmats, second one greased",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and HasGreaseTab],
   function(m,n)
-    local i,l,res,vcl;
+    local i,l,res,vcl,q;
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
     if m!.vecclass![CVEC_IDX_len] <> n!.len then
         Error("\\*: lengths not matching");
     fi;
+    vcl := n!.vecclass;
+    q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+    if IsBound(CVEC_WinogradBounds[q]) and
+        m!.len * m!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] and
+        n!.len * n!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] then
+        # Do the Winograd trick:
+        res := CVEC_MultiplyWinograd(m,n,false,CVEC_WinogradBounds[q]);
+        if not(IsMutable(m) or IsMutable(n)) then
+            MakeImmutable(res);
+        fi;
+        return res;
+    fi;
+         
     # First make a new matrix:
     l := 0*[1..m!.len+1];
-    vcl := n!.vecclass;
     for i in [2..m!.len+1] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     od;
