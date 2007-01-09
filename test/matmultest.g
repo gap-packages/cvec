@@ -182,7 +182,7 @@ FindAllWinogradLimits := function()
   facs := [];
   for i in [1..Length(q)] do
       Print("Testing q=",q[i]," p=",p[i]," d=",d[i],"...\n");
-      facs[q[i]] := FindWinogradLimit(p[i],d[i]);
+      facs[q[i]] := FindWinogradLimit(p[i],d[i])^2;
   od;
   CVEC_WinogradBounds := facs;
   return facs;
