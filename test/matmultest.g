@@ -49,7 +49,7 @@ QuickRandomMat := function(n,m,p,d)
           r{[1+(j-1)*le..j*le]} := 
                tab[RandomIntegerMT(rs!.state,10) mod q^le + 1];
       od;
-      while Length(r) > n do Unbind(r[Length(r)]); od;
+      while Length(r) > m do Unbind(r[Length(r)]); od;
       l[i] := CVec(r,cl);
   od;
   return CMat(l,cl);
@@ -110,7 +110,7 @@ FindWinogradLimit := function(p,d)
       a := m*n;
       count := count + 1;
       time := Runtime() - t;
-  until time > 20;
+  until time > 10;
   Print("Using repetition count of ",count,"\n");
 
   t := Runtime();
@@ -126,15 +126,18 @@ FindWinogradLimit := function(p,d)
       m := QuickRandomMat(size,size,p,d);
       n := QuickRandomMat(size,size,p,d);
       GASMAN("collect");
-      GASMAN("message");
-      GASMAN("message");
       t := Runtime();
       for i in [1..count] do a := m*n; od;
       time := Runtime() - t;
-      GASMAN("message");
       Print("Size=",size," time=",time," factor=",
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
-  until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
+  until 15 * lasttime < 2 * time or     # time > 7.5 * lasttime
+        size = 3200;   # in case a mistake in measurement occurs
+
+  if time/lasttime < 15/2 then   # something strange has happened:
+      Print("Giving up, very strange, using limit=100000...\n\n");
+      return 100000;
+  fi;
 
   # now reduce count :
   count := Maximum(QuoInt(count,Maximum(1,QuoInt(time,2000))),1);
@@ -150,24 +153,14 @@ FindWinogradLimit := function(p,d)
       mmm := ExtractSubMatrix(m,[1..sizeh],[1..sizeh]);
       nnn := ExtractSubMatrix(n,[1..sizeh],[1..sizeh]);
       GASMAN("collect");
-      GASMAN("message");
-      GASMAN("message");
       t := Runtime();
       for i in [1..count] do a := mm*nn; od;
       time := Runtime() - t;
       t := Runtime();
       for i in [1..count] do a := mmm*nnn; od;
       time2 := Runtime() - t;
-      GASMAN("message");
       Print("Size=",size," time=",time," time2=",time2," factor=",
             FLOAT_INT(time)/FLOAT_INT(time2),"\n");
-      #if time > 1000 then
-      #    count := Maximum(QuoInt(count,2),1);
-      #    Print("Changing repetition count to ",count,"\n");
-      #elif time < 300 then
-      #    count := count * 2;
-      #    Print("Changing repetition count to ",count,"\n");
-      #fi;
       if time/time2 > 15/2 then
           uplim := size;
       else

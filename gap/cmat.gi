@@ -1276,15 +1276,26 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     if m!.vecclass![CVEC_IDX_len] <> n!.len then
         Error("\\*: lengths not matching");
     fi;
+    vcl := n!.vecclass;
+    q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+    if IsBound(CVEC_WinogradBounds[q]) and
+        m!.len * m!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] and
+        n!.len * n!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] then
+        # Do the Winograd trick:
+        res := CVEC_MultiplyWinograd(m,n,false,CVEC_WinogradBounds[q]);
+        if not(IsMutable(m) or IsMutable(n)) then
+            MakeImmutable(res);
+        fi;
+        return res;
+    fi;
+         
     # First make a new matrix:
     l := 0*[1..m!.len+1];
-    vcl := n!.vecclass;
     for i in [2..m!.len+1] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     od;
     res := CVEC_CMatMaker(l,n!.vecclass);
     if m!.len > 0 then
-        q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
         d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
         if q > CVEC.MaximumGreaseCalibration or
            not(IsBound(CVEC_CalibrationTableNoCache[q])) then
@@ -2105,6 +2116,7 @@ InstallGlobalFunction( GreaseCalibration,
         for j in [2..minpos] do limits[j] := limits[1]; od;
         CVEC_CalibrationTableCache[q] := limits;
 
+        if q = 641 then Error(); fi;
         # Now out of cache:
         # Compute intersections of cost lines for levels 1..8:
         limits := List([1..7],l->q^l*(l*q-l-1));
@@ -2128,6 +2140,7 @@ InstallGlobalFunction( GreaseCalibration,
         for j in [2..minpos] do limits[j] := limits[1]; od;
         CVEC_CalibrationTableNoCache[q] := limits;
 
+        if q = 641 then Error(); fi;
         Print(i,"/",info.le,"\r");
     od;
     Print("\n");
@@ -2169,4 +2182,142 @@ InstallGlobalFunction( CVEC_StoreGreaseCalibration,
     IO_Close(f);
   end );
 
+InstallGlobalFunction(CVEC_AddMat, function(a,b,mult)
+  local i;
+  for i in [1..Length(a)] do
+      AddRowVector(a[i],b[i],mult);
+  od;
+end);
+
+InstallGlobalFunction( CVEC_MultiplyWinograd, function(M,N,R,limit)
+  # Call with matrices M and N of fitting dimensions for multiplication.
+  # R must be either a matrix of the dimensions of M*N or false. limit
+  # is an integer. Does M*N. If R=false, a new matrix with the result is
+  # returned. Otherwise the result is written to R. For matrices whose
+  # product of the dimensions is smaller or equal to limit the standard
+  # matrix multiplication is used, otherwise the Winograd trick is done.
+  # It is allowed, that R is equal to M or N!
+  local a11,a12,a21,a22,b11,b12,b21,b22,l,l2,lhi,lhilo,llo,m,m1,m2,m3,m4,
+        m5,m6,m7,mhi,mhilo,mlo,mo,n,n2,nhi,nhilo,nlo,o,r,s1,s2,s3,s4,s5,s6,
+        s7,s8,t,t1,t2,ze;
+  if Length(M) * RowLength(M) <= limit or
+     Length(N) * RowLength(N) <= limit then
+      if R = false then 
+          return M*N; 
+      else
+          l := [1..Length(M)];
+          r := [1..RowLength(N)];
+          CopySubMatrix(M*N,R,l,l,r,r);
+          return R;
+      fi;
+  fi;
+  Print("Wino ",Length(M)," ",RowLength(M)," ",Length(N)," ",RowLength(N),"\n");
+  t := Runtime();
+  # From now on we have a result matrix:
+  l := Length(M);
+  m := RowLength(M);   # = Length(N)
+  n := RowLength(N);
+  l2 := QuoInt(l+1,2);
+  m2 := QuoInt(m+1,2);
+  n2 := QuoInt(n+1,2);
+  llo := [1..l2];
+  lhi := [l2+1..l];
+  if IsOddInt(l) then
+      lhilo := [1..l2-1];
+  else
+      lhilo := [1..l2];
+  fi;
+  mlo := [1..m2];
+  mhi := [m2+1..m];
+  if IsOddInt(m) then
+      mhilo := [1..m2-1];
+  else
+      mhilo := [1..m2];
+  fi;
+  nlo := [1..n2];
+  nhi := [n2+1..n];
+  if IsOddInt(n) then
+      nhilo := [1..n2-1];
+  else
+      nhilo := [1..n2];
+  fi;
+
+  o := One(BaseDomain(M));
+  mo := -o;
+  ze := Zero(BaseDomain(M));
+
+  a11 := ExtractSubMatrix(M,llo,mlo);
+  a21 := ZeroMutable(a11);
+  CopySubMatrix(M,a21,lhi,lhilo,mlo,mlo);
+  a22 := ZeroMutable(a11);
+  CopySubMatrix(M,a22,lhi,lhilo,mhi,mhilo);
+  s1 := a21+a22;
+  s2 := s1-a11;
+  s3 := a11-a21;
+  a12 := ZeroMutable(a11);
+  CopySubMatrix(M,a12,llo,llo,mhi,mhilo);
+  s4 := a12-s2;
+
+  b11 := ExtractSubMatrix(N,mlo,nlo);
+  b12 := ZeroMutable(b11);
+  CopySubMatrix(N,b12,mlo,mlo,nhi,nhilo);
+  s5 := b12-b11;
+  b22 := ZeroMutable(b11);
+  CopySubMatrix(N,b22,mhi,mhilo,nhi,nhilo);
+  s6 := b22-s5;
+  s7 := b22-b12;
+  b21 := ZeroMutable(b11);
+  CopySubMatrix(N,b21,mhi,mhilo,nlo,nlo);
+  s8 := s6-b21;
+  #Print(Runtime()-t,"\n"); t := Runtime();
+
+  # To save allocations:
+  Unbind(a21);
+  Unbind(b12);
+
+  # Now the multiplications:
+  m1 := CVEC_MultiplyWinograd(s2,s6,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  m2 := CVEC_MultiplyWinograd(a11,b11,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  m3 := CVEC_MultiplyWinograd(a12,b21,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  m4 := CVEC_MultiplyWinograd(s3,s7,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  m5 := CVEC_MultiplyWinograd(s1,s5,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  m6 := CVEC_MultiplyWinograd(s4,b22,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  m7 := CVEC_MultiplyWinograd(a22,s8,false,limit);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+
+  Unbind(s1); Unbind(s2); Unbind(s3); Unbind(s4);
+  Unbind(s5); Unbind(s6); Unbind(s7); Unbind(s8);
+
+  t1 := m1;
+  CVEC_AddMat(t1,m2,o);
+  t2 := m4;
+  CVEC_AddMat(t2,t1,o);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+  
+  Unbind(m1);
+
+  # Create a new result matrix if necessary:
+  if R = false then
+      R := ZeroMatrix(l,n,M);
+  fi;
+
+  # Put together the result:
+  CVEC_AddMat(m2,m3,o);
+  CopySubMatrix(m2,R,llo,llo,nlo,nlo);
+  CVEC_AddMat(t1,m5,o);
+  CVEC_AddMat(t1,m6,o);
+  CopySubMatrix(t1,R,llo,llo,nhilo,nhi);
+  CopySubMatrix(t2-m7,R,lhilo,lhi,nlo,nlo);
+  CVEC_AddMat(t2,m5,o);
+  CopySubMatrix(t2,R,lhilo,lhi,nhilo,nhi);
+  #Print(Runtime()-t,"\n"); t := Runtime();
+
+  return R;
+end);
 
