@@ -174,6 +174,7 @@ end;
 
 FindAllWinogradLimits := function()
   local d,f,facs,i,p,q;
+  CVEC_WinogradBounds := [];
   q := Filtered([2..1024],IsPrimePowerInt);
   f := List(q,Factors);
   p := List(f,x->x[1]);
@@ -183,6 +184,7 @@ FindAllWinogradLimits := function()
       Print("Testing q=",q[i]," p=",p[i]," d=",d[i],"...\n");
       facs[q[i]] := FindWinogradLimit(p[i],d[i]);
   od;
+  CVEC_WinogradBounds := facs;
   return facs;
 end;
 

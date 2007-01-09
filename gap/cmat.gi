@@ -2211,7 +2211,7 @@ InstallGlobalFunction( CVEC_MultiplyWinograd, function(M,N,R,limit)
           return R;
       fi;
   fi;
-  Print("Wino ",Length(M)," ",RowLength(M)," ",Length(N)," ",RowLength(N),"\n");
+  #Print("Wino ",Length(M)," ",RowLength(M)," ",Length(N)," ",RowLength(N),"\n");
   t := Runtime();
   # From now on we have a result matrix:
   l := Length(M);
