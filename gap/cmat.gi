@@ -2116,7 +2116,6 @@ InstallGlobalFunction( GreaseCalibration,
         for j in [2..minpos] do limits[j] := limits[1]; od;
         CVEC_CalibrationTableCache[q] := limits;
 
-        if q = 641 then Error(); fi;
         # Now out of cache:
         # Compute intersections of cost lines for levels 1..8:
         limits := List([1..7],l->q^l*(l*q-l-1));
@@ -2140,7 +2139,6 @@ InstallGlobalFunction( GreaseCalibration,
         for j in [2..minpos] do limits[j] := limits[1]; od;
         CVEC_CalibrationTableNoCache[q] := limits;
 
-        if q = 641 then Error(); fi;
         Print(i,"/",info.le,"\r");
     od;
     Print("\n");
