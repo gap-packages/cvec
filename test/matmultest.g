@@ -132,7 +132,11 @@ FindWinogradLimit := function(p,d)
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
   until 15 * lasttime < 2 * time;   # time > 7.5 * lasttime
 
-  dec := QuoInt(size,30);
+  # now reduce count :
+  count := Maximum(QuoInt(count,4),1);
+  Print("Changing repetition count to ",count,"\n");
+
+  dec := QuoInt(size,10);
   repeat
       repeat
           size := size - dec;
@@ -150,10 +154,17 @@ FindWinogradLimit := function(p,d)
           time2 := Runtime() - t;
           Print("Size=",size," time=",time," time2=",time2," factor=",
                 FLOAT_INT(time)/FLOAT_INT(time2),"\n");
+          if time > 1000 then
+              count := Maximum(QuoInt(count,2),1);
+              Print("Changing repetition count to ",count,"\n");
+          elif time < 300 then
+              count := count * 2;
+              Print("Changing repetition count to ",count,"\n");
+          fi;
       until 15 * time2 > 2 * time;
       size := size + dec;
       dec := QuoInt(dec,2);
-  until dec <= 3;
+  until dec <= 1;
   Print("Result: limit=",size," memory for such matrices: ",
         Memory(mm),"\n\n");
   return size;
