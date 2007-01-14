@@ -68,6 +68,7 @@ MatMulSpeedTest := function(p,d,what)
       b := ExtractSubMatrix(mm,[1..n],[1..n]);
       t := Runtime();
       x := a*b;
+      Unbind(x);
       #x := MultiplyWinograd2(a,b,false,n/2);
       t := Runtime()-t;
       if t < 5000 then
@@ -79,6 +80,7 @@ MatMulSpeedTest := function(p,d,what)
           t := Runtime();
           for i in [1..reps] do
               x := a*b;
+              Unbind(x);
               #x := MultiplyWinograd2(a,b,false,n/2);
           od;
           t := Runtime()-t;

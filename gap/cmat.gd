@@ -103,5 +103,7 @@ DeclareGlobalFunction( "CVEC_FastFill" );
 DeclareGlobalFunction( "GreaseCalibration" );
 DeclareGlobalFunction( "CVEC_StoreGreaseCalibration" );
 DeclareGlobalFunction( "CVEC_AddMat" );
+DeclareGlobalFunction( "CVEC_MulMat" );
 DeclareGlobalFunction( "CVEC_MultiplyWinograd" );
+DeclareGlobalFunction( "CVEC_MultiplyWinogradMemory" );
 
