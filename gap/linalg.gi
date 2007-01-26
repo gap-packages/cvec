@@ -240,7 +240,7 @@ InstallMethod( SemiEchelonBasisMutableTX, "for a row list matrix",
                 Add(coeffs,newcoeffs);
             else
                 newcoeffs := ZeroMutable(dec);
-                newcoeffs[1] := dec[1]^-1;
+                newcoeffs[j] := dec[1]^-1;
                 Add(coeffs,newcoeffs);
             fi;
             i := i + 1;

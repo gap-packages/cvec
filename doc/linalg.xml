@@ -78,7 +78,7 @@ for that the pivot element is in column <M>i</M>.
     <C>true</C> and <A>v</A> is not contained in the span of the vectors
     in <A>b</A> and <A>dec</A> is a vector, then the first <M>n+1</M> 
     components of <A>dec</A> are changed such that 
-    <M>\sum_{{i=1}}^{n+1} <A>dec</A>_i <A>b</A>_i</M>.
+    <M><A>v</A> = \sum_{{i=1}}^{n+1} <A>dec</A>_i <A>b</A>_i</M>.
 </Description>
 </ManSection>
 
