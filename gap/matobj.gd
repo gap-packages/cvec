@@ -483,6 +483,11 @@ DeclareOperation( "IdentityMatrix", [IsInt,IsMatrixObj] );
 # Returns a new mutable identity matrix in the same rep as the given one with
 # possibly different dimensions.
 
+DeclareOperation( "CompanionMatrix", [IsUnivariatePolynomial,IsMatrixObj] );
+# Returns the companion matrix of the first argument in the representation
+# of the second argument. Uses row-convention. The polynomial must be
+# monic and its coefficients must lie in the BaseDomain of the matrix.
+
 # The following are already declared in the library:
 # Eventually here will be the right place to do this.
 

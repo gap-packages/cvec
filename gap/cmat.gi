@@ -246,6 +246,34 @@ InstallMethod( IdentityMatrix, "for an integer and a cmat",
     fi;
   end );
 
+InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
+  [ IsUnivariatePolynomial, IsCMatRep ],
+  function( po, m )
+    local cl,d,i,l,ll,n,p;
+    l := CoefficientsOfUnivariatePolynomial(po);
+    n := Length(l)-1;
+    if not(IsOne(l[n+1])) then
+        Error("CompanionMatrix: polynomial is not monic");
+        return fail;
+    fi;
+    cl := CVEC_NewCVecClassSameField(m!.vecclass,n);
+    if IsGF2VectorRep(l) or Is8BitVectorRep(l) then
+        l := -CVec(l{[1..n]});
+    else
+        p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
+        d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
+        l := List(l{[1..n]},x->-x);   # to unpack!
+        l := CVec(l,p,d);
+    fi;
+    ll := 0*[1..n];
+    ll[n+1] := l;
+    for i in [1..n-1] do
+        ll[i+1] := CVEC_NEW(cl,cl![CVEC_IDX_type]);
+        ll[i+1][i+1] := 1;   # this works for all fields!
+    od;
+    return CVEC_CMatMaker(ll,cl);
+  end );
+
 InstallGlobalFunction( CVEC_RandomMat, function(arg)
   local c,d,i,j,l,li,p,q,x,y;
   if Length(arg) = 2 then

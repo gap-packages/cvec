@@ -1,5 +1,6 @@
 Document grease calibration (in particular local/calibration.HOSTNAME
 Document Winograd
+Document CompanionMatrix
 
 Attention: INTREP_TO_CVEC is dangerous: looking at first element
    might be wrong when converting to non-prime-fields...
