@@ -1,9 +1,14 @@
+#
 # makefile for the cvec package                             Max Neunhoeffer
+#
+##  Copyright (C) 2007  Max Neunhoeffer, Lehrstuhl D f. Math., RWTH Aachen
+##  This file is free software, see license information at the end.
+#
 CC=cc
 
-#COMPILEOPTIONS="-O3 -fomit-frame-pointer"
+COMPILEOPTIONS="-O3 -fomit-frame-pointer"
 #COMPILEOPTIONS="-O3 -g -fomit-frame-pointer"
-COMPILEOPTIONS="-O0 -g -Wall"
+#COMPILEOPTIONS="-O0 -g -Wall"
 # Some experiments:
 #COMPILEOPTIONS="-march=i686 -mcpu=pentium4 -O3 -fomit-frame-pointer"
 #COMPILEOPTIONS="-march=i686 -mcpu=pentium4 -O3 -fomit-frame-pointer -falign-loops=5 -finline-limit=6000"
@@ -40,9 +45,9 @@ clean:
 	rm -rf bin/@GAPARCH@ Makefile
 
 archive: doc
-	(cd .. ; tar czvf cvec.tar.gz --exclude ".svn" --exclude @GAPARCH@ cvec)
+	(cd .. ; tar czvf cvec-`cat cvec/VERSION`.tar.gz --exclude ".svn" --exclude bin --exclude test cvec)
 
-WEBPOS=/home/antares/neunhoef/mywebpage/Computer/Software/Gap/cvec
+WEBPOS=/users/neunhoef/mywebpage/Computer/Software/Gap/cvec
 
 towww: archive
 	echo '<?xml version="1.0" encoding="ISO-8859-1"?>' >${WEBPOS}.version
@@ -52,5 +57,23 @@ towww: archive
 	cp PackageInfo.g ${WEBPOS}
 	cp README ${WEBPOS}/README.cvec
 	cp doc/manual.pdf ${WEBPOS}/cvec.pdf
-	cp ../cvec.tar.gz ${WEBPOS}
+	cp ../cvec-`cat VERSION`.tar.gz ${WEBPOS}
+	@echo
+	@echo Now please adjust the archive link in 
+	@echo "    " ${WEBPOS}.mixer !
+
+##
+##  This program is free software; you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation; version 2 of the License.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+##
+##  You should have received a copy of the GNU General Public License
+##  along with this program; if not, write to the Free Software
+##  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+##
 

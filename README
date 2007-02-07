@@ -1,4 +1,7 @@
+     
+     =========================================================
     README file for the `CVEC' GAP4 package (Max Neunhoeffer)
+     =========================================================
         
 To get the newest version of this GAP 4 package download one of the
 archive files
@@ -12,13 +15,9 @@ respectively
     unzoo -x cvec-x.x.zoo
 and so on.
 
-(Note that if you use a browser like `netscape' for downloading the
-archive file the `gunzip' step above may already be done by the browser,
-although the name of your file may still have the misleading `.gz'
-extension.)
-
-Do this preferably (but not necessarily) inside the `pkg' subdirectory
-of your GAP 4 installation. It creates a subdirectory called `cvec'.
+Do this in a directory called 'pkg', preferably (but not necessarily)
+in the 'pkg' subdirectory of your GAP 4 installation. It creates a
+subdirectory called 'cvec'.
 
 To install this package do
 
@@ -36,22 +35,29 @@ configuring GAP itself on this architecture.
 
 The package  will not work without  this  step.
 
+If you installed the package in another 'pkg' directory than the standard
+'pkg' directory in your GAP 4 installation, then you have to add the path
+to the directory containing your 'pkg' directory to GAP's list of directories.
+This can be done by starting GAP with the '-l' command line option
+followed by the name of the directory and a semicolon. Then your directory
+is prepended to the list of directories searched. Otherwise the package 
+is not found by GAP. Of course, you can add this option to your GAP
+startup script.
+
 ----------------------------------------------------------------------------
 STATIC LINKING: This might be interesting for M$ Windows users, as
 dynamic loading of binary modules does not work there.
 
-You can also create a new statically linked `gap' binary as follows:
-Go into the main GAP directory and then into `bin/..bindir..'. Here
-..bindir.. means the directory containing the `gap' executable after
-compiling `gap'. This directory also contains the GAP compiler script
-`gac'. Assuming CVEC in the standard location you can then say
+You can also create a new statically linked 'gap' binary as follows:
+Go into the main GAP directory and then into 'bin/BINDIR'. Here
+BINDIR means the directory containing the 'gap' executable after
+compiling 'gap'. This directory also contains the GAP compiler script
+'gac'. Assuming CVEC in the standard location you can then say
 
-   ./gac -o gap-static -p "-DCVECSTATIC" -P "-static" ../../pkg/cvec/src/cvec.c
+   ./gac -o gap-static -p "-DIOSTATIC" -P "-static" ../../pkg/io/src/io.c
 
 Then copy your `gap' start script to, say, `gapbig' and change the
-references to the GAP binary to `gap-static'. On my Linux system with
-2GB RAM and kernel compiled with 4GB memory support I can nicely run
-`gapbig -m 1800m -K 1800m' and after loading CVEC.
+references to the GAP binary to `gap-static'.
 
 If you want to install more than one package with a C-part like this
 package, you can still create a statically linked GAP executable by
