@@ -16,7 +16,7 @@
   - Winograd trick for multiplication, corresponding calibration function
   - Put copyright and licensing information in all files.
   - Add version number to archive name, fixed some things in PackageInfo.g.
-  - Put revision 279 as version 1.5 on the web.
+  - Put revision 280 as version 1.5 on the web.
 
 
 ==========================
