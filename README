@@ -59,7 +59,7 @@ combining all the compile and link options and all the .c files as
 in the ./gac command above. For the cvec package, you have to add
   -DCVECSTATIC
 to the string of the -p option and the file
-  ../../pkg/io/src/cvec.c
+  ../../pkg/cvec/src/cvec.c
 somewhere on the command line.
 
 ----------------------------------------------------------------------------

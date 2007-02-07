@@ -11,6 +11,10 @@
     have to multiply a few times by the primitive root, not by powers of it.
   - Fixed a serious bug in SemiEchelonBasisMutableTX which occurred if
     the first row of the matrix was zero.
+  - New operation CompanionMatrix (not yet documented)
+  - GreaseCalibration for different machines (not yet documented)
+  - Winograd trick for multiplication, corresponding calibration function
+  - Put revision 274 as version 1.5 on the web.
 
 
 ==========================

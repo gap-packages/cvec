@@ -356,7 +356,7 @@ as <A>v</A>
 </ManSection>
 
 <ManSection>
-<Meth Name="ZeroVector" Arg="v, l" Label="cvec"/>
+<Meth Name="ZeroVector" Arg="l, v" Label="cvec"/>
 <Returns>a mutable copy of the zero <C>cvec</C> over the same
 field than <A>v</A> but with length <A>l</A></Returns>
 <Description>
