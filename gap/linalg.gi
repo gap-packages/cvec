@@ -789,12 +789,12 @@ end );
 InstallMethod( CharAndMinimalPolynomialOfMatrix, "for a matrix and an indet nr",
   [IsCMatRep, IsPosInt],
   function( m, indetnr )
-    return CVEC_MinimalPolynomialMC(m,1/100,true,indetnr);
+    return CVEC_MinimalPolynomialMC(m,1/100,true,true,indetnr);
   end );
 
 InstallMethod( CharAndMinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
   function( m )
-    return CVEC_MinimalPolynomialMC(m,1/100,true,1);
+    return CVEC_MinimalPolynomialMC(m,1/100,true,true,1);
   end );
 
 InstallMethod( MinimalPolynomialOfMatrix, "for a matrix and an indet nr",
@@ -815,7 +815,7 @@ InstallMethod( MinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
 InstallGlobalFunction( CVEC_GlueMatrices, function(l)
   # all elements of the list l must be CMats over the same field
   # l must not be empty
-  local d,g,i,m,n,p,pos,x;
+  local d,g,i,m,n,p,pr,pos,x;
   n := Sum(l,Length);
   p := Characteristic(l[1]);
   d := DegreeFFE(l[1]);
@@ -827,15 +827,18 @@ InstallGlobalFunction( CVEC_GlueMatrices, function(l)
       pos := pos + Length(l[i]);
   od;
   if InfoLevel(InfoCVec) >= 2 then 
-      Display(m);
+      #Display(m);
+      OverviewMat(m);
       Print("\nOf course, I do a random basechange... :-)\n\n");
   fi;
   g := GL(n,p^d);
-  g := Group(List(GeneratorsOfGroup(g),CMat));
-  x := PseudoRandom(g);
+  g := List(GeneratorsOfGroup(g),CMat);
+  pr := ProductReplacer(g,rec(scramble := Maximum(QuoInt(n,5),200)));
+  x := Next(pr);
   m := x * m * x^-1;
   if InfoLevel(InfoCVec) >= 2 then
-      Display(m);
+      #Display(m);
+      OverviewMat(m);
   fi;
   return m;
   #return m;
@@ -946,14 +949,19 @@ function( p, f )
 end );
 
 InstallGlobalFunction( CVEC_MinimalPolynomialMC, 
-function( m, eps, verify, indetnr )
-  # The new algorithm of Cheryl and Max. Can be used as Las Vegas algorithm
+function( m, eps, factorise, verify, indetnr )
+  # The new algorithm of Cheryl and Max. Can be used as Monte Carlo algorithm
   # or as deterministic algorithm with verification.
   # eps is a cyclotomic which is an upper bound for the error probability
+  # factorise is a boolean indicating, whether the resulting
+  # polynomials should be factorised even if this would not be
+  # necessary for verification purpose.
   # verify is a boolean indicating, whether the result should be verified,
   # thereby proving correctness, indetnr is the number of an indeterminate
   local A,B,S,coeffs,col,d,dec,g,i,irreds,j,l,lowbounds,mm,mult,multmin,newBrow,
-        nrunclear,ns,opi,ordpol,ordpolsinv,p,pivs,prob,proof,rl,w,wcopy,ww,zero;
+        nrunclear,opi,ordpol,ordpolsinv,p,pivs,prob,proof,rl,se,w,wcopy,ww,zero,
+        ti,lcm,ti2;
+  ti := Runtime();
   rl := RowLength(m);
   zero := ZeroVector(rl,m);
   pivs := [1..rl];   # those are the columns we still want pivots for
@@ -1042,9 +1050,28 @@ function( m, eps, verify, indetnr )
   Unbind(B);
   Unbind(S);
 
+  ti2 := Runtime();
+  Info(InfoCVec,2,"Time until now: ",ti2-ti," lap: ",ti2-ti);
+  if not(factorise) and
+     Length(opi.rordpols)^2 < Length(m) then   # a quick check for cyclicity:
+      lcm := Lcm(opi.rordpols);
+      if Degree(lcm) = rl then
+          Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",
+               Runtime()-ti2);
+          ti2 := Runtime();
+          Info(InfoCVec,2,"Cyclic matrix!");
+          return rec( minpoly := lcm, charpoly := lcm,
+                      opi := opi,
+                      irreds := false, mult := false, multmin := false,
+                      proof := true );
+      fi;
+  fi;
   Info(InfoCVec,2,"Factoring relative order polynomials...");
   # Factor all parts:
   col := List(opi.rordpols,f->Collected(Factors(f)));
+  Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
+  ti2 := Runtime();
+  Info(InfoCVec,2,"Sorting and collecting factors...");
   # Collect all irreducible factors:
   irreds := [];
   mult := [];
@@ -1076,6 +1103,8 @@ function( m, eps, verify, indetnr )
           nrunclear := nrunclear + 1;
       fi;
   od;
+  Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
+  ti2 := Runtime();
   Info(InfoCVec,2,"Number of irreducible factors in charpoly: ",Length(irreds),
                   " mult. in minpoly unknown: ",nrunclear);
 
@@ -1120,6 +1149,9 @@ function( m, eps, verify, indetnr )
                   nrunclear := nrunclear + 1;
               fi;
           od;
+          Info(InfoCVec,2,"Time until now: ",Runtime()-ti,
+               " lap: ",Runtime()-ti2);
+          ti2 := Runtime();
           if nrunclear = 0 then proof := true; break; fi;   # result is correct!
 
           if verify then
@@ -1131,9 +1163,10 @@ function( m, eps, verify, indetnr )
                       Info(InfoCVec,2,"Working on factor: ",irreds[j],
                                       " multiplicity: ",multmin[j]);
                       mm := Value(irreds[j],m)^multmin[j];
-                      ns := NullspaceMatMutableX(mm);
-                      if Length(ns) < mult[j] then
+                      se := SemiEchelonBasisMutableX(mm);
+                      if Length(mm)-Length(se!.vectors) < mult[j] then
                           proof := false;
+                          Info(InfoCVec,2,"Found too small multiplicity!");
                           break;
                       fi;
                   fi;
@@ -1144,6 +1177,7 @@ function( m, eps, verify, indetnr )
       proof := true;
   fi;
 
+  Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
   return rec(minpoly := ordpol,
              charpoly := Product( opi.rordpols ),
              opi := opi,
