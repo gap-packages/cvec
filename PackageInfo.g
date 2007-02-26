@@ -183,7 +183,7 @@ AbstractHTML :=
    but only word-based processor arithmetic. This allows for bigger finite\
    fields and higher speed.",
 
-PackageWWWHome := "http://www.math.rwth-aachen.de/Computer/Software/Gap/cvec.html",
+PackageWWWHome := "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec.html",
                
 ##  Here is the information on the help books of the package, used for
 ##  loading into GAP's online help and maybe for an online copy of the 
