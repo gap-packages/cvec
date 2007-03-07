@@ -2382,10 +2382,10 @@ InstallGlobalFunction( CVEC_MultiplyWinogradMemory, function(M,N,limit)
   end;
   ClearLastColumn := function(m)
       local i,r,z;
-      r := RowLength(M);
-      z := Zero(BaseDomain(M));
-      for i in [1..Length(M)] do
-          M[i][r] := z;
+      r := RowLength(m);
+      z := Zero(BaseDomain(m));
+      for i in [1..Length(m)] do
+          m[i][r] := z;
       od;
   end;
 

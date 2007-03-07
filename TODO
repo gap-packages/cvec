@@ -1,3 +1,9 @@
+For vector/matrix framework:
+  - possibility to tell vector spaces in which representation to
+    deliver elements (GF(2)^24 compressed?)
+  - discuss it! 
+
+
 Document grease calibration (in particular local/calibration.HOSTNAME
 Document Winograd
 Document CompanionMatrix
