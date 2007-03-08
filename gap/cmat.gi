@@ -2531,6 +2531,58 @@ InstallGlobalFunction( CVEC_MultiplyWinogradMemory, function(M,N,limit)
   return R;
 end);
 
+InstallGlobalFunction( CVEC_ValueLaurentPoly,
+  function( f, x )
+    local i,j,n,o,s,val;
+    f := CoefficientsOfLaurentPolynomial( f );
+    i := Length( f[1] );
+    if i = 0 then
+        return ZeroSameMutability(x);
+    elif i = 1 then
+        if f[2] <> 0 then return f[1][1] * x^f[2]; fi;
+        if IsOne(f[1][1]) then   # return one
+            return x^0;
+        fi;
+        val := ZeroMutable(x);
+        s := f[1][1];
+        for j in [1..Length(x)] do val[j][j] := s; od;
+        if not(IsMutable(x)) then
+            MakeImmutable(val);
+        fi;
+        return val;
+    fi;
+    # Now we really have to do something:
+    val := MutableCopyMat(x);
+    n := Length(x);
+    s := f[1][i];
+    if not(IsOne(s)) then
+        for j in [1..n] do MultRowVector(val[j],s); od;
+    fi;
+    o := One(BaseField(x));
+    while true do
+        i := i - 1;
+        # Add a multiple of the identity:
+        if not(IsZero(f[1][i])) then
+            s := f[1][i];
+            for j in [1..n] do val[j][j] := s + val[j][j]; od;
+        fi;
+        if i = 1 then break; fi;
+        val := val*x;   # this is mutable!
+    od;
+    if f[2] <> 0 then val := val * x^f[2]; fi;
+    if not(IsMutable(x)) then MakeImmutable(val); fi;
+    return val;
+  end );
+
+InstallMethod( Value, "for a univariate Laurent polynomial, a cmat, and one",
+  [ IsLaurentPolynomial, IsRingElement and IsCMatRep, 
+    IsRingElement and IsCMatRep ],
+  function( p, x, one ) return CVEC_ValueLaurentPoly(p,x); end );
+
+InstallOtherMethod( Value, "for a univariate Laurent polynomial, and a cmat", 
+  [ IsLaurentPolynomial, IsRingElement and IsCMatRep ],
+  CVEC_ValueLaurentPoly );
+
 ##
 ##  This program is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by

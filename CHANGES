@@ -9,6 +9,8 @@
   - Improve MinimalPolynomialMC, change calling convention.
   - Fixed a dangerous bug in matrix multiplication using the
     memory-saving Winograd trick.
+  - Better Value method for CMats (do nothing a human would not also do)
+
 
 ==========================
  Changes from 1.4 -> 1.5:

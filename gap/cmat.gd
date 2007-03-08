@@ -107,6 +107,7 @@ DeclareGlobalFunction( "CVEC_AddMat" );
 DeclareGlobalFunction( "CVEC_MulMat" );
 DeclareGlobalFunction( "CVEC_MultiplyWinograd" );
 DeclareGlobalFunction( "CVEC_MultiplyWinogradMemory" );
+DeclareGlobalFunction( "CVEC_ValueLaurentPoly" );
 
 ##
 ##  This program is free software; you can redistribute it and/or modify
