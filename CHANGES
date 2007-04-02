@@ -11,7 +11,7 @@
     memory-saving Winograd trick.
   - Better Value method for CMats (do nothing a human would not also do)
   - Put AddMatrix and MultMatrix into interface and implement it for cmats
-  - Put revision 295 as version 1.6 on the web.
+  - Put revision 298 as version 1.6 on the web.
 
 
 ==========================
