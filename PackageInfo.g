@@ -27,11 +27,11 @@ Subtitle := "Compact vectors over finite fields",
 ##  See '?Extending: Version Numbers' in GAP help for an explanation
 ##  of valid version numbers. For an automatic package distribution update
 ##  you must provide a new version number even after small changes.
-Version := "1.5",
+Version := "1.6",
 
 ##  Release date of the current version in dd/mm/yyyy format.
 # 
-Date := "07/02/2007",
+Date := "02/04/2007",
 
 ##  URL of the archive(s) of the current package release, but *without*
 ##  the format extension(s), like '.zoo', which are given next.
@@ -42,7 +42,7 @@ Date := "07/02/2007",
 ##  example/init.g, ...    or  example-1.3/init.g, ...  )
 # 
 ArchiveURL := 
-     "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/cvec-1.5",
+     "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/cvec-1.6",
 
 ##  All provided formats as list of file extensions, separated by white
 ##  space or commas.
@@ -217,7 +217,7 @@ PackageDoc := rec(
   BookName  := "cvec",
   # format/extension can be one of .zoo, .tar.gz, .tar.bz2, -win.zip
   Archive := 
-      "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/cvec-1.5.tar.gz",
+      "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/cvec-1.6.tar.gz",
   ArchiveURLSubset := ["doc", "htm"],
   HTMLStart := "doc/chap0.htm",
   PDFFile   := "doc/manual.pdf",

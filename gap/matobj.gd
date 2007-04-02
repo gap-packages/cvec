@@ -454,6 +454,15 @@ DeclareOperation( "AssMatrix", [IsMatrixObj,IsPosInt,IsPosInt,IsObject] );
 # Problem: How about inverses of integer matrices that exist as
 # elements of rationals matrix?
 
+DeclareOperation( "AddMatrix", [IsMutable and IsMatrixObj,IsMatrixObj] );
+DeclareOperation( "AddMatrix", 
+  [IsMutable and IsMatrixObj,IsMatrixObj,IsMultiplicativeElement] );
+DeclareOperation( "MultMatrix", 
+  [IsMutable and IsMatrixObj,IsMultiplicativeElement] );
+
+# Changes first argument in place, matrices have to be of same
+# dimension and over same base domain.
+
 
 ############################################################################
 # Rule:

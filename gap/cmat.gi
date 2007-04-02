@@ -2235,6 +2235,42 @@ InstallGlobalFunction(CVEC_MulMat, function(a,mult)
   od;
 end);
 
+InstallMethod( AddMatrix, "for two row list matrices and a scalar",
+  [ IsMutable and IsRowListMatrix, IsRowListMatrix, IsMultiplicativeElement ],
+  function( A, B, s )
+    local i;
+    if Length(A) <> Length(B) then
+        Error("Matrices must have equal length");
+        return;
+    fi;
+    for i in [1..Length(A)] do
+        AddRowVector(A[i],B[i],s);
+    od;
+  end );
+
+InstallMethod( AddMatrix, "for two row list matrices",
+  [ IsMutable and IsRowListMatrix, IsRowListMatrix ],
+  function( A, B )
+    local i;
+    if Length(A) <> Length(B) then
+        Error("Matrices must have equal length");
+        return;
+    fi;
+    for i in [1..Length(A)] do
+        AddRowVector(A[i],B[i]);
+    od;
+  end );
+
+InstallMethod( MultMatrix, "for a row list matrix",
+  [ IsMutable and IsRowListMatrix, IsMultiplicativeElement ],
+  function( A, s )
+    local i;
+    for i in [1..Length(A)] do
+        MultRowVector(A[i],s);
+    od;
+  end );
+
+
 InstallGlobalFunction( CVEC_MultiplyWinograd, function(M,N,limit)
   # Call with matrices M and N of fitting dimensions for multiplication.
   # R must be either a matrix of the dimensions of M*N or false. limit
