@@ -158,10 +158,12 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
       l[CVEC_IDX_greasetabl] := greasetabl; 
 
       # Now the starting filter list:
+      filts := IsCVecRep;
       if size = 0 then
-          filts := IsCVecRep and IsCVecRepOverSmallField;
-      else
-          filts := IsCVecRep;
+          filts := filts and IsCVecRepOverSmallField;
+      fi;
+      if d = 1 then
+          filts := filts and IsCVecRepOverPrimeField;
       fi;
 
       # Note that IsMutable is added below, when we create the vector type
@@ -598,8 +600,9 @@ InstallOtherMethod( \*, "for cvecs", [IsFFE, IsCVecRep],
   end);
 
 InstallOtherMethod( ScalarProduct, "for two cvecs, kernel method", 
-  [ IsCVecRep and IsCVecRepOverSmallField, 
-    IsCVecRep and IsCVecRepOverSmallField], 1, CVEC_SCALAR_PRODUCT );
+  [ IsCVecRep and IsCVecRepOverSmallField and IsCVecRepOverPrimeField, 
+    IsCVecRep and IsCVecRepOverSmallField and IsCVecRepOverPrimeField], 
+    1, CVEC_SCALAR_PRODUCT );
 InstallOtherMethod( ScalarProduct, "for two cvecs, GAP method", 
   [ IsCVecRep, IsCVecRep ], 
   function( v,w )

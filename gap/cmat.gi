@@ -16,7 +16,7 @@
 
 InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
     # Makes a new CMat, given a list l with a 0 in the first place
-    local greasehint,m,q,qp,ty;
+    local greasehint,m,q,qp,ty,filts;
     if Length(l) > 0 then
         m := rec(rows := l, len := Length(l)-1, vecclass := cl,
                  scaclass := cl![CVEC_IDX_GF]);
@@ -32,9 +32,15 @@ InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
         m.greasehint := m.greasehint-1;
         qp := qp/q;
     od;
+    filts := IsCMatRep and IsMutable;
+    if cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d] = 1 then
+        filts := filts and IsCVecRepOverPrimeField;
+    fi;
+    if q <= MAXSIZE_GF_INTERNAL then
+        filts := filts and IsCVecRepOverSmallField;
+    fi;
     ty := NewType(CollectionsFamily(CollectionsFamily(
-                        cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam])),
-                  IsCMatRep and IsMutable);
+                        cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam])), filts );
     return Objectify(ty,m);
 end );
 
@@ -482,15 +488,18 @@ InstallOtherMethod( Remove, "for a cmat, and a position",
     return Remove(m!.rows,pos+1);
   end);
 
-InstallOtherMethod( \[\], "for a cmat, and a position", 
+#InstallOtherMethod( \[\], "for a cmat, and a position", 
+#  [IsCMatRep and IsMatrix, IsPosInt],
+#  function(m,pos)
+#    #if pos < 1 or pos > m!.len then
+#    #    Error("\\[\\]: illegal position");
+#    #    return fail;
+#    #fi;
+#    return m!.rows[pos+1];
+#  end);
+InstallOtherMethod( \[\], "for a cmat, and a position",
   [IsCMatRep and IsMatrix, IsPosInt],
-  function(m,pos)
-    if pos < 1 or pos > m!.len then
-        Error("\\[\\]: illegal position");
-        return fail;
-    fi;
-    return m!.rows[pos+1];
-  end);
+  CMAT_ELM_LIST );
 
 InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
   [IsCMatRep and IsMatrix and IsMutable, IsPosInt, IsCVecRep],
@@ -2618,6 +2627,38 @@ InstallMethod( Value, "for a univariate Laurent polynomial, a cmat, and one",
 InstallOtherMethod( Value, "for a univariate Laurent polynomial, and a cmat", 
   [ IsLaurentPolynomial, IsRingElement and IsCMatRep ],
   CVEC_ValueLaurentPoly );
+
+InstallMethod( ScalarProductsRows, "for two matrices, and a positive integer",
+  [ IsMatrixObj, IsMatrixObj, IsPosInt ],
+  function( m, n, l )
+    local i,sum;
+    sum := ScalarProduct( m[1], n[1] );
+    for i in [2..l] do
+        sum := sum + ScalarProduct( m[i], n[i] );
+    od;
+    return sum;
+  end );
+
+InstallMethod( ScalarProductsRows, "for two cmats, and a positive integer",
+  [ IsCMatRep, IsCMatRep, IsPosInt ],
+  function( m, n, l )
+    local i,rm,rn,sum;
+    rm := m!.rows;
+    rn := n!.rows;
+    sum := ScalarProduct( rm[2], rn[2] );
+    for i in [3..l+1] do
+        sum := sum + ScalarProduct( rm[i], rn[i] );
+    od;
+    return sum;
+  end );
+
+InstallMethod( ScalarProductsRows, 
+  "for two cmats over a small prime field and a pos. integer",
+  [ IsCMatRep and IsCVecRepOverSmallField and IsCVecRepOverPrimeField,
+    IsCMatRep and IsCVecRepOverSmallField and IsCVecRepOverPrimeField,
+    IsPosInt ],
+  CMATS_SCALAR_PRODUCTS_ROWS );
+
 
 ##
 ##  This program is free software; you can redistribute it and/or modify

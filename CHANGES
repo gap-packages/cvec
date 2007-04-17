@@ -3,6 +3,17 @@
 =============================================================================
 
 ==========================
+ Changes from 1.6 -> 1.7:
+==========================
+
+  - Introduce filters for cmats and cvecs to distinguish cases of q=p
+    and q <= MAXSIZE_GF_INTERNAL.
+  - Kernel method for cmat row access
+  - Operation ScalarProductsRows with kernel method for prime fields
+    used for condensation
+
+
+==========================
  Changes from 1.5 -> 1.6:
 ==========================
 

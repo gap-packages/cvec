@@ -109,6 +109,13 @@ DeclareGlobalFunction( "CVEC_MultiplyWinograd" );
 DeclareGlobalFunction( "CVEC_MultiplyWinogradMemory" );
 DeclareGlobalFunction( "CVEC_ValueLaurentPoly" );
 
+#############################################################################
+# Stuff for other packages:
+#############################################################################
+
+DeclareOperation( "ScalarProductsRows",
+  [ IsMatrixObj, IsMatrixObj, IsPosInt ] );
+
 ##
 ##  This program is free software; you can redistribute it and/or modify
 ##  it under the terms of the GNU General Public License as published by

@@ -31,7 +31,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define MAXDEGREE 1024
 
 /* Define this to empty if you want global access to functions: */
-#define STATIC static
+/* #define STATIC static */
+#define STATIC
 
 /* Define this to empty if your compiler does not support inlined functions: */
 #define INLINE inline
@@ -3367,7 +3368,6 @@ STATIC Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
     seqaccess sasrc;   /* For access in source */
     seqaccess sadst;   /* For access in destination */
 
-
     if (d == 1) {
         /* We read row-wise and write column-wise. */
         INIT_SEQ_ACCESS(&sadst,ELM_PLIST(n,2),1);
@@ -3818,12 +3818,15 @@ STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
         Int i;
         Word res;
         Word *vv,*ww;
+        Int size;
+
+        size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
 
         if (vcl != wcl) {
             return OurErrorBreakQuit("CVEC_SCALAR_PRODUCT: "
                                      "cvecs not in same class");
         }
-        if (d > 1) {
+        if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
             return TRY_NEXT_METHOD;
         }
         INIT_SEQ_ACCESS( &sa, v, 1 );
@@ -3859,6 +3862,62 @@ STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
     }
 }
 
+STATIC UInt rnam_rows = 0;
+
+STATIC Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
+{
+    if (!rnam_rows) {
+       rnam_rows = RNamName("rows");
+    } 
+    return ELM_PLIST(ElmPRec(m,rnam_rows),INT_INTOBJ(p)+1);
+}
+
+STATIC UInt rnam_vecclass = 0;
+
+Obj             SumFFEFFE ( Obj opL, Obj opR );
+
+STATIC Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
+/* m and n must have equal row length l */
+{
+    Obj cl,fi;
+
+    if (!rnam_vecclass) {
+        rnam_vecclass = RNamName("vecclass");
+    }
+    cl = ElmPRec(m,rnam_vecclass);
+    fi = ELM_PLIST(cl,IDX_fieldinfo);
+    PREPARE_d(fi);
+    PREPARE_p(fi);
+    Int size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
+
+    /* The following test has to be adjusted to the one in
+     * CVEC_SCALAR_PRODUCT! */
+    if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
+        return TRY_NEXT_METHOD;
+    }
+
+    if (!rnam_rows) {
+        rnam_rows = RNamName("rows");
+    } 
+    
+    Obj rowsm = ElmPRec(m,rnam_rows);
+    Obj rowsn = ElmPRec(n,rnam_rows);
+    
+    Int i,ll;
+    ll = INT_INTOBJ(l)+1;  /* Offset in !.rows! */
+
+    if (ll < 2) {   /* Empty cmats */
+        return Fail;
+    }
+    Obj sum = CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,2),ELM_PLIST(rowsn,2));
+    for (i = 3;i <= ll;i++) {
+        /*sum = CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
+                                               ELM_PLIST(rowsn,i));*/
+        sum = SumFFEFFE(sum,CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
+                                                     ELM_PLIST(rowsn,i)));
+    }
+    return sum;
+}
 
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
@@ -4058,6 +4117,14 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_SCALAR_PRODUCT", 2, "v, w",
     CVEC_SCALAR_PRODUCT,
     "cvec.c:CVEC_SCALAR_PRODUCT" },
+
+  { "CMAT_ELM_LIST", 2, "m, p",
+    CMAT_ELM_LIST,
+    "cvec.c:CMAT_ELM_LIST" },
+
+  { "CMATS_SCALAR_PRODUCTS_ROWS", 3, "m, n, l",
+    CMATS_SCALAR_PRODUCTS_ROWS,
+    "cvec.c:CMATS_SCALAR_PRODUCTS_ROWS" },
 
   { 0 }
 

@@ -29,6 +29,7 @@ DeclareRepresentation( "IsCVecRep",
   IsConstantTimeAccessList and IsFinite and IsRowVectorObj, [] );
   # How about IsNoImmediateMethodsObject???
 DeclareFilter( "IsCVecRepOverSmallField" );
+DeclareFilter( "IsCVecRepOverPrimeField" );
 
 #############################################################################
 ## Information about the base fields:

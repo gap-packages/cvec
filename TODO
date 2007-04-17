@@ -1,3 +1,6 @@
+Avoid a few more checks in methods like \[\] for cmats?
+
+
 For vector/matrix framework:
   - possibility to tell vector spaces in which representation to
     deliver elements (GF(2)^24 compressed?)
