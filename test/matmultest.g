@@ -165,13 +165,13 @@ FindWinogradLimit := function(p,d)
       time2 := Runtime() - t;
       Print("Size=",size," time=",time," time2=",time2," factor=",
             FLOAT_INT(time)/FLOAT_INT(time2),"\n");
-      if time/time2 > 15/2 then
+      if time2 = 0 or time/time2 > 15/2 then
           uplim := size;
       else
           lowlim := size;
       fi;
   od;
-  if time/time2 < 7 or time/time2 > 8 then
+  if time2 = 0 or time/time2 < 7 or time/time2 > 8 then
       Add(fishy,[p,d,FLOAT_INT(time)/FLOAT_INT(time2),uplim]);
   fi;
       
