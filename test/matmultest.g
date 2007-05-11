@@ -66,6 +66,7 @@ MatMulSpeedTest := function(p,d,what)
   for n in what do
       a := ExtractSubMatrix(m,[1..n],[1..n]);
       b := ExtractSubMatrix(mm,[1..n],[1..n]);
+      GASMAN("collect");
       t := Runtime();
       x := a*b;
       Unbind(x);
@@ -114,12 +115,14 @@ FindWinogradLimit := function(p,d)
       a := m*n;
       count := count + 1;
       time := Runtime() - t;
-  until time > 10;
+  until time > 30;
   Print("Using repetition count of ",count,"\n");
 
+  GASMAN("collect");
   t := Runtime();
   for i in [1..count] do a := m*n; od;
   time := Runtime() - t;
+  if time = 0 then time := 1; fi;
   Print("Size=",size," time=",time,"\n");
 
   # now count is the repetition
@@ -133,6 +136,7 @@ FindWinogradLimit := function(p,d)
       t := Runtime();
       for i in [1..count] do a := m*n; od;
       time := Runtime() - t;
+      if time = 0 then time := 1; fi;
       Print("Size=",size," time=",time," factor=",
             FLOAT_INT(time)/FLOAT_INT(lasttime),"\n");
   until 15 * lasttime < 2 * time or     # time > 7.5 * lasttime
@@ -160,6 +164,7 @@ FindWinogradLimit := function(p,d)
       t := Runtime();
       for i in [1..count] do a := mm*nn; od;
       time := Runtime() - t;
+      GASMAN("collect");
       t := Runtime();
       for i in [1..count] do a := mmm*nnn; od;
       time2 := Runtime() - t;
