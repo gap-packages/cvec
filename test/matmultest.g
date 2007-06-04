@@ -52,7 +52,7 @@ QuickRandomMat := function(n,m,p,d)
       while Length(r) > m do Unbind(r[Length(r)]); od;
       l[i] := CVec(r,cl);
   od;
-  return CMat(l,cl);
+  return MutableCopyMat(CMat(l,cl));
 end;
 
 MatMulSpeedTest := function(p,d,what)
@@ -98,6 +98,98 @@ MatMulSpeedTest := function(p,d,what)
   od;
   return l;
 end;
+
+MatMulSpeedTest2 := function(p,d,what,m,mm)
+  local a,b,f,i,l,n,reps,t,ti,x;
+  f := GF(p,d);
+  l := [];
+  for n in what do
+      a := ExtractSubMatrix(m,[1..n],[1..n]);
+      b := ExtractSubMatrix(mm,[1..n],[1..n]);
+      GASMAN("collect");
+      t := Runtime();
+      x := a*b;
+      Unbind(x);
+      #x := MultiplyWinograd2(a,b,false,n/2);
+      t := Runtime()-t;
+      if t < 5000 then
+          if t = 0 then 
+              reps := 2000;
+          else
+              reps := QuoInt(5000,t);
+          fi;
+          t := Runtime();
+          for i in [1..reps] do
+              x := a*b;
+              Unbind(x);
+              #x := MultiplyWinograd2(a,b,false,n/2);
+          od;
+          t := Runtime()-t;
+      else
+          reps := 1;
+      fi;
+      ti := FLOAT_INT(t)/FLOAT_INT(reps);
+      Add(l,[n,ti]);
+      Print("Field: GF(",p,",",d,"), size: ",n,", time: ",
+            STRING_FLOAT(ti)," [ms]\n");
+  od;
+  for i in [1..Length(what)] do
+      Print(l[i][1]," ",l[i][2],"\n");
+  od;
+  return l;
+end;
+
+MatMulSpeedTestForWinograd := function(p,d,what,m,mm,nrwino)
+  local a,b,bo,count,f,i,l,n,q,reps,t,ti,x;
+  f := GF(p,d);
+  q := p^d;
+  l := [];
+  for n in what do
+      a := ExtractSubMatrix(m,[1..n],[1..n]);
+      b := ExtractSubMatrix(mm,[1..n],[1..n]);
+      count := nrwino;
+      if count = 0 then
+          CVEC_WinogradBounds[q] := (n+1)^2;
+      else
+          bo := n;
+          while count > 1 do
+              count := count - 1;
+              bo := QuoInt(bo+1,2);
+          od;
+          CVEC_WinogradBounds[q] := bo^2;
+      fi;
+      GASMAN("collect");
+      t := Runtime();
+      x := a*b;
+      t := Runtime()-t;
+      Unbind(x);
+      if t < 1000 then
+          if t = 0 then 
+              reps := 2000;
+          else
+              reps := QuoInt(1000,t);
+          fi;
+      else
+          reps := 1;
+      fi;
+      GASMAN("collect");
+      t := Runtime();
+      for i in [1..reps] do
+          x := a*b;
+          Unbind(x);
+      od;
+      t := Runtime()-t;
+      ti := FLOAT_INT(t)/FLOAT_INT(reps);
+      Add(l,[n,ti]);
+      Print("Field: GF(",p,",",d,"), size: ",n,", time: ",
+            STRING_FLOAT(ti)," [ms]\n");
+  od;
+  for i in [1..Length(what)] do
+      Print(l[i][1]," ",l[i][2],"\n");
+  od;
+  return l;
+end;
+
 
 fishy := [];
 
@@ -185,6 +277,80 @@ FindWinogradLimit := function(p,d)
   return uplim;
 end;
 
+FindWinogradLimit2 := function(p,d)
+  local a,count,i,m,merk,merk2,minuses,n,pluses,q,size,t,time,time2;
+  size := 800;
+  m := QuickRandomMat(size,size,p,d);
+  n := QuickRandomMat(size,size,p,d);
+  GASMAN("collect");
+  count := 0;
+  t := Runtime();
+  repeat
+      a := m*n;
+      count := count + 1;
+      time := Runtime() - t;
+  until time > 500;
+  
+  q := p^d;
+  Print(q,":\nUsing repetition count of ",count,"\n");
+  if IsBound(CVEC_WinogradBounds[q]) then
+      merk2 := CVEC_WinogradBounds[q];
+  else
+      merk2 := 10000^2;
+  fi;
+  CVEC_WinogradBounds[q] := 10000^2;
+  pluses := 0;
+  minuses := 0;
+  repeat
+    m := QuickRandomMat(size,size,p,d);
+    n := QuickRandomMat(size,size,p,d);
+    merk := CVEC_WinogradBounds[q];
+    GASMAN("collect");
+    t := Runtime();
+    for i in [1..count] do a := m*n; od;
+    time := Runtime() - t;
+    CVEC_WinogradBounds[q] := size*size;
+    GASMAN("collect");
+    t := Runtime();
+    for i in [1..count] do a := m*n; od;
+    time2 := Runtime() - t;
+    Print("Size: ",size," count: ",count," without: ",time," with: ",time2);
+    if 20 * time2 > time * 21 or (time2 > time and pluses = 0) then   
+        # not worthwhile
+        CVEC_WinogradBounds[q] := merk;
+        pluses := 0;
+        minuses := minuses + 1;
+        Print(" -\n");
+    else
+        if merk < CVEC_WinogradBounds[q] then
+            if minuses >= 3 then
+                CVEC_WinogradBounds[q] := 10000^2;
+            else
+                CVEC_WinogradBounds[q] := merk;
+            fi;
+            
+        fi;
+        Print(" +\n");
+        pluses := pluses + 1;
+        minuses := 0;
+    fi;
+    if time > 1000 and count > 1 then
+        count := Maximum(QuoInt(count,2),1);
+    fi;
+    size := size + 100;
+  until size >= 4000 or (size >= 2000 and q > 16) or pluses >= 20;
+  merk := CVEC_WinogradBounds[q];   # the result
+  CVEC_WinogradBounds[q] := merk2;
+  if pluses >= 2 then
+      Print("\nResult: ",Sqrt(merk),"\n");
+      return Sqrt(merk);
+  else
+      Print("\nResult: ",10000,"\n");
+      return 10000;
+  fi;
+end;
+
+
 FindAllWinogradLimits := function()
   local d,f,facs,i,p,q;
   CVEC_WinogradBounds := [];
@@ -197,6 +363,23 @@ FindAllWinogradLimits := function()
   for i in [1..Length(q)] do
       Print("Testing q=",q[i]," p=",p[i]," d=",d[i],"...\n");
       facs[q[i]] := FindWinogradLimit(p[i],d[i])^2;
+  od;
+  CVEC_WinogradBounds := facs;
+  return facs;
+end;
+
+FindAllWinogradLimits2 := function()
+  local d,f,facs,i,p,q;
+  CVEC_WinogradBounds := [];
+  fishy := [];
+  q := Filtered([2..1024],IsPrimePowerInt);
+  f := List(q,Factors);
+  p := List(f,x->x[1]);
+  d := List(f,x->Length(x));
+  facs := [];
+  for i in [1..Length(q)] do
+      Print("Testing q=",q[i]," p=",p[i]," d=",d[i],"...\n");
+      facs[q[i]] := FindWinogradLimit2(p[i],d[i])^2;
   od;
   CVEC_WinogradBounds := facs;
   return facs;

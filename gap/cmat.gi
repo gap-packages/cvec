@@ -2290,8 +2290,8 @@ InstallGlobalFunction( CVEC_MultiplyWinograd, function(M,N,limit)
   local a11,a12,a21,a22,b11,b12,b21,b22,l,l2,lhi,lhilo,llo,m,m1,m2,m3,m4,
         m5,m6,m7,mhi,mhilo,mlo,mo,n,n2,nhi,nhilo,nlo,o,r,s1,s2,s3,s4,s5,s6,
         s7,s8,t,t1,t2,ze,R;
-  if Length(M) * RowLength(M) <= limit or
-     Length(N) * RowLength(N) <= limit then
+  if Length(M) * RowLength(M) < limit or
+     Length(N) * RowLength(N) < limit then
       return M*N; 
   fi;
   if Memory(M) >= 5000000 then 
