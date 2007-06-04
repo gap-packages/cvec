@@ -555,11 +555,12 @@ InstallMethod( FactorsOfCharacteristicPolynomial,
   "for a row list matrix and an indet nr", 
   [IsRowListMatrix, IsPosInt],
   function( m, indetnr )
-    local f,facs,irrfacs;
+    local f,facs,irrfacs,pr;
     facs := CVEC_CharacteristicPolynomialFactors(m,indetnr);
+    pr := PolynomialRing(BaseDomain(m),[indetnr]);
     irrfacs := [];
     for f in facs do
-        Append(irrfacs,Factors(f));
+        Append(irrfacs,Factors(pr,f));
     od;
     Sort(irrfacs);
     return irrfacs;
@@ -660,7 +661,7 @@ InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
   # but there is something wrong with the factoring out of subspaces and
   # the corresponding lower and upper bounds. DO NOT USE!
   local col,deg,facs,havedim,i,irreds,l,lowbound,lowbounds,mp,mult,
-        multfactoredout,multmin,nrblocks,ns,p,targetmult,upbound,x;
+        multfactoredout,multmin,nrblocks,ns,p,pr,targetmult,upbound,x;
   # First the characteristic polynomial:
   facs := CVEC_CharacteristicPolynomialFactors(m,indetnr);
   if Length(facs) = 1 then
@@ -670,7 +671,8 @@ InstallGlobalFunction( CVEC_CharAndMinimalPolynomial, function( m, indetnr )
   Info(InfoCVec,2,
        "More than 1 factor, factorising characteristic polynomial...");
   # Factor all parts:
-  col := List(facs,f->Collected(Factors(f)));
+  pr := PolynomialRing(BaseDomain(m),[indetnr]);
+  col := List(facs,f->Collected(Factors(pr,f)));
   # Collect all irreducible factors:
   irreds := [];
   mult := [];
@@ -959,8 +961,8 @@ function( m, eps, factorise, verify, indetnr )
   # verify is a boolean indicating, whether the result should be verified,
   # thereby proving correctness, indetnr is the number of an indeterminate
   local A,B,S,coeffs,col,d,dec,g,i,irreds,j,l,lowbounds,mm,mult,multmin,newBrow,
-        nrunclear,opi,ordpol,ordpolsinv,p,pivs,prob,proof,rl,se,w,wcopy,ww,zero,
-        ti,lcm,ti2;
+        nrunclear,opi,ordpol,ordpolsinv,p,pivs,pr,prob,proof,rl,se,w,wcopy,ww,
+        zero,ti,lcm,ti2;
   ti := Runtime();
   rl := RowLength(m);
   zero := ZeroVector(rl,m);
@@ -976,6 +978,7 @@ function( m, eps, factorise, verify, indetnr )
   opi.o := One(opi.f);
   opi.z := Zero(opi.f);
   opi.fam := FamilyObj(opi.o);
+  pr := PolynomialRing(opi.f,[indetnr]);
   # We keep the base change between the basis
   #  Y = [x_1,x_1*m,x_1*m^2,...,x_1*(m^(d_1-1)),x_2,...,x_2*m^(d_2-1),...]
   # and the semi echelonised basis S by keeping Y=A*S and S=B*Y at the same 
@@ -1068,7 +1071,7 @@ function( m, eps, factorise, verify, indetnr )
   fi;
   Info(InfoCVec,2,"Factoring relative order polynomials...");
   # Factor all parts:
-  col := List(opi.rordpols,f->Collected(Factors(f)));
+  col := List(opi.rordpols,f->Collected(Factors(pr,f)));
   Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
   ti2 := Runtime();
   Info(InfoCVec,2,"Sorting and collecting factors...");

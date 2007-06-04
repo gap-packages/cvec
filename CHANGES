@@ -11,6 +11,11 @@
   - Kernel method for cmat row access
   - Operation ScalarProductsRows with kernel method for prime fields
     used for condensation
+  - Fixed infinite recursion in matrix multiplication because of
+    Winograd method.
+  - Fixed problem of polynomial factorisation over "DefaultField"
+    instead of BaseDomain in Minimal and Characteristic polynomial
+    routines.
 
 
 ==========================
