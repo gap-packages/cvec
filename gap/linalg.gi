@@ -470,6 +470,12 @@ BindGlobal( "SumIntersectionMatCMat",
     return [sum,int];
   end );
 
+# Make it public:
+InstallMethod( SumIntersectionMat, "for two cmats",
+  [ IsCMatRep, IsCMatRep ],
+  SumIntersectionMatCMat );
+
+
 #############################################################################
 # Characteristic polynomials:
 #############################################################################
