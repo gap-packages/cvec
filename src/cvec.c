@@ -1384,7 +1384,8 @@ STATIC Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
     {  /* The PREPAREs define new variables, so we want an extra block! */
         PREPARE_clfi(u,ucl,ufi);
         PREPARE_clfi(v,vcl,vfi);
-        Int start,end;
+        Int start = 0;  /* Initialization to keep the compiler happy. */
+        Int end = 0;
 
         if (ufi != vfi || ELM_PLIST(ucl,IDX_len) != ELM_PLIST(vcl,IDX_len)) {
             return OurErrorBreakQuit(
