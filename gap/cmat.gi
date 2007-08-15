@@ -44,6 +44,30 @@ InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
     return Objectify(ty,m);
 end );
 
+InstallMethod( NewMatrix, 
+  "for CMatRep, a finite field, an integer, and finite field data",
+  [ IsCMatRep, IsField and IsFinite, IsList ],
+  function( filt, f, rl, l )
+    local p,d,c,li,i,v;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    c := CVEC_NewCVecClass(p,d,rl);
+    li := 0*[1..Length(l)+1];
+    for i in [1..Length(l)] do
+        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataType(TypeObj(l[i]))) then
+            li[i+1] := ShallowCopy(l[i]);
+        elif IsRowVectorObj(l[i]) then
+            li[i+1] := CVec(Unpack(l[i]),c);
+        elif IsPlistRep(l[i]) then
+            li[i+1] := CVec(l[i],c);
+        else
+            Error("do not know how to handle initialization data");
+            return fail;
+        fi;
+    od;
+    return CVEC_CMatMaker(li,c);
+  end);
+
 InstallMethod( CMat, "for a list of cvecs and a cvec", [IsList, IsCVecRep],
   function(l,v)
     return CMat(l,DataType(TypeObj(v)),true);

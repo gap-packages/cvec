@@ -291,6 +291,10 @@ DeclareOperation( "Vector", [IsList,IsRowVectorObj]);
 # Creates a new vector in the same representation but with entries from list.
 # The length is given by the length of the first argument.
 
+DeclareConstructor( "NewVector", [IsRowVectorObj,IsRing,IsList] );
+# A constructor. The first argument must be a filter indicating the
+# representation the vector will be in, the second is the base domain.
+
 DeclareOperation( "ChangeBaseDomain", [IsRowVectorObj,IsRing] );
 # Changes the base domain. A copy of the row vector in the first argument is
 # created, which comes in a "similar" representation but over the new
@@ -535,8 +539,14 @@ InstallMethod( Matrix, "generic convenience method with 2 args",
   end );
 
 # Note that it is not possible to generate a matrix via "Matrix" without
-# a template matrix object. Use the representation-specific constructor
-# methods instead.
+# a template matrix object. Use the constructor methods instead:
+
+DeclareConstructor( "NewMatrix", [IsMatrixObj, IsRing, IsInt, IsList] );
+# Constructs a new fully mutable matrix. The first argument has to be a filter
+# indicating the representation. The second the base domain, the third
+# the row length and the last a list containing either row vectors
+# of the right length or lists with base domain elements.
+# The last argument is guaranteed not to be changed!
 
 DeclareOperation( "ChangeBaseDomain", [IsMatrixObj,IsRing] );
 # Changes the base domain. A copy of the matrix in the first argument is

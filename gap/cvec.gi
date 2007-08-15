@@ -825,6 +825,21 @@ InstallOtherMethod( CVec, "for a compressed 8bit vector",
     return w;
   end);
 
+InstallMethod( NewVector, 
+  "for IsCVecRep, a finite field, and a list of finite field elements",
+  [IsCVecRep, IsField and IsFinite, IsList],
+  function( filt, f, l )
+    local p,d,c;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    if IsSmallIntRep(p^d) then
+        c := CVEC_NewCVecClass(p,d,Length(l));
+    else
+        c := CVEC_NewCVecClass(p,d,Length(l)/d);
+    fi;
+    return CVec(l,c);  # Delegate to another routine
+  end );
+
 InstallMethod( Vector, "for a list of finite field elements, and a cvec",
   [IsList, IsCVecRep],
   function( l, v )
