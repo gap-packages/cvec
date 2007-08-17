@@ -835,23 +835,31 @@ InstallGlobalFunction( CVEC_GlueMatrices, function(l)
       pos := pos + Length(l[i]);
   od;
   if InfoLevel(InfoCVec) >= 2 then 
-      #Display(m);
       OverviewMat(m);
-      Print("\nOf course, I do a random basechange... :-)\n\n");
+      Print("\n");
   fi;
+  return m;
+end );
+  
+InstallGlobalFunction( CVEC_ScrambleMatrices,
+  function( l )
+  local n,p,d,g,pr,x,xi;
+  n := Length(l[1]);
+  p := Characteristic(l[1]);
+  d := DegreeFFE(l[1]);
   g := GL(n,p^d);
   g := List(GeneratorsOfGroup(g),CMat);
   pr := ProductReplacer(g,rec(scramble := Maximum(QuoInt(n,5),200)));
   x := Next(pr);
-  m := x * m * x^-1;
-  if InfoLevel(InfoCVec) >= 2 then
-      #Display(m);
-      OverviewMat(m);
+  xi := x^-1;
+  l := List(l,y->x * y * xi);
+  if InfoLevel(InfoCVec) >= 2 and Length(l) = 1 then
+      OverviewMat(l[1]);
+      Print("\n");
   fi;
-  return m;
-  #return m;
+  return l;
 end );
-  
+
 InstallGlobalFunction( CVEC_MakeJordanBlock, function(f,pol,s)
   local c,cl,d,deg,i,m,n,o,p,pos;
   p := Characteristic(f);
@@ -880,14 +888,15 @@ InstallGlobalFunction( CVEC_MakeExample, function(f,p,l)
   # p a list of irredcible polynomials
   # l a list of lists of the same length than p, each a list of sizes of
   # generalized Jordan blocks
-  local i,ll,s;
+  local i,ll,s,x;
   ll := [];
   for i in [1..Length(p)] do
       for s in l[i] do
           Add(ll,CVEC_MakeJordanBlock(f,p[i],s));
       od;
   od;
-  return CVEC_GlueMatrices(ll);
+  x := CVEC_ScrambleMatrices([CVEC_GlueMatrices(ll)]);
+  return x[1];
 end );
 
 # The following function is used in the Monte Carlo minimal polynomial

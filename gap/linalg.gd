@@ -113,6 +113,7 @@ DeclareOperation( "CharAndMinimalPolynomialOfMatrix", [IsObject, IsInt] );
 #############################################################################
 
 DeclareGlobalFunction( "CVEC_GlueMatrices" );
+DeclareGlobalFunction( "CVEC_ScrambleMatrices" );
 DeclareGlobalFunction( "CVEC_MakeJordanBlock" );
 DeclareGlobalFunction( "CVEC_MakeExample" );
 

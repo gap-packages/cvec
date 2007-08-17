@@ -351,7 +351,8 @@ InstallMethod( PrintObj, "for a cvec", [IsCVecRep],
 function(v)
   local l,c,i;
   c := DataType(TypeObj(v));
-  Print("CVec([");
+  Print("NewRowVector(IsCVecRep,GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),[");
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
       l := Unpack(v);
       for i in l do Print(i,","); od;
@@ -359,15 +360,18 @@ function(v)
       l := Unpack(v);
       for i in l do Print(i,","); od;
   fi;
-  Print("],",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
-        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],")");
+  Print("])");
 end);
 
 InstallMethod( String, "for a cvec", [IsCVecRep], 
 function(v)
   local l,c,i,res;
   c := DataType(TypeObj(v));
-  res := "CVec([";
+  res := "NewRowVector(IsCVecRep,GF(";
+  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]));
+  Add(res,',');
+  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_d]));
+  Append(res,"),[");
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
       l := Unpack(v);
       for i in l do Append(res,String(i)); Append(res,","); od;
@@ -375,11 +379,7 @@ function(v)
       l := Unpack(v);
       for i in l do Append(res,String(i)); Append(res,","); od;
   fi;
-  Append(res,"],");
-  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]));
-  Append(res,",");
-  Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_d]));
-  Append(res,")");
+  Append(res,"])");
   return res;
 end);
 
@@ -825,7 +825,13 @@ InstallOtherMethod( CVec, "for a compressed 8bit vector",
     return w;
   end);
 
-InstallMethod( NewVector, 
+InstallMethod( ConstructingFilter, "for a cvec",
+  [IsCVecRep],
+  function(v)
+    return IsCVecRep;
+  end );
+
+InstallMethod( NewRowVector, 
   "for IsCVecRep, a finite field, and a list of finite field elements",
   [IsCVecRep, IsField and IsFinite, IsList],
   function( filt, f, l )
@@ -838,6 +844,17 @@ InstallMethod( NewVector,
         c := CVEC_NewCVecClass(p,d,Length(l)/d);
     fi;
     return CVec(l,c);  # Delegate to another routine
+  end );
+
+InstallMethod( NewZeroVector,
+  "for IsCVecRep, a finite field, and an integer",
+  [ IsCVecRep, IsField and IsFinite, IsInt ],
+  function( filt, f, l )
+    local p,d,cl;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    cl := CVEC_NewCVecClass(p,d,l);
+    return CVEC_NEW(cl,cl![CVEC_IDX_type]);
   end );
 
 InstallMethod( Vector, "for a list of finite field elements, and a cvec",

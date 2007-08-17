@@ -44,9 +44,13 @@ InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
     return Objectify(ty,m);
 end );
 
+InstallMethod( ConstructingFilter, "for a cmat",
+  [ IsCMatRep ],
+  function( m ) return IsCMatRep; end );
+
 InstallMethod( NewMatrix, 
-  "for CMatRep, a finite field, an integer, and finite field data",
-  [ IsCMatRep, IsField and IsFinite, IsList ],
+  "for IsCMatRep, a finite field, an integer, and finite field data",
+  [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
   function( filt, f, rl, l )
     local p,d,c,li,i,v;
     p := Characteristic(f);
@@ -61,12 +65,45 @@ InstallMethod( NewMatrix,
         elif IsPlistRep(l[i]) then
             li[i+1] := CVec(l[i],c);
         else
-            Error("do not know how to handle initialization data");
+            Error("I do not know how to handle initialization data");
             return fail;
         fi;
     od;
     return CVEC_CMatMaker(li,c);
   end);
+
+InstallMethod( NewZeroMatrix,
+  "for IsCMatRep, a finite field, and two integers",
+  [ IsCMatRep, IsField and IsFinite, IsInt, IsInt ],
+  function( filt, f, rows, cols )
+    local p, d, c, li, i;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    c := CVEC_NewCVecClass(p,d,cols);
+    li := 0*[1..rows+1];
+    for i in [2..rows+1] do
+        li[i] := CVEC_NEW(c,c![CVEC_IDX_type]);
+    od;
+    return CVEC_CMatMaker(li,c);
+  end );
+    
+InstallMethod( NewIdentityMatrix,
+  "for IsCMatRep, a finite field, and two integers",
+  [ IsCMatRep, IsField and IsFinite, IsInt ],
+  function( filt, f, rows )
+    local p, d, c, li, o, i;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    c := CVEC_NewCVecClass(p,d,rows);
+    li := 0*[1..rows+1];
+    o := One(f);
+    for i in [1..rows] do
+        li[i+1] := CVEC_NEW(c,c![CVEC_IDX_type]);
+        li[i+1][i] := o;
+    od;
+    return CVEC_CMatMaker(li,c);
+  end );
+    
 
 InstallMethod( CMat, "for a list of cvecs and a cvec", [IsList, IsCVecRep],
   function(l,v)
@@ -393,11 +430,14 @@ end);
 InstallMethod( PrintObj, "for a cmat", [IsCMatRep and IsMatrix],
 function(m)
   local c,i;
-  Print("CMat([");
+  c := m!.vecclass;
+  Print("NewMatrix(IsCMatRep,GF(",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),",RowLength(m),",[");
   for i in [1..m!.len] do
-      Print(m!.rows[i+1],",");
+      Print(Unpack(m!.rows[i+1]),",");
   od;
-  Print("],",m!.vecclass,")");
+  Print("])");
 end);
   
 InstallMethod( Display, "for a cmat", 
