@@ -13,14 +13,15 @@
 
 
 ############################################################################
+#
 # Overview:
 #
-# The whole idea of this interface is that vectors and matrices must
+# The whole idea of this interface is that (row-) vectors and matrices must
 # be proper objects with a stored type (i.e. created by Objectify allowing
 # inheritance) to benefit from method selection. This is not true for
 # lists of lists which have traditionally been matrices in GAP and whose
 # type is computed rather expensively on the fly every time the method
-# selections considers them. In addition it should be possible to write
+# selection considers them. In addition it should be possible to write
 # (efficient) code that is independent of the actual representation (in
 # the sense of GAP's representation filters) and preserves it.
 #
@@ -61,7 +62,7 @@
 # representation to a matrix representation or vice versa.
 #
 # The way to write code that preserves the representation basically
-# works by using constructor operations that take template objects
+# works by using constructing operations that take template objects
 # to decide about the actual representation of the new object.
 #
 # Vectors do not have to be lists in the sense that they do not have
@@ -72,6 +73,7 @@
 #
 # There are some rules embedded in the comments to the following code.
 # They are marked with the word "Rule".
+#
 ############################################################################
 
 
@@ -202,7 +204,7 @@ DeclareOperation( "ListOp", [IsRowVectorObj,IsFunction] );
 # This is an unpacking operation returning a mutable copy in form of a list.
 # It enables the "List" function to work.
 
-# I intentionally left out "PositionNot" here because it can rarely
+# "PositionNot" is intentionally left out here because it can rarely
 # be implemented much more efficiently than by running through the vector.
 
 # Note that vectors need not behave like lists with respect to the 
@@ -291,9 +293,16 @@ DeclareOperation( "Vector", [IsList,IsRowVectorObj]);
 # Creates a new vector in the same representation but with entries from list.
 # The length is given by the length of the first argument.
 
-DeclareConstructor( "NewVector", [IsRowVectorObj,IsRing,IsList] );
+DeclareOperation( "ConstructingFilter", [IsRowVectorObj] );
+DeclareOperation( "ConstructingFilter", [IsMatrixObj] );
+
+DeclareConstructor( "NewRowVector", [IsRowVectorObj,IsRing,IsList] );
 # A constructor. The first argument must be a filter indicating the
 # representation the vector will be in, the second is the base domain.
+
+DeclareConstructor( "NewZeroVector", [IsRowVectorObj,IsRing,IsInt] );
+# A similar constructor to construct a zero vector, the last argument
+# is the base domain.
 
 DeclareOperation( "ChangeBaseDomain", [IsRowVectorObj,IsRing] );
 # Changes the base domain. A copy of the row vector in the first argument is
@@ -308,17 +317,18 @@ DeclareOperation( "Randomize", [IsRowVectorObj] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
 
-# DeclareOperation( "Randomize", [IsRowVectorObj,IsRandomSource] );
-# This is the future as soon as we have random sources in the library.
+DeclareOperation( "Randomize", [IsRowVectorObj,IsRandomSource] );
+# The same, use the second argument to provide "randomness".
 
 # Already in the library, the declarations need to be adjusted:
-# DeclareOperation( "CopySubVector", [IsRowVectorObj,IsRowVectorObj,
-#                                     IsList,IsList] );
+DeclareOperation( "CopySubVector", [IsRowVectorObj,IsRowVectorObj,
+                                    IsList,IsList] );
 # CopySubVector(a,b,src,dst) does b{dst} := a{src} efficiently without
 # generating an intermediate object.
 
-DeclareOperation( "Memory", [ IsRowVectorObj ] );
+# DeclareOperation( "Memory", [ IsRowVectorObj ] );
 # Returns the amount of memory needed for a row vector in bytes
+# Only commented out here since this should be solved for all objects.
 
 
 ############################################################################
@@ -387,10 +397,17 @@ DeclareOperation( "PositionSortedOp",[IsMatrixObj,IsRowVectorObj,IsFunction]);
 
 # The following are already in the library, these declarations should be
 # adjusted:
-#DeclareOperation( "CopySubMatrix", [IsMatrixObj,IsMatrixObj,
-#                                    IsList,IsList,IsList,IsList] );
-#DeclareOperation( "ExtractSubMatrix", [IsMatrixObj,IsList,IsList] );
+DeclareOperation( "ExtractSubMatrix", [IsMatrixObj,IsList,IsList] );
+# Creates a fully mutable copy of the submatrix described by the two
+# lists, which mean subset of rows and subset of columns respectively.
 DeclareOperation( "MutableCopyMat", [IsMatrixObj] );
+# Creates a fully mutable copy of the matrix.
+DeclareOperation( "CopySubMatrix", [IsMatrixObj,IsMatrixObj,
+                                    IsList,IsList,IsList,IsList] );
+# Copies the submatrix of the first argument described by the 3rd
+# and 4th arg (rows/cols) onto the place in the second argument
+# described by the 5th and the 6th. Called with (a,b,c,d,e,f) this
+# does b{e}{f} := a{c}{d} without an intermediate object.
 
 
 ############################################################################
@@ -489,13 +506,21 @@ DeclareOperation( "MultMatrix",
 ############################################################################
 
 DeclareOperation( "ZeroMatrix", [IsInt,IsInt,IsMatrixObj] );
-# Returns a new mutable zero matrix in the same rep as the given one with
+# Returns a new fully mutable zero matrix in the same rep as the given one with
 # possibly different dimensions. First argument is number of rows, second
 # is number of columns.
+
+DeclareConstructor( "NewZeroMatrix", [IsMatrixObj,IsRing,IsInt,IsInt]);
+# Returns a new fully mutable zero matrix over the base domain in the
+# 2nd argument. The integers are the number of rows and columns.
 
 DeclareOperation( "IdentityMatrix", [IsInt,IsMatrixObj] );
 # Returns a new mutable identity matrix in the same rep as the given one with
 # possibly different dimensions.
+
+DeclareConstructor( "NewIdentityMatrix", [IsMatrixObj,IsRing,IsInt]);
+# Returns a new fully mutable identity matrix over the base domain in the
+# 2nd argument. The integer is the number of rows and columns.
 
 DeclareOperation( "CompanionMatrix", [IsUnivariatePolynomial,IsMatrixObj] );
 # Returns the companion matrix of the first argument in the representation
@@ -615,8 +640,9 @@ InstallMethod( Fold, "for a vector, a positive int, and a matrix",
     return m;
   end );
 
-DeclareOperation( "Memory", [ IsMatrixObj ] );
+# DeclareOperation( "Memory", [ IsMatrixObj ] );
 # Returns the amount of memory needed for a matrix in bytes
+# Only commented out here since it should be solved for all objects.
 
 ############################################################################
 ############################################################################
