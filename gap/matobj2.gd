@@ -281,7 +281,7 @@ DeclareConstructor( "NewZeroVector", [IsRowVectorObj,IsRing,IsInt] );
 # A similar constructor to construct a zero vector, the last argument
 # is the base domain.
 
-DeclareOperation( "ChangeBaseDomain", [IsRowVectorObj,IsRing] );
+DeclareOperation( "ChangedBaseDomain", [IsRowVectorObj,IsRing] );
 # Changes the base domain. A copy of the row vector in the first argument is
 # created, which comes in a "similar" representation but over the new
 # base domain that is given in the second argument.
@@ -633,7 +633,7 @@ DeclareConstructor( "NewMatrix", [IsMatrixObj, IsRing, IsInt, IsList] );
 # The last argument is guaranteed not to be changed!
 # If the last argument already contains row vectors, they are copied.
 
-DeclareOperation( "ChangeBaseDomain", [IsMatrixObj,IsRing] );
+DeclareOperation( "ChangedBaseDomain", [IsMatrixObj,IsRing] );
 # Changes the base domain. A copy of the matrix in the first argument is
 # created, which comes in a "similar" representation but over the new
 # base domain that is given in the second argument.

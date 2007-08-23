@@ -881,7 +881,7 @@ InstallMethod( Vector, "for a list of finite field elements, and a cmat",
     fi;
   end );
 
-InstallMethod( ChangeBaseDomain, "for a cvec and a finite field",
+InstallMethod( ChangedBaseDomain, "for a cvec and a finite field",
   [IsCVecRep,IsField and IsFinite],
   function( v, f )
     local cl;

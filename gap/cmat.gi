@@ -396,7 +396,7 @@ InstallGlobalFunction( CVEC_RandomMat, function(arg)
   return CVEC_CMatMaker(l,c);
 end );
 
-InstallMethod( ChangeBaseDomain, "for a cmat and a finite field",
+InstallMethod( ChangedBaseDomain, "for a cmat and a finite field",
   [IsCMatRep,IsField and IsFinite],
   function( m, f )
     local cl,i,l;
