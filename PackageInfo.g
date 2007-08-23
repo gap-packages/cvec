@@ -27,7 +27,7 @@ Subtitle := "Compact vectors over finite fields",
 ##  See '?Extending: Version Numbers' in GAP help for an explanation
 ##  of valid version numbers. For an automatic package distribution update
 ##  you must provide a new version number even after small changes.
-Version := "1.6",
+Version := "1.7",
 
 ##  Release date of the current version in dd/mm/yyyy format.
 # 
@@ -42,7 +42,7 @@ Date := "02/04/2007",
 ##  example/init.g, ...    or  example-1.3/init.g, ...  )
 # 
 ArchiveURL := 
-     "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/cvec-1.6",
+     "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/cvec-1.7",
 
 ##  All provided formats as list of file extensions, separated by white
 ##  space or commas.
@@ -120,16 +120,17 @@ Persons := [
     FirstNames    := "Max",
     IsAuthor      := true,
     IsMaintainer  := true,
-    Email         := "max.neunhoeffer@math.rwth-aachen.de",
-    WWWHome       := "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/",
+    Email         := "neunhoef@mcs.st-and.ac.uk",
+    WWWHome       := "http://www-groups.mcs.st-and.ac.uk/~neunhoef/",
     PostalAddress := Concatenation( [
-                       "Lehrstuhl D für Mathematik\n",
-                       "RWTH Aachen\n",
-                       "Templergraben 64\n",
-                       "52056 Aachen\n",
-                       "Germany" ] ),
-    Place         := "Aachen",
-    Institution   := "RWTH Aachen"
+                       "School of Mathematics and Statistics\n",
+                       "University of St Andrews\n",
+                       "Mathematical Institute\n",
+                       "North Haugh\n",
+                       "St Andrews, Fife KY16 9SS\n",
+                       "Scotland, UK" ] ),
+    Place         := "St Andrews",
+    Institution   := "University of St Andrews"
   ),
 ],
 
@@ -163,9 +164,9 @@ Status := "dev",
 ##  and updating of the package in the GAP distribution.
 #
 README_URL := 
-  "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/README.cvec",
+  "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/README.cvec",
 PackageInfoURL := 
-  "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/PackageInfo.g",
+  "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/PackageInfo.g",
 
 ##  Here you  must provide a short abstract explaining the package content 
 ##  in HTML format (used on the package overview Web page) and an URL 
@@ -183,7 +184,7 @@ AbstractHTML :=
    but only word-based processor arithmetic. This allows for bigger finite\
    fields and higher speed.",
 
-PackageWWWHome := "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec.html",
+PackageWWWHome := "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec.html",
                
 ##  Here is the information on the help books of the package, used for
 ##  loading into GAP's online help and maybe for an online copy of the 
@@ -217,7 +218,7 @@ PackageDoc := rec(
   BookName  := "cvec",
   # format/extension can be one of .zoo, .tar.gz, .tar.bz2, -win.zip
   Archive := 
-      "http://www.math.rwth-aachen.de/~Max.Neunhoeffer/Computer/Software/Gap/cvec/cvec-1.6.tar.gz",
+      "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/cvec-1.7.tar.gz",
   ArchiveURLSubset := ["doc", "htm"],
   HTMLStart := "doc/chap0.htm",
   PDFFile   := "doc/manual.pdf",
@@ -238,7 +239,7 @@ PackageDoc := rec(
 Dependencies := rec(
   # GAP version, use version strings for specifying exact versions,
   # prepend a '>=' for specifying a least version.
-  GAP := ">=4.4.8",
+  GAP := ">=4.4.9",
   # list of pairs [package name, (least) version],  package name is case
   # insensitive, least version denoted with '>=' prepended to version string.
   # without these, the package will not load

@@ -618,7 +618,7 @@ InstallOtherMethod( Length, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m) return m!.len; end);
 
-InstallMethod( DimensionsMat, "for a cmat",
+InstallOtherMethod( DimensionsMat, "for a cmat",
   [IsCMatRep and IsMatrixObj],
   function(m) return [m!.len,m!.vecclass![2]]; end );
 
@@ -1827,7 +1827,7 @@ end );
 # Further handling of matrices: 
 #############################################################################
 
-InstallMethod( PositionNonZero, "for a cmat",
+InstallOtherMethod( PositionNonZero, "for a cmat",
   [ IsCMatRep and IsMatrix and IsMatrixObj ],
   function(m)
     local i;
@@ -1836,7 +1836,7 @@ InstallMethod( PositionNonZero, "for a cmat",
     return i;
   end );
 
-InstallMethod( PositionNonZero, "for a cmat, and an integer",
+InstallOtherMethod( PositionNonZero, "for a cmat, and an integer",
   [ IsCMatRep and IsMatrix, IsInt ],
   function(m,j)
     local i;
@@ -1849,7 +1849,7 @@ InstallMethod( PositionNonZero, "for a cmat, and an integer",
     fi;
   end );
 
-InstallMethod( PositionLastNonZero, "for a cmat",
+InstallOtherMethod( PositionLastNonZero, "for a cmat",
   [ IsCMatRep and IsMatrix and IsMatrixObj ],
   function(m)
     local i;
@@ -1858,7 +1858,7 @@ InstallMethod( PositionLastNonZero, "for a cmat",
     return i;
   end );
 
-InstallMethod( PositionLastNonZero, "for a cmat, and an integer",
+InstallOtherMethod( PositionLastNonZero, "for a cmat, and an integer",
   [ IsCMatRep and IsMatrix and IsMatrixObj, IsInt ],
   function(m,j)
     local i;
@@ -1867,7 +1867,7 @@ InstallMethod( PositionLastNonZero, "for a cmat, and an integer",
     return i;
   end );
 
-InstallMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
   function(m)
     local i,mi;
     mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
@@ -1888,7 +1888,8 @@ InstallMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
     return true;
   end);
 
-InstallMethod( IsUpperTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( IsUpperTriangularMat, "for a cmat", 
+  [IsCMatRep and IsMatrix],
   function(m)
     local i,mi;
     mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
@@ -1908,7 +1909,8 @@ InstallMethod( IsUpperTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
     return true;
   end);
 
-InstallMethod( IsLowerTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( IsLowerTriangularMat, "for a cmat", 
+  [IsCMatRep and IsMatrix],
   function(m)
     local i,mi;
     mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
@@ -1932,7 +1934,7 @@ InstallMethod( IsLowerTriangularMat, "for a cmat", [IsCMatRep and IsMatrix],
 # Copying of matrices:
 #############################################################################
 
-InstallMethod( MutableCopyMat, "for a cmat", 
+InstallOtherMethod( MutableCopyMat, "for a cmat", 
   [IsCMatRep and IsMatrixObj],
   function(m)
     local l,i;
@@ -1948,17 +1950,19 @@ InstallMethod( MutableCopyMat, "for a cmat",
 # KroneckerProduct:
 #############################################################################
 
-InstallMethod( KroneckerProduct, "for cmats", 
+# The generic method suffices, however, for compatibility with
+# GAP < 4.5 we install it here anew:
+
+InstallOtherMethod( KroneckerProduct, "for cmats", 
                [ IsCMatRep and IsMatrixObj, IsCMatRep and IsMatrixObj ],
   function( A, B )
     local rowsA, rowsB, colsA, colsB, newclass, AxB, i, j;
       rowsA := Length(A);
-      colsA := Length(A[1]);
+      colsA := RowLength(A);
       rowsB := Length(B);
-      colsB := Length(B[1]);
+      colsB := RowLength(B);
 
-      newclass := CVecClass( A[1], colsA * colsB );
-      AxB := CVEC_ZeroMat( rowsA * rowsB, newclass );
+      AxB := ZeroMatrix( rowsA * rowsB, colsA * colsB, A );
 
       # Cache matrices
       # not implemented yet
@@ -2320,41 +2324,6 @@ InstallGlobalFunction(CVEC_MulMat, function(a,mult)
       MultRowVector(a[i],mult);
   od;
 end);
-
-InstallMethod( AddMatrix, "for two row list matrices and a scalar",
-  [ IsMutable and IsRowListMatrix, IsRowListMatrix, IsMultiplicativeElement ],
-  function( A, B, s )
-    local i;
-    if Length(A) <> Length(B) then
-        Error("Matrices must have equal length");
-        return;
-    fi;
-    for i in [1..Length(A)] do
-        AddRowVector(A[i],B[i],s);
-    od;
-  end );
-
-InstallMethod( AddMatrix, "for two row list matrices",
-  [ IsMutable and IsRowListMatrix, IsRowListMatrix ],
-  function( A, B )
-    local i;
-    if Length(A) <> Length(B) then
-        Error("Matrices must have equal length");
-        return;
-    fi;
-    for i in [1..Length(A)] do
-        AddRowVector(A[i],B[i]);
-    od;
-  end );
-
-InstallMethod( MultMatrix, "for a row list matrix",
-  [ IsMutable and IsRowListMatrix, IsMultiplicativeElement ],
-  function( A, s )
-    local i;
-    for i in [1..Length(A)] do
-        MultRowVector(A[i],s);
-    od;
-  end );
 
 
 InstallGlobalFunction( CVEC_MultiplyWinograd, function(M,N,limit)

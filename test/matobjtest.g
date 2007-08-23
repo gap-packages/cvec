@@ -1,6 +1,6 @@
 RowListMatrixObjTester := function( m, level )
-  local MyError,a,bd,dims,errors,i,j,k,l,n,nn,one,s,three,two,u,v,w,wi,wit,wt,
-        z,zero,vi;
+  local MyError,a,bd,dims,errors,i,j,k,l,n,nn,one,s,three,two,u,v,vv,w,wi,wit,
+        wt,z,zero,vi,filter,pol,vvv;
   
   MyError := function(nr)
     Print("ERROR: Number ",nr," see code of RowListMatrixObjTester!\n\n");
@@ -213,9 +213,16 @@ RowListMatrixObjTester := function( m, level )
   if not(IsZero(z)) then MyError(60); fi;
   if not(IsMutable(z)) then MyError(61); fi;
   if not(Length(z) = 10) then MyError(62); fi;
+  z := ZeroVector(10,ZeroImmutable(v));
+  if not(IsZero(z)) then MyError([60,1]); fi;
+  if not(IsMutable(z)) then MyError([61,1]); fi;
+  if not(Length(z) = 10) then MyError([62,1]); fi;
   z := Vector([zero,one,zero,one,zero,one,zero,one],z);
   if not(IsMutable(z)) then MyError(63); fi;
   if not(Length(z) = 8) then MyError(64); fi;
+  z := Vector([zero,one,zero,one,zero,one,zero,one],ZeroImmutable(z));
+  if not(IsMutable(z)) then MyError([63,1]); fi;
+  if not(Length(z) = 8) then MyError([64,2]); fi;
 
   # Randomize:
   Randomize(z);
@@ -498,7 +505,7 @@ RowListMatrixObjTester := function( m, level )
   w := MutableCopyMat(m);
   wi := MutableCopyMat(w);
   MakeImmutable(wi);
-  u := Matrix(List(w,v->v*wt),RowLength(w),w);
+  u := Matrix(List(w,v->v*wt),Length(w),w);
   if u <> w*wt then MyError(170); fi;
   v := w[1];
   vi := ShallowCopy(v);
@@ -518,7 +525,7 @@ RowListMatrixObjTester := function( m, level )
   if u <> List(m,List) then MyError(176); fi;
   
   # KroneckerProduct:
-  w := Matrix([[zero,one],[two,three]],2,m);
+  w := Matrix([[one,zero],[two,one]],2,m);
   wi := MutableCopyMat(w);
   MakeImmutable(wi);
   u := Matrix([[zero,one],[one,one]],2,m);
@@ -574,9 +581,53 @@ RowListMatrixObjTester := function( m, level )
   if not(IsOne(u*wi)) then MyError(205); fi;
 
   # Folding/Unfolding:
-  v := Vector([zero,one,two,three],w[1]);
+  v := Vector([one,zero,two,one],w[1]);
   if Unfold(w,v) <> v then MyError(206); fi;
   if Fold(v,2,w) <> w then MyError(207); fi;
+
+  # Now the constructors:
+  filter := ConstructingFilter(v);
+  vv := NewRowVector(filter,bd,Unpack(v));
+  if v <> vv or not(IsIdenticalObj(TypeObj(v),TypeObj(vv))) then 
+      MyError(208); 
+  fi;
+  vv := NewZeroVector(filter,bd,Length(v));
+  if ZeroMutable(v) <> vv or 
+     not(IsIdenticalObj(TypeObj(ZeroMutable(v)),TypeObj(vv))) then 
+      MyError(209); 
+  fi;
+  filter := ConstructingFilter(m);
+  vv := NewMatrix(filter,bd,RowLength(m),Unpack(m));
+  if not(IsMutable(m)) then MakeImmutable(vv); fi;
+  if vv <> m or not(IsIdenticalObj(TypeObj(vv),TypeObj(m))) then
+      MyError(210);
+  fi;
+  vv := NewZeroMatrix(filter,bd,Length(m),RowLength(m));
+  if vv <> ZeroMutable(m) or
+     not(IsIdenticalObj(TypeObj(vv),TypeObj(ZeroMutable(m)))) then
+      MyError(211);
+  fi;
+  vv := NewIdentityMatrix(filter,bd,Length(m));
+  if not(IsOne(vv)) or
+     not(IsIdenticalObj(TypeObj(vv),TypeObj(MutableCopyMat(m)))) then
+      MyError(212);
+  fi;
+
+  # Now AddMatrix/MultMatrix:
+  vv := MutableCopyMat(m);
+  AddMatrix(vv,m);
+  if vv <> m+m then MyError(213); fi;
+  AddMatrix(vv,m,two);
+  if vv <> m+m+m+m then MyError(214); fi;
+  vv := MutableCopyMat(m);
+  MultMatrix(vv,two);
+  if vv <> two * m then MyError(215); fi;
+  # Now CompanionMatrix:
+  pol := PolynomialRing(bd);
+  vv := Unpack(m[1]);
+  vvv := CompanionMatrix(UnivariatePolynomialByCoefficients(FamilyObj(one),
+                         Concatenation(vv,[one]),1),m);
+  if vvv[Length(vv)] <> -Vector(vv,m) then MyError(216); fi;
 
   if level = 0 then
       Print("Standard matrix tests completed.\n\n");
@@ -594,27 +645,32 @@ RowListMatrixObjTester := function( m, level )
   if not(IsRowVectorObj(u)) then
       Print("Warning: Empty vector is not in IsRowVectorObj!\n");
   fi;
-  if Length(u) <> 0 then MyError(213); fi;
+  if Length(u) <> 0 then MyError(413); fi;
   u := w{[]};
   if not(IsMatrixObj(u)) then
       Print("Warning: Matrix with no rows is not in IsMatrixObj!\n");
   fi;
-  if Length(u) <> 0 then MyError(214); fi;
+  if Length(u) <> 0 then MyError(414); fi;
   u := ExtractSubMatrix(w,[1..2],[]);
   if not(IsMatrixObj(u)) then
       Print("Warning: Matrix with empty rows is not in IsMatrixObj!\n");
   fi;
-  if RowLength(u) <> 0 then MyError(215); fi;
-  if Length(u) <> 2 then MyError(216); fi;
+  if RowLength(u) <> 0 then MyError(415); fi;
+  if Length(u) <> 2 then MyError(416); fi;
 
   w := Matrix( [[one,two]],2,m );
-  if IsOne(w) <> false then MyError(208); fi;
+  if IsOne(w) <> false then MyError(408); fi;
   # IsOne is a property and hence must only return false or true
-  if OneMutable(w) <> fail then MyError(209); fi;
-  if Inverse(w) <> fail then MyError(210); fi;
+  if OneMutable(w) <> fail then MyError(409); fi;
+  if Inverse(w) <> fail then MyError(410); fi;
   # Error 211 taken out.
   w := Matrix( [[one,zero],[one,zero]],2,m );
-  if Inverse(w) <> fail then MyError(212); fi;
+  if Inverse(w) <> fail then MyError(412); fi;
+
+  # Now Memory:
+  vv := MemoryUsage(m[1]);
+  vv := MemoryUsage(m);
+  # This is only tried, not tested.
 
   Print("Strange tests completed.\n\n");
 

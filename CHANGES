@@ -16,6 +16,11 @@
   - Fixed problem of polynomial factorisation over "DefaultField"
     instead of BaseDomain in Minimal and Characteristic polynomial
     routines.
+  - New method for SumIntersectionMat for cmats. 
+  - Use constructors for new objects in new interface, implement them.
+  - Change all addresses to St Andrews.
+  - Require GAP >= 4.4.9
+  - Tune vector matrices interface and polish implementation.
 
 
 ==========================

@@ -119,6 +119,9 @@ DeclareAttribute( "BaseDomain", IsRowVectorObj );
 # is defined by the behaviour of POW_OBJ_INT.
 
 DeclareAttribute( "Length", IsRowVectorObj );    # can be zero
+# We have to declare this since a row vector is not necessarily
+# a list! Correspondingly we have to use InstallOtherMethod
+# for those row vector types that are lists.
 
 ############################################################################
 # Rule:
@@ -165,6 +168,11 @@ DeclareOperation( "ListOp", [IsRowVectorObj] );
 DeclareOperation( "ListOp", [IsRowVectorObj,IsFunction] );
 # This is an unpacking operation returning a mutable copy in form of a list.
 # It enables the "List" function to work.
+
+# The following unwraps a vector to a list:
+DeclareOperation( "Unpack", [IsRowVectorObj] );
+# It guarantees to copy, that is changing the returned object does
+# not change the original object.
 
 # "PositionNot" is intentionally left out here because it can rarely
 # be implemented much more efficiently than by running through the vector.
@@ -254,6 +262,12 @@ DeclareOperation( "ZeroVector", [IsInt,IsMatrixObj] );
 DeclareOperation( "Vector", [IsList,IsRowVectorObj]);
 # Creates a new vector in the same representation but with entries from list.
 # The length is given by the length of the first argument.
+# It is *not* guaranteed that the list is copied!
+
+DeclareOperation( "Vector", [IsList,IsMatrixObj] );
+# Returns a new mutable vector in a rep that is compatible with
+# the matrix but of possibly different length given by the first
+# argument. It is *not* guaranteed that the list is copied!
 
 DeclareOperation( "ConstructingFilter", [IsRowVectorObj] );
 DeclareOperation( "ConstructingFilter", [IsMatrixObj] );
@@ -261,6 +275,7 @@ DeclareOperation( "ConstructingFilter", [IsMatrixObj] );
 DeclareConstructor( "NewRowVector", [IsRowVectorObj,IsRing,IsList] );
 # A constructor. The first argument must be a filter indicating the
 # representation the vector will be in, the second is the base domain.
+# The last argument is guaranteed not to be changed!
 
 DeclareConstructor( "NewZeroVector", [IsRowVectorObj,IsRing,IsInt] );
 # A similar constructor to construct a zero vector, the last argument
@@ -278,19 +293,32 @@ DeclareOperation( "ChangeBaseDomain", [IsRowVectorObj,IsRing] );
 DeclareOperation( "Randomize", [IsRowVectorObj] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
+# The argument is also returned by the function.
 
 DeclareOperation( "Randomize", [IsRowVectorObj,IsRandomSource] );
 # The same, use the second argument to provide "randomness".
+# The vector argument is also returned by the function.
 
-# Already in the library, the declarations need to be adjusted:
+#############################################################################
+##
+#O  CopySubVector( <src>, <dst>, <scols>, <dcols> )
+##
+##  <#GAPDoc Label="CopySubVector">
+##  <ManSection>
+##  <Oper Name="CopySubVector" Arg='src, dst, scols, dcols'/>
+##
+##  <Description>
+##  returns nothing. Does <C><A>dst</A>{<A>dcols</A>} := <A>src</A>{<A>scols</A>}</C>
+##  without creating an intermediate object and thus - at least in
+##  special cases - much more efficiently. For certain objects like
+##  compressed vectors this might be significantly more efficient if 
+##  <A>scols</A> and <A>dcols</A> are ranges with increment 1.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
 DeclareOperation( "CopySubVector", [IsRowVectorObj,IsRowVectorObj,
                                     IsList,IsList] );
-# CopySubVector(a,b,src,dst) does b{dst} := a{src} efficiently without
-# generating an intermediate object.
-
-# DeclareOperation( "Memory", [ IsRowVectorObj ] );
-# Returns the amount of memory needed for a row vector in bytes
-# Only commented out here since this should be solved for all objects.
 
 
 ############################################################################
@@ -311,6 +339,9 @@ DeclareAttribute( "BaseDomain", IsMatrixObj );
 # is defined by the behaviour of POW_OBJ_INT in the kernel.
 
 DeclareAttribute( "Length", IsMatrixObj );
+# We have to declare this since matrix objects need not be lists.
+# We have to use InstallOtherMethod for those matrix types that are
+# lists.
 
 DeclareAttribute( "RowLength", IsMatrixObj );
 
@@ -359,18 +390,48 @@ DeclareOperation( "PositionSortedOp",[IsMatrixObj,IsRowVectorObj,IsFunction]);
 
 # The following are already in the library, these declarations should be
 # adjusted:
+#############################################################################
+##
+#O  ExtractSubMatrix( <mat>, <rows>, <cols> )
+##
+##  <#GAPDoc Label="ExtractSubMatrix">
+##  <ManSection>
+##  <Oper Name="ExtractSubMatrix" Arg='mat, rows, cols'/>
+##
+##  <Description>
+##  Creates a fully mutable copy of the submatrix described by the two
+##  lists, which mean subset of rows and subset of columns respectively.
+##  This does <A>mat</A>{<A>rows</A>}{<A>cols</A>} and returns the result.
+##  It preserves the representation of the matrix.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
 DeclareOperation( "ExtractSubMatrix", [IsMatrixObj,IsList,IsList] );
-# Creates a fully mutable copy of the submatrix described by the two
-# lists, which mean subset of rows and subset of columns respectively.
-DeclareOperation( "MutableCopyMat", [IsMatrixObj] );
+
 # Creates a fully mutable copy of the matrix.
+DeclareOperation( "MutableCopyMat", [IsMatrixObj] );
+
+#############################################################################
+##
+#O  CopySubMatrix( <src>, <dst>, <srows>, <drows>, <scols>, <dcols> )
+##
+##  <#GAPDoc Label="CopySubMatrix">
+##  <ManSection>
+##  <Oper Name="CopySubMatrix" Arg='src, dst, srows, drows, scols, dcols'/>
+##
+##  <Description>
+##  returns nothing. Does <C><A>dst</A>{<A>drows</A>}{<A>dcols</A>} := <A>src</A>{<A>srows</A>}{<A>scols</A>}</C>
+##  without creating an intermediate object and thus - at least in
+##  special cases - much more efficiently. For certain objects like
+##  compressed vectors this might be significantly more efficient if 
+##  <A>scols</A> and <A>dcols</A> are ranges with increment 1.
+##  </Description>
+##  </ManSection>
+##  <#/GAPDoc>
+##
 DeclareOperation( "CopySubMatrix", [IsMatrixObj,IsMatrixObj,
                                     IsList,IsList,IsList,IsList] );
-# Copies the submatrix of the first argument described by the 3rd
-# and 4th arg (rows/cols) onto the place in the second argument
-# described by the 5th and the 6th. Called with (a,b,c,d,e,f) this
-# does b{e}{f} := a{c}{d} without an intermediate object.
-
 
 ############################################################################
 # New element access for matrices (especially necessary for flat mats:
@@ -445,6 +506,42 @@ DeclareOperation( "MultMatrix",
 
 # Changes first argument in place, matrices have to be of same
 # dimension and over same base domain.
+
+# Generic methods should do the trick:
+InstallMethod( AddMatrix, "for two row list matrices and a scalar",
+  [ IsMutable and IsRowListMatrix, IsRowListMatrix, IsMultiplicativeElement ],
+  function( A, B, s )
+    local i;
+    if Length(A) <> Length(B) then
+        Error("Matrices must have equal length");
+        return;
+    fi;
+    for i in [1..Length(A)] do
+        AddRowVector(A[i],B[i],s);
+    od;
+  end );
+
+InstallMethod( AddMatrix, "for two row list matrices",
+  [ IsMutable and IsRowListMatrix, IsRowListMatrix ],
+  function( A, B )
+    local i;
+    if Length(A) <> Length(B) then
+        Error("Matrices must have equal length");
+        return;
+    fi;
+    for i in [1..Length(A)] do
+        AddRowVector(A[i],B[i]);
+    od;
+  end );
+
+InstallMethod( MultMatrix, "for a row list matrix",
+  [ IsMutable and IsRowListMatrix, IsMultiplicativeElement ],
+  function( A, s )
+    local i;
+    for i in [1..Length(A)] do
+        MultRowVector(A[i],s);
+    od;
+  end );
 
 
 ############################################################################
@@ -534,6 +631,7 @@ DeclareConstructor( "NewMatrix", [IsMatrixObj, IsRing, IsInt, IsList] );
 # the row length and the last a list containing either row vectors
 # of the right length or lists with base domain elements.
 # The last argument is guaranteed not to be changed!
+# If the last argument already contains row vectors, they are copied.
 
 DeclareOperation( "ChangeBaseDomain", [IsMatrixObj,IsRing] );
 # Changes the base domain. A copy of the matrix in the first argument is
@@ -546,7 +644,7 @@ DeclareOperation( "ChangeBaseDomain", [IsMatrixObj,IsRing] );
 ############################################################################
 
 DeclareOperation( "Randomize", [IsMatrixObj] );
-# DeclareOperation( "Randomize", [IsMatrixObj,IsRandomSource] );
+DeclareOperation( "Randomize", [IsMatrixObj,IsRandomSource] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
 # The second version will come when we have random sources.
@@ -653,6 +751,8 @@ DeclareOperation( "ListOp", [IsRowListMatrix, IsFunction] );
 
 # The following unwraps a matrix to a list of lists:
 DeclareOperation( "Unpack", [IsRowListMatrix] );
+# It guarantees to copy, that is changing the returned object does
+# not change the original object.
 
 
 ############################################################################

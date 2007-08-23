@@ -869,6 +869,18 @@ InstallMethod( Vector, "for a list of finite field elements, and a cvec",
     fi;
   end );
 
+InstallMethod( Vector, "for a list of finite field elements, and a cmat",
+  [IsList, IsCMatRep],
+  function( l, m )
+    local c;
+    if Length(l) = RowLength(m) then
+        return CVec(l,m!.vecclass);
+    else
+        c := CVEC_NewCVecClassSameField(m!.vecclass,Length(l));
+        return CVec(l,c);
+    fi;
+  end );
+
 InstallMethod( ChangeBaseDomain, "for a cvec and a finite field",
   [IsCVecRep,IsField and IsFinite],
   function( v, f )

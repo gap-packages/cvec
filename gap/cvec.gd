@@ -101,7 +101,6 @@ DeclareOperation( "CVecClass", [IsPosInt, IsPosInt, IsInt] );
 DeclareOperation( "CVec", [IsObject, IsPosInt, IsPosInt] );
 DeclareOperation( "CVec", [IsObject, IsObject] );
 DeclareOperation( "CVec", [IsObject] );
-DeclareOperation( "Unpack", [IsCVecRep] );
 DeclareOperation( "IntegerRep", [IsObject] );
 DeclareOperation( "CVecNumber", [IsInt, IsCVecClass] );
 DeclareOperation( "CVecNumber", [IsInt, IsPosInt, IsPosInt, IsPosInt] );
