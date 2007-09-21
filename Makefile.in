@@ -47,7 +47,7 @@ clean:
 archive: doc
 	(cd .. ; tar czvf cvec-`cat cvec/VERSION`.tar.gz --exclude ".svn" --exclude bin --exclude test cvec)
 
-WEBPOS=/users/neunhoef/mywebpage/Computer/Software/Gap/cvec
+WEBPOS=/scratch/neunhoef/mywebpage.pub/Computer/Software/Gap/cvec
 
 towww: archive
 	echo '<?xml version="1.0" encoding="ISO-8859-1"?>' >${WEBPOS}.version
