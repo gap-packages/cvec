@@ -165,6 +165,23 @@ InstallMethod( CleanRow,
   [SEBType and IsMutable and IsCMatSEB, IsCVecRep, IsBool, IsObject], 
    CVEC_CLEANROWKERNEL );
 
+InstallMethod( IO_Pickle, "for a file and a cmat semi echelonized basis",
+  [ IsFile, IsCMatSEB and IsList and IsSemiEchelonized ],
+  function( f, seb )
+    return IO_GenericObjectPickler(f,"CSEB",[seb!.vectors,seb!.pivots],
+                                   seb,[],[],[]);
+  end );
+
+IO_Unpicklers.CSEB :=
+  function( f )
+    local vectors, pivots;
+    vectors := IO_Unpickle(f); 
+    if vectors = IO_Error then return IO_Error; fi;
+    pivots := IO_Unpickle(f);
+    if vectors = IO_Error then return IO_Error; fi;
+    return SEBMaker(vectors,pivots);
+  end;
+
 InstallMethod( Coefficients, "for a semi echelonized basis, and a vector",
   [SEBType, IsRowVectorObj],
   function(b,v)

@@ -21,6 +21,7 @@
   - Change all addresses to St Andrews.
   - Require GAP >= 4.4.9
   - Tune vector matrices interface and polish implementation.
+  - Added a pickling/unpickling method for semi echelon basis.
 
 
 ==========================
