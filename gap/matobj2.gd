@@ -538,7 +538,8 @@ DeclareOperation( "ProductTransposedMatMat", [IsMatrixObj, IsMatrixObj] );
 # Computes the product TransposedMat(A)*B, possibly without
 # first computing TransposedMat(A).
 
-DeclareOperation( "TraceMat", [IsMatrixObj] );
+# DeclareOperation( "TraceMat", [IsMatrixObj] );
+# This is not compatible with GAP 4r4.
 # The sum of the diagonal entries. Error for a non-square matrix.
 
 ############################################################################
