@@ -14,6 +14,8 @@ if not(IsBound(IsMatrixObj)) then
     ReadPackage("cvec", "gap/matobj1.gd");
     ReadPackage("cvec", "gap/matobj2.gd");
     ReadPackage("cvec", "gap/matobj.gi");
+    ReadPackage("cvec", "gap/matobjplist.gd");
+    ReadPackage("cvec", "gap/matobjplist.gi");
 fi;
 
 ReadPackage("cvec", "gap/cvec.gd");

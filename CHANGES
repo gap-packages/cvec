@@ -25,7 +25,8 @@
   - Quite a few little changes to the vector/matrix interface
     after discussions in Braunschweig.
   - Make TraceMat compatible with GAP4R4.
-  - Put revision 322 as version 1.7 on the web.
+  - Added matobjplist.g* from the dev library for compatibility with 4r4.
+  - Put revision 323 as version 1.7 on the web.
 
 
 ==========================
