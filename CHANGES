@@ -24,7 +24,7 @@
   - Added a pickling/unpickling method for semi echelon basis.
   - Quite a few little changes to the vector/matrix interface
     after discussions in Braunschweig.
-  - Put revision xxx as version 1.7 on the web.
+  - Put revision 320 as version 1.7 on the web.
 
 
 ==========================

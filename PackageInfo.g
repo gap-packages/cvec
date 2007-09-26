@@ -31,7 +31,7 @@ Version := "1.7",
 
 ##  Release date of the current version in dd/mm/yyyy format.
 # 
-Date := "21/09/2007",
+Date := "26/09/2007",
 
 ##  URL of the archive(s) of the current package release, but *without*
 ##  the format extension(s), like '.zoo', which are given next.
@@ -239,12 +239,12 @@ PackageDoc := rec(
 Dependencies := rec(
   # GAP version, use version strings for specifying exact versions,
   # prepend a '>=' for specifying a least version.
-  GAP := ">=4.4.9",
+  GAP := ">=4.4.10",
   # list of pairs [package name, (least) version],  package name is case
   # insensitive, least version denoted with '>=' prepended to version string.
   # without these, the package will not load
-  NeededOtherPackages := [["GAPDoc", ">= 0.99"],["IO", ">= 2.0"],
-                          ["orb", ">= 1.3"]],
+  NeededOtherPackages := [["GAPDoc", ">= 1.0"],["IO", ">= 2.2"],
+                          ["orb", ">= 1.4"]],
   # without these the package will issue a warning while loading
   # SuggestedOtherPackages := [],
   SuggestedOtherPackages := [],
