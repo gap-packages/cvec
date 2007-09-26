@@ -13,9 +13,9 @@ if not(IsBound(IsMatrixObj)) then
     # released GAP 4.4 does not yet have it.
     ReadPackage("cvec", "gap/matobj1.gd");
     ReadPackage("cvec", "gap/matobj2.gd");
-    ReadPackage("cvec", "gap/matobj.gi");
     ReadPackage("cvec", "gap/matobjplist.gd");
     ReadPackage("cvec", "gap/matobjplist.gi");
+    ReadPackage("cvec", "gap/matobj.gi");
 fi;
 
 ReadPackage("cvec", "gap/cvec.gd");
