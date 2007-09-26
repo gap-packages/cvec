@@ -1,6 +1,6 @@
 RowListMatrixObjTester := function( m, level )
   local MyError,a,bd,dims,errors,i,j,k,l,n,nn,one,s,three,two,u,v,vv,w,wi,wit,
-        wt,z,zero,vi,filter,pol,vvv;
+        wt,z,zero,vi,filter,pol,vvv,vvv2;
   
   MyError := function(nr)
     Print("ERROR: Number ",nr," see code of RowListMatrixObjTester!\n\n");
@@ -243,18 +243,18 @@ RowListMatrixObjTester := function( m, level )
   # Test RowList behaviour:
   v := n[1];
   v[1] := one;
-  if ElmMatrix(n,1,1) <> one then MyError(66); fi;
+  if MatElm(n,1,1) <> one then MyError(66); fi;
   v[1] := two;
-  if ElmMatrix(n,1,1) <> two then MyError(67); fi;
-  AssMatrix(n,1,1,one);
+  if MatElm(n,1,1) <> two then MyError(67); fi;
+  SetMatElm(n,1,1,one);
   if v[1] <> one then MyError(68); fi;
 
   # Test sharing of rows:
   n[2] := v;
-  AssMatrix(n,1,2,one);
-  if ElmMatrix(n,2,2) <> one then MyError(69); fi;
-  AssMatrix(n,2,1,two);
-  if ElmMatrix(n,1,1) <> two then MyError(70); fi;
+  SetMatElm(n,1,2,one);
+  if MatElm(n,2,2) <> one then MyError(69); fi;
+  SetMatElm(n,2,1,two);
+  if MatElm(n,1,1) <> two then MyError(70); fi;
   # Test for identical row objects:
   if not(IsIdenticalObj(n[1],n[1])) then
       Print("Warning: Row objects of same row are not identical!\n");
@@ -432,9 +432,9 @@ RowListMatrixObjTester := function( m, level )
       for j in [1..RowLength(wt)] do
           s := Zero(BaseDomain(w));
           for k in [1..RowLength(w)] do
-              s := s + ElmMatrix(w,i,k) * ElmMatrix(wt,k,j);
+              s := s + MatElm(w,i,k) * MatElm(wt,k,j);
           od;
-          if s <> ElmMatrix(u,i,j) then MyError(139); fi;
+          if s <> MatElm(u,i,j) then MyError(139); fi;
       od;
   od;
   if not(IsMutable(u)) or not(IsMutable(u[1])) then MyError(140); fi;
@@ -627,7 +627,52 @@ RowListMatrixObjTester := function( m, level )
   vv := Unpack(m[1]);
   vvv := CompanionMatrix(UnivariatePolynomialByCoefficients(FamilyObj(one),
                          Concatenation(vv,[one]),1),m);
-  if vvv[Length(vv)] <> -Vector(vv,m) then MyError(216); fi;
+  if vvv[Length(vv)] <> -Vector(vv,CompatibleVector(m)) then MyError(216); fi;
+  # Now NewCompanionMatrix:
+  vvv2 := NewCompanionMatrix(ConstructingFilter(m),
+                             UnivariatePolynomialByCoefficients(FamilyObj(one),
+                             Concatenation(vv,[one]),1),BaseDomain(m));
+  if vvv2 <> vvv then MyError(217); fi;
+  # Now CompatibleMatrix:
+  vvv2 := CompatibleMatrix(vvv2[1]);
+  if not(IsMatrixObj(vvv2)) then MyError(218); fi;
+
+  # Now ConcatenationOfVectors:
+  vvv2 := ConcatenationOfVectors(vvv[1],vvv[2]);
+  if vvv2{[1..Length(vvv[1])]} <> vvv[1] or
+     vvv2{[Length(vvv[1])+1..Length(vvv[1])+Length(vvv[2])]} <> vvv[2] then
+      MyError(219);
+  fi;
+
+  # Now ExtractSubVector:
+  vvv2 := ExtractSubVector(vvv[1],[1..Length(vvv[1])-1]);
+  if vvv2 <> vvv[1]{[1..Length(vvv[1])-1]} then MyError(220); fi;
+
+  # Now ProductTransposedMatMat:
+  vvv2 := ProductTransposedMatMat(vvv,vvv);
+  if vvv2 <> TransposedMat(vvv)*vvv then MyError(221); fi;
+  
+  # Now ScalarProduct:
+  vvv2 := ScalarProduct(vvv[1],vvv[1]);
+  if vvv2 <> Sum([1..Length(vvv[1])],i->vvv[1][i] * vvv[1][i]) then
+      MyError(222);
+  fi;
+
+  # Now TraceMat:
+  vvv2 := TraceMat(vvv);
+  if vvv2 <> Sum([1..Length(vvv)],i->MatElm(vvv,i,i)) then MyError(223); fi;
+
+  # Now WeightOfVector:
+  vvv2 := WeightOfVector(vvv[1]);
+  if vvv2 <> Number([1..Length(vvv[1])],i->not(IsZero(vvv[1][i]))) then
+      MyError(224);
+  fi;
+
+  # Now DistanceOfVectors:
+  vvv2 := DistanceOfVectors(vvv[1],vvv[2]);
+  if vvv2 <> Number([1..Length(vvv[1])],i->vvv[1][i] <> vvv[2][i]) then
+      MyError(225);
+  fi;
 
   if level = 0 then
       Print("Standard matrix tests completed.\n\n");

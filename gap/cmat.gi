@@ -342,6 +342,31 @@ InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
     return CVEC_CMatMaker(ll,cl);
   end );
 
+InstallMethod( NewCompanionMatrix,
+  "for IsCMatRep, a polynomial and a ring",
+  [ IsCMatRep, IsUnivariatePolynomial, IsRing ],
+  function( ty, po, bd )
+    local i,l,ll,n,one;
+    one := One(bd);
+    l := CoefficientsOfUnivariatePolynomial(po);
+    if not(IsPlistRep(l)) then
+        l := Unpack(l);
+    fi;
+    n := Length(l)-1;
+    if not(IsOne(l[n+1])) then
+        Error("CompanionMatrix: polynomial is not monic");
+        return fail;
+    fi;
+    ll := NewMatrix(ty,bd,n,[]);
+    l := Vector(-l{[1..n]},CompatibleVector(ll));
+    for i in [1..n-1] do
+        Add(ll,ZeroMutable(l));
+        ll[i][i+1] := one;
+    od;
+    Add(ll,l);
+    return ll;
+  end );
+
 InstallGlobalFunction( CVEC_RandomMat, function(arg)
   local c,d,i,j,l,li,p,q,x,y;
   if Length(arg) = 2 then
@@ -409,6 +434,19 @@ InstallMethod( ChangedBaseDomain, "for a cmat and a finite field",
     return CVEC_CMatMaker(l,cl);
   end );
 
+InstallMethod( CompatibleMatrix, "for a cvec",
+  [IsCVecRep],
+  function( v )
+    local l;
+    l := [0,v];
+    return CVEC_CMatMaker(l,DataType(TypeObj(v)));
+  end );
+
+InstallMethod( CompatibleVector, "for a cmat",
+  [IsCMatRep],
+  function( m )
+    return CVEC_New(m!.vecclass);
+  end );
 
 
 #############################################################################
@@ -580,13 +618,13 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
     m!.rows[pos+1] := v;
   end);
 
-InstallMethod( ElmMatrix, "for a cmat and two positions",
+InstallMethod( MatElm, "for a cmat and two positions",
   [IsCMatRep and IsMatrix, IsPosInt, IsPosInt],
   function( m, row, col )
     return m!.rows[row+1][col];
   end );
 
-InstallMethod( AssMatrix, "for a cmat, two positions, and an ffe",
+InstallMethod( SetMatElm, "for a cmat, two positions, and an ffe",
   [IsCMatRep and IsMatrix, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
     m!.rows[row+1][col] := el;
@@ -2054,7 +2092,7 @@ IO_Unpicklers.ICMA :=
 # Memory usage information:
 #############################################################################
 
-InstallMethod( Memory, "for a cmat", [ IsCMatRep ],
+InstallOtherMethod( Memory, "for a cmat", [ IsCMatRep ],
   function( m )
     local bpw,bpb;
     # Bytes per word:

@@ -111,6 +111,7 @@ DeclareGlobalVariable( "CVEC_CharactersForDisplay" );
 
 DeclareGlobalFunction( "CVEC_HandleScalar" );
 
+DeclareOperation( "Memory", [IsCVecRep] );
 
 #############################################################################
 # Looking for nonzero entries from behind:

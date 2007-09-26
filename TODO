@@ -1,5 +1,8 @@
 Hashfunktionen nicht Architekturneutral!
-
+Fast method for ProductTransposedMatMat
+Fast method for WeightOfVector
+Fast method for DistanceOfVector
+Fast method for TraceMat
 
 Avoid a few more checks in methods like \[\] for cmats?
 

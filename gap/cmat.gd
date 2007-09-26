@@ -33,6 +33,8 @@ DeclareGlobalFunction( "CVEC_ZeroMat" );
 DeclareGlobalFunction( "CVEC_IdentityMat" );
 DeclareGlobalFunction( "CVEC_RandomMat" );
 
+DeclareOperation( "Memory", [IsCMatRep] );
+
 #############################################################################
 # Greasing of matrices:
 #############################################################################

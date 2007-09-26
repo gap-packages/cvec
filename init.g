@@ -9,8 +9,11 @@
 ##  
 
 if not(IsBound(IsMatrixObj)) then
+    # This should have been done whilst reading the library, but
+    # released GAP 4.4 does not yet have it.
     ReadPackage("cvec", "gap/matobj1.gd");
     ReadPackage("cvec", "gap/matobj2.gd");
+    ReadPackage("cvec", "gap/matobj.gi");
 fi;
 
 ReadPackage("cvec", "gap/cvec.gd");

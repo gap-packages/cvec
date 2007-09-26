@@ -869,18 +869,6 @@ InstallMethod( Vector, "for a list of finite field elements, and a cvec",
     fi;
   end );
 
-InstallMethod( Vector, "for a list of finite field elements, and a cmat",
-  [IsList, IsCMatRep],
-  function( l, m )
-    local c;
-    if Length(l) = RowLength(m) then
-        return CVec(l,m!.vecclass);
-    else
-        c := CVEC_NewCVecClassSameField(m!.vecclass,Length(l));
-        return CVec(l,c);
-    fi;
-  end );
-
 InstallMethod( ChangedBaseDomain, "for a cvec and a finite field",
   [IsCVecRep,IsField and IsFinite],
   function( v, f )
@@ -1304,7 +1292,7 @@ IO_Unpicklers.ICVC :=
 # Memory usage information:
 #############################################################################
 
-InstallMethod( Memory, "for a cvec", [ IsCVecRep ],
+InstallOtherMethod( Memory, "for a cvec", [ IsCVecRep ],
   function( v )
     # the header is 2 words on 64bit and 3 words on 32bit machines:
     # we count the master pointer!

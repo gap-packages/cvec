@@ -13,7 +13,7 @@
 #
 ############################################################################
 Revision.matobj2_gd :=
-    "@(#)$Id: matobj2.gd,v 4.39 2007/01/31 19:02:19 gap Exp $";
+    "@(#)$Id: matobj2.gd,v 4.2 2007/09/26 13:05:55 gap Exp $";
 
 
 ############################################################################
@@ -186,7 +186,14 @@ DeclareOperation( "Unpack", [IsRowVectorObj] );
 # an intermediate object. Use CopySubVector instead!
 # The list operations Position and so on seem to be unnecessary for
 # vectors and matrices and thus are left out to simplify the interface.
+# Note that since Concatenation is a function using Append, it will
+# not work for vectors and it cannot be overloaded!
+# Thus we need:
+DeclareGlobalFunction( "ConcatenationOfVectors" );
 
+DeclareOperation( "ExtractSubVector", [IsRowVectorObj,IsList] );
+# Does the same as slicing v{l} but is here to be similar to
+# ExtractSubMatrix.
 
 ############################################################################
 # Standard operations for all objects:
@@ -246,6 +253,9 @@ DeclareOperation( "MultRowVector",
 #    AdditiveInverseSameMutability, ZeroImmutable, ZeroMutable, 
 #    ZeroSameMutability, IsZero, Characteristic
 
+DeclareOperation( "ScalarProduct", [ IsRowVectorObj, IsRowVectorObj ] );
+# This is defined for two vectors of equal length, it returns the standard
+# scalar product.
 
 ############################################################################
 # The "representation-preserving" contructor methods:
@@ -264,13 +274,15 @@ DeclareOperation( "Vector", [IsList,IsRowVectorObj]);
 # The length is given by the length of the first argument.
 # It is *not* guaranteed that the list is copied!
 
-DeclareOperation( "Vector", [IsList,IsMatrixObj] );
-# Returns a new mutable vector in a rep that is compatible with
-# the matrix but of possibly different length given by the first
-# argument. It is *not* guaranteed that the list is copied!
+# the following is gone again, use CompatibleVector instead:
+#DeclareOperation( "Vector", [IsList,IsMatrixObj] );
+## Returns a new mutable vector in a rep that is compatible with
+## the matrix but of possibly different length given by the first
+## argument. It is *not* guaranteed that the list is copied!
 
 DeclareOperation( "ConstructingFilter", [IsRowVectorObj] );
-DeclareOperation( "ConstructingFilter", [IsMatrixObj] );
+
+DeclareOperation( "CompatibleMatrix", [IsRowVectorObj] );
 
 DeclareConstructor( "NewRowVector", [IsRowVectorObj,IsRing,IsList] );
 # A constructor. The first argument must be a filter indicating the
@@ -286,16 +298,22 @@ DeclareOperation( "ChangedBaseDomain", [IsRowVectorObj,IsRing] );
 # created, which comes in a "similar" representation but over the new
 # base domain that is given in the second argument.
 
+DeclareGlobalFunction( "MakeVector" );
+# A convenience function for users to choose some appropriate representation
+# and guess the base domain if not supplied as second argument.
+# This is not guaranteed to be efficient and should never be used 
+# in library or package code.
+
 ############################################################################
 # Some things that fit nowhere else:
 ############################################################################
 
-DeclareOperation( "Randomize", [IsRowVectorObj] );
+DeclareOperation( "Randomize", [IsRowVectorObj and IsMutable] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
 # The argument is also returned by the function.
 
-DeclareOperation( "Randomize", [IsRowVectorObj,IsRandomSource] );
+DeclareOperation( "Randomize", [IsRowVectorObj and IsMutable,IsRandomSource] );
 # The same, use the second argument to provide "randomness".
 # The vector argument is also returned by the function.
 
@@ -317,8 +335,17 @@ DeclareOperation( "Randomize", [IsRowVectorObj,IsRandomSource] );
 ##  </ManSection>
 ##  <#/GAPDoc>
 ##
-DeclareOperation( "CopySubVector", [IsRowVectorObj,IsRowVectorObj,
-                                    IsList,IsList] );
+DeclareOperation( "CopySubVector", 
+  [IsRowVectorObj,IsRowVectorObj and IsMutable, IsList,IsList] );
+
+DeclareOperation( "WeightOfVector", [IsRowVectorObj] );
+# This computes the Hamming weight of a vector, i.e. the number of
+# nonzero entries.
+
+DeclareOperation( "DistanceOfVectors", [IsRowVectorObj, IsRowVectorObj] );
+# This computes the Hamming distance of two vectors, i.e. the number
+# of positions, in which the vectors differ. The vectors must have the
+# same length.
 
 
 ############################################################################
@@ -359,7 +386,7 @@ DeclareOperation( "[]", [IsMatrixObj,IsPosInt] );
 # row within it to allow the old GAP syntax M[i][j] for read and write
 # access to work. Note that this will never be particularly efficient
 # for flat matrices. Efficient code will have to use ElmMatrix and
-# AssMatrix instead.
+# SetMatElm instead.
 
 DeclareOperation( "PositionNonZero", [IsMatrixObj] );
 DeclareOperation( "PositionNonZero", [IsMatrixObj, IsInt] );
@@ -437,9 +464,9 @@ DeclareOperation( "CopySubMatrix", [IsMatrixObj,IsMatrixObj,
 # New element access for matrices (especially necessary for flat mats:
 ############################################################################
 
-DeclareOperation( "ElmMatrix", [IsMatrixObj,IsPosInt,IsPosInt] );
+DeclareOperation( "MatElm", [IsMatrixObj,IsPosInt,IsPosInt] );
 
-DeclareOperation( "AssMatrix", [IsMatrixObj,IsPosInt,IsPosInt,IsObject] );
+DeclareOperation( "SetMatElm", [IsMatrixObj,IsPosInt,IsPosInt,IsObject] );
 
 
 ############################################################################
@@ -507,42 +534,12 @@ DeclareOperation( "MultMatrix",
 # Changes first argument in place, matrices have to be of same
 # dimension and over same base domain.
 
-# Generic methods should do the trick:
-InstallMethod( AddMatrix, "for two row list matrices and a scalar",
-  [ IsMutable and IsRowListMatrix, IsRowListMatrix, IsMultiplicativeElement ],
-  function( A, B, s )
-    local i;
-    if Length(A) <> Length(B) then
-        Error("Matrices must have equal length");
-        return;
-    fi;
-    for i in [1..Length(A)] do
-        AddRowVector(A[i],B[i],s);
-    od;
-  end );
+DeclareOperation( "ProductTransposedMatMat", [IsMatrixObj, IsMatrixObj] );
+# Computes the product TransposedMat(A)*B, possibly without
+# first computing TransposedMat(A).
 
-InstallMethod( AddMatrix, "for two row list matrices",
-  [ IsMutable and IsRowListMatrix, IsRowListMatrix ],
-  function( A, B )
-    local i;
-    if Length(A) <> Length(B) then
-        Error("Matrices must have equal length");
-        return;
-    fi;
-    for i in [1..Length(A)] do
-        AddRowVector(A[i],B[i]);
-    od;
-  end );
-
-InstallMethod( MultMatrix, "for a row list matrix",
-  [ IsMutable and IsRowListMatrix, IsMultiplicativeElement ],
-  function( A, s )
-    local i;
-    for i in [1..Length(A)] do
-        MultRowVector(A[i],s);
-    od;
-  end );
-
+DeclareOperation( "TraceMat", [IsMatrixObj] );
+# The sum of the diagonal entries. Error for a non-square matrix.
 
 ############################################################################
 # Rule:
@@ -586,6 +583,10 @@ DeclareOperation( "CompanionMatrix", [IsUnivariatePolynomial,IsMatrixObj] );
 # of the second argument. Uses row-convention. The polynomial must be
 # monic and its coefficients must lie in the BaseDomain of the matrix.
 
+DeclareConstructor( "NewCompanionMatrix", 
+  [IsMatrixObj, IsUnivariatePolynomial, IsRing] );
+# The constructor variant of <Ref Oper="CompanionMatrix"/>.
+
 # The following are already declared in the library:
 # Eventually here will be the right place to do this.
 
@@ -608,20 +609,6 @@ DeclareOperation( "Matrix", [IsList,IsInt,IsMatrixObj]);
 # element of the first argument (done with a generic method):
 DeclareOperation( "Matrix", [IsList,IsMatrixObj] );
 
-InstallMethod( Matrix, "generic convenience method with 2 args",
-  [IsList,IsMatrixObj],
-  function( l, m )
-    if Length(l) = 0 then
-        Error("Matrix: two-argument version not allowed with empty first arg");
-        return;
-    fi;
-    if not(IsList(l[1]) or IsRowVectorObj(l[1])) then
-        Error("Matrix: flat data not supported in two-argument version");
-        return;
-    fi;
-    return Matrix(l,Length(l[1]),m);
-  end );
-
 # Note that it is not possible to generate a matrix via "Matrix" without
 # a template matrix object. Use the constructor methods instead:
 
@@ -633,18 +620,28 @@ DeclareConstructor( "NewMatrix", [IsMatrixObj, IsRing, IsInt, IsList] );
 # The last argument is guaranteed not to be changed!
 # If the last argument already contains row vectors, they are copied.
 
+DeclareOperation( "ConstructingFilter", [IsMatrixObj] );
+
+DeclareOperation( "CompatibleVector", [IsMatrixObj] );
+
 DeclareOperation( "ChangedBaseDomain", [IsMatrixObj,IsRing] );
 # Changes the base domain. A copy of the matrix in the first argument is
 # created, which comes in a "similar" representation but over the new
 # base domain that is given in the second argument.
+
+DeclareGlobalFunction( "MakeMatrix" );
+# A convenience function for users to choose some appropriate representation
+# and guess the base domain if not supplied as second argument.
+# This is not guaranteed to be efficient and should never be used 
+# in library or package code.
 
 
 ############################################################################
 # Some things that fit nowhere else:
 ############################################################################
 
-DeclareOperation( "Randomize", [IsMatrixObj] );
-DeclareOperation( "Randomize", [IsMatrixObj,IsRandomSource] );
+DeclareOperation( "Randomize", [IsMatrixObj and IsMutable] );
+DeclareOperation( "Randomize", [IsMatrixObj and IsMutable,IsRandomSource] );
 # Changes the mutable argument in place, every entry is replaced
 # by a random element from BaseDomain.
 # The second version will come when we have random sources.
@@ -670,39 +667,11 @@ DeclareOperation( "Fold", [IsRowVectorObj, IsPosInt, IsMatrixObj] );
 # as the third argument. The length of the vector must be a multiple
 # of the second argument.
 
-# Here come two generic methods using only other interface operations:
-InstallMethod( Unfold, "for a matrix object, and a vector object",
-  [ IsMatrixObj, IsRowVectorObj ],
-  function( m, w )
-    local v,i,l;
-    if Length(m) = 0 then
-        return ZeroVector(0,w);
-    else
-        l := RowLength(m);
-        v := ZeroVector(Length(m)*l,w);
-        for i in [1..Length(m)] do
-            CopySubVector( m[i], v, [1..l], [(i-1)*l+1..i*l] );
-        od;
-        return v;
-    fi;
-  end );
-  
-InstallMethod( Fold, "for a vector, a positive int, and a matrix",
-  [ IsRowVectorObj, IsPosInt, IsMatrixObj ],
-  function( v, rl, t )
-    local rows,i,tt,m;
-    m := Matrix([],rl,t);
-    tt := ZeroVector(rl,v);
-    for i in [1..Length(v)/rl] do
-        CopySubVector(v,tt,[(i-1)*rl+1..i*rl],[1..rl]);
-        Add(m,ShallowCopy(tt));
-    od;
-    return m;
-  end );
+# The following unwraps a matrix to a list of lists:
+DeclareOperation( "Unpack", [IsRowListMatrix] );
+# It guarantees to copy, that is changing the returned object does
+# not change the original object.
 
-# DeclareOperation( "Memory", [ IsMatrixObj ] );
-# Returns the amount of memory needed for a matrix in bytes
-# Only commented out here since it should be solved for all objects.
 
 ############################################################################
 ############################################################################
@@ -748,11 +717,6 @@ DeclareOperation( "Append", [IsRowListMatrix,IsRowListMatrix] );
 # The following unwraps a matrix to a list of vectors:
 DeclareOperation( "ListOp", [IsRowListMatrix] );
 DeclareOperation( "ListOp", [IsRowListMatrix, IsFunction] );
-
-# The following unwraps a matrix to a list of lists:
-DeclareOperation( "Unpack", [IsRowListMatrix] );
-# It guarantees to copy, that is changing the returned object does
-# not change the original object.
 
 
 ############################################################################
