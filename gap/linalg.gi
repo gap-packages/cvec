@@ -1170,11 +1170,18 @@ function( m, eps, factorise, verify, indetnr )
               prob := prob * p;  # probability to have missed one Jordan block
               Info( InfoCVec, 2, "Probability to have them all (%%): ",
                      Int((1-prob)^nrunclear*1000));
-              if 1-(1-prob)^nrunclear < eps then
+              if 1-(1-prob)^nrunclear < eps and Length(opi.rordpols)-i > 5 then
                   break;   # this is the probability to have missed one
               fi;
               i := i + 1;
           od;
+
+          if i > Length(opi.rordpols) then
+              proof := true;
+              Info(InfoCVec,2,"Have found proof by computing all absolute ",
+                   "order polynomials!");
+              break;
+          fi;
 
           Info(InfoCVec,2,"Checking multiplicities...");
           nrunclear := 0;
