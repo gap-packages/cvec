@@ -1,0 +1,246 @@
+/* Macros which must be defined outside:
+   NAME    : name for this instance of the code
+   WORD    : type for a word, please make it unsigned!
+   PTRINT  : numerical type which can hold a pointer
+   WPR     : words per row
+   MATROWS : rows in one matrix, must be equal to WPR*sizeof(WORD)*8
+   ALIGN   : alignment of the arena, set e.g. to 0x100000L to align on 1MB
+   GREASE  : grease level, must be a divisor of sizeof(WORD)*8
+   GREASE2 : must be 2^GREASE
+*/
+
+#include <stdlib.h>
+#include <string.h>
+
+#define WORDLEN sizeof(WORD)
+#define WORDBITS (sizeof(WORD)*8)
+#define MATMEM (MATROWS*WPR*sizeof(WORD))
+#define GREASEMASK (GREASE2-1)
+
+WORD *ARENA;
+WORD *REGS[128];   /* Pointers to the matrix registers */
+WORD *GRACCU; 
+/* Number of standard matrix registers: */
+int NRREGS;   /* This is set by gf2_allocmem/gf2_usemem */
+int WPRNAME = WPR;
+
+int gf2_usemem(void *memspace, PTRINT cachesize)
+{
+    int i;
+    PTRINT p;
+    ARENA = memspace;
+    NRREGS = (int) (((4*cachesize)/5) / MATMEM - 32);
+    if (NRREGS < 8) return -1;
+    if (NRREGS > 128) NRREGS = 128;
+    p = (PTRINT) ARENA;
+    for (i = 0;i < NRREGS;i++) {
+        REGS[i] = (WORD *) p;
+        p += MATMEM;
+    }
+    GRACCU = (WORD *) p;
+    return 0;
+}
+
+int gf2_allocmem(PTRINT cachesize)
+{
+    ARENA = (WORD *) malloc(cachesize+ALIGN);
+    if (ARENA == NULL) return -2;
+    ARENA = (WORD *) (((PTRINT) ARENA + ALIGN - 1) & (~(ALIGN-1)));
+    return gf2_usemem(ARENA,cachesize);
+}
+
+#if WPR == 1
+#define ROWCLEAR(r) *r++ = 0
+#else
+#define ROWCLEAR(r) do { int i; for (i = WPR;i > 0;i--) *r++ = 0; } while(0)
+#endif
+
+#if WPR == 1
+#define ROWADD3(r,p,q) *r++ = *p++ ^ *q++
+#else
+#define ROWADD3(r,p,q) do \
+  { int i; for (i = WPR;i > 0;i--) *r++ = *p++ ^ *q++;} while(0)
+#endif
+
+#if WPR == 1
+#define ROWADD2(r,q) *r++ ^= *q++ 
+#else
+#define ROWADD2(r,q) do \
+  { int i; for (i = WPR;i > 0;i--) { *r = *r ^ *q++; r++; } } while(0)
+#endif
+
+#if GREASE == 4 && WPR == 1
+/* In this case words is always equal to 1! */
+void gf2_grease(int a, int words)
+/* GREASE a, which is a register number 
+   words must be <= WPR and gf2_mul must then
+   be called with the same value! */
+{
+    WORD *r,*w;
+    int k;
+    r = REGS[a];
+    w = GRACCU;
+    for (k = (sizeof(WORD)*8/GREASE);k > 0;k--) {
+        *w++ = 0;
+        *w++ = r[0];
+        *w++ = r[1];
+        *w++ = r[0] ^ r[1];
+        *w++ = r[2];
+        *w++ = r[2] ^ r[0];
+        *w++ = r[2] ^ r[1];
+        *w++ = r[2] ^ r[1] ^ r[0];
+        *w++ = r[3];
+        *w = r[3] ^ w[-8]; w++;
+        *w = r[3] ^ w[-8]; w++;
+        *w = r[3] ^ w[-8]; w++;
+        *w = r[3] ^ w[-8]; w++;
+        *w = r[3] ^ w[-8]; w++;
+        *w = r[3] ^ w[-8]; w++;
+        *w = r[3] ^ w[-8]; w++;
+        r += 4;
+    }
+}
+#else
+void gf2_grease(int a, int words)
+/* GREASE a, which is a register number 
+   words must be <= WPR and gf2_mul must then
+   be called with the same value! */
+{
+    WORD *r,*q;
+    int j;
+    int l;
+    int i;
+    int k;
+    WORD *p,*rr;
+    p = REGS[a];
+    r = GRACCU;
+    for (k = words*(sizeof(WORD)*8/GREASE);k > 0;k--) {
+        rr = r;
+        ROWCLEAR(r);
+        l = 1;
+        for (i = GREASE;i > 0;i--) {
+            q = rr;
+            for (j = l;j > 0;j--) {
+                ROWADD3(r,q,p);
+                p -= WPR;
+            }
+            p += WPR;
+            l <<= 1;
+        }
+    }
+}
+
+#endif
+
+void gf2_mul(int d, int a, int rows, int words)
+/* d := a * greaseaccu      
+   d and a are register numbers, d must be different from a! 
+   rows is the number of rows taken in left matrix a
+   words*sizeof(WORD)*8 is the number of rows taken in right matrix 
+       (--> greaseaccu)
+   Note that words must be <= WPR and gf2_grease must have been called
+   with the same value! */
+{
+    WORD *r,*p,*q,*qq;
+    int i,j,k;
+    WORD w,w2;
+    r = REGS[d];
+    p = REGS[a];
+    if (words == 1 ) {
+        for (i = rows;i > 0;i--) {
+            q = GRACCU;
+            w = *p++;
+            w2 = 0;
+            for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
+                if (q[WPR * (w & GREASEMASK)]) w2 ^= q[WPR * (w & GREASEMASK)];
+                w >>= GREASE;
+                q += GREASE2*WPR;
+            }
+            *r = w2;
+            r += WPR;
+        }
+    } else {
+        for (i = rows;i > 0;i--) {
+            q = GRACCU;
+            for (k = words;k > 0;k--) {
+                w = *p++;
+                for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
+                    qq = q + WPR * (w & GREASEMASK);
+                    ROWADD2(r,qq);
+                    r -= WPR;
+                    w >>= GREASE;
+                    q += GREASE2*WPR;
+                }
+            }
+            r += WPR;
+        }
+    }
+}
+
+void gf2_zero(int d)
+{
+    int i;
+    WORD *p = REGS[d];
+    for (i = MATROWS;i > 0;i--) ROWCLEAR(p);
+}
+
+void gf2_add(int d, int a, int b)
+/* d := a + b     all are register numbers */
+{
+    WORD *p, *q, *r;
+    int i;
+    p = REGS[a]; q = REGS[b]; r = REGS[d];
+    for (i = MATROWS;i > 0;i--) ROWADD3(r,p,q);
+}
+
+void gf2_copy(int d, int a)
+/* d := a         all are register numbers */
+{
+    memcpy(REGS[d],REGS[a],MATMEM);
+}
+
+#undef ROWCLEAR
+#undef ROWADD2
+#undef ROWADD3
+#undef ARENA
+#undef _ARENA
+#undef __ARENA
+#undef REGS
+#undef _REGS
+#undef __REGS
+#undef GRACCU
+#undef _GRACCU
+#undef __GRACCU
+#undef NRREGS
+#undef _NRREGS
+#undef __NRREGS
+
+#undef gf2_allocmem
+#undef _gf2_allocmem
+#undef __gf2_allocmem
+#undef gf2_usemem
+#undef _gf2_usemem
+#undef __gf2_usemem
+#undef gf2_grease
+#undef _gf2_grease
+#undef __gf2_grease
+#undef gf2_mul
+#undef _gf2_mul
+#undef __gf2_mul
+#undef gf2_zero
+#undef _gf2_zero
+#undef __gf2_zero
+#undef gf2_add
+#undef _gf2_add
+#undef __gf2_add
+#undef gf2_copy
+#undef _gf2_copy
+#undef __gf2_copy
+
+#undef WORDLEN
+#undef WORDBITS
+#undef ARENA
+#undef REGS
+#undef GRACCU
+#undef MATMEM
+

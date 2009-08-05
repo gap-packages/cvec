@@ -1,0 +1,65 @@
+/* Macros which must be defined outside:
+   NAME    : name for this instance of the code
+   WORD    : type for a word, please make it unsigned!
+   PTRINT  : numerical type which can hold a pointer
+   WPR     : words per row
+   MATROWS : rows in one matrix, must be equal to WPR*sizeof(WORD)*8
+   ALIGN   : alignment of the arena, set e.g. to 0x100000L to align on 1MB
+   GREASE  : grease level, must be a divisor of sizeof(WORD)*8
+   GREASE2 : must be 2^GREASE
+*/
+
+
+#define __ARENA(name) arena_##name
+#define _ARENA(name) __ARENA(name)
+#define ARENA _ARENA(NAME)
+#define __REGS(name) regs_##name
+#define _REGS(name) __REGS(name)
+#define REGS _REGS(NAME)
+#define __GRACCU(name) graccu_##name
+#define _GRACCU(name) __GRACCU(name)
+#define GRACCU _GRACCU(NAME)
+#define __NRREGS(name) nrregs_##name
+#define _NRREGS(name) __NRREGS(name)
+#define NRREGS _NRREGS(NAME)
+#define __WPRNAME(name) WPR_##name
+#define _WPRNAME(name) __WPRNAME(name)
+#define WPRNAME _WPRNAME(NAME)
+
+extern WORD *ARENA;
+extern WORD *REGS[128];   /* Pointers to the matrix registers */
+extern WORD *GRACCU;
+/* Number of standard matrix registers: */
+extern int NRREGS;   /* This is set by gf2_allocmem/gf2_usemem */
+extern int WPRNAME;
+
+#define __gf2_usemem(name) gf2_usemem_##name
+#define _gf2_usemem(name) __gf2_usemem(name)
+#define gf2_usemem _gf2_usemem(NAME)
+#define __gf2_allocmem(name) gf2_allocmem_##name
+#define _gf2_allocmem(name) __gf2_allocmem(name)
+#define gf2_allocmem _gf2_allocmem(NAME)
+#define __gf2_grease(name) gf2_grease_##name
+#define _gf2_grease(name) __gf2_grease(name)
+#define gf2_grease _gf2_grease(NAME)
+#define __gf2_mul(name) gf2_mul_##name
+#define _gf2_mul(name) __gf2_mul(name)
+#define gf2_mul _gf2_mul(NAME)
+#define __gf2_zero(name) gf2_zero_##name
+#define _gf2_zero(name) __gf2_zero(name)
+#define gf2_zero _gf2_zero(NAME)
+#define __gf2_add(name) gf2_add_##name
+#define _gf2_add(name) __gf2_add(name)
+#define gf2_add _gf2_add(NAME)
+#define __gf2_copy(name) gf2_copy_##name
+#define _gf2_copy(name) __gf2_copy(name)
+#define gf2_copy _gf2_copy(NAME)
+
+int gf2_usemem(void *memspace, PTRINT cachesize);
+int gf2_allocmem(PTRINT cachesize);
+void gf2_grease(int a, int words);
+void gf2_mul(int d, int a, int rows, int words);
+void gf2_zero(int d);
+void gf2_add(int d, int a, int b);
+void gf2_copy(int d, int a);
+
