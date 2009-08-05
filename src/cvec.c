@@ -13,6 +13,17 @@ const char * Revision_cvec_c =
 #include <stdlib.h>
 
 #include "src/compiled.h"          /* GAP headers                */
+#ifdef SYS_IS_64_BIT
+#include "gf2lib_64.c"
+WORD myarena[(4096*1024+1024*1024)/8];      
+         /* we assume 4MB of cache, aligned to 1MB */
+WORD *arenastart;
+#else
+#include "gf2lib_32.c"
+WORD myarena[(2048*1024+1024*1024)/4];      
+         /* we assume 2MB of cache, aligned to 1MB */
+WORD *arenastart;
+#endif
 
 #if SYS_IS_CYGWIN32
 #include <cygwin/in.h>
@@ -31,8 +42,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define MAXDEGREE 1024
 
 /* Define this to empty if you want global access to functions: */
-/* #define STATIC static */
-#define STATIC
+#define STATIC static
+/*  #define STATIC  */
 
 /* Define this to empty if your compiler does not support inlined functions: */
 #define INLINE inline
@@ -2402,6 +2413,85 @@ STATIC Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
     return 0L;
 }
 
+STATIC INLINE void ld(WORD *reg, Obj mat,
+                      int wordscp, int wordscl, int rowscp)
+{
+    int i,j;
+    WORD *data;
+    for (i = 2;i <= rowscp+1;i++) {
+        data = (WORD *) DATA_CVEC(ELM_PLIST(mat,i));
+        for (j = wordscp; j > 0; j--) *reg++ = *data++;
+        for (j = wordscl; j > 0; j--) *reg++ = 0UL;
+    }
+}
+
+STATIC INLINE void st(Obj mat, WORD *reg,
+                      int wordscp, int wordsskip, int rowscp)
+{
+    int i,j;
+    WORD *data;
+    for (i = 2;i <= rowscp+1;i++) {
+        data = (WORD *) DATA_CVEC(ELM_PLIST(mat,i));
+        for (j = wordscp; j > 0; j --) *data++ = *reg++;
+        reg += wordsskip;
+    }
+}
+
+STATIC Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
+{
+    Int maxdim;
+    PREPARE_cl(ELM_PLIST(m,2),clm);
+    PREPARE_cl(ELM_PLIST(n,2),cln);
+    Int rowsm = LEN_PLIST(m)-1;
+    Int rowsn = LEN_PLIST(n)-1;
+    int wordlenm,wordlenn;
+
+    maxdim = INT_INTOBJ(maxd);
+#ifndef SYS_IS_64_BIT
+    if (maxdim <= 32) {
+        ld(regs_32[0],m,1,0,rowsm);
+        ld(regs_32[1],n,1,0,rowsn);
+        gf2_grease_32(1,1);
+        gf2_mul_32(2,0,rowsm,1);
+        st(l,regs_32[2],1,0,rowsm);
+    } else 
+#endif
+    if (maxdim <= 64) {
+        wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
+        wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
+        ld(regs_64[0],m,wordlenm,WPR_64-wordlenm,rowsm);
+        ld(regs_64[1],n,wordlenn,WPR_64-wordlenn,rowsn);
+        gf2_grease_64(1,wordlenm);
+        gf2_mul_64(2,0,rowsm,wordlenm);
+        st(l,regs_64[2],wordlenn,WPR_64-wordlenn,rowsm);
+    } else if (maxdim <= 128) {
+        wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
+        wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
+        ld(regs_128[0],m,wordlenm,WPR_128-wordlenm,rowsm);
+        ld(regs_128[1],n,wordlenn,WPR_128-wordlenn,rowsn);
+        gf2_grease_128(1,wordlenm);
+        gf2_mul_128(2,0,rowsm,wordlenm);
+        st(l,regs_128[2],wordlenn,WPR_128-wordlenn,rowsm);
+    } else if (maxdim <= 256) {
+        wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
+        wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
+        ld(regs_256[0],m,wordlenm,WPR_256-wordlenm,rowsm);
+        ld(regs_256[1],n,wordlenn,WPR_256-wordlenn,rowsn);
+        gf2_grease_256(1,wordlenm);
+        gf2_mul_256(2,0,rowsm,wordlenm);
+        st(l,regs_256[2],wordlenn,WPR_256-wordlenn,rowsm);
+    } else if (maxdim <= 512) {
+        wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
+        wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
+        ld(regs_512[0],m,wordlenm,WPR_512-wordlenm,rowsm);
+        ld(regs_512[1],n,wordlenn,WPR_512-wordlenn,rowsn);
+        gf2_grease_512(1,wordlenm);
+        gf2_mul_512(2,0,rowsm,wordlenm);
+        st(l,regs_512[2],wordlenn,WPR_512-wordlenn,rowsm);
+    }
+    return 0L;
+}
+
 STATIC Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
@@ -4059,6 +4149,10 @@ static StructGVarFunc GVarFuncs [] = {
     PROD_CMAT_CMAT_GREASED,
     "cvec.c:PROD_CMAT_CMAT_GREASED" },
 
+  { "CVEC_PROD_CMAT_CMAT_GF2_SMALL", 4, "l, m, n, maxdim",
+    PROD_CMAT_CMAT_GF2_SMALL,
+    "cvec.c:PROD_CMAT_CMAT_GF2_SMALL" },
+
   { "CVEC_PROD_CMAT_CMAT_NOGREASE", 3, "l, m, n",
     PROD_CMAT_CMAT_NOGREASE,
     "cvec.c:PROD_CMAT_CMAT_NOGREASE" },
@@ -4138,6 +4232,22 @@ static Int InitKernel ( StructInitInfo *module )
 {
     /* init filters and functions                                          */
     InitHdlrFuncsFromTable( GVarFuncs );
+
+    /* Init gf2lib structures: */
+    arenastart = (WORD *) 
+        ((((unsigned long) myarena)+0x100000UL) & (~(0xfffffUL)));
+#ifdef SYS_IS_64_BIT
+    gf2_usemem_512(arenastart,4096*1024);
+    gf2_usemem_256(arenastart,4096*1024);
+    gf2_usemem_128(arenastart,4096*1024);
+    gf2_usemem_64(arenastart,4096*1024);
+#else
+    gf2_usemem_512(arenastart,2048*1024);
+    gf2_usemem_256(arenastart,2048*1024);
+    gf2_usemem_128(arenastart,2048*1024);
+    gf2_usemem_64(arenastart,2048*1024);
+    gf2_usemem_32(arenastart,2048*1024);
+#endif
 
     /* return success                                                      */
     return 0;

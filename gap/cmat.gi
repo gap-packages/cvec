@@ -1422,7 +1422,7 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
 InstallOtherMethod(\*, "for two cmats, second one not greased",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
   function(m,n)
-    local d,greasetab,i,j,l,lev,q,res,spreadtab,tab,tablen,vcl;
+    local d,greasetab,i,j,l,lev,q,res,spreadtab,tab,tablen,vcl,max;
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
         Error("\\*: incompatible base fields");
     fi;
@@ -1430,7 +1430,21 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
         Error("\\*: lengths not matching");
     fi;
     vcl := n!.vecclass;
+    max := Maximum(m!.len,m!.vecclass![CVEC_IDX_len],vcl![CVEC_IDX_len]);
     q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
+    if max < 512 and q = 2 then
+        # Make a new matrix and then go directly into the kernel:
+        l := 0*[1..m!.len+1];
+        for i in [2..m!.len+1] do
+            l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
+        od;
+        res := CVEC_CMatMaker(l,n!.vecclass);
+        CVEC_PROD_CMAT_CMAT_GF2_SMALL(l,m!.rows,n!.rows,max);
+        if not(IsMutable(m) or IsMutable(n)) then
+            MakeImmutable(res);
+        fi;
+        return res;
+    fi;
     if IsBound(CVEC_WinogradBounds[q]) and
         m!.len * m!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] and
         n!.len * n!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] then

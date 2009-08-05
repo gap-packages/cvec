@@ -3,11 +3,12 @@
 =============================================================================
 
 ==========================
- Changes from 1.7 -> 1.8:
+ Changes from 1.7 -> 2.0:
 ==========================
 
   - Slightly improved minimal polynomial routine by suggestion of
     referee.
+  - Use C-Hashfunction of orb 3.0 if it is there.
 
 ==========================
  Changes from 1.6 -> 1.7:

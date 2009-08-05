@@ -1,8 +1,12 @@
 Hashfunktionen nicht Architekturneutral!
+Note dependencies
 Fast method for ProductTransposedMatMat
 Fast method for WeightOfVector
 Fast method for DistanceOfVector
 Fast method for TraceMat
+HISTORY file
+Show all versions for download
+License
 
 Avoid a few more checks in methods like \[\] for cmats?
 

@@ -27,11 +27,11 @@ Subtitle := "Compact vectors over finite fields",
 ##  See '?Extending: Version Numbers' in GAP help for an explanation
 ##  of valid version numbers. For an automatic package distribution update
 ##  you must provide a new version number even after small changes.
-Version := "1.7",
+Version := "2.0",
 
 ##  Release date of the current version in dd/mm/yyyy format.
 # 
-Date := "26/09/2007",
+Date := "??/08/2009",
 
 ##  URL of the archive(s) of the current package release, but *without*
 ##  the format extension(s), like '.zoo', which are given next.
@@ -42,7 +42,7 @@ Date := "26/09/2007",
 ##  example/init.g, ...    or  example-1.3/init.g, ...  )
 # 
 ArchiveURL := 
-     "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/cvec-1.7",
+     "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/cvec-2.0",
 
 ##  All provided formats as list of file extensions, separated by white
 ##  space or commas.
@@ -216,10 +216,7 @@ PackageWWWHome := "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Softwar
 PackageDoc := rec(
   # use same as in GAP            
   BookName  := "cvec",
-  # format/extension can be one of .zoo, .tar.gz, .tar.bz2, -win.zip
-  Archive := 
-      "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/cvec-1.7.tar.gz",
-  ArchiveURLSubset := ["doc", "htm"],
+  ArchiveURLSubset := ["doc"],
   HTMLStart := "doc/chap0.htm",
   PDFFile   := "doc/manual.pdf",
   # the path to the .six file used by GAP's help system
@@ -239,12 +236,12 @@ PackageDoc := rec(
 Dependencies := rec(
   # GAP version, use version strings for specifying exact versions,
   # prepend a '>=' for specifying a least version.
-  GAP := ">=4.4.10",
+  GAP := ">=4.4.12",
   # list of pairs [package name, (least) version],  package name is case
   # insensitive, least version denoted with '>=' prepended to version string.
   # without these, the package will not load
-  NeededOtherPackages := [["GAPDoc", ">= 1.0"],["IO", ">= 2.2"],
-                          ["orb", ">= 1.4"]],
+  NeededOtherPackages := [["GAPDoc", ">= 1.2"],["IO", ">= 3.0"],
+                          ["orb", ">= 3.0"]],
   # without these the package will issue a warning while loading
   # SuggestedOtherPackages := [],
   SuggestedOtherPackages := [],

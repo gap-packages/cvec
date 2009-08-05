@@ -1251,8 +1251,13 @@ InstallMethod( ChooseHashFunction, "for cvecs",
     local bytelen,c;
     c := CVecClass(p);
     bytelen := c![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
-    return rec( func := CVEC_HashFunctionForCVecs,
-                data := [hashlen,bytelen] );
+    if IsBound(GenericHashFunc_C) then
+        return rec( func := GenericHashFunc_C,
+                    data := [257,CVEC_BYTESPERWORD,bytelen,hashlen] );
+    else
+        return rec( func := CVEC_HashFunctionForCVecs,
+                    data := [hashlen,bytelen] );
+    fi;
   end );
 
 
