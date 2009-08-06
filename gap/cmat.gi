@@ -32,16 +32,7 @@ InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
         m.greasehint := m.greasehint-1;
         qp := qp/q;
     od;
-    filts := IsCMatRep and IsMutable;
-    if cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d] = 1 then
-        filts := filts and IsCVecRepOverPrimeField;
-    fi;
-    if q <= MAXSIZE_GF_INTERNAL then
-        filts := filts and IsCVecRepOverSmallField;
-    fi;
-    ty := NewType(CollectionsFamily(CollectionsFamily(
-                        cl![CVEC_IDX_fieldinfo]![CVEC_IDX_scafam])), filts );
-    return Objectify(ty,m);
+    return Objectify(cl![CVEC_IDX_typecmat],m);
 end );
 
 InstallMethod( ConstructingFilter, "for a cmat",
@@ -1432,7 +1423,7 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     vcl := n!.vecclass;
     max := Maximum(m!.len,m!.vecclass![CVEC_IDX_len],vcl![CVEC_IDX_len]);
     q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
-    if max < 512 and q = 2 then
+    if max <= 512 and q = 2 then
         # Make a new matrix and then go directly into the kernel:
         l := 0*[1..m!.len+1];
         for i in [2..m!.len+1] do

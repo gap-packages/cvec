@@ -24,7 +24,9 @@ bindir:
 	if test ! -d bin;  then mkdir bin;  fi
 	if test ! -d bin/@GAPARCH@;  then mkdir bin/@GAPARCH@;  fi
 
-bin/@GAPARCH@/cvec.so: src/cvec.c
+bin/@GAPARCH@/cvec.so: src/cvec.c src/gf2lib_32.c src/gf2lib_64.c \
+                       src/gf2lib.def src/gf2libh.def src/gf2lib_32.h \
+		       src/gf2lib_64.h
 	cp $(GAPPATH)/bin/@GAPARCH@/config.h bin/@GAPARCH@
 	$(GAPPATH)/bin/@GAPARCH@/gac -p ${COMPILEOPTIONS} -d -o bin/@GAPARCH@/cvec.so src/cvec.c
 

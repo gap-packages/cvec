@@ -71,6 +71,7 @@ DeclareRepresentation( "IsCVecFieldInfo", IsPositionalObjectRep, [] );
 ##         immediate integer, 2 else
 ##  ![14]: the scalars family, vectors get the CollectionsFamily
 ##         this is FFEFamily(p) from the GAP library
+##  ![15]: filter list for the creation of new cmats over this field
 
 DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ## We use the same symbolic names for these indices as exported from cvec.c
@@ -84,6 +85,8 @@ DeclareRepresentation( "IsCVecClass", IsPositionalObjectRep, [] );
 ##  ![7]: CVEC_classes[pos] where pos = Position(CVEC_q.q)
 ##         the latter are used for fast access to other cvec classes over
 ##         the same field.
+##  ![8]: starting type (mutable vesion) for new cmats using vectors in
+##        this class
 
 #############################################################################
 # Access to the base field:

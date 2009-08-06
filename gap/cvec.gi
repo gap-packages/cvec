@@ -75,7 +75,7 @@ InstallValue( CVEC_BestGreaseTab,
 InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
   # Creates a new class of cvecs or returns a cached one:
   local bestgrease,bitsperel,cl,elsperword,filts,greasetabl,j,l,po,pos,pos2,
-        q,s,scafam,size,tab1,tab2,ty,wordlen;
+        q,s,scafam,size,tab1,tab2,ty,wordlen,filtscmat;
 
   # First check the arguments:
   if d <= 0 then 
@@ -159,15 +159,19 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
 
       # Now the starting filter list:
       filts := IsCVecRep;
+      filtscmat := IsCMatRep;
       if size = 0 then
           filts := filts and IsCVecRepOverSmallField;
+          filtscmat := filtscmat and IsCVecRepOverSmallField;
       fi;
       if d = 1 then
           filts := filts and IsCVecRepOverPrimeField;
+          filtscmat := filtscmat and IsCVecRepOverPrimeField;
       fi;
 
       # Note that IsMutable is added below, when we create the vector type
       l[CVEC_IDX_filts] := filts;
+      l[CVEC_IDX_filtscmat] := filtscmat;
 
       # We use the "official" families:
       scafam := FFEFamily(p);
@@ -208,6 +212,7 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
   else   # pos <> fail
       elsperword := CVEC_F[pos]![CVEC_IDX_elsperword];  # for later use
       filts := CVEC_F[pos]![CVEC_IDX_filts];            # for later use
+      filtscmat := CVEC_F[pos]![CVEC_IDX_filtscmat];    # for later use
       scafam := CVEC_F[pos]![CVEC_IDX_scafam];          # for later use
   fi;
 
@@ -228,6 +233,8 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
   cl[CVEC_IDX_GF] := GF(p,d);
   cl[CVEC_IDX_lens] := CVEC_lens[pos];
   cl[CVEC_IDX_classes] := CVEC_classes[pos];
+  ty := NewType(CollectionsFamily(CollectionsFamily(scafam)),filtscmat);
+  cl[CVEC_IDX_typecmat] := ty;
 
   Objectify(NewType(CVecClassFamily,IsCVecClass),cl);
 

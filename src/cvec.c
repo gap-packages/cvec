@@ -42,8 +42,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define MAXDEGREE 1024
 
 /* Define this to empty if you want global access to functions: */
-#define STATIC static
-/*  #define STATIC  */
+/*  #define STATIC static */
+#define STATIC
 
 /* Define this to empty if your compiler does not support inlined functions: */
 #define INLINE inline
@@ -71,6 +71,7 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define IDX_tab2 12
 #define IDX_size 13
 #define IDX_scafam 14
+#define IDX_filtscmat 15
 
 #define IDX_fieldinfo 1
 #define IDX_len 2
@@ -79,6 +80,7 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define IDX_GF 5
 #define IDX_lens 6
 #define IDX_classes 7
+#define IDX_typecmat 8
 
 #define OFF_mask 0
 #define OFF_offset 1
@@ -4293,6 +4295,7 @@ static Int InitLibrary ( StructInitInfo *module )
     CVEC_PUBLISH(IDX_tab2);
     CVEC_PUBLISH(IDX_size);
     CVEC_PUBLISH(IDX_scafam);
+    CVEC_PUBLISH(IDX_filtscmat);
 
     CVEC_PUBLISH(IDX_fieldinfo);
     CVEC_PUBLISH(IDX_len);
@@ -4301,6 +4304,7 @@ static Int InitLibrary ( StructInitInfo *module )
     CVEC_PUBLISH(IDX_GF);
     CVEC_PUBLISH(IDX_lens);
     CVEC_PUBLISH(IDX_classes);
+    CVEC_PUBLISH(IDX_typecmat);
 
     /*ImportFuncFromLibrary( "IsCVecRep", &IsCVecRep );*/
 

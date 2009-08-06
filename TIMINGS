@@ -1,0 +1,33 @@
+Times to multiply two 512x512 matrices over GF(2) (10000x):
+
+  gaplib, luna:                  37522ms
+  cvec, luna, vor Aenderungen:   11872ms
+  cvec, luna, nach Typsp.:       11432ms
+
+
+
+Times to multiply two 64x64 matrices over GF(2) (100000x):
+
+  gaplib, luna:                   6004ms
+  cvec, luna, vor Aenderungen:    2868ms
+  cvec, luna, nach Typsp.:        2552ms
+
+
+
+Times to multiply two 32x32 matrices over GF(2) (100000x):
+
+  gaplib, luna:                   1520ms
+  cvec, luna, vor Aenderungen:    1656ms
+  cvec, luna, nach Typsp.:        1316ms
+
+
+
+Times to multiply two 4x4 matrices over GF(2) (1000000x):
+
+  gaplib, luna:                    776ms
+  cvec, luna, vor Aenderungen:   15361ms
+  cvec, luna, nach Typsp.:       11349ms
+
+
+
+
