@@ -4012,6 +4012,129 @@ STATIC Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
     return sum;
 }
 
+static UInt RNAM_greasehint = 0;
+static UInt RNAM_len = 0;
+static UInt RNAM_rows = 0;
+static UInt RNAM_scaclass = 0;
+static UInt RNAM_vecclass = 0;
+
+STATIC Obj CVEC_CMatMaker_C( Obj self, Obj l, Obj cl )
+{
+    /* Create a cmat object. This is internal, so no checks are done! */
+    Obj m;
+    Obj q;
+    Int qq;
+    Int qp;
+    Obj fi;
+    Int greasehint;
+    Int len;
+    Int i;
+
+    if (RNAM_greasehint == 0) {
+        RNAM_greasehint = RNamName("greasehint");
+        RNAM_len = RNamName("len");
+        RNAM_rows = RNamName("rows");
+        RNAM_scaclass = RNamName("scaclass");
+        RNAM_vecclass = RNamName("vecclass");
+    }
+    fi = ELM_PLIST(cl,IDX_fieldinfo);
+    q = ELM_PLIST(fi,IDX_q);
+    if (!IS_INTOBJ(q)) 
+        greasehint = 0;
+    else {
+        greasehint = INT_INTOBJ(ELM_PLIST(fi,IDX_bestgrease));
+        qq = INT_INTOBJ(q);
+        qp = 1;
+        for (i = greasehint;i > 0;i--) qp *= qq;
+        len = LEN_PLIST(l);
+        while (greasehint > 0 && len < qp) {
+            greasehint--;
+            qp /= qq;
+        }
+    }
+    /* GARBAGE COLLECTION POSSIBLE */
+    m = NEW_PREC(5);
+    AssPRec(m,RNAM_greasehint,INTOBJ_INT(greasehint));
+    AssPRec(m,RNAM_len,INTOBJ_INT(LEN_PLIST(l)-1));
+    AssPRec(m,RNAM_rows,l);
+    AssPRec(m,RNAM_scaclass,ELM_PLIST(cl,IDX_GF));
+    AssPRec(m,RNAM_vecclass,cl);
+    SET_TYPE_COMOBJ(m,ELM_PLIST(cl,IDX_typecmat));
+    RetypeBag( m, T_COMOBJ );
+    return m;
+}
+
+STATIC Obj CVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
+{
+    Int i;
+    Obj cvectype;
+    Int len;
+    Obj l;
+
+    len = INT_INTOBJ(nrrows);
+    /* GARBAGE COLLECTION POSSIBLE */
+    l = NEW_PLIST(T_PLIST,len+1);
+    SET_LEN_PLIST(l,len+1);
+    SET_ELM_PLIST(l,1,INTOBJ_INT(0));
+    cvectype = ELM_PLIST(cl,IDX_type);
+    for (i = 2;i <= len+1;i++) {
+        /* GARBAGE COLLECTION POSSIBLE */
+        SET_ELM_PLIST(l,i,NEW(self,cl,cvectype));
+        CHANGED_BAG(l);
+    }
+    /* GARBAGE COLLECTION POSSIBLE */
+    return CVEC_CMatMaker_C(self,l,cl);
+}
+
+static Obj CVEC_PROD_CMAT_CMAT_BIG;
+
+STATIC Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
+{
+    /* This function is installed as the multiplication function for cmats.
+     * It dispatches very quickly for small matrices and calls back
+     * CVEC_PROD_CMAT_CMAT_BIG on the GAP level for bigger matrices
+     * to sort out Winograd and so on. It also does the catching of
+     * argument errors. */
+    Obj clm,cln;
+    Obj fi;
+    Int max;
+    Int dim;
+    Obj q;
+    Obj res;
+
+    if (ElmPRec(m,RNAM_scaclass) != ElmPRec(n,RNAM_scaclass)) {
+        return OurErrorBreakQuit(
+             "CVEC_PROD_CMAT_CMAT: incompatible base fields");
+    }
+    dim = INT_INTOBJ(ElmPRec(n,RNAM_len));
+    clm = ElmPRec(m,RNAM_vecclass);
+    if (INT_INTOBJ(ELM_PLIST(clm,IDX_len)) != dim) {
+        return OurErrorBreakQuit(
+             "CVEC_PROD_CMAT_CMAT: matrix dimension not matching");
+    }
+    cln = ElmPRec(n,RNAM_vecclass);
+    max = INT_INTOBJ(ELM_PLIST(cln,IDX_len));
+    if (dim > max) max = dim;
+    dim = INT_INTOBJ(ElmPRec(m,RNAM_len));
+    if (dim > max) max = dim;
+    /* dim is now the number of rows of m */
+    fi = ELM_PLIST(clm,IDX_fieldinfo);
+    q = ELM_PLIST(fi,IDX_q);
+    if (IS_INTOBJ(q) && q == INTOBJ_INT(2) && max <= 512) {
+        res = CVEC_MAKE_ZERO_CMAT(self,INTOBJ_INT(dim),cln);
+        PROD_CMAT_CMAT_GF2_SMALL(self,ElmPRec(res,RNAM_rows),
+                                      ElmPRec(m,RNAM_rows),
+                                      ElmPRec(n,RNAM_rows),INTOBJ_INT(max));
+        if (!(IS_MUTABLE_OBJ(m) || IS_MUTABLE_OBJ(n)))
+            MakeImmutable(res);
+        return res;
+    }
+    /* Go back to the GAP level: */
+    return CALL_2ARGS(CVEC_PROD_CMAT_CMAT_BIG,m,n);
+}
+
+
+
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
 /******************************************************************************
@@ -4223,6 +4346,18 @@ static StructGVarFunc GVarFuncs [] = {
     CMATS_SCALAR_PRODUCTS_ROWS,
     "cvec.c:CMATS_SCALAR_PRODUCTS_ROWS" },
 
+  { "CVEC_CMatMaker_C", 2, "l, cl",
+    CVEC_CMatMaker_C,
+    "cvec.c:CVEC_CMatMaker_C" },
+
+  { "CVEC_MAKE_ZERO_CMAT", 2, "nrrows, cl",
+    CVEC_MAKE_ZERO_CMAT,
+    "cvec.c:CVEC_MAKE_ZERO_CMAT" },
+
+  { "CVEC_PROD_CMAT_CMAT_DISPATCH", 2, "m, n",
+    CVEC_PROD_CMAT_CMAT_DISPATCH,
+    "cvec.c:CVEC_PROD_CMAT_CMAT_DISPATCH" },
+
   { 0 }
 
 };
@@ -4250,6 +4385,8 @@ static Int InitKernel ( StructInitInfo *module )
     gf2_usemem_64(arenastart,2048*1024);
     gf2_usemem_32(arenastart,2048*1024);
 #endif
+
+    InitFopyGVar("CVEC_PROD_CMAT_CMAT_BIG", &CVEC_PROD_CMAT_CMAT_BIG);
 
     /* return success                                                      */
     return 0;
@@ -4355,7 +4492,7 @@ StructInitInfo * Init__cvec ( void )
  * kept in the C-level are no longer valid:
  * All places where a garbage collection can be triggered are marked
  * with "GARBAGE COLLECTION POSSIBLE" (usage of functions "NewBag",
- * "NEW_STRING", "NEW_PLIST", "GrowString" or "CALL_1ARGS"). 
+ * "NEW_STRING", "NEW_PLIST", "GrowString", "NEW_PREC", or "CALL_1ARGS"). 
  * All those places have to be checked that no absolute reference is 
  * reused after the garbage collection. This has been done. 
  * The following functions contain such places:
@@ -4367,8 +4504,11 @@ StructInitInfo * Init__cvec ( void )
  *   PROD_COEFFS_CVEC_PRIMEFIELD
  *   CMAT_INVERSE
  *   CMAT_INVERSE_GREASE
- * Those functions are not called in this file from the C level. So no
- * other functions are "infected". */
+ *   CVEC_CMatMaker_C
+ *   CVEC_MAKE_ZERO_CMAT
+ *   CVEC_PROD_CMAT_CMAT_DISPATCH
+ * Those functions are not called from any other functions in this file 
+ * from the C level. So no other functions are "infected". */
 
 /* Here is a sketch of a proof that there are no missing CHANGED_BAGs in
  * this file:

@@ -18,6 +18,20 @@ if not(IsBound(IsMatrixObj)) then
     ReadPackage("cvec", "gap/matobj.gi");
 fi;
 
+################################
+# First look after our C part: #
+################################
+
+# load kernel function if it is installed:
+if (not IsBound(CVEC)) and ("cvec" in SHOW_STAT()) then
+  # try static module
+  LoadStaticModule("cvec");
+fi;
+if (not IsBound(CVEC)) and
+   (Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") <> fail) then
+  LoadDynamicModule(Filename(DirectoriesPackagePrograms("cvec"), "cvec.so"));
+fi;
+
 ReadPackage("cvec", "gap/cvec.gd");
 ReadPackage("cvec", "gap/cmat.gd");
 ReadPackage("cvec", "gap/linalg.gd");

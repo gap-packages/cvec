@@ -27,7 +27,7 @@ DeclareOperation( "CMat", [IsList] );
 DeclareOperation( "CMat", [IsList, IsObject] );
 DeclareOperation( "CMat", [IsList, IsObject, IsBool] );
 
-DeclareGlobalFunction( "CVEC_CMatMaker" );
+DeclareGlobalFunction( "CVEC_CMatMaker_GAP" );
 
 DeclareGlobalFunction( "CVEC_ZeroMat" );
 DeclareGlobalFunction( "CVEC_IdentityMat" );
@@ -62,6 +62,14 @@ DeclareGlobalFunction( "CVEC_CopySubMatrixUgly" );
 #############################################################################
 
 DeclareGlobalFunction( "CVEC_HashFunctionForCMats" );
+
+
+#############################################################################
+# Matrix multiplication:
+#############################################################################
+
+DeclareGlobalFunction( "CVEC_PROD_CMAT_CMAT_BIG" );
+
 
 #############################################################################
 # Greasing:

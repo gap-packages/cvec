@@ -14,7 +14,7 @@
 # Creation:
 #############################################################################
 
-InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
+InstallGlobalFunction( CVEC_CMatMaker_GAP, function(l,cl)
     # Makes a new CMat, given a list l with a 0 in the first place
     local greasehint,m,q,qp,ty,filts;
     if Length(l) > 0 then
@@ -34,6 +34,11 @@ InstallGlobalFunction( CVEC_CMatMaker, function(l,cl)
     od;
     return Objectify(cl![CVEC_IDX_typecmat],m);
 end );
+if IsBound(CVEC_CMatMaker_C) then
+    CVEC_CMatMaker := CVEC_CMatMaker_C;
+else
+    CVEC_CMatMaker := CVEC_CMatMaker_GAP;
+fi;
 
 InstallMethod( ConstructingFilter, "for a cmat",
   [ IsCMatRep ],
@@ -1412,30 +1417,33 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
  
 InstallOtherMethod(\*, "for two cmats, second one not greased",
   [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
+  CVEC_PROD_CMAT_CMAT_DISPATCH );
+
+InstallGlobalFunction( CVEC_PROD_CMAT_CMAT_BIG,
   function(m,n)
-    local d,greasetab,i,j,l,lev,q,res,spreadtab,tab,tablen,vcl,max;
-    if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
-        Error("\\*: incompatible base fields");
-    fi;
-    if m!.vecclass![CVEC_IDX_len] <> n!.len then
-        Error("\\*: lengths not matching");
-    fi;
+    local d,greasetab,i,j,l,lev,q,res,spreadtab,tab,tablen,vcl;
+    #if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
+    #    Error("\\*: incompatible base fields");
+    #fi;
+    #if m!.vecclass![CVEC_IDX_len] <> n!.len then
+    #    Error("\\*: lengths not matching");
+    #fi;
     vcl := n!.vecclass;
-    max := Maximum(m!.len,m!.vecclass![CVEC_IDX_len],vcl![CVEC_IDX_len]);
+    #max := Maximum(m!.len,m!.vecclass![CVEC_IDX_len],vcl![CVEC_IDX_len]);
     q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
-    if max <= 512 and q = 2 then
-        # Make a new matrix and then go directly into the kernel:
-        l := 0*[1..m!.len+1];
-        for i in [2..m!.len+1] do
-            l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-        od;
-        res := CVEC_CMatMaker(l,n!.vecclass);
-        CVEC_PROD_CMAT_CMAT_GF2_SMALL(l,m!.rows,n!.rows,max);
-        if not(IsMutable(m) or IsMutable(n)) then
-            MakeImmutable(res);
-        fi;
-        return res;
-    fi;
+    #if max <= 512 and q = 2 then
+    #    # Make a new matrix and then go directly into the kernel:
+    #    l := 0*[1..m!.len+1];
+    #    for i in [2..m!.len+1] do
+    #        l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
+    #    od;
+    #    res := CVEC_CMatMaker(l,n!.vecclass);
+    #    CVEC_PROD_CMAT_CMAT_GF2_SMALL(l,m!.rows,n!.rows,max);
+    #    if not(IsMutable(m) or IsMutable(n)) then
+    #        MakeImmutable(res);
+    #    fi;
+    #    return res;
+    #fi;
     if IsBound(CVEC_WinogradBounds[q]) and
         m!.len * m!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] and
         n!.len * n!.vecclass![CVEC_IDX_len] >= CVEC_WinogradBounds[q] then
@@ -1448,11 +1456,13 @@ InstallOtherMethod(\*, "for two cmats, second one not greased",
     fi;
          
     # First make a new matrix:
-    l := 0*[1..m!.len+1];
-    for i in [2..m!.len+1] do
-        l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-    od;
-    res := CVEC_CMatMaker(l,n!.vecclass);
+    #l := 0*[1..m!.len+1];
+    #for i in [2..m!.len+1] do
+    #    l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
+    #od;
+    #res := CVEC_CMatMaker(l,n!.vecclass);
+    res := CVEC_MAKE_ZERO_CMAT(m!.len,n!.vecclass);
+    l := res!.rows;
     if m!.len > 0 then
         d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
         if q > CVEC.MaximumGreaseCalibration or

@@ -9,20 +9,6 @@
 ##  fields. 
 ##
 
-################################
-# First look after our C part: #
-################################
-
-# load kernel function if it is installed:
-if (not IsBound(CVEC)) and ("cvec" in SHOW_STAT()) then
-  # try static module
-  LoadStaticModule("cvec");
-fi;
-if (not IsBound(CVEC)) and
-   (Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") <> fail) then
-  LoadDynamicModule(Filename(DirectoriesPackagePrograms("cvec"), "cvec.so"));
-fi;
-
 #############################################################################
 ## Info Class:
 #############################################################################
@@ -233,7 +219,8 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
   cl[CVEC_IDX_GF] := GF(p,d);
   cl[CVEC_IDX_lens] := CVEC_lens[pos];
   cl[CVEC_IDX_classes] := CVEC_classes[pos];
-  ty := NewType(CollectionsFamily(CollectionsFamily(scafam)),filtscmat);
+  ty := NewType(CollectionsFamily(CollectionsFamily(scafam)),
+                filtscmat and IsMutable);
   cl[CVEC_IDX_typecmat] := ty;
 
   Objectify(NewType(CVecClassFamily,IsCVecClass),cl);
@@ -1272,6 +1259,7 @@ InstallMethod( ChooseHashFunction, "for cvecs",
 # (Un-)Pickling:
 #############################################################################
 
+CVEC_CMatMaker := fail;   # this is to get rid of a warning in this method
 InstallMethod( IO_Pickle, "for cvecs",
   [IsFile, IsCVecRep and IsList],
   function( f, v )
@@ -1283,6 +1271,7 @@ InstallMethod( IO_Pickle, "for cvecs",
     if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
     return IO_OK;
   end );
+Unbind(CVEC_CMatMaker);
 
 IO_Unpicklers.MCVC :=
   function( f )
