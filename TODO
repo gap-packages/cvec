@@ -1,3 +1,6 @@
+Debug burschen.gp: zwei matrizen A und B, wo A*B falsch berechnet
+wird!
+
 Hashfunktionen nicht Architekturneutral!
 Note dependencies
 Fast method for ProductTransposedMatMat
