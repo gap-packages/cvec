@@ -2463,32 +2463,32 @@ STATIC Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
         wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
         ld(regs_64[0],m,wordlenm,WPR_64-wordlenm,rowsm);
         ld(regs_64[1],n,wordlenn,WPR_64-wordlenn,rowsn);
-        gf2_grease_64(1,wordlenm);
-        gf2_mul_64(2,0,rowsm,wordlenm);
+        gf2_grease_64(1,wordlenn);
+        gf2_mul_64(2,0,rowsm,wordlenn);
         st(l,regs_64[2],wordlenn,WPR_64-wordlenn,rowsm);
     } else if (maxdim <= 128) {
         wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
         wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
         ld(regs_128[0],m,wordlenm,WPR_128-wordlenm,rowsm);
         ld(regs_128[1],n,wordlenn,WPR_128-wordlenn,rowsn);
-        gf2_grease_128(1,wordlenm);
-        gf2_mul_128(2,0,rowsm,wordlenm);
+        gf2_grease_128(1,wordlenn);
+        gf2_mul_128(2,0,rowsm,wordlenn);
         st(l,regs_128[2],wordlenn,WPR_128-wordlenn,rowsm);
     } else if (maxdim <= 256) {
         wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
         wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
         ld(regs_256[0],m,wordlenm,WPR_256-wordlenm,rowsm);
         ld(regs_256[1],n,wordlenn,WPR_256-wordlenn,rowsn);
-        gf2_grease_256(1,wordlenm);
-        gf2_mul_256(2,0,rowsm,wordlenm);
+        gf2_grease_256(1,wordlenn);
+        gf2_mul_256(2,0,rowsm,wordlenn);
         st(l,regs_256[2],wordlenn,WPR_256-wordlenn,rowsm);
     } else if (maxdim <= 512) {
         wordlenm = INT_INTOBJ(ELM_PLIST(clm,IDX_wordlen));
         wordlenn = INT_INTOBJ(ELM_PLIST(cln,IDX_wordlen));
         ld(regs_512[0],m,wordlenm,WPR_512-wordlenm,rowsm);
         ld(regs_512[1],n,wordlenn,WPR_512-wordlenn,rowsn);
-        gf2_grease_512(1,wordlenm);
-        gf2_mul_512(2,0,rowsm,wordlenm);
+        gf2_grease_512(1,wordlenn);
+        gf2_mul_512(2,0,rowsm,wordlenn);
         st(l,regs_512[2],wordlenn,WPR_512-wordlenn,rowsm);
     }
     return 0L;
@@ -3918,6 +3918,20 @@ STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
         if (vcl != wcl) {
             return OurErrorBreakQuit("CVEC_SCALAR_PRODUCT: "
                                      "cvecs not in same class");
+        }
+        /* This is a special case which is even higher optimised: */
+        if (p == 2 && d == 1) {
+            vv = DATA_CVEC(v);
+            ww = DATA_CVEC(w);
+            Int wlen = INT_INTOBJ(ELM_PLIST(vcl,IDX_wordlen));
+            Word w = 0L;
+            for (i = wlen;i > 0;i--) w ^= (*vv++ & *ww++);
+#ifdef SYS_IS_64_BIT
+            w ^= (w >> 32);
+#endif
+            w ^= (w >> 16); w ^= (w >> 8); w ^= (w >> 4);
+            w ^= (w >> 2);  w ^= (w >> 1); w &= 1L;
+            return ELM_PLIST(tab2,(Int) w + 1);
         }
         if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
             return TRY_NEXT_METHOD;
