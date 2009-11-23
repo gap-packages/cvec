@@ -69,6 +69,8 @@ DeclareGlobalFunction( "CVEC_HashFunctionForCMats" );
 #############################################################################
 
 DeclareGlobalFunction( "CVEC_PROD_CMAT_CMAT_BIG" );
+DeclareOperation( "EntryOfMatrixProduct", 
+  [ IsMatrixObj, IsMatrixObj, IsPosInt, IsPosInt ] );
 
 
 #############################################################################

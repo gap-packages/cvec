@@ -1115,6 +1115,35 @@ CVEC.TEST.INVERSION := function(p,d)
   fi;
 end;
   
+CVEC.TEST.SCALARPRODUCT := function(p,d)
+  local x,m,i,j,y;
+  x := Random(5,200);
+  m := CVEC_RandomMat(10,x,p,d);
+  for i in [1..10] do
+    for j in [i..10] do
+      y := ScalarProduct(m[i],m[j]);
+      if y <> Sum([1..x],k->m[i][k]*m[j][k]) then
+          Error("Alarm p=",p," d=",d," you can inspect m, i, and j");
+      fi;
+    od;
+  od;
+end;
+
+CVEC.TEST.ENTRYOFMATRIXPRODUCT := function(p,d)
+  local x,m,n,i,j,y;
+  x := Random(5,200);
+  m := CVEC_RandomMat(10,x,p,d);
+  n := CVEC_RandomMat(x,10,p,d);
+  for i in [1..10] do
+    for j in [i..10] do
+      y := EntryOfMatrixProduct(m,n,i,j);
+      if y <> Sum([1..x],k->m[i][k]*n[k][j]) then
+          Error("Alarm p=",p," d=",d," you can inspect m, n, i, and j");
+      fi;
+    od;
+  od;
+end;
+  
 CVEC.TEST.DOALL := function()
   local inf;
   inf := InfoLevel(InfoWarning);
@@ -1243,9 +1272,16 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.SCALAR_UNPACK(65537,2);
   Print("Testing SCALAR_UNPACK 65537^3...\r");
   CVEC.TEST.SCALAR_UNPACK(65537,3);
+  Print("Testing NumberFFVector...\r");
   CVEC.TEST.ALLCHEAP("NUMBERFFVECTOR",CVEC.TEST.NUMBERFFVECTOR);
+  Print("Testing TransposedMat...\r");
   CVEC.TEST.ALLCHEAP("TRANSPOSED_MAT",CVEC.TEST.TRANSPOSED_MAT);
+  Print("Testing inversion...\r");
   CVEC.TEST.COMPRESSED_ALL("INVERSION",CVEC.TEST.INVERSION);
+  Print("Testing ScalarProduct...\r");
+  CVEC.TEST.ALLFFE("SCALARPRODUCT",CVEC.TEST.SCALARPRODUCT);
+  Print("Testing EntryOfMatrixProduct...\r");
+  CVEC.TEST.ALLFFE("ENTRYOFMATPROD",CVEC.TEST.ENTRYOFMATRIXPRODUCT);
   SetInfoLevel(InfoWarning,inf);
 end;
 

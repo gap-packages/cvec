@@ -1,3 +1,4 @@
+    
 /***************************************************************************
  **
  *A  cvec.c               cvec-package                        Max Neunhoeffer
@@ -3894,53 +3895,55 @@ STATIC Obj CVEC_EQINT(Obj self, Obj a, Obj b)
     return (EQ( a, b ) ? True : False);
 }
 
-STATIC Obj CVEC_ROW_COL_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
+STATIC Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
 {
     /* m and n must be cmats over the same prime field with #cols(m)=#rows(n).
      * i must be a row number of m and j a row number of n. */
     Int rnamrows = RNamName( "rows" );
     Obj mrows = ElmPRec( m, rnamrows );
     Obj nrows = ElmPRec( n, rnamrows );
+    Int len;
+    Int k;
+    len = LEN_PLIST(mrows);
+    if (len == 1) return Fail;
+    k = INT_INTOBJ(i);
+    if (k < 1 || k > len-1) {
+        return 
+          OurErrorBreakQuit("CMAT_ENTRY_OF_MAT_PROD: row index out of range");
+    }
     Obj v = ELM_PLIST(mrows,INT_INTOBJ(i)+1);
     PREPARE_clfi(v,vcl,fi);
+    len = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+    if (len != LEN_PLIST(nrows)-1) {
+        return OurErrorBreakQuit("CMAT_ENTRY_OF_MAT_PROD: unequal length");
+    }
     PREPARE_p(fi);
     PREPARE_d(fi);
     PREPARE_tab2(fi);
-    if (LEN_PLIST(nrows) == 0) return ELM_PLIST(tab2,1);    # Zero!
+    if (LEN_PLIST(nrows) == 1) return ELM_PLIST(tab2,1);    /* Zero! */
     Obj w = ELM_PLIST(nrows,2);
     PREPARE_cl(w,wcl);
-    Int len = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+    k = INT_INTOBJ(j);
+    if (k < 1 || k > INT_INTOBJ(ELM_PLIST(wcl,IDX_len))) {
+        return 
+          OurErrorBreakQuit("CMAT_ENTRY_OF_MAT_PROD: col index out of range");
+    }
     seqaccess sa;
-    Int i;
+    seqaccess saw;
     Word res;
     Word *vv,*ww;
-    Int size;
+    Int size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
 
-    size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
-
-    if (vcl != wcl) {
-        return OurErrorBreakQuit("CVEC_SCALAR_PRODUCT: "
-                                 "cvecs not in same class");
-    }
-    /* This is a special case which is even higher optimised: */
-    if (p == 2 && d == 1) {
-        vv = DATA_CVEC(v);
-        ww = DATA_CVEC(w);
-        Int wlen = INT_INTOBJ(ELM_PLIST(vcl,IDX_wordlen));
-        Word w = 0L;
-        for (i = wlen;i > 0;i--) w ^= (*vv++ & *ww++);
-#ifdef SYS_IS_64_BIT
-        w ^= (w >> 32);
-#endif
-        w ^= (w >> 16); w ^= (w >> 8); w ^= (w >> 4);
-        w ^= (w >> 2);  w ^= (w >> 1); w &= 1L;
-        return ELM_PLIST(tab2,(Int) w + 1);
+    if (fi != ELM_PLIST(wcl,IDX_fieldinfo)) {
+        return OurErrorBreakQuit("CMAT_ENTRY_OF_MAT_PROD: "
+                                 "cmats not over same field");
     }
     if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
         return TRY_NEXT_METHOD;
     }
     INIT_SEQ_ACCESS( &sa, v, 1 );
-    i = 1;
+    INIT_SEQ_ACCESS( &saw, w, INT_INTOBJ(j) );
+    k = 1;
     res = 0;
     vv = DATA_CVEC(v);
     ww = DATA_CVEC(w);
@@ -3949,22 +3952,26 @@ STATIC Obj CVEC_ROW_COL_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
      * (2) 2*(p-1)*(p-1) does fit into a Word */
     if ((p-1)*(p-1) > (WORDALLONE >> 1)) {
         while (1) {
-            res += (GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&sa,ww,0)) % p;
+            res += (GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&saw,ww,0)) % p;
             if (res >= p) res -= p;
-            if (++i > len) break;
+            if (++k > len) break;
             STEP_RIGHT(&sa);
+            w = ELM_PLIST(nrows,k+1);
+            ww = DATA_CVEC(w);
         }
     } else {
         Word addsbeforereduce = WORDALLONE / ((p-1)*(p-1));
-        Word j = addsbeforereduce;
+        Word jj = addsbeforereduce;
         while (1) {
-            res += GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&sa,ww,0);
-            if (--j == 0) {
-                j = addsbeforereduce;
+            res += GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&saw,ww,0);
+            if (--jj == 0) {
+                jj = addsbeforereduce;
                 res %= p;
             }
-            if (++i > len) break;
+            if (++k > len) break;
             STEP_RIGHT(&sa);
+            w = ELM_PLIST(nrows,k+1);
+            ww = DATA_CVEC(w);
         }
         res %= p;
     }
@@ -4424,6 +4431,10 @@ static StructGVarFunc GVarFuncs [] = {
   { "CVEC_CLEANROWKERNEL", 4, "basis, vec, extend, dec",
     CLEANROWKERNEL, 
     "cvec.c:CLEANROWKERNEL" },
+
+  { "CMAT_ENTRY_OF_MAT_PROD", 4, "m, n, i, j",
+    CMAT_ENTRY_OF_MAT_PROD,
+    "cvec.c:CMAT_ENTRY_OF_MAT_PROD" },
 
   { "CVEC_SCALAR_PRODUCT", 2, "v, w",
     CVEC_SCALAR_PRODUCT,

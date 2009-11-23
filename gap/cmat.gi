@@ -2758,6 +2758,23 @@ InstallMethod( ScalarProductsRows,
     IsPosInt ],
   CMATS_SCALAR_PRODUCTS_ROWS );
 
+InstallMethod( EntryOfMatrixProduct, "for cmats over prime fields",
+  [ IsCMatRep and IsCVecRepOverSmallField and IsCVecRepOverPrimeField,
+    IsCMatRep and IsCVecRepOverSmallField and IsCVecRepOverPrimeField,
+    IsPosInt, IsPosInt ],
+  CMAT_ENTRY_OF_MAT_PROD );
+
+InstallMethod( EntryOfMatrixProduct, "generic method",
+  [ IsMatrixObj, IsMatrixObj, IsPosInt, IsPosInt ],
+  function( m, n, i, j )
+    local f,k,res;
+    f := BaseDomain(m);
+    res := Zero(f);
+    for k in [1..RowLength(m)] do
+        res := res + MatElm(m,i,k) * MatElm(n,k,j);
+    od;
+    return res;
+  end );
 
 ##
 ##  This program is free software; you can redistribute it and/or modify

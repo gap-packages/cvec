@@ -11,6 +11,7 @@
   - Use C-Hashfunction of orb 3.0 if it is there.
   - Many optimisations for GF2
   - Faster ScalarProduct for GF2
+  - Fast EntryOfMatrixProduct for prime fields
 
 
 ==========================
