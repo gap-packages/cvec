@@ -1,14 +1,14 @@
 /***************************************************************************
-**
-*A  cvec.c               cvec-package                        Max Neunhoeffer
-**
-**  Copyright (C) 2007  Max Neunhoeffer, Lehrstuhl D f. Math., RWTH Aachen
-**  This file is free software, see license information at the end.
-**  
-*/
+ **
+ *A  cvec.c               cvec-package                        Max Neunhoeffer
+ **
+ **  Copyright (C) 2007  Max Neunhoeffer, Lehrstuhl D f. Math., RWTH Aachen
+ **  This file is free software, see license information at the end.
+ **  
+ */
 
 const char * Revision_cvec_c =
-   "$Id: cvec.c,v$";
+"$Id: cvec.c,v$";
 
 #include <stdlib.h>
 
@@ -16,12 +16,12 @@ const char * Revision_cvec_c =
 #ifdef SYS_IS_64_BIT
 #include "gf2lib_64.c"
 WORD myarena[(4096*1024+1024*1024)/8];      
-         /* we assume 4MB of cache, aligned to 1MB */
+/* we assume 4MB of cache, aligned to 1MB */
 WORD *arenastart;
 #else
 #include "gf2lib_32.c"
 WORD myarena[(2048*1024+1024*1024)/4];      
-         /* we assume 2MB of cache, aligned to 1MB */
+/* we assume 2MB of cache, aligned to 1MB */
 WORD *arenastart;
 #endif
 
@@ -49,8 +49,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define INLINE inline
 
 
-  /************************************/
- /* Macros to access the data types: */
+/************************************/
+/* Macros to access the data types: */
 /************************************/
 
 /* The following positions are exported into the record CVEC for use
@@ -3892,6 +3892,83 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
 STATIC Obj CVEC_EQINT(Obj self, Obj a, Obj b)
 {
     return (EQ( a, b ) ? True : False);
+}
+
+STATIC Obj CVEC_ROW_COL_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
+{
+    /* m and n must be cmats over the same prime field with #cols(m)=#rows(n).
+     * i must be a row number of m and j a row number of n. */
+    Int rnamrows = RNamName( "rows" );
+    Obj mrows = ElmPRec( m, rnamrows );
+    Obj nrows = ElmPRec( n, rnamrows );
+    Obj v = ELM_PLIST(mrows,INT_INTOBJ(i)+1);
+    PREPARE_clfi(v,vcl,fi);
+    PREPARE_p(fi);
+    PREPARE_d(fi);
+    PREPARE_tab2(fi);
+    if (LEN_PLIST(nrows) == 0) return ELM_PLIST(tab2,1);    # Zero!
+    Obj w = ELM_PLIST(nrows,2);
+    PREPARE_cl(w,wcl);
+    Int len = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
+    seqaccess sa;
+    Int i;
+    Word res;
+    Word *vv,*ww;
+    Int size;
+
+    size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
+
+    if (vcl != wcl) {
+        return OurErrorBreakQuit("CVEC_SCALAR_PRODUCT: "
+                                 "cvecs not in same class");
+    }
+    /* This is a special case which is even higher optimised: */
+    if (p == 2 && d == 1) {
+        vv = DATA_CVEC(v);
+        ww = DATA_CVEC(w);
+        Int wlen = INT_INTOBJ(ELM_PLIST(vcl,IDX_wordlen));
+        Word w = 0L;
+        for (i = wlen;i > 0;i--) w ^= (*vv++ & *ww++);
+#ifdef SYS_IS_64_BIT
+        w ^= (w >> 32);
+#endif
+        w ^= (w >> 16); w ^= (w >> 8); w ^= (w >> 4);
+        w ^= (w >> 2);  w ^= (w >> 1); w &= 1L;
+        return ELM_PLIST(tab2,(Int) w + 1);
+    }
+    if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
+        return TRY_NEXT_METHOD;
+    }
+    INIT_SEQ_ACCESS( &sa, v, 1 );
+    i = 1;
+    res = 0;
+    vv = DATA_CVEC(v);
+    ww = DATA_CVEC(w);
+    /* We distinguish 2 cases: 
+     * (1) 2*(p-1)*(p-1) does not fit into a Word
+     * (2) 2*(p-1)*(p-1) does fit into a Word */
+    if ((p-1)*(p-1) > (WORDALLONE >> 1)) {
+        while (1) {
+            res += (GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&sa,ww,0)) % p;
+            if (res >= p) res -= p;
+            if (++i > len) break;
+            STEP_RIGHT(&sa);
+        }
+    } else {
+        Word addsbeforereduce = WORDALLONE / ((p-1)*(p-1));
+        Word j = addsbeforereduce;
+        while (1) {
+            res += GET_VEC_ELM(&sa,vv,0) * GET_VEC_ELM(&sa,ww,0);
+            if (--j == 0) {
+                j = addsbeforereduce;
+                res %= p;
+            }
+            if (++i > len) break;
+            STEP_RIGHT(&sa);
+        }
+        res %= p;
+    }
+    return ELM_PLIST(tab2,res+1);
 }
 
 STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
