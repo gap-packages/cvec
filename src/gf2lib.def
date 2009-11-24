@@ -141,22 +141,42 @@ void gf2_mul(int d, int a, int rows, int words)
    Note that words must be <= WPR and gf2_grease must have been called
    with the same value! */
 {
-    WORD *r,*p,*q,*qq;
+    WORD *r,*p,*q;
     int i,j,k;
-    WORD w,w2;
+    WORD w;
+#if WPR == 1
+    WORD w2;
+#else
+    WORD *qq;
+#endif
     r = REGS[d];
     p = REGS[a];
     if (words == 1 ) {
         for (i = rows;i > 0;i--) {
             q = GRACCU;
+            ROWCLEAR(r);
+            r -= WPR;
             w = *p++;
-            w2 = 0;
-            for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
-                if (q[WPR * (w & GREASEMASK)]) w2 ^= q[WPR * (w & GREASEMASK)];
-                w >>= GREASE;
-                q += GREASE2*WPR;
-            }
-            *r = w2;
+            if (w) {
+#if WPR == 1
+                w2 = 0;
+                for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
+                    if (q[w & GREASEMASK]) w2 ^= q[w & GREASEMASK];
+                    w >>= GREASE;
+                    q += GREASE2*WPR;
+                }
+                *r = w2;
+#else
+                for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
+                    qq = q + WPR * (w & GREASEMASK);
+                    ROWADD2(r,qq);
+                    r -= WPR;
+                    w >>= GREASE;
+                    q += GREASE2*WPR;
+                }
+#endif
+            } else q += GREASE2*WPR*(sizeof(WORD)*8/GREASE);
+            p += WPR-words;
             r += WPR;
         }
     } else {
@@ -166,13 +186,25 @@ void gf2_mul(int d, int a, int rows, int words)
             r -= WPR;
             for (k = words;k > 0;k--) {
                 w = *p++;
-                for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
-                    qq = q + WPR * (w & GREASEMASK);
-                    ROWADD2(r,qq);
-                    r -= WPR;
-                    w >>= GREASE;
-                    q += GREASE2*WPR;
-                }
+                if (w) {
+#if WPR == 1
+                    w2 = 0;
+                    for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
+                        if (q[w & GREASEMASK]) w2 ^= q[w & GREASEMASK];
+                        w >>= GREASE;
+                        q += GREASE2*WPR;
+                    }
+                    *r = w2;
+#else
+                    for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
+                        qq = q + WPR * (w & GREASEMASK);
+                        ROWADD2(r,qq);
+                        r -= WPR;
+                        w >>= GREASE;
+                        q += GREASE2*WPR;
+                    }
+#endif
+                } else q += GREASE2*WPR*(sizeof(WORD)*8/GREASE);
             }
             p += WPR-words;
             r += WPR;
