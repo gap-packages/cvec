@@ -22,7 +22,7 @@ default: bindir bin/@GAPARCH@/cvec.so
 # this target creates a bin-directory
 bindir:
 	if test ! -d bin;  then mkdir bin;  fi
-	if test ! -d bin/@GAPARCH@;  then mkdir bin/@GAPARCH@;  fi
+	if test ! -d bin/@GAPARCH@;  then mkdir -p bin/@GAPARCH@;  fi
 
 bin/@GAPARCH@/cvec.so: src/cvec.c src/gf2lib_32.c src/gf2lib_64.c \
                        src/gf2lib.def src/gf2libh.def src/gf2lib_32.h \
