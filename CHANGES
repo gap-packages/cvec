@@ -13,6 +13,7 @@
   - Faster ScalarProduct for GF2
   - Fast EntryOfMatrixProduct for prime fields
   - Fixed configure script to work with GAP 4.5 without breaking 4.4.
+  - Fixed a bug with zero length matrices introduced after 1.7
 
 
 ==========================

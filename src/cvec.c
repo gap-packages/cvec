@@ -4220,9 +4220,10 @@ STATIC Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
     q = ELM_PLIST(fi,IDX_q);
     if (IS_INTOBJ(q) && q == INTOBJ_INT(2) && max <= 512) {
         res = CVEC_MAKE_ZERO_CMAT(self,INTOBJ_INT(dim),cln);
-        PROD_CMAT_CMAT_GF2_SMALL(self,ElmPRec(res,RNAM_rows),
-                                      ElmPRec(m,RNAM_rows),
-                                      ElmPRec(n,RNAM_rows),INTOBJ_INT(max));
+        if (dim > 0)   /* Otherwise there is nothing to do. */
+            PROD_CMAT_CMAT_GF2_SMALL(self,ElmPRec(res,RNAM_rows),
+                                          ElmPRec(m,RNAM_rows),
+                                          ElmPRec(n,RNAM_rows),INTOBJ_INT(max));
         if (!(IS_MUTABLE_OBJ(m) || IS_MUTABLE_OBJ(n)))
             MakeImmutable(res);
         return res;

@@ -1,5 +1,11 @@
 Check OurErrorBreakQuit
 
+Checke "fast paths"
+
+Ermittle Length-Problem von Max Horn
+
+Schnelleres Pickling/Unpickling fuer cvecs --> nicht an cmats delegieren
+
 Hashfunktionen nicht Architekturneutral!
 Note dependencies
 Fast method for ProductTransposedMatMat

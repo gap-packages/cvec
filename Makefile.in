@@ -26,7 +26,7 @@ bindir:
 
 bin/@GAPARCH@/cvec.so: src/cvec.c src/gf2lib_32.c src/gf2lib_64.c \
                        src/gf2lib.def src/gf2libh.def src/gf2lib_32.h \
-		       src/gf2lib_64.h
+		       src/gf2lib_64.h Makefile
 	cp $(GAPPATH)/bin/@GAPARCH@/config.h bin/@GAPARCH@
 	$(GAPPATH)/bin/@GAPARCH@/gac -p ${COMPILEOPTIONS} -d -o bin/@GAPARCH@/cvec.so src/cvec.c
 
