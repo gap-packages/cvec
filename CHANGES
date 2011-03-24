@@ -3,7 +3,7 @@
 =============================================================================
 
 ==========================
- Changes from 1.7 -> 2.0:
+ Changes from 1.7 -> 1.8:
 ==========================
 
   - Slightly improved minimal polynomial routine by suggestion of
@@ -14,6 +14,8 @@
   - Fast EntryOfMatrixProduct for prime fields
   - Fixed configure script to work with GAP 4.5 without breaking 4.4.
   - Fixed a bug with zero length matrices introduced after 1.7
+  - Added a Length method for semi echelonised bases
+  - Documented the Vectors operation for semi echelonised bases
 
 
 ==========================

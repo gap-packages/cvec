@@ -63,6 +63,11 @@ InstallMethod( BasisVectors, "for a semi echelonised basis", [ SEBType ],
     return b!.vectors;
   end );
 
+InstallMethod( Length, "for a semi echelonised basis", [ SEBType ],
+  function(b)
+    return Length(b!.vectors);
+  end );
+
 InstallMethod( Pivots, "for a semi echelonised basis", [ SEBType ],
   function(b)
     return b!.pivots;

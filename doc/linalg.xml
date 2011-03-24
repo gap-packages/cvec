@@ -57,6 +57,25 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
+<Oper Name="Vectors" Arg="b"/>
+<Returns> a matrix </Returns>
+<Description>
+    The argument <A>b</A> must be a semi echelonised basis. This
+    operation returns a (mutable) matrix whose rows are the basis
+    vectors.
+</Description>
+</ManSection>
+
+<ManSection>
+<Oper Name="Length" Arg="b" Label="for a semi echelonised basis"/>
+<Returns> an integer </Returns>
+<Description>
+    The argument <A>b</A> must be a semi echelonised basis. This
+    operation returns the number of vectors in the basis.
+</Description>
+</ManSection>
+
+<ManSection>
 <Meth Name="CleanRow" Arg="b, v, extend, dec"/>
 <Returns> <C>true</C> or <C>false</C> </Returns>
 <Description>

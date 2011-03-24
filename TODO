@@ -1,8 +1,6 @@
-Check OurErrorBreakQuit
+HISTORY file
 
 Checke "fast paths"
-
-Ermittle Length-Problem von Max Horn
 
 Schnelleres Pickling/Unpickling fuer cvecs --> nicht an cmats delegieren
 
@@ -12,7 +10,6 @@ Fast method for ProductTransposedMatMat
 Fast method for WeightOfVector
 Fast method for DistanceOfVector
 Fast method for TraceMat
-HISTORY file
 Show all versions for download
 License
 
