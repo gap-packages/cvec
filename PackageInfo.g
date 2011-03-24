@@ -217,7 +217,7 @@ PackageDoc := rec(
   # use same as in GAP            
   BookName  := "cvec",
   ArchiveURLSubset := ["doc"],
-  HTMLStart := "doc/chap0.htm",
+  HTMLStart := "doc/chap0.html",
   PDFFile   := "doc/manual.pdf",
   # the path to the .six file used by GAP's help system
   SixFile   := "doc/manual.six",
