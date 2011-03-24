@@ -1,5 +1,3 @@
-HISTORY file
-
 Checke "fast paths"
 
 Schnelleres Pickling/Unpickling fuer cvecs --> nicht an cmats delegieren

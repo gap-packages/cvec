@@ -16,6 +16,7 @@
   - Fixed a bug with zero length matrices introduced after 1.7
   - Added a Length method for semi echelonised bases
   - Documented the Vectors operation for semi echelonised bases
+  - Put revision 401 as version 1.8 on the web
 
 
 ==========================
