@@ -219,6 +219,14 @@ InstallMethod( Matrix, "for a list of cvecs, an integer, and a cmat",
     fi;
   end );
 
+InstallMethod( Matrix, "for an empty list, an int and a GF2 matrix",
+  [ IsList and IsEmpty, IsPosInt, IsGF2MatrixRep ],
+  function(l,n,m) return l; end );
+
+InstallMethod( Matrix, "for an empty list, an int and an 8bit matrix rep",
+  [ IsList and IsEmpty, IsPosInt, Is8BitMatrixRep ],
+  function(l,n,m) return l; end );
+
 # Some methods to make special matrices:
 
 InstallGlobalFunction( CVEC_ZeroMat, function(arg)
@@ -2711,7 +2719,7 @@ InstallGlobalFunction( CVEC_ValueLaurentPoly,
             for j in [1..n] do val[j][j] := s + val[j][j]; od;
         fi;
         if i = 1 then break; fi;
-        val := val*x;   # this is mutable!
+        val := x*val;   # this is mutable!
     od;
     if f[2] <> 0 then val := val * x^f[2]; fi;
     if not(IsMutable(x)) then MakeImmutable(val); fi;

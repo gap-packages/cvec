@@ -2067,7 +2067,7 @@ STATIC Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
     return INTOBJ_INT( (Int) res );
 }
 
-/* The following routines do the same as EXTRACT, but more efficient,
+/* The following routines do the same as EXTRACT, but more efficiently,
  * if one needs many similar lookups. We separate initialization and lookup. */
 
 static Int VecEx_d;
@@ -3769,7 +3769,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
   Int firstnz;
   Int len;
-  Int i,j;
+  Int j;
   Int newpiv;
   int fnzcounter = 0;
 
@@ -3797,14 +3797,13 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   if (firstnz > vlen) return True;  /* The zero vector, all done */
 
   len = LEN_PLIST( rows )-1;  /* note that CMats start with a fail in pos 1 */
-  i = 1;
   /* we distinguish between prime field case and extension field case: */
   if (d == 1) {
       Word *vecvec = DATA_CVEC(vec);
       Word *decdec = 0L;
       Int c;
       if (cldec) decdec = DATA_CVEC(dec);
-      for (j = i;j <= len;j++) {
+      for (j = 1;j <= len;j++) {
           Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
           if (++fnzcounter >= 10) {
               firstnz = CVEC_Firstnzp(fi,vecvec,vlen);
@@ -3817,6 +3816,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
                   ADDMUL_INL(vecvec,DATA_CVEC(ELM_PLIST(rows,j+1)),fi,
                              p-c,wordlen);
               }
+              // firstnz = piv+1;
           }
       }
       newpiv = CVEC_Firstnzp(fi,vecvec,vlen);
@@ -3839,7 +3839,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
       Word *vecvec = DATA_CVEC(vec);
       Word *decdec = 0L;
       if (cldec) decdec = DATA_CVEC(dec);
-      for (j = i;j <= len;j++) {
+      for (j = 1;j <= len;j++) {
           Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
           if (++fnzcounter >= 10) {
               firstnz = CVEC_Firstnzq(fi,vecvec,vlen,wordlen);
@@ -3854,6 +3854,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
                       scbuf[k] = scbuf[k] ? p-scbuf[k] : 0;
                   ADDMUL_INT(vec,cl,fi,ELM_PLIST(rows,j+1),d,scbuf,0,wordlen);
               }
+              // firstnz = piv+1;
           }
       }
       newpiv = CVEC_Firstnzq(fi,vecvec,vlen,wordlen);

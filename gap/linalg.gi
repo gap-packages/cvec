@@ -34,6 +34,14 @@ InstallMethod( SEBMaker, "for a cmat, and an integer list",
                              SEBType and IsMutable and IsCMatSEB),b);
   end );
 
+InstallOtherMethod( SEBMaker, "empty plist method",
+  [ IsList and IsEmpty, IsList and IsEmpty ],
+  function( vectors, pivots )
+    local b;
+    b := rec( vectors := vectors, pivots := pivots );
+    return Objectify(NewType(FamilyObj(b.vectors),SEBType and IsMutable),b);
+  end );
+
 InstallMethod( SemiEchelonBasisMutable, "for a semi echelonised basis record",
   [IsRecord],
   function(b)
@@ -102,7 +110,7 @@ InstallMethod( Display, "for a semi echelonised basis",
 #############################################################################
 
 BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
-  local c,firstnz,i,j,lc,len,lev,mo,newpiv,pivs;
+  local c,firstnz,j,lc,len,lev,mo,newpiv,pivs;
   # INPUT
   # basis: component object with fields
   #        pivots   : integer list of pivot columns of basis matrix
@@ -130,9 +138,11 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
   fi;
 
   len := Length(basis!.vectors);
-  i := 1;
-
-  for j in [i..len] do
+  if len = 1 and IsPlistRep(basis!.vectors) then
+      ConvertToMatrixRep(basis!.vectors);
+  fi;
+          
+  for j in [1..len] do
     if basis!.pivots[j] >= firstnz then
       c := vec[ basis!.pivots[ j ] ];
       if not IsZero( c ) then
@@ -141,6 +151,7 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
         fi;
         AddRowVector( vec, basis!.vectors[ j ], -c );
       fi;
+      #firstnz := basis!.pivots[j]+1;
     fi;
   od;
 

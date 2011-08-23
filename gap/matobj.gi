@@ -99,6 +99,14 @@ InstallMethod( Matrix, "generic convenience method with 2 args",
     return Matrix(l,Length(l[1]),m);
   end );
 
+InstallMethod( Matrix, "for an empty list, an int and a GF2 matrix",
+  [ IsList and IsEmpty, IsPosInt, IsGF2MatrixRep ],
+  function(l,n,m) return l; end );
+
+InstallMethod( Matrix, "for an empty list, an int and an 8bit matrix rep",
+  [ IsList and IsEmpty, IsPosInt, Is8BitMatrixRep ],
+  function(l,n,m) return l; end );
+
 InstallMethod( Unfold, "for a matrix object, and a vector object",
   [ IsMatrixObj, IsRowVectorObj ],
   function( m, w )
