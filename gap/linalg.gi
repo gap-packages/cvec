@@ -999,18 +999,32 @@ function( p, f )
 end );
 
 InstallGlobalFunction( CVEC_MinimalPolynomialMC, 
-function( m, eps, factorise, verify, indetnr )
+function( arg )
   # The new algorithm of Cheryl and Max. Can be used as Monte Carlo algorithm
   # or as deterministic algorithm with verification.
-  # eps is a cyclotomic which is an upper bound for the error probability
-  # factorise is a boolean indicating, whether the resulting
-  # polynomials should be factorised even if this would not be
-  # necessary for verification purpose.
-  # verify is a boolean indicating, whether the result should be verified,
-  # thereby proving correctness, indetnr is the number of an indeterminate
-  local A,B,S,coeffs,col,d,dec,g,i,irreds,j,l,lowbounds,mm,mult,multmin,newBrow,
-        nrunclear,opi,ordpol,ordpolsinv,p,pivs,pr,prob,proof,rl,se,w,wcopy,ww,
-        zero,ti,lcm,ti2;
+  # Arguments: m, eps [,indetnr]
+  #   m a matrix
+  #   eps is a cyclotomic which is an upper bound for the error probability
+  #       if it is set to 0 then deterministic verification is done
+  #   indetnr is the number of an indeterminate, if omitted 1 is taken
+  local A,B,S,coeffs,col,d,dec,eps,g,i,indetnr,irreds,j,l,lcm,lowbounds,m,
+        mm,mult,multmin,newBrow,nrunclear,opi,ordpol,ordpolsinv,p,pivs,
+        pr,prob,proof,res,rl,se,ti,ti2,veri,verify,w,wcopy,ww,zero;
+  if Length(arg) < 2 or Length(arg) > 3 then
+      Error("Usage: m, eps [,indetnr]"); 
+  fi;
+  m := arg[1];
+  eps := arg[2];
+  if Length(arg) = 3 then
+      indetnr := arg[3];
+  else
+      indetnr := 1;
+  fi;
+  verify := IsZero(eps);
+  if verify then
+      eps := 1/10000;  # a good compromise to start deterministic verification?
+  fi;
+
   ti := Runtime();
   rl := RowLength(m);
   zero := ZeroVector(rl,m);
@@ -1030,7 +1044,7 @@ function( m, eps, factorise, verify, indetnr )
   # We keep the base change between the basis
   #  Y = [x_1,x_1*m,x_1*m^2,...,x_1*(m^(d_1-1)),x_2,...,x_2*m^(d_2-1),...]
   # and the semi echelonised basis S by keeping Y=A*S and S=B*Y at the same 
-  # time. Be are only interested in B, but we get A as a byproduct.
+  # time. We are only interested in B, but we get A as a byproduct.
   A := Matrix([],rl,m);
   B := Matrix([],rl,m);
   ordpolsinv := []; # here we collect information to be used for the order pols
@@ -1096,27 +1110,9 @@ function( m, eps, factorise, verify, indetnr )
       SubtractSet(pivs,S!.pivots{[d+1..l]});
   od;
 
-  # Release some memory:
-  Unbind(A);
-  Unbind(B);
-  Unbind(S);
-
   ti2 := Runtime();
   Info(InfoCVec,2,"Time until now: ",ti2-ti," lap: ",ti2-ti);
-  if not(factorise) and
-     Length(opi.rordpols)^2 < Length(m) then   # a quick check for cyclicity:
-      lcm := Lcm(opi.rordpols);
-      if Degree(lcm) = rl then
-          Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",
-               Runtime()-ti2);
-          ti2 := Runtime();
-          Info(InfoCVec,2,"Cyclic matrix!");
-          return rec( minpoly := lcm, charpoly := lcm,
-                      opi := opi,
-                      irreds := false, mult := false, multmin := false,
-                      proof := true );
-      fi;
-  fi;
+
   Info(InfoCVec,2,"Factoring relative order polynomials...");
   # Factor all parts:
   col := List(opi.rordpols,f->Collected(Factors(pr,f)));
@@ -1130,8 +1126,8 @@ function( m, eps, factorise, verify, indetnr )
   multmin := [];
   for l in col do
       for i in l do
-          p := Position(irreds,i[1]);
-          if p = fail then
+          p := PositionSorted(irreds,i[1]);
+          if p > Length(irreds) or irreds[p] <> i[1] then
               Add(irreds,i[1]);
               Add(mult,i[2]);
               Add(lowbounds,i[2]);
@@ -1147,102 +1143,125 @@ function( m, eps, factorise, verify, indetnr )
           fi;
       od;
   od;
-  nrunclear := 0;   # number of irreducible factors the multiplicity of which
-                    # are not yet known
-  for i in [1..Length(irreds)] do
-      if mult[i] > lowbounds[i] then
-          nrunclear := nrunclear + 1;
-      fi;
-  od;
-  Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
-  ti2 := Runtime();
-  Info(InfoCVec,2,"Number of irreducible factors in charpoly: ",Length(irreds),
-                  " mult. in minpoly unknown: ",nrunclear);
+  repeat   # this is used via break to jump to the end where we return
 
-  ordpol := Lcm(Set(opi.rordpols)); # this is a lower bound for the minpoly
+    if Length(opi.rordpols)^2 < Length(m) then # a quick check for cyclicity:
+        lcm := Lcm(opi.rordpols);
+        if Degree(lcm) = rl then
+            Info(InfoCVec,2,"Cyclic matrix, this proves minpoly=charpoly!");
+            proof := true;
+            multmin := ShallowCopy(mult);
+            ordpol := lcm;
+            break;   # go to the end, report success
+        fi;
+    fi;
+
+    nrunclear := 0;   # number of irreducible factors the multiplicity of which
+                      # are not yet known
+    for i in [1..Length(irreds)] do
+        if mult[i] > lowbounds[i] then
+            nrunclear := nrunclear + 1;
+        fi;
+    od;
+    Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
+    ti2 := Runtime();
+    Info(InfoCVec,2,"Number of irreducible factors in charpoly: ",
+                    Length(irreds)," mult. in minpoly unknown: ",nrunclear);
+
+    if nrunclear = 0 then
+        proof := true;
+        multmin := ShallowCopy(mult);
+        break;
+    fi;
+
+    ordpol := Lcm(Set(opi.rordpols)); # this is a lower bound for the minpoly
                                # in particular, it is a multiple of rordpols[1]
 
-  if nrunclear > 0 then
-      i := 2;
-      p := 1/Size(opi.f);   # probability to miss a big Jordan block with the
-                            # order polynomial of one vector (upper bound)
-      proof := false;
-      repeat   # until verification said "OK"
-          # This is an upper estimate of the probability not to find a generator
-          # of a cyclic space:
-          prob := p;   # we already have the order polynomial for one vector 
-          Info(InfoCVec,2,"Calculating order polynomials...");
-          while i <= Length(opi.rordpols) do
-              w := ShallowCopy(zero);
-              w[opi.ranges[i][1]] := opi.o;
-              g := CVEC_CalcOrderPolyTuned(opi,w,i,indetnr);
-              if not(IsZero(ordpol mod g)) then
-                  ordpol := Lcm(ordpol,g);
-              fi;
-              if Degree(ordpol) = Length(m) then   # a cyclic matrix!
-                  proof := true;
-                  break;
-              fi;
-              prob := prob * p;  # probability to have missed one Jordan block
-              Info( InfoCVec, 2, "Probability to have them all (%%): ",
-                     Int((1-prob)^nrunclear*1000));
-              if 1-(1-prob)^nrunclear < eps and Length(opi.rordpols)-i > 5 then
-                  break;   # this is the probability to have missed one
-              fi;
-              i := i + 1;
-          od;
+    i := 2;    # here we count, which abs. order polynomial to do next
+    veri := 1; # here we count, which irred. factor to verify next
+    p := 1/Size(opi.f);   # probability to miss a big Jordan block with the
+                          # order polynomial of one vector (upper bound)
+    proof := false;
 
-          if i > Length(opi.rordpols) then
-              proof := true;
-              Info(InfoCVec,2,"Have found proof by computing all absolute ",
-                   "order polynomials!");
-              break;
-          fi;
+    # This is an upper estimate of the probability not to find a generator
+    # of a cyclic space:
+    prob := p;   # we already have the order polynomial for one vector 
+    while not(proof) do
+        Info(InfoCVec,2,"Calculating order polynomials...");
+        while i <= Length(opi.rordpols) do
+            w := ShallowCopy(zero);
+            w[opi.ranges[i][1]] := opi.o;
+            g := CVEC_CalcOrderPolyTuned(opi,w,i,indetnr);
+            if not(IsZero(ordpol mod g)) then
+                ordpol := Lcm(ordpol,g);
+            fi;
+            if Degree(ordpol) = Length(m) then   # a cyclic matrix!
+                proof := true;
+                multmin := ShallowCopy(mult);
+                Info(InfoCVec,2,"Cyclic matrix, found proof.");
+                break;
+            fi;
+            prob := prob * p;  # probability to have missed one Jordan block
+            Info( InfoCVec, 2, "Probability to have them all (%%): ",
+                   Int((1-prob)^nrunclear*10000),"/10000");
+            if 1-(1-prob)^nrunclear < eps and Length(opi.rordpols)-i > 5 then
+                break;   # this is the probability to have missed one
+            fi;
+            i := i + 1;
+        od;
 
-          Info(InfoCVec,2,"Checking multiplicities...");
-          nrunclear := 0;
-          for j in [1..Length(irreds)] do
-              multmin[j] := CVEC_FactorMultiplicity(ordpol,irreds[j]);
-              if multmin[j] < mult[j] then
-                  nrunclear := nrunclear + 1;
-              fi;
-          od;
-          Info(InfoCVec,2,"Time until now: ",Runtime()-ti,
-               " lap: ",Runtime()-ti2);
-          ti2 := Runtime();
-          if nrunclear = 0 then proof := true; break; fi;   # result is correct!
+        Info(InfoCVec,2,"Checking multiplicities...");
+        nrunclear := 0;
+        for j in [1..Length(irreds)] do
+            multmin[j] := CVEC_FactorMultiplicity(ordpol,irreds[j]);
+            if j >= veri and multmin[j] < mult[j] then
+                nrunclear := nrunclear + 1;
+            fi;
+        od;
+        if nrunclear = 0 then proof := true; break; fi;   # result is correct!
 
-          if verify then
-              Info(InfoCVec,2,"Verifying result (",nrunclear,
-                   " unclear multiplicities) ...");
-              proof := true;  # will be set to false once we discover something
-              for j in [1..Length(irreds)] do
-                  if multmin[j] < mult[j] then
-                      Info(InfoCVec,2,"Working on factor: ",irreds[j],
-                                      " multiplicity: ",multmin[j]);
-                      mm := Value(irreds[j],m)^multmin[j];
-                      se := SemiEchelonBasisMutableX(mm);
-                      if Length(mm)-Length(se!.vectors) < mult[j] then
-                          proof := false;
-                          Info(InfoCVec,2,"Found too small multiplicity!");
-                          break;
-                      fi;
-                  fi;
-              od;
-          fi;
-      until not(verify) or proof;
-  else
-      proof := true;
-  fi;
+        if proof or not(verify) then break; fi;
+
+        if i > Length(opi.rordpols) then
+            proof := true;
+            Info(InfoCVec,2,"Have found proof by computing all absolute ",
+                 "order polynomials!");
+            break;
+        fi;
+
+        Info(InfoCVec,2,"Time until now: ",Runtime()-ti,
+             " lap: ",Runtime()-ti2);
+        ti2 := Runtime();
+
+        Info(InfoCVec,2,"Verifying result (",nrunclear,
+             " unclear multiplicities) ...");
+        while veri <= Length(irreds) do
+            if multmin[veri] < mult[veri] then
+                Info(InfoCVec,2,"Working on factor: ",irreds[veri],
+                                " multiplicity: ",multmin[veri]);
+                mm := Value(irreds[veri],m)^multmin[veri];
+                se := SemiEchelonBasisMutableX(mm);
+                if Length(mm)-Length(se!.vectors) < mult[veri] then
+                    Info(InfoCVec,2,"Found too small multiplicity!");
+                    break;
+                fi;
+            fi;
+            veri := veri + 1;
+        od;
+        if veri > Length(irreds) then 
+            Info(InfoCVec,2,"Verified all irreducible factors, found proof.");
+            proof := true; 
+        fi;
+    od;   # until proof found or break hit
+  until true;    # also used to jump out early
 
   Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
-  return rec(minpoly := ordpol,
-             charpoly := Product( opi.rordpols ),
-             opi := opi,
-             irreds := irreds,
-             mult := mult,
-             multmin := multmin,
-             proof := proof);
+  res := rec(minpoly := ordpol, charpoly := Product( opi.rordpols ),
+             opi := opi, irreds := irreds, mult := mult, multmin := multmin,
+             proof := proof, prob := eps,
+             A := A, B := B, S := S);
+  res.iscyclic := Degree(res.minpoly) = Degree(res.charpoly);
+  return res;
 end );
 
 ##
