@@ -830,12 +830,12 @@ end );
 InstallMethod( CharAndMinimalPolynomialOfMatrix, "for a matrix and an indet nr",
   [IsCMatRep, IsPosInt],
   function( m, indetnr )
-    return CVEC_MinimalPolynomialMC(m,1/100,true,true,indetnr);
+    return MinimalPolynomialOfMatrixMC(m,0,indetnr);
   end );
 
 InstallMethod( CharAndMinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
   function( m )
-    return CVEC_MinimalPolynomialMC(m,1/100,true,true,1);
+    return MinimalPolynomialOfMatrixMC(m,0);
   end );
 
 InstallMethod( MinimalPolynomialOfMatrix, "for a matrix and an indet nr",
@@ -959,7 +959,7 @@ function( opi, v, i, indetnr )
       for j in [2..Length(coeffs)] do
           # Now apply base changed matrix to v:
           #   v := v * opi.mm;
-          # but remember, that we only store the interesting rows of mm:
+          # but remember that we only store the interesting rows of mm:
           vv := ZeroMutable(v);
           CopySubVector(v,vv,[1..top-1],[2..top]);
           for k in [2..i] do
@@ -998,7 +998,7 @@ function( p, f )
   return m;
 end );
 
-InstallGlobalFunction( CVEC_MinimalPolynomialMC, 
+InstallGlobalFunction( MinimalPolynomialOfMatrixMC, 
 function( arg )
   # The new algorithm of Cheryl and Max. Can be used as Monte Carlo algorithm
   # or as deterministic algorithm with verification.
@@ -1263,6 +1263,13 @@ function( arg )
   res.iscyclic := Degree(res.minpoly) = Degree(res.charpoly);
   return res;
 end );
+
+InstallMethod( MinimalPolynomial, "new MC method with verification",
+  [ IsField, IsRowListMatrix and IsOrdinaryMatrix, IsPosInt ],
+  function(f,m,indet)
+    if f <> BaseDomain(m) then TryNextMethod(); fi;
+    return MinimalPolynomialOfMatrixMC(m,0,indet).minpoly;
+  end );
 
 ##
 ##  This program is free software; you can redistribute it and/or modify

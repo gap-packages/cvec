@@ -270,7 +270,7 @@ for that the pivot element is in column <M>i</M>.
 
 <ManSection>
 <Meth Name="CharAndMinimalPolynomialOfMatrix" Arg="m"/>
-<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m, indetnr"/>
+<Meth Name="CharAndMinimalPolynomialOfMatrix" Arg="m, indetnr"/>
 <Returns> a record </Returns>
 <Description>
     Calculates the characteristic and minimal polynomial of the 
@@ -292,7 +292,52 @@ for that the pivot element is in column <M>i</M>.
     over the base field.
 </Description>
 </ManSection>
-         
+ 
+<ManSection>
+<Oper Name="MinimalPolynomialOfMatrixMC" Arg="m, prob [,indetnr]"/>
+<Returns> a record </Returns>
+<Description>
+This method calculates the characteristic and minimal polynomials of the
+row list matrix <A>m</A> over its base domain. 
+It uses the Monte Carlo algorithm by Neunhoeffer
+and Praeger. The second argument <A>prob</A> is an upper bound for the
+error probability, it can be <M>0</M> in which case a deterministic 
+verification is done. The optional argument <A>indetnr</A> is the number
+of the indeterminate over the base domain to be used to express polynomials.
+<P/>
+
+The result is a record with the following components bound: The component 
+<C>charpoly</C> is the characteristic polynomial which is guaranteed to
+be correct. The component <C>minpoly</C> is always a divisor of the minimal 
+polynomial and usually is equal to it. 
+See below for details. The component <C>irreds</C> is a sorted
+list of the irreducible factors of the characteristic polynomial. The 
+component <C>mult</C> is a corresponding list of the same length containing 
+the multiplicities of these irreducible factors in the characteristic
+polynomial. The component <C>minmult</C> is a corresponding list of the same 
+length containing the multiplicities of these irreducible factors in the
+polynomial given in <C>minpoly</C>. The component <C>proof</C> is set to
+<C>true</C> if the result is proved to be correct, which can happen even
+if <A>prob</A> was non-zero (for example in the case of a cyclic matrix).
+The component <C>iscyclic</C> is set to <C>true</C> if and only if the
+minimal polynomial is equal to the characteristic polynomial. The component
+<C>prob</C> is set to the probability given in <A>prob</A>, if that was
+zero then it is set to <M>1/10000</M> but <C>proof</C> will be <C>true</C>.
+The components <C>A</C>, <C>B</C> and <C>S</C> describe a base change
+for <A>m</A> to a sparse form which is obtained as a byproduct.
+<C>S</C> is a semi echelonised basis which was obtained by a spin-up
+computation with <A>m</A> and if <M>Y</M> is the sparse basis
+then <M>Y = A \cdot S</M> and <M>B=A^{-1}</M>.
+
+<P/>The given result for the minimal polynomial 
+could be a proper divisor of the real minimal polynomial
+if <A>prob</A> was non-zero, however, the probability for this outcome is
+guaranteed to be less than or equal to <A>prob</A>. Note that it is
+always guaranteed that all irreducible factors of the minimal polynomial are
+actually present, it can only happen that the multiplicities are too small.
+</Description>
+</ManSection>
+
 </Section>
 
 <!-- ############################################################ -->

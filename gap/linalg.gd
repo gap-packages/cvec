@@ -124,7 +124,7 @@ DeclareGlobalFunction( "CVEC_MakeExample" );
 
 DeclareGlobalFunction( "CVEC_CalcOrderPolyTuned" );
 DeclareGlobalFunction( "CVEC_FactorMultiplicity" );
-DeclareGlobalFunction( "CVEC_MinimalPolynomialMC" );
+DeclareGlobalFunction( "MinimalPolynomialOfMatrixMC" );
 
 ##
 ##  This program is free software; you can redistribute it and/or modify
