@@ -61,8 +61,8 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define MAXDEGREE 1024
 
 /* Define this to empty if you want global access to functions: */
-/*  #define STATIC static */
-#define STATIC
+#define STATIC static
+/* #define STATIC */
 
 /* Define this to empty if your compiler does not support inlined functions: */
 #define INLINE inline
