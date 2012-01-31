@@ -42,7 +42,7 @@ Date := "31/01/2012",
 ##  example/init.g, ...    or  example-1.3/init.g, ...  )
 # 
 ArchiveURL := 
-     "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/cvec-2.0",
+     "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvecfor4.5/cvec-2.0_for4.5",
 
 ##  All provided formats as list of file extensions, separated by white
 ##  space or commas.
@@ -166,7 +166,7 @@ Status := "deposited",
 README_URL := 
   "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/README.cvec",
 PackageInfoURL := 
-  "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvec/PackageInfo.g",
+  "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/cvecfor4.5/PackageInfo.g",
 
 ##  Here you  must provide a short abstract explaining the package content 
 ##  in HTML format (used on the package overview Web page) and an URL 
@@ -236,7 +236,7 @@ PackageDoc := rec(
 Dependencies := rec(
   # GAP version, use version strings for specifying exact versions,
   # prepend a '>=' for specifying a least version.
-  GAP := ">=4.4.12",
+  GAP := ">=4.5",
   # list of pairs [package name, (least) version],  package name is case
   # insensitive, least version denoted with '>=' prepended to version string.
   # without these, the package will not load

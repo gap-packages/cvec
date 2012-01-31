@@ -9,6 +9,8 @@
   - Improve implementation of MinimalPolynomialOfMatrixMC and use it
     as a method for MinimalPolynomial for row list matrices.
     Document it for the first time.
+  - Completely change build setup to use automake/autoconf/libtool as
+    done in the IO package.
 
 
 ==========================
