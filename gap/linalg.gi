@@ -160,11 +160,11 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
     return true;
   else
     if extend then
-      c := vec[newpiv]^-1;
-      MultRowVector( vec, vec[ newpiv ]^-1 );
+      c := vec[newpiv];
       if dec <> fail then
         dec[len+1] := c;
       fi;
+      MultRowVector( vec, c^-1 );
       Add( basis!.vectors, vec );
       Add( basis!.pivots, newpiv );
     fi;
@@ -1171,6 +1171,7 @@ function( arg )
     if nrunclear = 0 then
         proof := true;
         multmin := ShallowCopy(mult);
+        ordpol := Product([1..Length(irreds)],i->irreds[i]^multmin[i]);
         break;
     fi;
 
@@ -1270,6 +1271,13 @@ InstallMethod( MinimalPolynomial, "new MC method with verification",
     if f <> BaseDomain(m) then TryNextMethod(); fi;
     return MinimalPolynomialOfMatrixMC(m,0,indet).minpoly;
   end );
+
+InstallMethod( MinimalPolynomialMatrixNC, "new MC method with verification",
+  [ IsField, IsRowListMatrix and IsOrdinaryMatrix, IsPosInt ],
+  function(f,m,indet)
+    return MinimalPolynomialOfMatrixMC(m,0,indet).minpoly;
+  end );
+
 
 ##
 ##  This program is free software; you can redistribute it and/or modify
