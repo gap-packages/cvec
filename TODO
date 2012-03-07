@@ -1,3 +1,5 @@
+Do not use Popen for hostname call on windows
+
 Checke "fast paths"
 
 Look for permissions, see Alexander's email 29 Sep 2011
