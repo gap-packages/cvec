@@ -640,7 +640,7 @@ Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
             e = ELM_PLIST(l,i);
             if (!IS_INTOBJ(e) || INT_INTOBJ(e) < 0 || INT_INTOBJ(e) >= q) {
                 return OurErrorBreakQuit("CVEC_INTLI_TO_FFELI: Elements of l "
-                                         "must be integers between 0 and q‐1");
+                                         "must be integers between 0 and q-1");
             }
             e = ELM_PLIST(tab2,INT_INTOBJ(e)+1);
             SET_ELM_PLIST(l,i,e);
