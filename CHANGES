@@ -3,6 +3,15 @@
 =============================================================================
 
 ==========================
+ Changes from 2.1 -> 2.2:
+==========================
+
+  - Compile manual against GAP 4.5.4.
+  - Add script "configure_like_gap".
+  - Adjust README and installation instructions.
+
+
+==========================
  Changes from 2.0 -> 2.1:
 ==========================
 
