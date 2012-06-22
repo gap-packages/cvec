@@ -3,6 +3,14 @@
 =============================================================================
 
 ==========================
+ Changes from 2.2 -> 2.3:
+==========================
+
+  - Fix CMat bug: used to not ShallowCopy its first argument
+  - Fixed DuplicateFreeList and Filtered bug for CMats.
+
+
+==========================
  Changes from 2.1 -> 2.2:
 ==========================
 
