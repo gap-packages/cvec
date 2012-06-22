@@ -173,7 +173,7 @@ end);
 InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value", 
   [IsList,IsCVecClass,IsBool],
   function(l,cl,dochecks)
-    local v;
+    local v,ll;
     if dochecks then
         for v in [1..Length(l)] do
             if not(IsBound(l[v])) or not(IsCVecRep(l[v])) or 
@@ -183,8 +183,10 @@ InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value",
             fi;
         od;
     fi;
-    Add(l,0,1);
-    return CVEC_CMatMaker(l,cl);
+    ll := EmptyPlist(Length(l)+1);
+    Add(ll,0);
+    Append(ll,l);
+    return CVEC_CMatMaker(ll,cl);
   end);
 
 InstallMethod( Matrix, "for a list of cvecs, an integer, and a cmat",
@@ -639,7 +641,7 @@ InstallOtherMethod( \{\}, "for a cmat, and a list",
   function(m,li)
     local l;
     l := m!.rows{li+1};
-    return CMat(l,m!.vecclass,false);
+    return CVEC_CMatMaker(l,m!.vecclass);
   end);
 
 InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
@@ -683,7 +685,7 @@ InstallOtherMethod( DuplicateFreeList, "for a cmat",
   function(m)
     local l;
     l := DuplicateFreeList(m!.rows);
-    return CMat(l,m!.vecclass,false);
+    return CVEC_CMatMaker(l,m!.vecclass);
   end);
 
 InstallOtherMethod( Append, "for two cmats",
@@ -705,7 +707,8 @@ InstallOtherMethod( FilteredOp, "for a cmat and a function",
   function(m,f)
     local l;
     l := Filtered(m!.rows{[2..m!.len+1]},f);
-    return CMat(l,m!.vecclass,false);
+    Add(l,0,1);
+    return CVEC_CMatMaker(l,m!.vecclass);
   end);
 
 InstallOtherMethod( UNB_LIST, "for a cmat and a position",
