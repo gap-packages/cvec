@@ -641,7 +641,7 @@ InstallOtherMethod( \{\}, "for a cmat, and a list",
   function(m,li)
     local l,what;
     what := EmptyPlist(Length(li)+1);
-    Add(what,0);
+    Add(what,1);
     Append(what,li+1);
     l := m!.rows{what};
     return CVEC_CMatMaker(l,m!.vecclass);
