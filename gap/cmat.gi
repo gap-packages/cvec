@@ -639,8 +639,11 @@ InstallMethod( SetMatElm, "for a cmat, two positions, and an ffe",
 InstallOtherMethod( \{\}, "for a cmat, and a list",
   [IsCMatRep and IsMatrix, IsList],
   function(m,li)
-    local l;
-    l := m!.rows{li+1};
+    local l,what;
+    what = EmptyPlist(Length(li)+1);
+    Add(what,0);
+    Append(what,li+1);
+    l := m!.rows{what};
     return CVEC_CMatMaker(l,m!.vecclass);
   end);
 
