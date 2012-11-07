@@ -117,6 +117,13 @@ DeclareGlobalFunction( "CVEC_HandleScalar" );
 DeclareOperation( "Memory", [IsCVecRep] );
 
 #############################################################################
+# Frobenius automorphisms for vectors:
+#############################################################################
+
+DeclareOperation("^", [IsCVecRep, IsMapping and IsOne]);
+DeclareOperation("^", [IsCVecRep, IsFrobeniusAutomorphism]);
+
+#############################################################################
 # Looking for nonzero entries from behind:
 #############################################################################
 
