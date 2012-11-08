@@ -593,7 +593,9 @@ InstallOtherMethod( \*, "for cvecs", [IsFFE, IsCVecRep],
                 CVEC_HandleScalar(DataType(TypeObj(v)),s));
   end);
 
+#############################################################################
 # Applying Frobenius automorphisms element-wise:
+#############################################################################
 
 
 InstallMethod( \^, "for a cvec and a trivial frobenius automorphism",
@@ -602,13 +604,13 @@ InstallMethod( \^, "for a cvec and a trivial frobenius automorphism",
     return v;
   end );
 
-InstallMethod( \^, "for a cvec and a trivial frobenius automorphism",
+InstallMethod( \^, "for a mutable cvec and a trivial frobenius automorphism",
   [IsCVecRep and IsMutable, IsMapping and IsOne],
   function( v, f )
     return ShallowCopy(v);
   end );
 
-InstallMethod( \^, "for a cvec and a frobenius automorphism",
+InstallMethod( \^, "for a mutable cvec and a frobenius automorphism",
   [IsCVecRep and IsMutable, IsFrobeniusAutomorphism],
   function( v, f )
     local w,i;
