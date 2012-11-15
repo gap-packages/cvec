@@ -598,20 +598,21 @@ InstallOtherMethod( \*, "for cvecs", [IsFFE, IsCVecRep],
 #############################################################################
 
 
-InstallMethod( \^, "for a cvec and a trivial frobenius automorphism",
-  [IsCVecRep, IsMapping and IsOne],
+InstallOtherMethod( \^, "for a cvec and a trivial frobenius automorphism",
+  [IsCVecRep and IsFFECollection, IsMapping and IsOne],
   function( v, f )
     return v;
   end );
 
-InstallMethod( \^, "for a mutable cvec and a trivial frobenius automorphism",
-  [IsCVecRep and IsMutable, IsMapping and IsOne],
+InstallOtherMethod( \^, 
+  "for a mutable cvec and a trivial frobenius automorphism",
+  [IsCVecRep and IsFFECollection and IsMutable, IsMapping and IsOne],
   function( v, f )
     return ShallowCopy(v);
   end );
 
-InstallMethod( \^, "for a mutable cvec and a frobenius automorphism",
-  [IsCVecRep and IsMutable, IsFrobeniusAutomorphism],
+InstallOtherMethod( \^, "for a mutable cvec and a frobenius automorphism",
+  [IsCVecRep and IsFFECollection and IsMutable, IsFrobeniusAutomorphism],
   function( v, f )
     local w,i;
     w := ShallowCopy(v);
@@ -621,8 +622,8 @@ InstallMethod( \^, "for a mutable cvec and a frobenius automorphism",
     return w;
   end );
 
-InstallMethod( \^, "for a cvec and a frobenius automorphism",
-  [IsCVecRep, IsFrobeniusAutomorphism],
+InstallOtherMethod( \^, "for a cvec and a frobenius automorphism",
+  [IsCVecRep and IsFFECollection, IsFrobeniusAutomorphism],
   function( v, f )
     local w,i;
     w := ShallowCopy(v);
