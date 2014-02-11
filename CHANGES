@@ -8,6 +8,7 @@
 
   - Add methods for \^ for cvecs and Frobenius automorphisms
   - Add methods for \^ for cmats and Frobenius automorphisms
+  - Fix a bug in unpickling semi echelonised bases
 
 
 ==========================

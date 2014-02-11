@@ -190,12 +190,14 @@ InstallMethod( IO_Pickle, "for a file and a cmat semi echelonized basis",
 
 IO_Unpicklers.CSEB :=
   function( f )
-    local vectors, pivots;
+    local vectors, pivots, seb;
     vectors := IO_Unpickle(f); 
     if vectors = IO_Error then return IO_Error; fi;
     pivots := IO_Unpickle(f);
     if vectors = IO_Error then return IO_Error; fi;
-    return SEBMaker(vectors,pivots);
+    seb := SEBMaker(vectors,pivots);
+    IO_GenericObjectUnpickler(f,seb,[],[]);
+    return seb;
   end;
 
 InstallMethod( Coefficients, "for a semi echelonized basis, and a vector",
