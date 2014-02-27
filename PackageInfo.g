@@ -91,7 +91,6 @@ PackageDoc := rec(
   PDFFile   := "doc/manual.pdf",
   SixFile   := "doc/manual.six",
   LongTitle := "Compact vectors over finite fields",
-  Autoload  := true
 ),
 
 Dependencies := rec(
@@ -113,8 +112,6 @@ AvailabilityTest := function()
   fi;
   return true;
 end,
-
-Autoload := false,
 
 ##  *Optional*, but recommended: path relative to package root to a file which 
 ##  contains as many tests of the package functionality as sensible.
