@@ -10,8 +10,6 @@
 # defined in matobj1.gd and matobj2.gd.
 #
 ############################################################################
-Revision.matobj_gi :=
-    "@(#)$Id: matobj.gi,v 4.1 2007/09/26 13:05:55 gap Exp $";
 
 
 InstallMethod( WeightOfVector, "generic method",

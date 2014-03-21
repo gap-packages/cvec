@@ -12,9 +12,6 @@
 #
 ############################################################################
 
-Revision.matobjplist_gd :=
-    "@(#)$Id: matobjplist.gd,v 4.1 2007/08/24 09:40:32 gap Exp $";
-
 DeclareRepresentation( "IsPlistVectorRep", 
    IsRowVectorObj and IsPositionalObjectRep, [] );
 # 2 positions used:

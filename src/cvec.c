@@ -8,9 +8,6 @@
  **  
  */
 
-const char * Revision_cvec_c =
-"$Id: cvec.c,v$";
-
 #include <stdlib.h>
 
 #include "src/compiled.h"          /* GAP headers                */
@@ -4599,14 +4596,12 @@ static StructInitInfo module = {
 #ifndef CVECSTATIC
 StructInitInfo * Init__Dynamic ( void )
 {
-  module.revision_c = Revision_cvec_c;
   return &module;
 }
 #endif
 
 StructInitInfo * Init__cvec ( void )
 {
-  module.revision_c = Revision_cvec_c;
   return &module;
 }
 
