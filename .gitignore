@@ -2,7 +2,7 @@
 /doc/chap*.txt
 /doc/*.css
 /doc/*.js
-doc/chooser.html
+/doc/chooser.html
 /doc/*.aux
 /doc/*.bbl
 /doc/*.blg
@@ -18,3 +18,16 @@ doc/chooser.html
 /doc/*.tex
 /doc/*.toc
 /doc/manual.pdf
+
+/.deps/
+/.libs/
+/Makefile
+/bin/
+/config.log
+/config.status
+/cvec.la
+/cvec_la-cvec.lo
+/lib/
+/libtool
+/src/pkgconfig.h
+/src/stamp-h1
