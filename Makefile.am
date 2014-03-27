@@ -15,13 +15,12 @@ if SYS_IS_CYGWIN
 cvec_la_LDFLAGS += -no-undefined -version-info 0:0:0 -Wl,$(GAPROOT)/bin/$(GAPARCH)/gap.dll
 endif
 
-all-local: cvec.la install-libLTLIBRARIES
-#	@$(MAKE) $(AM_MAKEFLAGS) install-libLTLIBRARIES
+all-local: cvec.la
 	$(mkdir_p) $(top_srcdir)/$(BINARCHDIR)
 if SYS_IS_CYGWIN
-	cp $(libdir)/cvec.dll $(GAPINSTALLLIB)
+	cp .libs/cvec.dll $(GAPINSTALLLIB)
 else
-	cp $(libdir)/cvec.so $(GAPINSTALLLIB)
+	cp .libs/cvec.so $(GAPINSTALLLIB)
 endif
 	@echo "SUCCESS!"
 
