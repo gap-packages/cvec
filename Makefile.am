@@ -32,5 +32,5 @@ doc:	doc/manual.six
 
 doc/manual.six: doc/cvec.xml doc/intro.xml doc/install.xml doc/datastrucs.xml \
 		doc/vectors.xml doc/matrices.xml doc/performance.xml \
-		doc/gaplib.xml doc/examples.xml doc/linalg.xml
-	($(GAPROOT)/bin/gap.sh makedoc.g)
+		doc/gaplib.xml doc/examples.xml doc/linalg.xml PackageInfo.g
+	($(GAPROOT)/bin/gap.sh -A makedoc.g)
