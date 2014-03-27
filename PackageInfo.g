@@ -7,20 +7,10 @@
 
 SetPackageInfo( rec(
 
-##  This is case sensitive, use your preferred spelling.
 PackageName := "cvec",
-
-##  This may be used by a default banner or on a Web page, should fit on
-##  one line.
 Subtitle := "Compact vectors over finite fields",
-
-##  See '?Extending: Version Numbers' in GAP help for an explanation
-##  of valid version numbers. For an automatic package distribution update
-##  you must provide a new version number even after small changes.
 Version := "2.5",
-
-##  Release date of the current version in dd/mm/yyyy format.
-Date := "14/09/2012",
+Date := "14/09/2012", # dd/mm/yyyy format
 
 ##  Information about authors and maintainers.
 Persons := [
