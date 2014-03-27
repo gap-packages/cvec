@@ -62,14 +62,13 @@ Status := "deposited",
 # AcceptDate := "08/1999",
 #AcceptDate := "",
 
-BaseURL := "http://www-groups.mcs.st-and.ac.uk/~neunhoef/Computer/Software/Gap/",
-
-PackageWWWHome := Concatenation( ~.BaseURL, "cvec.html" ),
-ArchiveURL     := Concatenation( ~.BaseURL, "cvec/cvec-", ~.Version ),
-README_URL     := Concatenation( ~.BaseURL, "cvec/README.cvec" ),
-PackageInfoURL := Concatenation( ~.BaseURL, "cvec/PackageInfo.g" ),
-
-ArchiveFormats := ".tar.gz",
+PackageWWWHome := "http://neunhoef.github.io/cvec/",
+README_URL     := Concatenation(~.PackageWWWHome, "README"),
+PackageInfoURL := Concatenation(~.PackageWWWHome, "PackageInfo.g"),
+ArchiveURL     := Concatenation("https://github.com/neunhoef/cvec/",
+                                "releases/download/v", ~.Version,
+                                "/cvec-", ~.Version),
+ArchiveFormats := ".tar.gz .tar.bz2",
 
 ##  Here you  must provide a short abstract explaining the package content 
 ##  in HTML format (used on the package overview Web page) and an URL 
