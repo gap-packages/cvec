@@ -1,6 +1,6 @@
 AC_PREREQ(2.68)
 LT_PREREQ([2.4.2])
-AC_INIT([cvec], 4.1, neunhoef@mcs.st-and.ac.uk)
+AC_INIT([cvec], m4_esyscmd([tr -d '\n' < VERSION]), [https://github.com/neunhoef/cvec/issues], [cvec], [http://neunhoef.github.io/cvec/])
 AC_CONFIG_SRCDIR([src/cvec.c])
 AC_CONFIG_HEADER([src/pkgconfig.h:cnf/pkgconfig.h.in])
 AC_CONFIG_MACRO_DIR([m4])
