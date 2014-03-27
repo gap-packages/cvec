@@ -35,22 +35,3 @@ doc/manual.six: doc/cvec.xml doc/intro.xml doc/install.xml doc/datastrucs.xml \
 		doc/vectors.xml doc/matrices.xml doc/performance.xml \
 		doc/gaplib.xml doc/examples.xml doc/linalg.xml
 	($(GAPROOT)/bin/gap.sh makedoc.g)
-
-archive: doc
-	(cd .. ; tar czvf cvec-`cat cvec/VERSION`.tar.gz --exclude ".svn" --exclude bin --exclude test --exclude ".git" --exclude ".libs" --exclude lib --exclude cvec.la --exclude cvec_la-cvec.lo --exclude .deps --exclude autom4te.cache --exclude .gitignore --exclude config.log --exclude stamp-h1 --exclude pkgconfig.h --exclude libtool --exclude config.status cvec)
-
-WEBPOS=/scratch/neunhoef/mywebpage.pub/Computer/Software/Gap/cvec
-
-towww: archive
-	echo '<?xml version="1.0" encoding="ISO-8859-1"?>' >${WEBPOS}.version
-	echo '<mixer>' >>${WEBPOS}.version
-	cat VERSION >>${WEBPOS}.version
-	echo '</mixer>' >>${WEBPOS}.version
-	cp PackageInfo.g ${WEBPOS}
-	cp README ${WEBPOS}/README.cvec
-	cp doc/manual.pdf ${WEBPOS}/cvec.pdf
-	cp ../cvec-`cat VERSION`.tar.gz ${WEBPOS}
-	@echo
-	@echo Now please adjust the archive link in 
-	@echo "    " ${WEBPOS}.mixer !
-
