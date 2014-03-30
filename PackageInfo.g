@@ -10,7 +10,7 @@ SetPackageInfo( rec(
 PackageName := "cvec",
 Subtitle := "Compact vectors over finite fields",
 Version := "2.5",
-Date := "14/09/2012", # dd/mm/yyyy format
+Date := "31/04/2014", # dd/mm/yyyy format
 
 ##  Information about authors and maintainers.
 Persons := [
