@@ -73,6 +73,14 @@ shows instructive examples for the usage of this package.
 
 </Section>
 
+<Section Label="feedback">
+<Heading>Feedback</Heading>
+
+For bug reports, feature requests and suggestions, please use our
+<URL Text="issue tracker">https://github.com/neunhoef/cvec/issues</URL>.
+
+</Section>
+
 <!-- ############################################################ -->
 
 </Chapter>
