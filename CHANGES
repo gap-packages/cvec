@@ -1,65 +1,38 @@
-=============================================================================
- This file describes changes in the cvec package beginning from version 1.2:
-=============================================================================
+==================================================
+ This file describes changes in the cvec package
+==================================================
 
-==========================
- Changes from 2.4 -> 2.5:
-==========================
-
+2.5 (2014-03-31)
   - Add methods for \^ for cvecs and Frobenius automorphisms
   - Add methods for \^ for cmats and Frobenius automorphisms
   - Fix a bug in unpickling semi echelonised bases
   - Update and tweak the package build system
   - Move package repository and website to GitHub
 
-
-==========================
- Changes from 2.3 -> 2.4:
-==========================
-
+2.4 (2012-09-14)
   - Fix an ELMS_LIST bug for CMats reported by Felix Noeske
 
-
-==========================
- Changes from 2.2 -> 2.3:
-==========================
-
+2.3 (2012-07-13)
   - Fix CMat bug: used to not ShallowCopy its first argument
   - Fixed DuplicateFreeList and Filtered bug for CMats.
 
-
-==========================
- Changes from 2.1 -> 2.2:
-==========================
-
+2.2 (2012-05-28)
   - Compile manual against GAP 4.5.4.
   - Add script "configure_like_gap".
   - Adjust README and installation instructions.
 
-
-==========================
- Changes from 2.0 -> 2.1:
-==========================
-
+2.1 (2012-02-03)
   - Fix a serious bug in MinimalPolynomialMC for matrices over finite
     fields. WARNING: Wrong results were produced by version 2.0!
 
-
-==========================
- Changes from 1.8 -> 2.0:
-==========================
-
+2.0 (2012-01-31)
   - Improve implementation of MinimalPolynomialOfMatrixMC and use it
     as a method for MinimalPolynomial for row list matrices.
     Document it for the first time.
   - Completely change build setup to use automake/autoconf/libtool as
     done in the IO package.
 
-
-==========================
- Changes from 1.7 -> 1.8:
-==========================
-
+1.8 (2011-03-24)
   - Slightly improved minimal polynomial routine by suggestion of
     referee.
   - Use C-Hashfunction of orb 3.0 if it is there.
@@ -72,11 +45,7 @@
   - Documented the Vectors operation for semi echelonised bases
   - Put revision 402 as version 1.8 on the web
 
-
-==========================
- Changes from 1.6 -> 1.7:
-==========================
-
+1.7 (2007-09-26)
   - Introduce filters for cmats and cvecs to distinguish cases of q=p
     and q <= MAXSIZE_GF_INTERNAL.
   - Kernel method for cmat row access
@@ -99,11 +68,7 @@
   - Added matobjplist.g* from the dev library for compatibility with 4r4.
   - Put revision 324 as version 1.7 on the web.
 
-
-==========================
- Changes from 1.5 -> 1.6:
-==========================
-
+1.6 (2007-04-02)
   - Improve MinimalPolynomialMC, change calling convention.
   - Fixed a dangerous bug in matrix multiplication using the
     memory-saving Winograd trick.
@@ -111,11 +76,7 @@
   - Put AddMatrix and MultMatrix into interface and implement it for cmats
   - Put revision 298 as version 1.6 on the web.
 
-
-==========================
- Changes from 1.4 -> 1.5:
-==========================
-
+1.5 (2007-02-07)
   - Improve usage of grease, in particular for level 1 for 2 < q < 257
   - Improve FILL_GREASE_TAB by using trick coming from analysis: we only
     have to multiply a few times by the primitive root, not by powers of it.
@@ -128,22 +89,23 @@
   - Add version number to archive name, fixed some things in PackageInfo.g.
   - Put revision 280 as version 1.5 on the web.
 
-
-==========================
- Changes from 1.3 -> 1.4:
-==========================
-
+1.4 (2006-11-29)
   - Adjust to new buffered I/O.
   - New operation ChangeBaseDomain with methods for cvecs and cmats.
   - Put revision 212 as version 1.4 on the web.
 
-
-==========================
- Changes from 1.2 -> 1.3:
-==========================
-
+1.3 (2006-09-01)
   - change nearly everything to the new vector/matrix interface
   - implement new Intersection functionality no longer using Zassenhaus
   - allow for more than one package with a C-part
   - added test/polynomials.g to check characteristic and minimal polynomials
   - added Memory for cvecs and cmats and to interface
+
+1.2 (2006-08-18)
+  - ?
+
+1.01 (2006-06-08)
+  - ?
+
+1.0 (2005-06-28)
+  - Initial release
