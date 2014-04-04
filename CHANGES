@@ -2,6 +2,11 @@
  This file describes changes in the cvec package
 ==================================================
 
+2.5.1 (2014-04-04)
+  - Previous release had an invalid release date in
+    PackageInfo.g (2014-04-31 instead of 2014-03-31).
+  - Merge HISTORY and CHANGES files.
+
 2.5 (2014-03-31)
   - Add methods for \^ for cvecs and Frobenius automorphisms
   - Add methods for \^ for cmats and Frobenius automorphisms
