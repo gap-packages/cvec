@@ -8,16 +8,6 @@
 ##  Initialization of the cvec package
 ##  
 
-if not(IsBound(IsMatrixObj)) then
-    # This should have been done whilst reading the library, but
-    # released GAP 4.4 does not yet have it.
-    ReadPackage("cvec", "gap/matobj1.gd");
-    ReadPackage("cvec", "gap/matobj2.gd");
-    ReadPackage("cvec", "gap/matobjplist.gd");
-    ReadPackage("cvec", "gap/matobjplist.gi");
-    ReadPackage("cvec", "gap/matobj.gi");
-fi;
-
 ################################
 # First look after our C part: #
 ################################
