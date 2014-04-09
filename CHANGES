@@ -1,6 +1,7 @@
-==================================================
- This file describes changes in the cvec package
-==================================================
+This file describes changes in the cvec package.
+
+X.Y (YYYY-MM-DD)
+  - ...
 
 2.5.1 (2014-04-04)
   - Previous release had an invalid release date in
