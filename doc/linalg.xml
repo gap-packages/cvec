@@ -38,8 +38,7 @@ for that the pivot element is in column <M>i</M>.
 <Meth Name="EmptySemiEchelonBasis" Arg="v"/>
 <Returns> a new mutable empty semi echelonised basis </Returns>
 <Description>
-    The argument <A>v</A> must be a sample vector. Also a <C>cvecclass</C>
-    can be given instead.
+    The argument <A>v</A> must be a sample vector.
 </Description>
 </ManSection>
 
