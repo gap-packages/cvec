@@ -92,11 +92,11 @@ There are some methods to create <C>cmat</C>s of special form:
 </ManSection>
 
 <ManSection>
-<Func Name="CVEC_IdentityMat" Arg="rows, cl"/>
-<Func Name="CVEC_IdentityMat" Arg="rows, cols, p, d"/>
+<Func Name="CVEC_IdentityMat" Arg="cl"/>
+<Func Name="CVEC_IdentityMat" Arg="n, p, d"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
-    Creates an identity matrix with <A>rows</A> rows and <A>cols</A> columns
+    Creates an identity matrix with <A>n</A> rows and columns
     over the field <C>GF(<A>p</A>,<A>d</A>)</C>. If a <C>cvecclass</C>
     <A>cl</A> is given, the number of columns and the field follow
     from that.
