@@ -120,7 +120,7 @@ for that the pivot element is in column <M>i</M>.
     very same objects be used in the semi echelonised result basis.
     <P/>
     The <Q>T</Q> indicates, that the transformation is calculated, that is,
-    the resulting record <C>r</C> will have a compontent <C>coeffs</C>, such
+    the resulting record <C>r</C> will have a component <C>coeffs</C>, such
     that <C>r.coeffs * <A>m</A></C> is equal to <C>r.vectors</C> component
     of the semi echelonised result. Further, with given letter <Q>T</Q>
     there will be a component <C>relations</C> which is a basis for the

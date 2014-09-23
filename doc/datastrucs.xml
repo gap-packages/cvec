@@ -64,7 +64,7 @@ polynomial <M>c \in GF(p)[x]</M>. We always represent field elements
 of <M>GF(p^d)</M> by polynomials
 <Math>a = \sum_{{i=0}}^{{d-1}} a_i x^i</Math>
 where the coefficients <M>a_i</M> are in <M>GF(p)</M>. Because <M>c</M>
-is monic, this gives a one-to-one correspondance between polynomials
+is monic, this gives a one-to-one correspondence between polynomials
 and finite field elements.<P/>
 
 The memory layout for compressed vectors is determined by two important
@@ -459,7 +459,7 @@ The external representation is the same as the internal format of
 a 32bit machine with little endianess, which means, that the lower
 significant bytes of a <C>Word</C> are stored in lower addresses. The
 reasons for this decision are firstly that 64bit machines can do the bit
-shifting to convert between internal and externel representation easier
+shifting to convert between internal and external representation easier
 using their wide registers, and secondly, that the nowadays most popular
 architectures i386 and AMD64 use both little endianess, such that
 conversion is only necessary on a minority of machines.<P/>

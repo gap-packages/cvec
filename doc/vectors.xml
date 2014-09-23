@@ -323,7 +323,7 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 <Description>
     <A>v</A> must be a mutable <C>cvec</C> and <A>s</A> a scalar (see
     Subsection <Ref Subsect="scahandl"/>).
-    Multiplys <A>v</A> by <A>s</A> modifying <A>v</A>. If
+    Multiplies <A>v</A> by <A>s</A> modifying <A>v</A>. If
     <A>fr</A> and <A>to</A> are given, they give a hint, that <A>v</A> is
     zero outside positions <A>fr</A> to <A>to</A> (inclusively). The method
     can, if it chooses so, save time by not computing outside that range.
