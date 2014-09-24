@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <!DOCTYPE Book SYSTEM "gapdoc.dtd">
 
@@ -12,34 +12,7 @@
 -->
 
 <Book Name="cvec">
-
-<TitlePage>
-    <Title>GAP 4 Package <Package>cvec</Package></Title>
-    <Subtitle>Compact vectors over finite fields</Subtitle>
-    <Version>
-      Version <#Include SYSTEM "../VERSION">
-    </Version>
-    <Author>Max Neunhöffer
-<Address>
-School of Mathematics and Statistics
-Mathematical Institute
-North Haugh
-St Andrews, Fife KY16 9SS
-Scotland, UK
-</Address>
-    <Email>neunhoef@mcs.st-and.ac.uk</Email>
-    <Homepage>http://www-groups.mcs.st-and.ac.uk/&tilde;neunhoef</Homepage>
-    </Author>
-    <Date>March 2014</Date>
-
-<Copyright>
-    &copyright; by Max Neunhöffer<P/>
-
-  This package may be distributed under the terms and conditions of the
-  GNU Public License Version 2.
-</Copyright>
-
-</TitlePage>
+<#Include SYSTEM "title.xml">
 
 <!--  TableOfContents  . . . . . .  generate a table of contents   -->
 <TableOfContents/>

@@ -103,7 +103,18 @@ end,
 
 ##  *Optional*: Here you can list some keyword related to the topic 
 ##  of the package.
-Keywords := []
+Keywords := [],
+
+AutoDoc := rec(
+    TitlePage := rec(
+        Copyright := Concatenation(
+                    "&copyright; by Max Neunhöffer<P/>\n",
+                    "\n",
+                    "This package may be distributed under the terms and conditions of the\n",
+                    "GNU Public License Version 2.\n"
+                ),
+    )
+),
 
 ));
 
