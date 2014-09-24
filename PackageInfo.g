@@ -7,8 +7,8 @@ SetPackageInfo( rec(
 
 PackageName := "cvec",
 Subtitle := "Compact vectors over finite fields",
-Version := "2.5.1",
-Date := "04/04/2014", # dd/mm/yyyy format
+Version := "2.5.2",
+Date := "24/09/2014", # dd/mm/yyyy format
 
 ##  Information about authors and maintainers.
 Persons := [
@@ -18,7 +18,7 @@ Persons := [
     IsAuthor      := true,
     IsMaintainer  := false,
     Email         := "max@9hoeffer.de",
-    WWWHome       := "http://www-groups.mcs.st-and.ac.uk/~neunhoef/",
+    WWWHome       := "http://www-groups.mcs.st-and.ac.uk/~neunhoef",
     PostalAddress := Concatenation( [
                        "Gustav-Freytag-Straße 40\n",
                        "50354 Hürth\n",
@@ -64,10 +64,10 @@ Status := "deposited",
 # AcceptDate := "08/1999",
 #AcceptDate := "",
 
-PackageWWWHome := "http://neunhoef.github.io/cvec/",
+PackageWWWHome := "http://gap-system.github.io/cvec/",
 README_URL     := Concatenation(~.PackageWWWHome, "README"),
 PackageInfoURL := Concatenation(~.PackageWWWHome, "PackageInfo.g"),
-ArchiveURL     := Concatenation("https://github.com/neunhoef/cvec/",
+ArchiveURL     := Concatenation("https://github.com/gap-system/cvec/",
                                 "releases/download/v", ~.Version,
                                 "/cvec-", ~.Version),
 ArchiveFormats := ".tar.gz .tar.bz2",

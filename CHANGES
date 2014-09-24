@@ -1,10 +1,11 @@
 This file describes changes in the cvec package.
 
-X.Y (YYYY-MM-DD)
+2.5.2 (2014-09-24)
   - Fix some minor issues in the documentation
   - Remove some leftover GAP 4.4 compatibility code
   - Update Max Neunhoeffer's contact data
   - Use AutoDoc to generate title page of the manual from PackageInfo.g
+  - Add Max Horn as a maintainer
   - ...
 
 2.5.1 (2014-04-04)

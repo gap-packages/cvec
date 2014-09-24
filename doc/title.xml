@@ -9,7 +9,7 @@
     Compact vectors over finite fields
   </Subtitle>
   <Version>
-    2.5.1
+    2.5.2
   </Version>
   <Author>
     Max Neunhöffer<Alt Only="LaTeX"><Br/></Alt>
@@ -37,7 +37,7 @@ Germany<Br/>
 
   </Author>
   <Date>
-    04/04/2014
+    24/09/2014
   </Date>
   <Copyright>
     &copyright; 2005-2014 by Max Neunhöffer<P/>
