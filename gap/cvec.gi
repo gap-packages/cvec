@@ -1276,7 +1276,7 @@ InstallMethod( Randomize, "for a cvec and a random source",
 #############################################################################
 
 InstallGlobalFunction( CVEC_HashFunctionForCVecs, function(v,data)
-  return HASHKEY_BAG(v,257,CVEC_BYTESPERWORD,data[2]) mod data[1] + 1;
+  return HashKeyBag(v,257,CVEC_BYTESPERWORD,data[2]) mod data[1] + 1;
 end );
 
 InstallMethod( ChooseHashFunction, "for cvecs",
@@ -1285,13 +1285,8 @@ InstallMethod( ChooseHashFunction, "for cvecs",
     local bytelen,c;
     c := CVecClass(p);
     bytelen := c![CVEC_IDX_wordlen] * CVEC_BYTESPERWORD;
-    if IsBound(GenericHashFunc_C) and IsFunction(GenericHashFunc_C) then
-        return rec( func := GenericHashFunc_C,
-                    data := [257,CVEC_BYTESPERWORD,bytelen,hashlen] );
-    else
-        return rec( func := CVEC_HashFunctionForCVecs,
-                    data := [hashlen,bytelen] );
-    fi;
+    return rec( func := CVEC_HashFunctionForCVecs,
+                data := [hashlen,bytelen] );
   end );
 
 
