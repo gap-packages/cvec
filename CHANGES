@@ -1,6 +1,10 @@
 This file describes changes in the cvec package.
 
 X.Y (YYYY-MM-DD)
+  - Some functions accept slightly more general input. For example, it
+    is now in some cases acceptable to use finite field elements like
+    Z(4)^0 (which is equal, but not identical, to Z(2)^0) as input when
+    cvec is expecting elements of GF(2).
   - Move website to http://gap-packages.github.io/cvec/
   - ...
 

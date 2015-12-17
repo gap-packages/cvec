@@ -544,13 +544,13 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
                       if (IS_INTOBJ(o))
                           y = (Word) INT_INTOBJ(o);
                       else if (IS_FFE(o) && CHAR_FF(FLD_FFE(o)) == p && 
-                               DEGR_FF(FLD_FFE(o)) == 1)
+                               DegreeFFE(o) == 1) {
                           if (VAL_FFE(o) == 0)
                             y = (Word) 0;
                           else
                             y = (Word) INT_INTOBJ(ELM_PLIST(tab1,
                              (VAL_FFE(o)-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2));
-                      else {
+                      } else {
                           return OurErrorBreakQuit(
                                 "CVEC_INTREP_TO_CVEC: invalid object in list");
                       }
@@ -579,7 +579,7 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
                           y /= p;
                       }
                   } else if (IS_FFE(o) && CHAR_FF(FLD_FFE(o)) == p && 
-                           (d % DEGR_FF(FLD_FFE(o)) == 0)) {
+                           (d % DegreeFFE(o) == 0)) {
                       if (VAL_FFE(o) == 0)
                           y = (Word) 0;
                       else 
@@ -666,7 +666,7 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
         for (i = 1;i <= len;i++) {
             e = ELM_PLIST(l,i);
             if (!IS_FFE(e) || CHAR_FF(FLD_FFE(e)) != p || 
-                (d % DEGR_FF(FLD_FFE(e))) != 0) {
+                (d % DegreeFFE(e)) != 0) {
                 return OurErrorBreakQuit("CVEC_FFELI_TO_INTLI: Elements of l "
                                          "must be finite field elements over "
                                          "the right field");
@@ -1461,7 +1461,7 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
         PREPARE_tab1(fi);
         PREPARE_d(fi);
         PREPARE_q(fi);
-        if (CHAR_FF(FLD_FFE(s)) == p && (d % DEGR_FF(FLD_FFE(s))) == 0) {
+        if (CHAR_FF(FLD_FFE(s)) == p && (d % DegreeFFE(s)) == 0) {
             if (VAL_FFE(s) == 0) {
                 sc = 0;
             } else {
