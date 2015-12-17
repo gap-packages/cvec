@@ -1,5 +1,5 @@
 AC_PREREQ([2.68])
-AC_INIT([cvec], m4_esyscmd([tr -d '\n' < VERSION]), [https://github.com/neunhoef/cvec/issues], [cvec], [http://neunhoef.github.io/cvec/])
+AC_INIT([cvec], m4_esyscmd([tr -d '\n' < VERSION]), [https://github.com/gap-packages/cvec/issues], [cvec], [http://gap-packages.github.io/cvec/])
 AC_CONFIG_SRCDIR([src/cvec.c])
 AC_CONFIG_HEADER([src/pkgconfig.h:cnf/pkgconfig.h.in])
 AC_CONFIG_MACRO_DIR([m4])
