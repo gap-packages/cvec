@@ -44,12 +44,12 @@ InstallOtherMethod( SEBMaker, "empty plist method",
 
 InstallMethod( SemiEchelonBasisMutable, "for a semi echelonised basis record",
   [IsRecord],
-  function(b)
-    local i;
-    b.pivots := [];
+  function(r)
+    local i, b;
+    b := rec( vectors := r.vectors, pivots := [] );
     for i in [1..RowLength(b.vectors)] do
-        if IsBound(b.heads[i]) and b.heads[i] > 0 then
-            b.pivots[b.heads[i]] := i;
+        if IsBound(r.heads[i]) and r.heads[i] > 0 then
+            b.pivots[r.heads[i]] := i;
         fi;
     od;
     return SEBMaker(b.vectors,b.pivots);
