@@ -103,7 +103,7 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonRows" Arg="m"/>
+<Meth Name="SemiEchelonBasisMutable" Arg="m"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
     The argument <A>m</A> must be a <C>cmat</C>. This method calculates
@@ -111,7 +111,7 @@ for that the pivot element is in column <M>i</M>.
     <P/>
     There are a
     number of similar operations the names of which are derived from 
-    <Ref Meth="SemiEchelonRows"/> by appending single letters: The letters
+    <Ref Meth="SemiEchelonBasisMutable"/> by appending single letters: The letters
     <Q>P</Q>, <Q>T</Q> and <Q>X</Q> are modifiers and there are operations
     for most of the <M>8</M> combinations of those letters being present or not
     respectively. Always give the present letters in alphabetical order.
@@ -136,44 +136,44 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonRowsX" Arg="m"/>
+<Meth Name="SemiEchelonBasisMutableX" Arg="m"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
-    Same as <Ref Meth="SemiEchelonRows"/> but destructive in <A>m</A>.
+    Same as <Ref Meth="SemiEchelonBasisMutable"/> but destructive in <A>m</A>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonRowsT" Arg="m"/>
+<Meth Name="SemiEchelonBasisMutableT" Arg="m"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
-    Same as <Ref Meth="SemiEchelonRows"/> but in addition stores the
-    transformation, see <Ref Meth="SemiEchelonRows"/>.
+    Same as <Ref Meth="SemiEchelonBasisMutable"/> but in addition stores the
+    transformation, see <Ref Meth="SemiEchelonBasisMutable"/>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonRowsTX" Arg="m"/>
+<Meth Name="SemiEchelonBasisMutableTX" Arg="m"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
-    Same as <Ref Meth="SemiEchelonRowsT"/> but destructive in <A>m</A>.
+    Same as <Ref Meth="SemiEchelonBasisMutableT"/> but destructive in <A>m</A>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonRowsP" Arg="m"/>
+<Meth Name="SemiEchelonBasisMutableP" Arg="m"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
-    Same as <Ref Meth="SemiEchelonRows"/> but in addition stores the
-    inverse transformation, see <Ref Meth="SemiEchelonRows"/>.
+    Same as <Ref Meth="SemiEchelonBasisMutable"/> but in addition stores the
+    inverse transformation, see <Ref Meth="SemiEchelonBasisMutable"/>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonRowsPX" Arg="m"/>
+<Meth Name="SemiEchelonBasisMutablePX" Arg="m"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
-    Same as <Ref Meth="SemiEchelonRowsP"/> but destructive in <A>m</A>.
+    Same as <Ref Meth="SemiEchelonBasisMutableP"/> but destructive in <A>m</A>.
 </Description>
 </ManSection>
 
@@ -182,7 +182,7 @@ for that the pivot element is in column <M>i</M>.
 <Returns> a <C>cmat</C> </Returns>
 <Description>
     Returns a <C>cmat</C> the rows of which are a basis of the (left) nullspace
-    of the <C>cmat</C> <A>m</A>. Internally, <Ref Meth="SemiEchelonRowsT"/>
+    of the <C>cmat</C> <A>m</A>. Internally, <Ref Meth="SemiEchelonBasisMutableT"/>
     is used and the component <C>relations</C> of the result is returned.
     The result is mutable, which is the reason for the introduction of 
     a new operation besides <Ref Oper="NullspaceMat" BookName="Ref"/>.

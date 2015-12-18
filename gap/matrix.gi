@@ -11,7 +11,7 @@
 ##  main GAP library for cmats.
 ##
 ##  For CMats these are basically obsolete because of the functions
-##  around SemiEchelonRows* in linalg.gi, which however have a slightly
+##  around SemiEchelonBasisMutable* in linalg.gi, which however have a slightly
 ##  different interface.
 ##
 
