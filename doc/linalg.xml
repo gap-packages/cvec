@@ -44,19 +44,6 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="MakeSemiEchelonBasis" Arg="b"/>
-<Returns> a semi echelonised basis </Returns>
-<Description>
-    Turns the output <A>b</A> of <Ref Oper="SemiEchelonMat" BookName="Ref"/>
-    into a valid semi echelonised basis in the sense of the 
-    <Package>cvec</Package> package. This means that the component
-    <C>pivots</C> is calculated from the component <C>heads</C>.
-    Use this function only if necessary. Directly use 
-    <Ref Meth="SemiEchelonRows"/> instead.
-</Description>
-</ManSection>
-
-<ManSection>
 <Oper Name="Vectors" Arg="b"/>
 <Returns> a matrix </Returns>
 <Description>
@@ -99,6 +86,19 @@ for that the pivot element is in column <M>i</M>.
     in <A>b</A> and <A>dec</A> is a vector, then the first <M>n+1</M> 
     components of <A>dec</A> are changed such that 
     <M><A>v</A> = \sum_{{i=1}}^{n+1} <A>dec</A>_i <A>b</A>_i</M>.
+</Description>
+</ManSection>
+
+<ManSection>
+<Meth Name="SemiEchelonBasisMutable" Arg="b"/>
+<Returns> a semi echelonised basis </Returns>
+<Description>
+    Turns the output <A>b</A> of <Ref Oper="SemiEchelonMat" BookName="Ref"/>
+    into a valid semi echelonised basis in the sense of the 
+    <Package>cvec</Package> package. This means that the component
+    <C>pivots</C> is calculated from the component <C>heads</C>.
+    Use this function only if absolutely necessary. Instead, directly
+    invoke <Ref Meth="SemiEchelonBasisMutable"/>  on the original matrix.
 </Description>
 </ManSection>
 
