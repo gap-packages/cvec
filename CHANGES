@@ -6,6 +6,7 @@ X.Y (YYYY-MM-DD)
     Z(4)^0 (which is equal, but not identical, to Z(2)^0) as input when
     cvec is expecting elements of GF(2).
   - Move website to http://gap-packages.github.io/cvec/
+  - Stop using GenericHashFunc_C (formerly provided by the orb package)
   - ...
 
 2.5.3 (2014-11-08)
