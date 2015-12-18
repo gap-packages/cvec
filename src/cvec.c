@@ -289,6 +289,17 @@ Obj INIT_SMALL_GFQ_TABS(Obj self, Obj pp, Obj dd, Obj qq, Obj tab1, Obj tab2,
     return 0L;
 }
 
+// Given a FFE o, perform lookup in tab1
+static inline Obj FFE_TO_INTOBJ(Obj tab1, Int q, Obj o)
+{
+    FFV v = VAL_FFE(o);
+    if (v == 0)
+        return INTOBJ_INT(0);
+
+    return ELM_PLIST(tab1, (v-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2);
+}
+
+
   /**********************/
  /* Sequential access: */
 /**********************/
@@ -545,11 +556,7 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
                           y = (Word) INT_INTOBJ(o);
                       else if (IS_FFE(o) && CHAR_FF(FLD_FFE(o)) == p && 
                                DegreeFFE(o) == 1) {
-                          if (VAL_FFE(o) == 0)
-                            y = (Word) 0;
-                          else
-                            y = (Word) INT_INTOBJ(ELM_PLIST(tab1,
-                             (VAL_FFE(o)-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2));
+                          y = (Word) INT_INTOBJ(FFE_TO_INTOBJ(tab1, q, o));
                       } else {
                           return OurErrorBreakQuit(
                                 "CVEC_INTREP_TO_CVEC: invalid object in list");
@@ -580,11 +587,7 @@ STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
                       }
                   } else if (IS_FFE(o) && CHAR_FF(FLD_FFE(o)) == p && 
                            (d % DegreeFFE(o) == 0)) {
-                      if (VAL_FFE(o) == 0)
-                          y = (Word) 0;
-                      else 
-                          y = (Word) INT_INTOBJ(ELM_PLIST(tab1,
-                           (VAL_FFE(o)-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2));
+                      y = (Word) INT_INTOBJ(FFE_TO_INTOBJ(tab1, q, o));
                       for (j = 0;j < d;j++) {
                           pw[j] |= ((y % p) << shift);
                           y /= p;
@@ -671,12 +674,7 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
                                          "must be finite field elements over "
                                          "the right field");
             }
-            if (VAL_FFE(e) == 0) {
-                e = INTOBJ_INT(0);
-            } else {
-                e = ELM_PLIST(tab1,
-                         (VAL_FFE(e)-1)*((q-1)/(SIZE_FF(FLD_FFE(e))-1))+2);
-            }
+            e = FFE_TO_INTOBJ(tab1, q, e);
             SET_ELM_PLIST(l,i,e);
         }
     }
@@ -1462,12 +1460,7 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
         PREPARE_d(fi);
         PREPARE_q(fi);
         if (CHAR_FF(FLD_FFE(s)) == p && (d % DegreeFFE(s)) == 0) {
-            if (VAL_FFE(s) == 0) {
-                sc = 0;
-            } else {
-                sc = INT_INTOBJ(ELM_PLIST(tab1,
-                         (VAL_FFE(s)-1)*((q-1)/(SIZE_FF(FLD_FFE(s))-1))+2));
-            }
+            sc = INT_INTOBJ(FFE_TO_INTOBJ(tab1, q, s));
         } else {
             return (Int *) OurErrorBreakQuit(
                     "prepare_scalar: scalar from wrong field");
