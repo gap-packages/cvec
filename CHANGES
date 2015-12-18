@@ -1,6 +1,6 @@
 This file describes changes in the cvec package.
 
-X.Y (YYYY-MM-DD)
+2.5.4 (2015-12-18)
   - Some functions accept slightly more general input. For example, it
     is now in some cases acceptable to use finite field elements like
     Z(4)^0 (which is equal, but not identical, to Z(2)^0) as input when
@@ -8,9 +8,9 @@ X.Y (YYYY-MM-DD)
   - Fix EmptySemiEchelonBasis: its documentation said it expects a
     sample vector, but the implementation expected a sample matrix. Now
     both are possible, and both are documented.
+  - Fix some errors in the manual.
   - Move website to http://gap-packages.github.io/cvec/
   - Stop using GenericHashFunc_C (formerly provided by the orb package)
-  - ...
 
 2.5.3 (2014-11-08)
   - Tweak the build system to avoid potential issues when the source
