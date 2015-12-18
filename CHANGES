@@ -5,6 +5,9 @@ X.Y (YYYY-MM-DD)
     is now in some cases acceptable to use finite field elements like
     Z(4)^0 (which is equal, but not identical, to Z(2)^0) as input when
     cvec is expecting elements of GF(2).
+  - Fix EmptySemiEchelonBasis: its documentation said it expects a
+    sample vector, but the implementation expected a sample matrix. Now
+    both are possible, and both are documented.
   - Move website to http://gap-packages.github.io/cvec/
   - Stop using GenericHashFunc_C (formerly provided by the orb package)
   - ...

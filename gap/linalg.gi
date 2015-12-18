@@ -61,6 +61,12 @@ InstallMethod( EmptySemiEchelonBasis, "for a row list matrix",
     return SEBMaker( Matrix([],RowLength(m),m), [] );
   end );
 
+InstallMethod( EmptySemiEchelonBasis, "for a row vector",
+  [ IsRowVector ],
+  function( v )
+    return EmptySemiEchelonBasis(CMat([v]));
+  end );
+
 InstallMethod( Vectors, "for a semi echelonsised basis", [ SEBType ],
   function(b)
     return b!.vectors;

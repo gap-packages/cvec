@@ -17,6 +17,7 @@
 
 DeclareOperation( "SEBMaker", [IsRowListMatrix,IsList] );
 DeclareOperation( "EmptySemiEchelonBasis", [ IsRowListMatrix ] );
+DeclareOperation( "EmptySemiEchelonBasis", [ IsRowVector ] );
 DeclareOperation( "SemiEchelonBasisMutable", [ IsRowListMatrix ] );
 DeclareOperation( "SemiEchelonBasisMutable", [ IsRecord ] );
 DeclareOperation( "SemiEchelonBasisMutableX", [IsRowListMatrix] );
