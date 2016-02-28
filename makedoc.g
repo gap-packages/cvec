@@ -1,4 +1,4 @@
-##  this creates the documentation, needs: GAPDoc and AutoDOc packages, pdflatex
+##  this creates the documentation, needs: GAPDoc and AutoDoc packages, pdflatex
 ##  
 ##  Call this with GAP from within the package directory.
 ##
