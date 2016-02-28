@@ -1,23 +1,13 @@
-##  this creates the documentation, needs: GAPDoc package, latex, pdflatex,
-##  mkindex, dvips
+##  this creates the documentation, needs: GAPDoc and AutoDOc packages, pdflatex
 ##  
-##  Call this with GAP.
-##  
+##  Call this with GAP from within the package directory.
+##
 
-PACKAGE := "cvec";
-SetPackagePath(PACKAGE, ".");
-PrintTo("VERSION", PackageInfo(PACKAGE)[1].Version);
-
-LoadPackage("GAPDoc");
-LoadPackage("IO");
-LoadPackage("orb");
-
-if fail <> LoadPackage("AutoDoc", ">= 2014.03.27") then
-    AutoDoc(PACKAGE : scaffold := rec( MainPage := false ));
-else
-    MakeGAPDocDoc("doc", PACKAGE, [], PACKAGE, "MathJax");
-    CopyHTMLStyleFiles("doc");
-    GAPDocManualLab(PACKAGE);
+if fail = LoadPackage("AutoDoc", ">= 2016.01.21") then
+    Error("AutoDoc 2016.01.21 or newer is required");
 fi;
+
+AutoDoc(rec( scaffold := rec( MainPage := false )));
+PrintTo("VERSION", GAPInfo.PackageInfoCurrent.Version);
 
 QUIT;
