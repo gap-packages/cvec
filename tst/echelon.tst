@@ -10,4 +10,3 @@ gap> EmptySemiEchelonBasis(c);
 <semi echelonized basis over GF(3) of length 0>
 gap> EmptySemiEchelonBasis(c[1]);
 <semi echelonized basis over GF(3) of length 0>
-

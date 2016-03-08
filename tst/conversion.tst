@@ -13,6 +13,7 @@ true
 gap> m2 = m16;
 true
 
+#
 gap> c := CVEC_NewCVecClass(2, 1, 2);
 <cvec-class field=GF(2,1) len=2 wordlen=1>
 gap> CVec(m2, c);
@@ -24,6 +25,7 @@ gap> CVec(m8, c);
 gap> CVec(m16, c);
 <cvec over GF(2,1) of length 2>
 
+#
 gap> c := CVEC_NewCVecClass(2, 2, 2);
 <cvec-class field=GF(2,2) len=2 wordlen=2>
 gap> CVec(m2, c);
@@ -35,6 +37,7 @@ gap> CVec(m8, c);
 gap> CVec(m16, c);
 <cvec over GF(2,2) of length 2>
 
+#
 gap> c := CVEC_NewCVecClass(2, 3, 2);
 <cvec-class field=GF(2,3) len=2 wordlen=3>
 gap> CVec(m2, c);
@@ -46,6 +49,7 @@ gap> CVec(m8, c);
 gap> CVec(m16, c);
 <cvec over GF(2,3) of length 2>
 
+#
 gap> c := CVEC_NewCVecClass(2, 4, 2);
 <cvec-class field=GF(2,4) len=2 wordlen=4>
 gap> CVec(m2, c);
