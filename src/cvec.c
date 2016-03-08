@@ -103,6 +103,10 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define OFF_maskp 2
 #define OFF_cutmask 3
 #define POS_DATA_TYPE 3
+/* FIXME: POS_DATA_TYPE is copied from GAP lib code,
+ see also the (unused) SHARED_TYPE macro in GAP's objects.h
+ So if GAP ever was to change this, we'd be in deep trouble.
+*/
 
 /* currently unused, see below:
 #define PREPARE(f) \
