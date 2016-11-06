@@ -247,13 +247,11 @@ InstallGlobalFunction( CVEC_NewCVecClassSameField, function(c,len)
 end );
 
 InstallMethod( CVecClass, "for a cvec", [IsCVecRep],
-  function(v)
-    return DataType(TypeObj(v));
-  end);
+  DataObj);
 
 InstallMethod( CVecClass, "for a cvec and a length", [IsCVecRep, IsInt],
   function(v,l)
-    return CVEC_NewCVecClassSameField(DataType(TypeObj(v)),l);
+    return CVEC_NewCVecClassSameField(DataObj(v),l);
   end );
 
 InstallMethod( CVecClass, "for a cvecclass and a length", [IsCVecClass, IsInt],
@@ -280,7 +278,7 @@ InstallGlobalFunction( CVEC_New, function(arg)
   if Length(arg) = 1 then
       c := arg[1];
       if IsCVecRep(c) then
-          c := DataType(TypeObj(c));
+          c := DataObj(c);
       fi;
       if IsCVecClass(c) then
           return CVEC_NEW(c,c![CVEC_IDX_type]);
@@ -327,7 +325,7 @@ end);
 InstallMethod( ViewObj, "for a cvec", [IsCVecRep], 
 function(v)
   local c;
-  c := DataType(TypeObj(v));
+  c := DataObj(v);
   Print("<");
   if not(IsMutable(v)) then Print("immutable "); fi;
   Print("cvec over GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
@@ -344,7 +342,7 @@ end);
 InstallMethod( PrintObj, "for a cvec", [IsCVecRep], 
 function(v)
   local l,c,i;
-  c := DataType(TypeObj(v));
+  c := DataObj(v);
   Print("NewRowVector(IsCVecRep,GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),[");
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
@@ -360,7 +358,7 @@ end);
 InstallMethod( String, "for a cvec", [IsCVecRep], 
 function(v)
   local l,c,i,res;
-  c := DataType(TypeObj(v));
+  c := DataObj(v);
   res := "NewRowVector(IsCVecRep,GF(";
   Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]));
   Add(res,',');
@@ -383,7 +381,7 @@ InstallValue( CVEC_CharactersForDisplay,
 InstallMethod( Display, "for a cvec", [IsCVecRep], 
 function(v)
   local i,l,c,q,lo;
-  c := DataType(TypeObj(v));
+  c := DataObj(v);
   Print("[");
   q := c![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
   if q <= 36 then
@@ -441,7 +439,7 @@ end );
 
 InstallOtherMethod( Length, "for cvecs", [IsCVecRep], 
 function(v)
-  return DataType(TypeObj(v))![CVEC_IDX_len];
+  return DataObj(v)![CVEC_IDX_len];
 end);
 
 # AddRowVector(v,w [,s][,fr,to]) where s is integer or FFE:
@@ -462,7 +460,7 @@ InstallOtherMethod( AddRowVector, "for cvecs",
 InstallOtherMethod( AddRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsCVecRep, IsFFE],
   function(v,w,s) 
-    CVEC_ADDMUL(v,w,CVEC_HandleScalar(DataType(TypeObj(v)),s),0,0); 
+    CVEC_ADDMUL(v,w,CVEC_HandleScalar(DataObj(v),s),0,0);
   end);
 InstallOtherMethod( AddRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsCVecRep, IsInt and IsSmallIntRep],
@@ -476,7 +474,7 @@ InstallOtherMethod( AddRowVector, "for cvecs",
 InstallOtherMethod( AddRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsCVecRep, IsFFE, IsInt, IsInt],
   function(v,w,s,fr,to) 
-    CVEC_ADDMUL(v,w,CVEC_HandleScalar(DataType(TypeObj(v)),s),fr,to); 
+    CVEC_ADDMUL(v,w,CVEC_HandleScalar(DataObj(v),s),fr,to);
   end);
 InstallOtherMethod( AddRowVector, "for cvecs",
   [IsMutable and IsCVecRep,IsCVecRep,IsInt and IsSmallIntRep,IsInt,IsInt],
@@ -505,12 +503,12 @@ InstallOtherMethod( MultRowVector, "for cvecs",
 InstallOtherMethod( MultRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsFFE],
   function(v,s) 
-    CVEC_MUL1(v,CVEC_HandleScalar(DataType(TypeObj(v)),s),0,0); 
+    CVEC_MUL1(v,CVEC_HandleScalar(DataObj(v),s),0,0);
   end);
 InstallOtherMethod( MultRowVector, "for cvecs",
   [IsMutable and IsCVecRep, IsFFE, IsInt, IsInt],
   function(v,s,fr,to) 
-    CVEC_MUL1(v,CVEC_HandleScalar(DataType(TypeObj(v)),s),fr,to); 
+    CVEC_MUL1(v,CVEC_HandleScalar(DataObj(v),s),fr,to);
   end);
 
 # Addition of vectors:
@@ -518,7 +516,7 @@ InstallOtherMethod( MultRowVector, "for cvecs",
 InstallOtherMethod( \+, "for cvecs", [IsCVecRep, IsCVecRep],
   function(v,w)
     local u,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_ADD3(u,v,w);
     if not(IsMutable(v)) and not(IsMutable(w)) then MakeImmutable(u); fi;
@@ -530,7 +528,7 @@ InstallOtherMethod( \+, "for cvecs", [IsCVecRep, IsCVecRep],
 InstallOtherMethod( \-, "for cvecs", [IsCVecRep, IsCVecRep],
   function(v,w)
     local u,vcl,p;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_COPY(v,u);
@@ -544,7 +542,7 @@ InstallOtherMethod( \-, "for cvecs", [IsCVecRep, IsCVecRep],
 InstallOtherMethod( AdditiveInverseMutable, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl,p;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_MUL2(u,v,p-1);
@@ -553,7 +551,7 @@ InstallOtherMethod( AdditiveInverseMutable, "for cvecs", [IsCVecRep],
 InstallOtherMethod( AdditiveInverseSameMutability, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl,p;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_MUL2(u,v,p-1);
@@ -568,7 +566,7 @@ BindGlobal( "CVEC_VECTOR_TIMES_SCALAR", function(v,s)
     # if necessary! Of course, integers and FFEs in internal representation
     # of course is allowed.
     local u,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_MUL2(u,v,s);
     if not(IsMutable(v)) then MakeImmutable(u); fi;
@@ -581,7 +579,7 @@ InstallOtherMethod( \*, "for cvecs", [IsCVecRep, IsFFE and IsInternalRep],
 InstallOtherMethod( \*, "for cvecs", [IsCVecRep, IsFFE], 
   function (v,s) 
     return CVEC_VECTOR_TIMES_SCALAR(v,
-                CVEC_HandleScalar(DataType(TypeObj(v)),s));
+                CVEC_HandleScalar(DataObj(v),s));
   end);
 InstallOtherMethod( \*, "for cvecs", [IsInt,IsCVecRep], 
   function(s,v) return CVEC_VECTOR_TIMES_SCALAR(v,s); end);
@@ -590,7 +588,7 @@ InstallOtherMethod( \*, "for cvecs", [IsFFE and IsInternalRep,IsCVecRep],
 InstallOtherMethod( \*, "for cvecs", [IsFFE, IsCVecRep], 
   function (s,v) 
     return CVEC_VECTOR_TIMES_SCALAR(v,
-                CVEC_HandleScalar(DataType(TypeObj(v)),s));
+                CVEC_HandleScalar(DataObj(v),s));
   end);
 
 #############################################################################
@@ -658,7 +656,7 @@ InstallOtherMethod( \[\]\:\=, "for a cvec, a pos, and an int",
 InstallOtherMethod( \[\]\:\=, "for a cvec, a pos, and a ffe",
   [IsCVecRep and IsMutable, IsPosInt, IsFFE], 
   function(v,pos,s)
-    CVEC_ASS_CVEC(v,pos,CVEC_HandleScalar(DataType(TypeObj(v)),s));
+    CVEC_ASS_CVEC(v,pos,CVEC_HandleScalar(DataObj(v),s));
   end);
 InstallOtherMethod( \[\]\:\=, "for cvecs", [IsCVecRep, IsPosInt, IsInt],
   function(v,p,o) Error("cvec is immutable"); end);
@@ -670,7 +668,7 @@ InstallOtherMethod( \[\], "for cvecs",
 InstallOtherMethod( \[\], "for cvecs", [IsCVecRep, IsPosInt], 
   function(v,pos)
     local d,fam,i,p,s,size,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     size := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
     s := CVEC_ELM_CVEC(v,pos);
     if size = 0 then return s; fi;
@@ -737,7 +735,7 @@ InstallOtherMethod( PositionNot, "for cvecs",
 InstallOtherMethod( ShallowCopy, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     CVEC_COPY(v,u);
     return u;
@@ -748,14 +746,14 @@ InstallOtherMethod( ShallowCopy, "for cvecs", [IsCVecRep],
 InstallOtherMethod( ZeroMutable, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     return u;
   end);
 InstallOtherMethod( ZeroSameMutability, "for cvecs", [IsCVecRep],
   function(v)
     local u,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     u := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
     if not(IsMutable(v)) then
         MakeImmutable(u);
@@ -767,7 +765,7 @@ InstallMethod( ZeroVector, "for an integer and a cvec",
   [IsInt, IsCVecRep],
   function(len,v)
     local cl;
-    cl := DataType(TypeObj(v));
+    cl := DataObj(v);
     if cl![CVEC_IDX_len] <> len then
         cl := CVEC_NewCVecClassSameField(cl,len);
     fi;
@@ -896,9 +894,9 @@ InstallMethod( Vector, "for a list of finite field elements, and a cvec",
   function( l, v )
     local c;
     if Length(l) = Length(v) then
-        return CVec(l,DataType(TypeObj(v)));
+        return CVec(l,DataObj(v));
     else
-        c := CVEC_NewCVecClassSameField(DataType(TypeObj(v)),Length(l));
+        c := CVEC_NewCVecClassSameField(DataObj(v),Length(l));
         return CVec(l,c);
     fi;
   end );
@@ -917,7 +915,7 @@ InstallMethod( ChangedBaseDomain, "for a cvec and a finite field",
 InstallMethod( Unpack, "for cvecs", [IsCVecRep],
   function(v)
     local d,f,fam,i,l,p,q,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     f := vcl![CVEC_IDX_fieldinfo];
     p := f![CVEC_IDX_p];
     d := f![CVEC_IDX_d];
@@ -960,7 +958,7 @@ InstallMethod( Unpack, "for cvecs", [IsCVecRep],
 InstallMethod( IntegerRep, "for cvecs", [IsCVecRep],
   function(v)
     local d,l,p,q,vcl;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     p := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
     d := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
     q := vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
@@ -977,7 +975,7 @@ InstallOtherMethod( NumberFFVector, "for a cvec, and a field size",
   [IsCVecRep and IsRowVector and IsFFECollection, IsPosInt],
   function(v,sz)
     local bas,c,f,halfword,i,l,res,wordlen;
-    c := DataType(TypeObj(v));
+    c := DataObj(v);
     f := c![CVEC_IDX_fieldinfo];
     if sz <> f![CVEC_IDX_q] then
         Error("CVEC_NumberFFVector: vector over wrong field");
@@ -1008,7 +1006,7 @@ InstallOtherMethod( NumberFFVector, "for a cvec",
   [IsCVecRep and IsRowVector and IsFFECollection],
   function(v)
     local c;
-    c := DataType(TypeObj(v));
+    c := DataObj(v);
     return NumberFFVector(v,c![CVEC_IDX_fieldinfo]![CVEC_IDX_q]);
   end);
 
@@ -1059,28 +1057,28 @@ InstallMethod( CVecNumber, "for an integer, and a cvecclass",
 InstallOtherMethod( Characteristic, "for cvecs", [IsCVecRep],
   function(v)
     local c;
-    c := DataType(TypeObj(v));
+    c := DataObj(v);
     return c![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
   end);
     
 InstallOtherMethod( DegreeFFE, "for cvecs", [IsCVecRep],
   function(v)
     local c;
-    c := DataType(TypeObj(v));
+    c := DataObj(v);
     return c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
   end);
     
 InstallMethod( BaseDomain, "for cvecs", [IsCVecRep],
   function(v)
     local c;
-    c := DataType(TypeObj(v));
+    c := DataObj(v);
     return c![CVEC_IDX_GF];
   end);
     
 InstallMethod( BaseField, "for cvecs", [IsCVecRep],
   function(v)
     local c;
-    c := DataType(TypeObj(v));
+    c := DataObj(v);
     return c![CVEC_IDX_GF];
   end);
     
@@ -1090,8 +1088,8 @@ InstallMethod( BaseField, "for cvecs", [IsCVecRep],
 
 InstallGlobalFunction( CVEC_Slice, function(src,dst,srcpos,len,dstpos)
   local cdst,csrc;
-  csrc := DataType(TypeObj(src));
-  cdst := DataType(TypeObj(dst));
+  csrc := DataObj(src);
+  cdst := DataObj(dst);
   if not(IsIdenticalObj(csrc![CVEC_IDX_fieldinfo],
                         cdst![CVEC_IDX_fieldinfo])) then
       Error("CVEC_Slice: vectors not over common field");
@@ -1125,7 +1123,7 @@ InstallOtherMethod( \{\}, "for a cvec and a range",
   function(v,r)
     # note that ranges in IsRangeRep always have length at least 2!
     local c,cl,w;
-    cl := DataType(TypeObj(v));
+    cl := DataObj(v);
     c := CVEC_NewCVecClassSameField(cl,Length(r));
     w := CVEC_NEW(c,c![CVEC_IDX_type]);
     CVEC_SLICE_LIST(v,w,r,[1..Length(r)]);
@@ -1139,7 +1137,7 @@ InstallOtherMethod( \{\}, "for a cvec and a list",
   [IsCVecRep, IsList],
   function(v,l)
     local c,cl,w;
-    cl := DataType(TypeObj(v));
+    cl := DataObj(v);
     c := CVEC_NewCVecClassSameField(cl,Length(l));
     w := CVEC_NEW(c,c![CVEC_IDX_type]);
     CVEC_SLICE_LIST(v,w,l,[1..Length(l)]);
@@ -1169,11 +1167,11 @@ InstallGlobalFunction( CVEC_Concatenation, function(arg)
       Error("CVEC_Concatenation: Need at least one cvec");
       return;
   fi;
-  c := DataType(TypeObj(arg[1]));
+  c := DataObj(arg[1]);
   len := Length(arg[1]);
   for i in [2..Length(arg)] do
       if not(IsCVecRep(arg[i])) or 
-         not(IsIdenticalObj(c,DataType(TypeObj(arg[i])))) then
+         not(IsIdenticalObj(c,DataObj(arg[i]))) then
           Error("CVEC_Concatenation: Arguments must all be cvecs over the ",
                 "same field ");
           return;
@@ -1199,12 +1197,12 @@ InstallOtherMethod( ProductCoeffs, "for cvecs",
   [IsCVecRep, IsCVecRep],
   function(v,w)
   local cl,u,vcl,wcl;
-  vcl := DataType(TypeObj(v));
+  vcl := DataObj(v);
   if vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d] > 1 then
       Error("Non-prime fields not yet implemented (doable)!");
       return;
   fi;
-  wcl := DataType(TypeObj(w));
+  wcl := DataObj(w);
   if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],wcl![CVEC_IDX_fieldinfo])) then
       Error("ProductCoeffs: Not over same field!");
   fi;
@@ -1222,7 +1220,7 @@ end);
 InstallMethod( Randomize, "for cvecs", [IsCVecRep and IsMutable],
   function( v )
     local cl,d,j,len,li,p,q,size;
-    cl := DataType(TypeObj(v));
+    cl := DataObj(v);
     len := Length(v);
     size := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
     d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
@@ -1248,7 +1246,7 @@ InstallMethod( Randomize, "for a cvec and a random source",
   [IsCVecRep and IsMutable, IsRandomSource],
   function( v, rs )
     local cl,d,j,len,li,p,q,size;
-    cl := DataType(TypeObj(v));
+    cl := DataObj(v);
     len := Length(v);
     size := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
     d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
@@ -1302,7 +1300,7 @@ InstallMethod( IO_Pickle, "for cvecs",
     if IsMutable(v) then tag := "MCVC";
     else tag := "ICVC"; fi;
     if IO_Write(f,tag) = fail then return IO_Error; fi;
-    m := CVEC_CMatMaker( [0,v], DataType(TypeObj(v)) );
+    m := CVEC_CMatMaker( [0,v], DataObj(v) );
     if CVEC_WriteMat( f, m ) = fail then return IO_Error; fi;
     return IO_OK;
   end );

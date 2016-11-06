@@ -54,7 +54,7 @@ InstallMethod( NewMatrix,
     c := CVEC_NewCVecClass(p,d,rl);
     li := 0*[1..Length(l)+1];
     for i in [1..Length(l)] do
-        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataType(TypeObj(l[i]))) then
+        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataObj(l[i])) then
             li[i+1] := ShallowCopy(l[i]);
         elif IsRowVectorObj(l[i]) then
             li[i+1] := CVec(Unpack(l[i]),c);
@@ -103,13 +103,13 @@ InstallMethod( NewIdentityMatrix,
 
 InstallMethod( CMat, "for a list of cvecs and a cvec", [IsList, IsCVecRep],
   function(l,v)
-    return CMat(l,DataType(TypeObj(v)),true);
+    return CMat(l,DataObj(v),true);
   end);
 
 InstallMethod( CMat, "for a list of cvecs, a cvec, and a boolean value",
   [IsList, IsCVecRep, IsBool],
   function(l,v,checks)
-    return CMat(l,DataType(TypeObj(v)),checks);
+    return CMat(l,DataObj(v),checks);
   end);
 
 InstallMethod( CMat, "for a list of cvecs", [IsList],
@@ -119,7 +119,7 @@ InstallMethod( CMat, "for a list of cvecs", [IsList],
         Error("CMat: Cannot use one-argument version with empty list");
         return fail;
     fi;
-    c := DataType(TypeObj(l[1]));
+    c := DataObj(l[1]);
     return CMat(l,c,true);
   end);
 
@@ -131,7 +131,7 @@ InstallMethod( CMat, "for a list of cvecs, and a boolean value",
         Error("CMat: Cannot use two-argument version with empty list and bool");
         return fail;
     fi;
-    c := DataType(TypeObj(l[1]));
+    c := DataObj(l[1]);
     return CMat(l,c,checks);
   end);
 
@@ -177,7 +177,7 @@ InstallMethod( CMat, "for a list of cvecs, a cvec class, and a boolean value",
     if dochecks then
         for v in [1..Length(l)] do
             if not(IsBound(l[v])) or not(IsCVecRep(l[v])) or 
-               not(IsIdenticalObj(DataType(TypeObj(l[v])),cl)) then
+               not(IsIdenticalObj(DataObj(l[v]),cl)) then
                 Error("CVEC_CMat: Not all list entries are correct vectors");
                 return fail;
             fi;
@@ -202,7 +202,7 @@ InstallMethod( Matrix, "for a list of cvecs, an integer, and a cmat",
         return CVEC_CMatMaker(li,cl);
     fi;
     if IsCVecRep(l[1]) then
-        if not(IsIdenticalObj(cl,DataType(TypeObj(l[1])))) then
+        if not(IsIdenticalObj(cl,DataObj(l[1]))) then
             Error("Matrix: cvec not in correct class");
             return fail;
         fi;
@@ -445,7 +445,7 @@ InstallMethod( CompatibleMatrix, "for a cvec",
   function( v )
     local l;
     l := [0,v];
-    return CVEC_CMatMaker(l,DataType(TypeObj(v)));
+    return CVEC_CMatMaker(l,DataObj(v));
   end );
 
 InstallMethod( CompatibleVector, "for a cmat",
@@ -564,7 +564,7 @@ InstallMethod( PostMakeImmutable, "for a cmat", [IsCMatRep and IsMatrix],
 InstallOtherMethod( Add, "for a cmat, and a cvec",
   [IsCMatRep and IsMatrix and IsMutable, IsCVecRep],
   function(m,v)
-    if not(IsIdenticalObj(DataType(TypeObj(v)),m!.vecclass)) then
+    if not(IsIdenticalObj(DataObj(v),m!.vecclass)) then
         Error("Add: only correct cvecs allowed in this matrix");
         return fail;
     fi;
@@ -574,7 +574,7 @@ InstallOtherMethod( Add, "for a cmat, and a cvec",
 InstallOtherMethod( Add, "for a cmat, a cvec, and a position",
   [IsCMatRep and IsMatrix and IsMutable, IsCVecRep, IsPosInt],
   function(m,v,pos)
-    if not(IsIdenticalObj(DataType(TypeObj(v)),m!.vecclass)) then
+    if not(IsIdenticalObj(DataObj(v),m!.vecclass)) then
         Error("Add: only correct cvecs allowed in this matrix");
         return fail;
     fi;
@@ -615,7 +615,7 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
     if pos < 1 or pos > m!.len+1 then
         Error("\\[\\]\\:\\=: illegal position");
     fi;
-    if not(IsIdenticalObj(DataType(TypeObj(v)),m!.vecclass)) then
+    if not(IsIdenticalObj(DataObj(v),m!.vecclass)) then
         Error("\\[\\]\\:\\=: can only assign cvecs to cmat");
     fi;
     if pos = m!.len+1 then
@@ -1402,7 +1402,7 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
   [IsCVecRep, IsCMatRep and IsMatrix],
   function(v,m)
     local i,res,vcl,s,z;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
                           m!.vecclass![CVEC_IDX_fieldinfo])) then
         Error("\\*: incompatible base fields");
@@ -1422,7 +1422,7 @@ InstallOtherMethod(\^, "for a cvec and a cmat, without greasing",
   [IsCVecRep, IsCMatRep and IsMatrix],
   function(v,m)
     local i,res,vcl,s,z;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
                           m!.vecclass![CVEC_IDX_fieldinfo])) then
         Error("\\^: incompatible base fields");
@@ -1442,7 +1442,7 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
   [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
   function(v,m)
     local i,res,vcl,l,pos,val;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
                           m!.vecclass![CVEC_IDX_fieldinfo])) then
         Error("\\*: incompatible base fields");
@@ -1462,7 +1462,7 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
   [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
   function(v,m)
     local i,res,vcl,l,pos,val;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],
                           m!.vecclass![CVEC_IDX_fieldinfo])) then
         Error("\\^: incompatible base fields");
@@ -2115,7 +2115,7 @@ InstallMethod( Fold, "for a cvec and an integer",
   [ IsCVecRep, IsPosInt, IsCMatRep ],
   function( v, x, m )
     local cl,i,l,len,q,vcl,w;
-    vcl := DataType(TypeObj(v));
+    vcl := DataObj(v);
     cl := CVEC_NewCVecClassSameField( vcl, x );
     len := vcl![CVEC_IDX_len];
     q := QuotientRemainder(len,x);
