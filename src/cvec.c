@@ -304,7 +304,7 @@ static inline Obj FFE_TO_INTOBJ(Obj tab1, Int q, Obj o)
     if (v == 0)
         return INTOBJ_INT(0);
 
-    return ELM_PLIST(tab1, (v-1)*((q-1)/(SIZE_FF(FLD_FFE(o))-1))+2);
+    return ELM_PLIST(tab1, (v-1) * (q-1) / (SIZE_FF(FLD_FFE(o))-1) + 2);
 }
 
 
