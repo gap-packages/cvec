@@ -102,10 +102,14 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define OFF_offset 1
 #define OFF_maskp 2
 #define OFF_cutmask 3
-#define POS_DATA_TYPE 3
-/* FIXME: POS_DATA_TYPE is copied from GAP lib code,
- see also the (unused) SHARED_TYPE macro in GAP's objects.h
- So if GAP ever was to change this, we'd be in deep trouble.
+
+#ifndef DATA_TYPE
+#define DATA_TYPE(type)       ELM_PLIST( type, 3 )
+#endif
+#define DATA_OBJ(obj)         DATA_TYPE(TYPE_DATOBJ(obj))
+/* Note: The index 3 is a magic constant taken from the GAP library and kernel.
+Future GAP versions will provide the DATA_TYPE macro in the
+kernel headers, so that we do not need to rely on magic constants anymore.
 */
 
 /* currently unused, see below:
@@ -128,9 +132,9 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 #define REDUCE(x) x - ((((x+offset)&mask) - (((x+offset)&mask)>>shift))&ps)
 
 #define PREPARE_cl(v,cl) \
-    Obj cl = ELM_PLIST(TYPE_DATOBJ(v),POS_DATA_TYPE);
+    Obj cl = DATA_OBJ(v);
 #define PREPARE_clfi(v,cl,fi) \
-    Obj cl = ELM_PLIST(TYPE_DATOBJ(v),POS_DATA_TYPE); \
+    Obj cl = DATA_OBJ(v); \
     Obj fi = ELM_PLIST(cl,IDX_fieldinfo)
 #define PREPARE_p(fi) Int p = INT_INTOBJ(ELM_PLIST(fi,IDX_p))
 #define PREPARE_d(fi) Int d = INT_INTOBJ(ELM_PLIST(fi,IDX_d))
@@ -162,7 +166,7 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
 
 #define IS_CVEC(obj) \
    (TNUM_OBJ(obj)==T_DATOBJ && \
-    TNUM_OBJ(ELM_PLIST(TYPE_DATOBJ(obj),POS_DATA_TYPE))==T_POSOBJ)
+    TNUM_OBJ(DATA_OBJ(obj))==T_POSOBJ)
 
 
   /*******************************/
@@ -3797,7 +3801,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
       if (!IS_CVEC(dec)) {
           return OurErrorBreakQuit("CLEANROWKERNEL: dec is no cvec");
       }
-      cldec = ELM_PLIST(TYPE_DATOBJ(dec),POS_DATA_TYPE);
+      cldec = DATA_OBJ(dec);
       /* Zero the decomposition vector: */
       MUL_INL(DATA_CVEC(dec),fi,0,INT_INTOBJ(ELM_PLIST(cldec,IDX_wordlen)));
   }
