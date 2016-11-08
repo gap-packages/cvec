@@ -189,17 +189,17 @@ STATIC Obj TEST_ASSUMPTIONS(Obj self)
     if (0UL - 1UL != WORDALLONE) return INTOBJ_INT(1);
     if ( WORDALLONE >> 0 != WORDALLONE ) return INTOBJ_INT(2);
     if ( sizeof(Word) != 8 && sizeof(Word) != 4) return INTOBJ_INT(3);
-#if !(__BYTE_ORDER == __LITTLE_ENDIAN) && !(__BYTE_ORDER == __BIG_ENDIAN)
-    return INTOBJ_INT(4);
-#else
-    return INTOBJ_INT(0);
-#endif
 #ifdef SYS_IS_64_BIT
     if (sizeof(Word) != 8) return INTOBJ_INT(5);
 #else
     if (sizeof(Word) != 4) return INTOBJ_INT(6);
 #endif
     if (sizeof(Word32) != 4) return INTOBJ_INT(7);
+#if !(__BYTE_ORDER == __LITTLE_ENDIAN) && !(__BYTE_ORDER == __BIG_ENDIAN)
+    return INTOBJ_INT(4);
+#else
+    return INTOBJ_INT(0);
+#endif
 }
 
 STATIC Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
