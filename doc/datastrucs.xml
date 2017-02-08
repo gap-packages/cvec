@@ -296,7 +296,7 @@ The field is described by the &GAP; object in position 1, a so-called
 <Item>8</Item><Item><Alt Only="LaTeX"><C>IDX\_bestgrease</C></Alt>
                     <Alt Not="LaTeX"><C>IDX_bestgrease</C></Alt></Item>
 <Item>the best grease level (see Section <Ref
-Sect="Greasing"/>)</Item>
+Sect="greasemat"/>)</Item>
 </Row>
 <Row>
 <Item>9</Item><Item><Alt Only="LaTeX"><C>IDX\_greasetabl</C></Alt>
@@ -409,11 +409,11 @@ rows are then stored in positions 2 to <C>len+1</C>.<P/>
 The component <C>greasehint</C> contains the greasing level 
 for the next matrix multiplication, in which this matrix occurs as the 
 factor on the right hand side (if greasing is worth the effort, see
-Section <Ref Sect="grease"/>).<P/>
+Section <Ref Sect="greasemat"/>).<P/>
 
 A <C>cmat</C> can be <Q>pre-greased</Q>, which just means, that a certain
 number of linear combinations of its rows is already precomputed (see
-Section <Ref Sect="grease"/>). In that case, the object is in the 
+Section <Ref Sect="greasemat"/>). In that case, the object is in the 
 additional filter <C>HasGreaseTab</C> and the following components
 are bound additionally:
 
