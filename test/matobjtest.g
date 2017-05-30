@@ -633,9 +633,6 @@ RowListMatrixObjTester := function( m, level )
                              UnivariatePolynomialByCoefficients(FamilyObj(one),
                              Concatenation(vv,[one]),1),BaseDomain(m));
   if vvv2 <> vvv then MyError(217); fi;
-  # Now CompatibleMatrix:
-  vvv2 := CompatibleMatrix(vvv2[1]);
-  if not(IsMatrixObj(vvv2)) then MyError(218); fi;
 
   # Now ConcatenationOfVectors:
   vvv2 := ConcatenationOfVectors(vvv[1],vvv[2]);

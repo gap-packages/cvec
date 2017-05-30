@@ -440,14 +440,6 @@ InstallMethod( ChangedBaseDomain, "for a cmat and a finite field",
     return CVEC_CMatMaker(l,cl);
   end );
 
-InstallMethod( CompatibleMatrix, "for a cvec",
-  [IsCVecRep],
-  function( v )
-    local l;
-    l := [0,v];
-    return CVEC_CMatMaker(l,DataObj(v));
-  end );
-
 InstallMethod( CompatibleVector, "for a cmat",
   [IsCMatRep],
   function( m )
