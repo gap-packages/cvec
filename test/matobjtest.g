@@ -613,15 +613,6 @@ RowListMatrixObjTester := function( m, level )
       MyError(212);
   fi;
 
-  # Now AddMatrix/MultMatrix:
-  vv := MutableCopyMat(m);
-  AddMatrix(vv,m);
-  if vv <> m+m then MyError(213); fi;
-  AddMatrix(vv,m,two);
-  if vv <> m+m+m+m then MyError(214); fi;
-  vv := MutableCopyMat(m);
-  MultMatrix(vv,two);
-  if vv <> two * m then MyError(215); fi;
   # Now CompanionMatrix:
   pol := PolynomialRing(bd);
   vv := Unpack(m[1]);
