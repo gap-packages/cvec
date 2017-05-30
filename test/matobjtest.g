@@ -645,10 +645,6 @@ RowListMatrixObjTester := function( m, level )
   vvv2 := ExtractSubVector(vvv[1],[1..Length(vvv[1])-1]);
   if vvv2 <> vvv[1]{[1..Length(vvv[1])-1]} then MyError(220); fi;
 
-  # Now ProductTransposedMatMat:
-  vvv2 := ProductTransposedMatMat(vvv,vvv);
-  if vvv2 <> TransposedMat(vvv)*vvv then MyError(221); fi;
-  
   # Now ScalarProduct:
   vvv2 := ScalarProduct(vvv[1],vvv[1]);
   if vvv2 <> Sum([1..Length(vvv[1])],i->vvv[1][i] * vvv[1][i]) then
