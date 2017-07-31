@@ -978,8 +978,7 @@ InstallOtherMethod( NumberFFVector, "for a cvec, and a field size",
     c := DataObj(v);
     f := c![CVEC_IDX_fieldinfo];
     if sz <> f![CVEC_IDX_q] then
-        Error("CVEC_NumberFFVector: vector over wrong field");
-        return;
+        ErrorNoReturn("CVEC_NumberFFVector: vector over wrong field");
     fi;
     wordlen := c![CVEC_IDX_wordlen];
     bas := f![CVEC_IDX_p] ^ f![CVEC_IDX_elsperword];
@@ -1092,28 +1091,23 @@ InstallGlobalFunction( CVEC_Slice, function(src,dst,srcpos,len,dstpos)
   cdst := DataObj(dst);
   if not(IsIdenticalObj(csrc![CVEC_IDX_fieldinfo],
                         cdst![CVEC_IDX_fieldinfo])) then
-      Error("CVEC_Slice: vectors not over common field");
-      return;
+      ErrorNoReturn("CVEC_Slice: vectors not over common field");
   fi;
   if srcpos < 1 or srcpos+len-1 > csrc![CVEC_IDX_len] or len <= 0 then
-      Error("CVEC_Slice: source area not valid");
-      return;
+      ErrorNoReturn("CVEC_Slice: source area not valid");
   fi;
   if dstpos < 1 or dstpos+len-1 > cdst![CVEC_IDX_len] then
-      Error("CVEC_Slice: destination area not valid");
-      return;
+      ErrorNoReturn("CVEC_Slice: destination area not valid");
   fi;
   if not(IsMutable(dst)) then
-      Error("CVEC_Slice: destination vector immutable");
-      return;
+      ErrorNoReturn("CVEC_Slice: destination vector immutable");
   fi;
   CVEC_SLICE(src,dst,srcpos,len,dstpos);
 end );
 
 InstallGlobalFunction( CVEC_SliceList, function(src,dst,srcposs,dstposs)
   if not(IsMutable(dst)) then
-      Error("CVEC_SliceList: destination vector immutable");
-      return;
+      ErrorNoReturn("CVEC_SliceList: destination vector immutable");
   fi;
   CVEC_SLICE_LIST(src,dst,srcposs,dstposs);
 end );
@@ -1164,17 +1158,15 @@ InstallOtherMethod( CopySubVector, "for two cvecs and stuff",
 InstallGlobalFunction( CVEC_Concatenation, function(arg)
   local c,cc,i,len,pos,v;
   if Length(arg) = 0 or not(IsCVecRep(arg[1])) then
-      Error("CVEC_Concatenation: Need at least one cvec");
-      return;
+      ErrorNoReturn("CVEC_Concatenation: Need at least one cvec");
   fi;
   c := DataObj(arg[1]);
   len := Length(arg[1]);
   for i in [2..Length(arg)] do
       if not(IsCVecRep(arg[i])) or 
          not(IsIdenticalObj(c,DataObj(arg[i]))) then
-          Error("CVEC_Concatenation: Arguments must all be cvecs over the ",
-                "same field ");
-          return;
+          ErrorNoReturn("CVEC_Concatenation: Arguments must all be cvecs ",
+                "over the same field ");
       fi;
       len := len + Length(arg[i]);
   od;
@@ -1199,12 +1191,11 @@ InstallOtherMethod( ProductCoeffs, "for cvecs",
   local cl,u,vcl,wcl;
   vcl := DataObj(v);
   if vcl![CVEC_IDX_fieldinfo]![CVEC_IDX_d] > 1 then
-      Error("Non-prime fields not yet implemented (doable)!");
-      return;
+      ErrorNoReturn("Non-prime fields not yet implemented (doable)!");
   fi;
   wcl := DataObj(w);
   if not(IsIdenticalObj(vcl![CVEC_IDX_fieldinfo],wcl![CVEC_IDX_fieldinfo])) then
-      Error("ProductCoeffs: Not over same field!");
+      ErrorNoReturn("ProductCoeffs: Not over same field!");
   fi;
   cl := CVEC_NewCVecClassSameField(vcl,vcl![CVEC_IDX_len]+wcl![CVEC_IDX_len]-1);
   u := CVEC_NEW(cl,cl![CVEC_IDX_type]);

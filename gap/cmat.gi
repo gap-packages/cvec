@@ -216,8 +216,7 @@ InstallMethod( Matrix, "for a list of cvecs, an integer, and a cmat",
         od;
         return CVEC_CMatMaker(li,cl);
     else
-        Error("Matrix for cmats: flat initializer not yet implemented");
-        return;
+        ErrorNoReturn("Matrix for cmats: flat initializer not yet implemented");
     fi;
   end );
 
@@ -237,8 +236,7 @@ InstallGlobalFunction( CVEC_ZeroMat, function(arg)
       y := arg[1];
       c := arg[2];   # this must be a cvec class
       if not(IsInt(y)) and not(IsCVecClass(c)) then
-          Error("Usage: CVEC_ZeroMat( rows, cvecclass)");
-          return;
+          ErrorNoReturn("Usage: CVEC_ZeroMat( rows, cvecclass)");
       fi;
   elif Length(arg) = 4 then
       y := arg[1];
@@ -249,13 +247,11 @@ InstallGlobalFunction( CVEC_ZeroMat, function(arg)
          not(IsInt(x) and x >= 0) or
          not(IsPosInt(p) and IsPrime(p)) or
          not(IsPosInt(d) and d < CVEC_MAXDEGREE) then
-          Error("Usage: CVEC_ZeroMat( rows, cols, p, d )");
-          return;
+          ErrorNoReturn("Usage: CVEC_ZeroMat( rows, cols, p, d )");
       fi;
       c := CVEC_NewCVecClass(p,d,x);
   else
-      Error("Usage: CVEC_ZeroMat( rows, [ cvecclass | cols, p, d ] )");
-      return;
+      ErrorNoReturn("Usage: CVEC_ZeroMat( rows, [ cvecclass | cols, p, d ] )");
   fi;
   l := 0*[1..y+1];
   for i in [1..y] do
@@ -281,8 +277,7 @@ InstallGlobalFunction( CVEC_IdentityMat, function(arg)
   if Length(arg) = 1 then
       c := arg[1];   # this must be a cvec class
       if not(IsCVecClass(c)) then
-          Error("Usage: CVEC_IdentityMat(cvecclass)");
-          return;
+          ErrorNoReturn("Usage: CVEC_IdentityMat(cvecclass)");
       fi;
       y := c![CVEC_IDX_len];
   elif Length(arg) = 3 then
@@ -292,13 +287,11 @@ InstallGlobalFunction( CVEC_IdentityMat, function(arg)
       if not(IsInt(y) and y >= 0) or
          not(IsPosInt(p) and IsPrime(p)) or
          not(IsPosInt(d) and d < CVEC_MAXDEGREE) then
-          Error("Usage: CVEC_IdentityMat( rows, p, d )");
-          return;
+          ErrorNoReturn("Usage: CVEC_IdentityMat( rows, p, d )");
       fi;
       c := CVEC_NewCVecClass(p,d,y);
   else
-      Error("Usage: CVEC_IdentityMat( [ cvecclass | rows, p, d ] )");
-      return;
+      ErrorNoReturn("Usage: CVEC_IdentityMat( [ cvecclass | rows, p, d ] )");
   fi;
   l := 0*[1..y+1];
   for i in [1..y] do
@@ -379,8 +372,7 @@ InstallGlobalFunction( CVEC_RandomMat, function(arg)
       y := arg[1];
       c := arg[2];   # this must be a cvec class
       if not(IsInt(y)) and not(IsCVecClass(c)) then
-          Error("Usage: CVEC_RandomMat( rows, cvecclass)");
-          return;
+          ErrorNoReturn("Usage: CVEC_RandomMat( rows, cvecclass)");
       fi;
       x := c![CVEC_IDX_len];
       d := c![CVEC_IDX_fieldinfo]![CVEC_IDX_d];   # used later on
@@ -395,13 +387,11 @@ InstallGlobalFunction( CVEC_RandomMat, function(arg)
          not(IsInt(x) and x >= 0) or
          not(IsPosInt(p) and IsPrime(p)) or
          not(IsPosInt(d) and d < CVEC_MAXDEGREE) then
-          Error("Usage: CVEC_RandomMat( rows, cols, p, d )");
-          return;
+          ErrorNoReturn("Usage: CVEC_RandomMat( rows, cols, p, d )");
       fi;
       c := CVEC_NewCVecClass(p,d,x);
   else
-      Print("Usage: CVEC_RandomMat( rows, [ cvecclass | cols, p, d ] )\n");
-      return;
+      ErrorNoReturn("Usage: CVEC_RandomMat( rows, [ cvecclass | cols, p, d ] )");
   fi;
   l := 0*[1..y+1];
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] <= 1 then    
@@ -645,8 +635,7 @@ InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
   function(m,l,n)
     local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
-        Error("{}:= : cmats not compatible");
-        return;
+        ErrorNoReturn("{}:= : cmats not compatible");
     fi;
     for i in [1..Length(l)] do
         m!.rows[l[i]+1] := n!.rows[i+1];
@@ -726,24 +715,19 @@ InstallGlobalFunction( CVEC_CopySubMatrix,
 function(src,dst,srcli,dstli,srcpos,len,dstpos)
   local i;
   if not(IsIdenticalObj(src!.scaclass,dst!.scaclass)) then
-      Error("CVEC_CopySubMatrix: cmats not over common field");
-      return;
+      ErrorNoReturn("CVEC_CopySubMatrix: cmats not over common field");
   fi;
   if Length(srcli) <> Length(dstli) then
-      Error("CVEC_CopySubMatrix: row lists do not have equal lengths");
-      return;
+      ErrorNoReturn("CVEC_CopySubMatrix: row lists do not have equal lengths");
   fi;
   if srcpos < 1 or srcpos+len-1 > src!.vecclass![CVEC_IDX_len] or len <= 0 then
-      Error("CVEC_CopySubMatrix: source area not valid");
-      return;
+      ErrorNoReturn("CVEC_CopySubMatrix: source area not valid");
   fi;
   if dstpos < 1 or dstpos+len-1 > dst!.vecclass![CVEC_IDX_len] then
-      Error("CVEC_CopySubMatrix: destination area not valid");
-      return;
+      ErrorNoReturn("CVEC_CopySubMatrix: destination area not valid");
   fi;
   if not(IsMutable(dst)) then
-      Error("CVEC_CopySubMatrix: destination is immutable");
-      return;
+      ErrorNoReturn("CVEC_CopySubMatrix: destination is immutable");
   fi;
   for i in [1..Length(srcli)] do
       CVEC_SLICE(src!.rows[srcli[i]+1],dst!.rows[dstli[i]+1],
@@ -869,8 +853,7 @@ InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
         vcl := CVEC_NewCVecClassSameField(vcl,Length(cols));
     fi;
     if not(ForAll(rows,x->x >= 1 and x <= mat!.len)) then
-        Error("CVEC_ExtractSubMatrix: row indices out of range");
-        return;
+        ErrorNoReturn("CVEC_ExtractSubMatrix: row indices out of range");
     fi;
     # Make rows a plain list:
     res := CVEC_ZeroMat(Length(rows),vcl);
@@ -2112,8 +2095,7 @@ InstallMethod( Fold, "for a cvec and an integer",
     len := vcl![CVEC_IDX_len];
     q := QuotientRemainder(len,x);
     if q[2] <> 0 then
-        Error("x must be a divisor of the length of v");
-        return;
+        ErrorNoReturn("x must be a divisor of the length of v");
     fi;
     q := q[1];
     l := 0*[q+1];
