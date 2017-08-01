@@ -1,5 +1,10 @@
 This file describes changes in the cvec package.
 
+2.5.7 (2017-08-01)
+  - Remove CompatibleMatrix method (this *undocumented* API will be
+    removed in GAP 4.9)
+  - Fix several broken references in the manual
+
 2.5.6 (2016-11-08)
   - Fix a bug reported by Jan De Beule which resulted in cvec incorrectly
     converting certain GAP matrices to cvec matrices.
