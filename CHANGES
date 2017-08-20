@@ -1,5 +1,8 @@
 This file describes changes in the cvec package.
 
+2.X.X
+  - Fix link to issue tracker in manual
+
 2.5.7 (2017-08-01)
   - Remove CompatibleMatrix method (this *undocumented* API will be
     removed in GAP 4.9)
