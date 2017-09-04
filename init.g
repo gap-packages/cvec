@@ -22,6 +22,14 @@ if (not IsBound(CVEC)) and
   LoadDynamicModule(Filename(DirectoriesPackagePrograms("cvec"), "cvec.so"));
 fi;
 
+#
+# Compatibility between older and newer versions of the MatrixObj interface
+#
+if not IsBound(NumberColumns) then
+    DeclareSynonym( "NumberColumns", RowLength );
+    DeclareSynonym( "NumberRows", Length );
+fi;
+
 ReadPackage("cvec", "gap/cvec.gd");
 ReadPackage("cvec", "gap/cmat.gd");
 ReadPackage("cvec", "gap/linalg.gd");

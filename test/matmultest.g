@@ -1,16 +1,16 @@
 QuickRandomize := function(m)
   local f,i,j,n,posx,posy,urposx,urposy;
   f := BaseDomain(m);
-  if Length(m) < 97 then
+  if NumberRows(m) < 97 then
       Randomize(m);
       return;
   fi;
   n := ExtractSubMatrix(m,[1..97],[1..97]);
   Randomize(n);
-  for i in [1..QuoInt(RowLength(m)+96,97)] do
-      for j in [1..QuoInt(Length(m)+96,97)] do
-          posx := [(i-1)*97+1..Minimum(RowLength(m),i*97)];
-          posy := [(j-1)*97+1..Minimum(Length(m),j*97)];
+  for i in [1..QuoInt(NumberColumns(m)+96,97)] do
+      for j in [1..QuoInt(NumberRows(m)+96,97)] do
+          posx := [(i-1)*97+1..Minimum(NumberColumns(m),i*97)];
+          posy := [(j-1)*97+1..Minimum(NumberRows(m),j*97)];
           urposx := [1..Length(posx)];
           urposy := [1..Length(posy)];
           CopySubMatrix(Random(f)*n,m,urposy,posy,urposx,posx);

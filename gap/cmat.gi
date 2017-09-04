@@ -145,9 +145,9 @@ InstallMethod( CMat, "for a compressed GF2 matrix",
   [IsList and IsGF2MatrixRep],
   function(m)
   local c,i,l,v;
-  l := 0*[1..Length(m)+1];
-  c := CVEC_NewCVecClass(2,1,Length(m[1]));
-  for i in [1..Length(m)] do
+  l := 0*[1..NumberRows(m)+1];
+  c := CVEC_NewCVecClass(2,1,NumberColumns(m));
+  for i in [1..NumberRows(m)] do
       v := ShallowCopy(m[i]);
       PLAIN_GF2VEC(v);
       l[i+1] := CVec(v,c);
@@ -159,10 +159,10 @@ InstallMethod( CMat, "for a compressed 8bit matrix",
   [IsList and Is8BitMatrixRep],
   function(m)
   local c,i,l,pd,v;
-  l := 0*[1..Length(m)+1];
+  l := 0*[1..NumberRows(m)+1];
   pd := Factors(Size(DefaultFieldOfMatrix(m)));
-  c := CVEC_NewCVecClass(pd[1],Length(pd),Length(m[1]));
-  for i in [1..Length(m)] do
+  c := CVEC_NewCVecClass(pd[1],Length(pd),NumberColumns(m));
+  for i in [1..NumberRows(m)] do
       v := ShallowCopy(m[i]);
       PLAIN_VEC8BIT(v);
       l[i+1] := CVec(v,c);
@@ -459,7 +459,7 @@ function(m)
   c := m!.vecclass;
   Print("NewMatrix(IsCMatRep,GF(",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
-        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),",RowLength(m),",[");
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),",NumberColumns(m),",[");
   for i in [1..m!.len] do
       Print(Unpack(m!.rows[i+1]),",");
   od;
@@ -480,8 +480,8 @@ end);
 
 InstallGlobalFunction( OverviewMat, function(M)
   local i,j,s,ts,tz,z;
-  z := Length(M);
-  s := Length(M[1]);
+  z := NumberRows(M);
+  s := NumberColumns(M);
   tz := QuoInt(z+39,40);
   ts := QuoInt(s+39,40);
   for i in [1..QuoInt(z+tz-1,tz)] do
@@ -642,7 +642,7 @@ InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
     od;
   end);
 
-InstallOtherMethod( Length, "for a cmat",
+InstallOtherMethod( NumberRows, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m) return m!.len; end);
 
@@ -650,7 +650,7 @@ InstallOtherMethod( DimensionsMat, "for a cmat",
   [IsCMatRep and IsMatrixObj],
   function(m) return [m!.len,m!.vecclass![2]]; end );
 
-InstallMethod( RowLength, "for a cmat",
+InstallMethod( NumberColumns, "for a cmat",
   [IsCMatRep and IsMatrix and IsMatrixObj],
   function(m) return m!.vecclass![2]; end );
 
@@ -1058,8 +1058,8 @@ InstallMethod( \^, "for a mutable cmat and a frobenius automorphism",
   function( v, f )
     local w,i,j,rl,x,y;
     w := MutableCopyMat(v);
-    rl := RowLength(w);
-    for i in [1..Length(w)] do
+    rl := NumberColumns(w);
+    for i in [1..NumberRows(w)] do
         x := v[i];
         y := w[i];
         for j in [1..rl] do
@@ -1074,8 +1074,8 @@ InstallMethod( \^, "for a cmat and a frobenius automorphism",
   function( v, f )
     local w,i,j,rl,x,y;
     w := MutableCopyMat(v);
-    rl := RowLength(w);
-    for i in [1..Length(w)] do
+    rl := NumberColumns(w);
+    for i in [1..NumberRows(w)] do
         x := v[i];
         y := w[i];
         for j in [1..rl] do
@@ -2048,10 +2048,10 @@ InstallOtherMethod( KroneckerProduct, "for cmats",
                [ IsCMatRep and IsMatrixObj, IsCMatRep and IsMatrixObj ],
   function( A, B )
     local rowsA, rowsB, colsA, colsB, newclass, AxB, i, j;
-      rowsA := Length(A);
-      colsA := RowLength(A);
-      rowsB := Length(B);
-      colsB := RowLength(B);
+      rowsA := NumberRows(A);
+      colsA := NumberColumns(A);
+      rowsB := NumberRows(B);
+      colsB := NumberColumns(B);
 
       AxB := ZeroMatrix( rowsA * rowsB, colsA * colsB, A );
 
@@ -2151,11 +2151,11 @@ InstallOtherMethod( Memory, "for a cmat", [ IsCMatRep ],
     bpw := GAPInfo.BytesPerVariable;
     # Bytes per bag (in addition to content):
     bpb := 8 + 2*bpw;   # this counts the header and the master pointer!
-    if Length(m) = 0 then
+    if NumberRows(m) = 0 then
         return 2*bpb + SHALLOW_SIZE(m) + SHALLOW_SIZE(m!.rows);
     else
         return 2*bpb + SHALLOW_SIZE(m) + SHALLOW_SIZE(m!.rows)
-               + Length(m) * Memory(m!.rows[2]);
+               + NumberRows(m) * Memory(m!.rows[2]);
     fi;
     # FIXME: this does not include greased data!
   end );
@@ -2426,19 +2426,19 @@ InstallGlobalFunction( CVEC_MultiplyWinograd, function(M,N,limit)
   local a11,a12,a21,a22,b11,b12,b21,b22,l,l2,lhi,lhilo,llo,m,m1,m2,m3,m4,
         m5,m6,m7,mhi,mhilo,mlo,mo,n,n2,nhi,nhilo,nlo,o,r,s1,s2,s3,s4,s5,s6,
         s7,s8,t,t1,t2,ze,R;
-  if Length(M) * RowLength(M) < limit or
-     Length(N) * RowLength(N) < limit then
+  if NumberRows(M) * NumberColumns(M) < limit or
+     NumberRows(N) * NumberColumns(N) < limit then
       return M*N; 
   fi;
   if Memory(M) >= 5000000 then 
       return CVEC_MultiplyWinogradMemory(M,N,limit);
   fi;
-  #Print("Wino ",Length(M)," ",RowLength(M)," ",Length(N)," ",RowLength(N),"\n");
+  #Print("Wino ",NumberRows(M)," ",NumberColumns(M)," ",NumberRows(N)," ",NumberColumns(N),"\n");
   t := Runtime();
   # From now on we have a result matrix:
-  l := Length(M);
-  m := RowLength(M);   # = Length(N)
-  n := RowLength(N);
+  l := NumberRows(M);
+  m := NumberColumns(M);   # = NumberRows(N)
+  n := NumberColumns(N);
   l2 := QuoInt(l+1,2);
   m2 := QuoInt(m+1,2);
   n2 := QuoInt(n+1,2);
@@ -2555,26 +2555,26 @@ InstallGlobalFunction( CVEC_MultiplyWinogradMemory, function(M,N,limit)
   local ClearLastColumn,ClearLastRow,R,R11,R12,R21,R22,l,l2,lhi,lhilo,llo,
         m,m2,mhi,mhilo,mlo,mo,n,n2,nhi,nhilo,nlo,o,t,x,xx,y,yy,z,ze,zz;
 
-  #Print("WinoMem ",Length(M)," ",RowLength(M)," ",Length(N)," ",
-  #      RowLength(N),"\n");
+  #Print("WinoMem ",NumberRows(M)," ",NumberColumns(M)," ",NumberRows(N)," ",
+  #      NumberColumns(N),"\n");
 
   ClearLastRow := function(m)
-      MultRowVector(m[Length(m)],Zero(BaseDomain(m)));
+      MultRowVector(m[NumberRows(m)],Zero(BaseDomain(m)));
   end;
   ClearLastColumn := function(m)
       local i,r,z;
-      r := RowLength(m);
+      r := NumberColumns(m);
       z := Zero(BaseDomain(m));
-      for i in [1..Length(m)] do
+      for i in [1..NumberRows(m)] do
           m[i][r] := z;
       od;
   end;
 
   t := Runtime();
   # From now on we have a result matrix:
-  l := Length(M);
-  m := RowLength(M);   # = Length(N)
-  n := RowLength(N);
+  l := NumberRows(M);
+  m := NumberColumns(M);   # = NumberRows(N)
+  n := NumberColumns(N);
   l2 := QuoInt(l+1,2);
   m2 := QuoInt(m+1,2);
   n2 := QuoInt(n+1,2);
@@ -2807,7 +2807,7 @@ InstallMethod( EntryOfMatrixProduct, "generic method",
     local f,k,res;
     f := BaseDomain(m);
     res := Zero(f);
-    for k in [1..RowLength(m)] do
+    for k in [1..NumberColumns(m)] do
         res := res + MatElm(m,i,k) * MatElm(n,k,j);
     od;
     return res;

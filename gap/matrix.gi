@@ -33,8 +33,8 @@ InstallMethod( SemiEchelonMatDestructive, "for a cmat",
           row,       # the row of current interest
           inv;       # inverse of a matrix entry
 
-    nrows:= Length( mat );
-    ncols:= RowLength( mat );
+    nrows:= NumberRows( mat );
+    ncols:= NumberColumns( mat );
 
     heads:= ListWithIdenticalEntries( ncols, 0 );
     nzheads := [];
@@ -85,8 +85,8 @@ InstallMethod( SemiEchelonMatTransformationDestructive,
           relations, # basis vectors of the null space of 'mat'
           row, head, x, row2, one, cl, zv;
             
-    nrows := Length( mat );
-    ncols := RowLength( mat );
+    nrows := NumberRows( mat );
+    ncols := NumberColumns( mat );
 
     one   := One( BaseDomain( mat ) );
 

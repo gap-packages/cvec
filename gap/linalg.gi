@@ -47,7 +47,7 @@ InstallMethod( SemiEchelonBasisMutable, "for a semi echelonised basis record",
   function(r)
     local i, b;
     b := rec( vectors := r.vectors, pivots := [] );
-    for i in [1..RowLength(b.vectors)] do
+    for i in [1..NumberColumns(b.vectors)] do
         if IsBound(r.heads[i]) and r.heads[i] > 0 then
             b.pivots[r.heads[i]] := i;
         fi;
@@ -58,7 +58,7 @@ InstallMethod( SemiEchelonBasisMutable, "for a semi echelonised basis record",
 InstallMethod( EmptySemiEchelonBasis, "for a row list matrix",
   [ IsRowListMatrix ],
   function( m )
-    return SEBMaker( Matrix([],RowLength(m),m), [] );
+    return SEBMaker( Matrix([],NumberColumns(m),m), [] );
   end );
 
 InstallMethod( EmptySemiEchelonBasis, "for a row vector",
@@ -252,7 +252,7 @@ InstallMethod( SemiEchelonBasisMutableTX, "for a row list matrix",
   [IsRowListMatrix and IsMutable],
   function( m )
     local b,coeffs,dec,i,j,mo,newcoeffs,newrelation,relations,rl,s,v,zerov;
-    rl := RowLength(m);
+    rl := NumberColumns(m);
     b := EmptySemiEchelonBasis( m );
     zerov := ZeroVector(rl,m);
     dec := ZeroVector(Length(m),zerov);  # Maximal length of the basis
@@ -318,7 +318,7 @@ InstallMethod( SemiEchelonBasisMutablePX, "for a row list matrix",
     # In the end we want b!.p * b!.vectors = m
     local b,p,dec,j,v,zerov, decl;
     b := EmptySemiEchelonBasis( m );
-    zerov := ZeroVector(RowLength(m),m);
+    zerov := ZeroVector(NumberColumns(m),m);
     decl := Minimum( 100, Length(m) );
     dec := ZeroVector(decl,zerov);
     if Length(m) = 0 then
@@ -453,7 +453,7 @@ InstallMethod( IntersectionAndSumRowSpaces, "for two semi echelonised bases",
     # columns. Thus they span the kernel by a dimension argument.
     #
     local d,dec,extension,images,res,v,w;
-    images := Matrix([],RowLength(b1!.vectors),b1!.vectors);
+    images := Matrix([],NumberColumns(b1!.vectors),b1!.vectors);
     dec := ZeroVector( Length(b2), b1!.vectors );
     d := Length(b1!.vectors);
     # Calculate image:
@@ -484,7 +484,7 @@ InstallMethod( IntersectionAndSumRowSpaces, "for two row list matrices",
 BindGlobal( "SumIntersectionMatCMat", 
   function(m1,m2)
     local i,int,mat,n,sum,v,w,zero;
-    n := RowLength(m1);
+    n := NumberColumns(m1);
     mat := Matrix([],2*n,m1);
     zero := ZeroVector(2*n,m1);
     for v in m1 do
@@ -526,7 +526,7 @@ function(m,indetnr)
   # m must be square
   local L,b,b2,closed,d,dec,f,facs,fam,i,l,lambda,newlambda,o,p,
         newpiv,pivs,subdim,v,vcopy,zero;
-  zero := ZeroVector(RowLength(m),m);
+  zero := ZeroVector(NumberColumns(m),m);
   d := Length(m);
   b := EmptySemiEchelonBasis(m);
   pivs := [1..d];
@@ -626,7 +626,7 @@ BindGlobal( "CVEC_ActionOnQuotient", function( gens, basis )
   # NOTES
   # 
   dimsubspc := Length( basis!.vectors );
-  dimfullspc := RowLength( basis!.vectors );
+  dimfullspc := NumberColumns( basis!.vectors );
   dimquotspc := dimfullspc - dimsubspc;
   diff := Difference( [1..dimfullspc], basis!.pivots );
   zerov := ZeroVector( dimquotspc, basis!.vectors ); #prepare vector type
@@ -650,8 +650,8 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
   # This is the old algorithm, implemented for RowListMatrices
   local L,b,b2,closed,d,dec,f,fam,i,l,lambda,o,p,pivs,poly,subdim,v,vcopy,zero;
 
-  zero := ZeroVector(RowLength(m),m);
-  d := Length(m);
+  zero := ZeroVector(NumberColumns(m),m);
+  d := NumberRows(m);
   b := EmptySemiEchelonBasis(m);
   pivs := [1..d];
   f := BaseField(m);
@@ -864,16 +864,15 @@ InstallMethod( MinimalPolynomialOfMatrix, "for a matrix", [IsCMatRep],
 InstallGlobalFunction( CVEC_GlueMatrices, function(l)
   # all elements of the list l must be CMats over the same field
   # l must not be empty
-  local d,g,i,m,n,p,pr,pos,x;
-  n := Sum(l,Length);
-  p := Characteristic(l[1]);
-  d := DegreeFFE(l[1]);
+  local d,g,i,m,n,pr,pos,x;
+  n := Sum(l,NumberRows);
   m := ZeroMatrix(n,n,l[1]);
   pos := 1;
   for i in [1..Length(l)] do
-      CopySubMatrix(l[i],m,[1..Length(l[i])],[pos..pos+Length(l[i])-1],
-                           [1..Length(l[i])],[pos..pos+Length(l[i])-1]);
-      pos := pos + Length(l[i]);
+      d := NumberRows(l[i]);
+      CopySubMatrix(l[i],m,[1..d],[pos..pos+d-1],
+                           [1..d],[pos..pos+d-1]);
+      pos := pos + d;
   od;
   if InfoLevel(InfoCVec) >= 2 then 
       OverviewMat(m);
@@ -885,7 +884,7 @@ end );
 InstallGlobalFunction( CVEC_ScrambleMatrices,
   function( l )
   local n,p,d,g,pr,x,xi;
-  n := Length(l[1]);
+  n := NumberRows(l[1]);
   p := Characteristic(l[1]);
   d := DegreeFFE(l[1]);
   g := GL(n,p^d);
@@ -1034,7 +1033,7 @@ function( arg )
   fi;
 
   ti := Runtime();
-  rl := RowLength(m);
+  rl := NumberColumns(m);
   zero := ZeroVector(rl,m);
   pivs := [1..rl];   # those are the columns we still want pivots for
   S := EmptySemiEchelonBasis(m);
