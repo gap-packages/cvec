@@ -26,8 +26,8 @@ fi;
 # Compatibility between older and newer versions of the MatrixObj interface
 #
 if not IsBound(NumberColumns) then
-    DeclareSynonym( "NumberColumns", RowLength );
-    DeclareSynonym( "NumberRows", Length );
+    DeclareSynonymAttr( "NumberColumns", RowLength );
+    DeclareSynonymAttr( "NumberRows", Length );
 fi;
 
 ReadPackage("cvec", "gap/cvec.gd");
