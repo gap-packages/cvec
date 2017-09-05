@@ -3892,7 +3892,7 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
               
               /* these are the only refs we have and still use: */
               helperdata = DATA_CVEC(helper);
-              vecvec = DATA_CVEC(vecvec);
+              vecvec = DATA_CVEC(vec);
               
               for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
               sclen++;
