@@ -25,8 +25,8 @@ RowListMatrixObjTester := function( m, level )
 
   # Let's first look at its attributes:
   dims := DimensionsMat(m);
-  if dims[1] <> Length(m) then MyError(1); fi;
-  if dims[2] <> RowLength(m) then MyError(2); fi;
+  if dims[1] <> NumberRows(m) then MyError(1); fi;
+  if dims[2] <> NumberColumns(m) then MyError(2); fi;
 
   # We do not like too small matrices here:
   if dims[1] < 2 or dims[2] < 2 then
@@ -308,13 +308,13 @@ RowListMatrixObjTester := function( m, level )
             "IsMatrixObj!\n");
   fi;
   if not(m[1][1] = n[1][1] and m[1][2] = n[1][2] and m[2][1] = n[2][1] and
-         m[2][2] = n[2][2] and Length(n) = 2 and RowLength(n) = 2) then
+         m[2][2] = n[2][2] and NumberRows(n) = 2 and NumberColumns(n) = 2) then
       MyError(89);
   fi;
   n := MutableCopyMat(n);
   CopySubMatrix(m,n,[2,1],[1,2],[2,1],[1,2]);
   if not(m[1][1] = n[2][2] and m[1][2] = n[2][1] and m[2][1] = n[1][2] and
-         m[2][2] = n[1][1] and Length(n) = 2 and RowLength(n) = 2) then
+         m[2][2] = n[1][1] and NumberRows(n) = 2 and NumberColumns(n) = 2) then
       MyError(90);
   fi;
   n := StructuralCopy(m);
@@ -429,9 +429,9 @@ RowListMatrixObjTester := function( m, level )
   a := w * wt;
   u := a;
   for i in [1..l] do 
-      for j in [1..RowLength(wt)] do
+      for j in [1..NumberColumns(wt)] do
           s := Zero(BaseDomain(w));
-          for k in [1..RowLength(w)] do
+          for k in [1..NumberColumns(w)] do
               s := s + MatElm(w,i,k) * MatElm(wt,k,j);
           od;
           if s <> MatElm(u,i,j) then MyError(139); fi;
@@ -489,7 +489,7 @@ RowListMatrixObjTester := function( m, level )
 
   # IdentityMatrix, Matrix:
   u := IdentityMatrix(7,m);
-  if not(Length(u) = 7) or not(RowLength(u) = 7) or not(IsOne(u)) or
+  if not(NumberRows(u) = 7) or not(NumberColumns(u) = 7) or not(IsOne(u)) or
      not(IsMutable(u)) or not(IsMutable(u[1])) then MyError(167); fi;
   v := Matrix(List(u),7,m);
   if u <> v or not(IsMutable(v)) or not(IsMutable(v[1])) then MyError(168); fi;
@@ -597,17 +597,17 @@ RowListMatrixObjTester := function( m, level )
       MyError(209); 
   fi;
   filter := ConstructingFilter(m);
-  vv := NewMatrix(filter,bd,RowLength(m),Unpack(m));
+  vv := NewMatrix(filter,bd,NumberColumns(m),Unpack(m));
   if not(IsMutable(m)) then MakeImmutable(vv); fi;
   if vv <> m or not(IsIdenticalObj(TypeObj(vv),TypeObj(m))) then
       MyError(210);
   fi;
-  vv := NewZeroMatrix(filter,bd,Length(m),RowLength(m));
+  vv := NewZeroMatrix(filter,bd,NumberRows(m),NumberColumns(m));
   if vv <> ZeroMutable(m) or
      not(IsIdenticalObj(TypeObj(vv),TypeObj(ZeroMutable(m)))) then
       MyError(211);
   fi;
-  vv := NewIdentityMatrix(filter,bd,Length(m));
+  vv := NewIdentityMatrix(filter,bd,NumberRows(m));
   if not(IsOne(vv)) or
      not(IsIdenticalObj(TypeObj(vv),TypeObj(MutableCopyMat(m)))) then
       MyError(212);
@@ -674,18 +674,18 @@ RowListMatrixObjTester := function( m, level )
   if not(IsRowVectorObj(u)) then
       Print("Warning: Empty vector is not in IsRowVectorObj!\n");
   fi;
-  if Length(u) <> 0 then MyError(413); fi;
+  if NumberRows(u) <> 0 then MyError(413); fi;
   u := w{[]};
   if not(IsMatrixObj(u)) then
       Print("Warning: Matrix with no rows is not in IsMatrixObj!\n");
   fi;
-  if Length(u) <> 0 then MyError(414); fi;
+  if NumberRows(u) <> 0 then MyError(414); fi;
   u := ExtractSubMatrix(w,[1..2],[]);
   if not(IsMatrixObj(u)) then
       Print("Warning: Matrix with empty rows is not in IsMatrixObj!\n");
   fi;
-  if RowLength(u) <> 0 then MyError(415); fi;
-  if Length(u) <> 2 then MyError(416); fi;
+  if NumberColumns(u) <> 0 then MyError(415); fi;
+  if NumberRows(u) <> 2 then MyError(416); fi;
 
   w := Matrix( [[one,two]],2,m );
   if IsOne(w) <> false then MyError(408); fi;
