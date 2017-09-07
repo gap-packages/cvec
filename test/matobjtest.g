@@ -36,8 +36,8 @@ RowListMatrixObjTester := function( m, level )
 
   # Now first consider the vectors:
   v := m[1];
-  if not(IsRowVectorObj(v)) then
-      Print("Warning, corresp. vectors are not in IsRowVectorObj,\n");
+  if not(IsVectorObj(v)) then
+      Print("Warning, corresp. vectors are not in IsVectorObj,\n");
       Print("let's see what they can do...\n");
   fi;
 
@@ -54,8 +54,8 @@ RowListMatrixObjTester := function( m, level )
 
   # Make a shallow copy:
   w := ShallowCopy(v);
-  if not(IsRowVectorObj(w)) then
-      Print("Warning, ShallowCopy of vectors are not in IsRowVectorObj.\n");
+  if not(IsVectorObj(w)) then
+      Print("Warning, ShallowCopy of vectors are not in IsVectorObj.\n");
   fi;
 
   # Is it a copy?
@@ -69,8 +69,8 @@ RowListMatrixObjTester := function( m, level )
 
   # Slicing:
   u := w{[1]};
-  if not(IsRowVectorObj(u)) then
-      Print("Warning, slices of vectors are not in IsRowVectorObj\n");
+  if not(IsVectorObj(u)) then
+      Print("Warning, slices of vectors are not in IsVectorObj\n");
   fi;
 
   # PositionNonZero:
@@ -671,8 +671,8 @@ RowListMatrixObjTester := function( m, level )
   # Try empty matrices and vectors:
   v := w[1];
   u := v{[]};
-  if not(IsRowVectorObj(u)) then
-      Print("Warning: Empty vector is not in IsRowVectorObj!\n");
+  if not(IsVectorObj(u)) then
+      Print("Warning: Empty vector is not in IsVectorObj!\n");
   fi;
   if NumberRows(u) <> 0 then MyError(413); fi;
   u := w{[]};
