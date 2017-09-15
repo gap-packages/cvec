@@ -25,6 +25,9 @@ fi;
 #
 # Compatibility between older and newer versions of the MatrixObj interface
 #
+if not IsBound(MultVector) then
+    DeclareSynonym( "MultVector", MultRowVector );
+fi;
 if not IsBound(NumberColumns) then
     DeclareSynonymAttr( "NumberColumns", RowLength );
     DeclareSynonymAttr( "NumberRows", Length );

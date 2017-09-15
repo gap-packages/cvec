@@ -160,9 +160,9 @@ RowListMatrixObjTester := function( m, level )
   for i in [1..l] do if u[i] <> w[i]*three then MyError(31); fi; od;
   AddRowVector(u,w,-two,1,l);
   if u <> w then MyError(32); fi;
-  MultRowVector(u,two);
+  MultVector(u,two);
   for i in [1..l] do if u[i] <> w[i]*two then MyError(33); fi; od;
-  MultRowVector(u,[1,2],w,[2,1],two);
+  MultVector(u,[1,2],w,[2,1],two);
   if u[1] <> w[2]*two or u[2] <> w[1]*two then MyError(34); fi;
   if w/one <> w then MyError(35); fi;
 

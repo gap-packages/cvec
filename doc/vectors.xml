@@ -317,8 +317,8 @@ For a <C>cvec</C> <A>v</A>. Works as expected.
 </ManSection>
 
 <ManSection>
-<Meth Name="MultRowVector" Arg="v, s" Label="cvecsca"/>
-<Meth Name="MultRowVector" Arg="v, s, fr, to" Label="cvecscapospos"/>
+<Meth Name="MultVector" Arg="v, s" Label="cvecsca"/>
+<Meth Name="MultVector" Arg="v, s, fr, to" Label="cvecscapospos"/>
 <Returns>nothing</Returns>
 <Description>
     <A>v</A> must be a mutable <C>cvec</C> and <A>s</A> a scalar (see

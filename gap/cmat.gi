@@ -2411,7 +2411,7 @@ end);
 InstallGlobalFunction(CVEC_MulMat, function(a,mult)
   local i;
   for i in [1..Length(a)] do
-      MultRowVector(a[i],mult);
+      MultVector(a[i],mult);
   od;
 end);
 
@@ -2559,7 +2559,7 @@ InstallGlobalFunction( CVEC_MultiplyWinogradMemory, function(M,N,limit)
   #      NumberColumns(N),"\n");
 
   ClearLastRow := function(m)
-      MultRowVector(m[NumberRows(m)],Zero(BaseDomain(m)));
+      MultVector(m[NumberRows(m)],Zero(BaseDomain(m)));
   end;
   ClearLastColumn := function(m)
       local i,r,z;
@@ -2737,7 +2737,7 @@ InstallGlobalFunction( CVEC_ValueLaurentPoly,
     n := Length(x);
     s := f[1][i];
     if not(IsOne(s)) then
-        for j in [1..n] do MultRowVector(val[j],s); od;
+        for j in [1..n] do MultVector(val[j],s); od;
     fi;
     o := One(BaseField(x));
     while true do

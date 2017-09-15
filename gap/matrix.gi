@@ -17,7 +17,7 @@
 
 # SemiEchelonMat and friends:
 # (note that we basically copy the library method, but use advanced
-#  functionality of AddRowVector and MultRowVectors here):
+#  functionality of AddRowVector and MultVectors here):
 
 InstallMethod( SemiEchelonMatDestructive, "for a cmat",
     [ IsMutable and IsCMatRep ],
@@ -56,7 +56,7 @@ InstallMethod( SemiEchelonMatDestructive, "for a cmat",
             if inv = fail then
               return fail;
             fi;
-            MultRowVector( row, inv, j, ncols );
+            MultVector( row, inv, j, ncols );
             Add( vectors, row );
             Add( nzheads, j );
             heads[j]:= Length( vectors );
