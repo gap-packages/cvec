@@ -134,7 +134,7 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
 
   # Clear dec vector if given:
   if dec <> fail then
-    MultRowVector(dec,Zero(dec[1]));
+    MultVector(dec,Zero(dec[1]));
   fi;
   
   # First a little shortcut:
@@ -170,7 +170,7 @@ BindGlobal( "CVEC_CleanRow", function( basis, vec, extend, dec)
       if dec <> fail then
         dec[len+1] := c;
       fi;
-      MultRowVector( vec, c^-1 );
+      MultVector( vec, c^-1 );
       Add( basis!.vectors, vec );
       Add( basis!.pivots, newpiv );
     fi;
@@ -1094,9 +1094,9 @@ function( arg )
           #                   = Y[l] - dec{[1..l-1]}*B*Y{[1..l-1]}
           # by a slight abuse of "*" because dec{[1..l-1]}*B has full length.
           newBrow := dec{[1..l-1]}*B;
-          MultRowVector(newBrow,-opi.o);
+          MultVector(newBrow,-opi.o);
           newBrow[l] := opi.o;
-          MultRowVector(newBrow,dec[l]^-1);
+          MultVector(newBrow,dec[l]^-1);
           Add(B,newBrow);
       od;
       # Now we have extended the basis S together with A and B, such that

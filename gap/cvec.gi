@@ -483,29 +483,29 @@ InstallOtherMethod( AddRowVector, "for cvecs",
   [IsMutable and IsCVecRep,IsCVecRep,IsFFE and IsInternalRep,IsInt,IsInt],
   CVEC_ADDMUL );
 
-# MultRowVector(v,s [,fr,to]) where s is integer or FFE:
-# Note that we do not give a method for MultRowVector with 5 arguments!
+# MultVector(v,s [,fr,to]) where s is integer or FFE:
+# Note that we do not give a method for MultVector with 5 arguments!
 
-InstallOtherMethod( MultRowVector, "for cvecs",
+InstallOtherMethod( MultVector, "for cvecs",
   [IsMutable and IsCVecRep, IsInt and IsSmallIntRep],
   function(v,s) CVEC_MUL1(v,s,0,0); end);
-InstallOtherMethod( MultRowVector, "for cvecs",
+InstallOtherMethod( MultVector, "for cvecs",
   [IsMutable and IsCVecRep, IsInt and IsSmallIntRep, IsInt, IsInt],
   CVEC_MUL1 );
 
-InstallOtherMethod( MultRowVector, "for cvecs",
+InstallOtherMethod( MultVector, "for cvecs",
   [IsMutable and IsCVecRep, IsFFE and IsInternalRep],
   function(v,s) CVEC_MUL1(v,s,0,0); end);
-InstallOtherMethod( MultRowVector, "for cvecs",
+InstallOtherMethod( MultVector, "for cvecs",
   [IsMutable and IsCVecRep, IsFFE and IsInternalRep, IsInt, IsInt],
   CVEC_MUL1 );
 
-InstallOtherMethod( MultRowVector, "for cvecs",
+InstallOtherMethod( MultVector, "for cvecs",
   [IsMutable and IsCVecRep, IsFFE],
   function(v,s) 
     CVEC_MUL1(v,CVEC_HandleScalar(DataObj(v),s),0,0);
   end);
-InstallOtherMethod( MultRowVector, "for cvecs",
+InstallOtherMethod( MultVector, "for cvecs",
   [IsMutable and IsCVecRep, IsFFE, IsInt, IsInt],
   function(v,s,fr,to) 
     CVEC_MUL1(v,CVEC_HandleScalar(DataObj(v),s),fr,to);
