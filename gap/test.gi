@@ -15,49 +15,49 @@ CVEC.TEST.ALLCHEAP := function(name,func)
   local p,d;
   for p in Primes do
     if p < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=1 ... \r");
+      Print("Testing ",name," p=",p,", d=1 ...\n");
       func(p,1);
     fi;
   od;
   for p in Primes{[1..20]} do
     if p^2 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=2 ... \r");
+      Print("Testing ",name," p=",p,", d=2 ...\n");
       func(p,2);
     fi;
   od;
   for p in Primes{[1..9]} do
     if p^3 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=3 ... \r");
+      Print("Testing ",name," p=",p,", d=3 ...\n");
       func(p,3);
     fi;
   od;
   for p in Primes{[1..4]} do
     if p^4 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=4 ... \r");
+      Print("Testing ",name," p=",p,", d=4 ...\n");
       func(p,4);
     fi;
   od;
   for p in Primes{[1..3]} do
     if p^5 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=5 ... \r");
+      Print("Testing ",name," p=",p,", d=5 ...\n");
       func(p,5);
     fi;
   od;
   for p in Primes{[1..2]} do
     if p^6 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=6 ... \r");
+      Print("Testing ",name," p=",p,", d=6 ...\n");
       func(p,6);
     fi;
   od;
   for p in Primes{[1..2]} do
     if p^7 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=",p,", d=7 ... \r");
+      Print("Testing ",name," p=",p,", d=7 ...\n");
       func(p,7);
     fi;
   od;
   for d in [8..13] do
     if p^8 < CVEC.TEST.LIMIT_ALLFFE then
-      Print("Testing ",name," p=2, d=",d," ... \r");
+      Print("Testing ",name," p=2, d=",d," ...\n");
       func(2,d);
     fi;
   od;
@@ -69,7 +69,7 @@ CVEC.TEST.COMPRESSED_ALL := function(name,func)
       if p < 256 then
           d := 1;
           while p^d <= 256 do
-              Print("Testing ",name," COMPRESSED p=",p,", d=",d," ...\r");
+              Print("Testing ",name," COMPRESSED p=",p,", d=",d," ...\n");
               func(p,d);
               d := d + 1;
           od;
@@ -87,7 +87,7 @@ CVEC.TEST.ALLFFE := function(name,func)
       # too much memory for the GF's in GAP
       d := 1;
       repeat
-          Print("Testing ",name," p=",p,", d=",d," ...\r");
+          Print("Testing ",name," p=",p,", d=",d," ...\n");
           func(p,d);
           d := d + 1;
       until p^d > MAXSIZE_GF_INTERNAL;
@@ -102,7 +102,7 @@ CVEC.TEST.ALLCONWAY := function(name,func)
     if p < CVEC.TEST.LIMIT_ALLFFE then
       l := Length(CONWAYPOLDATA[p]);
       for d in Filtered([1..l],i->IsBound(CONWAYPOLDATA[p][i])) do
-          Print("Testing ",name," p=",p," d=",d," ...\r");
+          Print("Testing ",name," p=",p," d=",d," ...\n");
           func(p,d);
       od;
     fi;
@@ -120,12 +120,12 @@ CVEC.TEST.INTFFE_CONVERSION := function(p,d)
   l := 1*[0..q-1];
   CVEC_INTLI_TO_FFELI(c,l);
   if l <> c![CVEC_IDX_tab2] then
-      Print("Alarm: INTLI_TO_FFELI, p=",p," d=",d,"      \n");
+      Print("Alarm: INTLI_TO_FFELI, p=",p," d=",d,"\n");
   fi;
   l := ShallowCopy(c![CVEC_IDX_tab2]);
   CVEC_FFELI_TO_INTLI(c,l);
   if l <> [0..q-1] then
-      Print("Alarm: FFELI_TO_INTLI, p=",p," d=",d,"      \n");
+      Print("Alarm: FFELI_TO_INTLI, p=",p," d=",d,"\n");
   fi;
 end;
 
@@ -429,11 +429,11 @@ CVEC.TEST.ELM_CVEC := function(p,d)
       if q <= MAXSIZE_GF_INTERNAL then
           if el <> c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i] then
               Print("Alarm: ELM_CVEC i=",i," ",el," ",
-                    c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i],"      \n");
+                    c![CVEC_IDX_fieldinfo]![CVEC_IDX_tab2][i],"\n");
           fi;
       else
           if el <> i-1 then
-              Print("Alarm: ELM_CVEC i=",i," ",el," ",i-1,"               \n");
+              Print("Alarm: ELM_CVEC i=",i," ",el," ",i-1,"\n");
           fi;
       fi;
   od;
@@ -454,7 +454,7 @@ CVEC.TEST.ASS_CVEC := function(p,d)
   od;
   CVEC_CVEC_TO_INTREP(v,l);
   if l <> [0..q-1] then
-      Print("Alarm ASS_CVEC p=",p," d=",d,"                  \n");
+      Print("Alarm ASS_CVEC p=",p," d=",d,"\n");
   fi;
   if q <= MAXSIZE_GF_INTERNAL then
       CVEC_MAKEZERO(v);
@@ -464,7 +464,7 @@ CVEC.TEST.ASS_CVEC := function(p,d)
       od;
       CVEC_CVEC_TO_INTREP(v,l);
       if l <> [0..q-1] then
-          Print("Alarm ASS_CVEC FFE p=",p," d=",d,"                  \n");
+          Print("Alarm ASS_CVEC FFE p=",p," d=",d,"\n");
       fi;
   fi;
 end;
@@ -480,14 +480,14 @@ CVEC.TEST.POSITION_NONZERO_CVEC := function(p,d)
   c := CVEC_NewCVecClass(p,d,q);
   v := CVEC_New(c);
   if CVEC_POSITION_NONZERO_CVEC(v) <> q+1 then
-      Print("Alarm POSITION_NONZERO_CVEC p=",p," d=",d," i=0        \n");
+      Print("Alarm POSITION_NONZERO_CVEC p=",p," d=",d," i=0\n");
   fi;
   l := 1 * [0..q-1];
   l[1] := 1;
   for i in [1..q] do
       CVEC_ASS_CVEC(v,i,l[i]);
       if CVEC_POSITION_NONZERO_CVEC(v) <> i then
-          Print("Alarm POSITION_NONZERO_CVEC p=",p," d=",d," i=",i,"       \n");
+          Print("Alarm POSITION_NONZERO_CVEC p=",p," d=",d," i=",i,"\n");
       fi;
       CVEC_ASS_CVEC(v,i,0);
   od;
@@ -504,7 +504,7 @@ CVEC.TEST.POSITION_LAST_NONZERO_CVEC := function(p,d)
   c := CVEC_NewCVecClass(p,d,q);
   v := CVEC_New(c);
   if CVEC_POSITION_LAST_NONZERO_CVEC(v) <> 0 then
-      Print("Alarm POSITION_LAST_NONZERO_CVEC p=",p," d=",d," i=0        \n");
+      Print("Alarm POSITION_LAST_NONZERO_CVEC p=",p," d=",d," i=0\n");
   fi;
   l := 1 * [0..q-1];
   l[1] := 1;
@@ -512,7 +512,7 @@ CVEC.TEST.POSITION_LAST_NONZERO_CVEC := function(p,d)
       CVEC_ASS_CVEC(v,i,l[i]);
       if CVEC_POSITION_LAST_NONZERO_CVEC(v) <> i then
           Print("Alarm POSITION_LAST_NONZERO_CVEC p=",p," d=",d," i=",
-                i,"       \n");
+                i,"\n");
       fi;
       CVEC_ASS_CVEC(v,i,0);
   od;
@@ -529,7 +529,7 @@ CVEC.TEST.MATMUL := function(p,d)
   r := Random([100..150]);
   s := Random([100..150]);
   t := Random([100..150]);
-  Print("\n     (doing ",r,"x",s," * ",s,"x",t,"...)\n");
+  #Print("\n     (doing ",r,"x",s," * ",s,"x",t,"...)\n");
   ca := CVEC_NewCVecClass(p,d,s);
   cb := CVEC_NewCVecClass(p,d,t);
   a := CMat([],ca);
@@ -574,37 +574,38 @@ CVEC.TEST.MATMUL := function(p,d)
   c6 := CVEC_CMatMaker(c6,cb);
 
   if List(c1,Unpack) <> List(c2,x->List(x,y->y)) then
-      Print("Alarm p=",p," d=",d," std matmul            \n");
+      Print("Alarm p=",p," d=",d," std matmul\n");
       Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c3 then
-      Print("Alarm p=",p," d=",d," greased matmul            \n");
+      Print("Alarm p=",p," d=",d," greased matmul\n");
       Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c4 then
-      Print("Alarm p=",p," d=",d," ungreased matmul            \n");
+      Print("Alarm p=",p," d=",d," ungreased matmul\n");
       Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c5 then
-      Print("Alarm p=",p," d=",d," ungreased vec*mat             \n");
+      Print("Alarm p=",p," d=",d," ungreased vec*mat\n");
       Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
   if c1 <> c6 then
-      Print("Alarm p=",p," d=",d," greased vec*mat             \n");
+      Print("Alarm p=",p," d=",d," greased vec*mat\n");
       Error("You can inspect c1, c2, c3, c4, c5, c6");
   fi;
 end;
 
+CVEC.TEST.LIMIT_SLICE := 256;
+
 CVEC.TEST.SLICE := function(p,d)
   local c,srcpos,len,dstpos,l,one,q,s,v,w;
   q := p^d;
-  l := 256;
+  l := CVEC.TEST.LIMIT_SLICE;
   c := CVEC_NewCVecClass(p,d,l);
   v := CVec(0*[1..l]+1,c);
   one := v[1];
-  Print("\n");
   for srcpos in [1..l] do
-      Print("srcpos=",srcpos," (256)\r");
+      Print("srcpos=",srcpos," (",l,")\n");
       for len in [1..l-srcpos+1] do
           for dstpos in [1..l-len+1] do
               w := CVEC_New(c);
@@ -612,13 +613,13 @@ CVEC.TEST.SLICE := function(p,d)
               if PositionNonZero(w) <> dstpos or
                  PositionLastNonZero(w) <> dstpos+len-1 then
                   Print("Alarm p=",p," d=",d," srcpos=",srcpos," len=",len,
-                        " dstpos=",dstpos,"                  \n");
+                        " dstpos=",dstpos,"\n");
                   Error("You can inspect v and w");
               fi;
               for s in [dstpos..dstpos+len-1] do
                   if w[s] <> one then
                       Print("Alarm p=",p," d=",d," srcpos=",srcpos," len=",len,
-                            " dstpos=",dstpos,"                  \n");
+                            " dstpos=",dstpos,"\n");
                       Error("You can inspect v and w");
                   fi;
               od;
@@ -630,7 +631,7 @@ end;
 CVEC.TEST.SLICELIST := function(p,d)
   local c,dstposs,f,i,j,l,len,li,one,po,q,srcposs,v,w;
   q := p^d;
-  l := 256;
+  l := CVEC.TEST.LIMIT_SLICE;
   f := GF(p,d);
   c := CVEC_NewCVecClass(p,d,l);
   v := CVec(0*[1..l]+1,c);
@@ -638,10 +639,10 @@ CVEC.TEST.SLICELIST := function(p,d)
   for i in [1..l] do
       v[i] := Random(f);
   od;
-  Print("\nTesting lists for srcposs and dstposs...\n");
+  Print("Testing lists for srcposs and dstposs...\n");
   for i in [1..1000] do   # a randomized test
       len := Random(1,l);
-      srcposs := List([1..len],i->Random(1,256));
+      srcposs := List([1..len],i->Random(1,l));
       li := [1..l];
       dstposs := [];
       for j in [1..len] do
@@ -652,13 +653,13 @@ CVEC.TEST.SLICELIST := function(p,d)
       CVEC_SLICE_LIST(v,w,srcposs,dstposs);
       for j in [1..Length(li)] do
           if not(IsZero(w[li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
       for j in [1..len] do
           if w[dstposs[j]] <> v[srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
@@ -666,7 +667,7 @@ CVEC.TEST.SLICELIST := function(p,d)
   Print("Testing list for srcposs and range for dstposs...\n");
   for i in [1..1000] do   # a randomized test
       len := Random(1,l);
-      srcposs := List([1..len],i->Random(1,256));
+      srcposs := List([1..len],i->Random(1,l));
       if Random(0,1) = 0 then
           po := Random(1,l-len+1);
           dstposs := [po..po+len-1];
@@ -679,13 +680,13 @@ CVEC.TEST.SLICELIST := function(p,d)
       CVEC_SLICE_LIST(v,w,srcposs,dstposs);
       for j in [1..Length(li)] do
           if not(IsZero(w[li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
       for j in [1..len] do
           if w[dstposs[j]] <> v[srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
@@ -710,13 +711,13 @@ CVEC.TEST.SLICELIST := function(p,d)
       CVEC_SLICE_LIST(v,w,srcposs,dstposs);
       for j in [1..Length(li)] do
           if not(IsZero(w[li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
       for j in [1..len] do
           if w[dstposs[j]] <> v[srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
@@ -743,13 +744,13 @@ CVEC.TEST.SLICELIST := function(p,d)
       CVEC_SLICE_LIST(v,w,srcposs,dstposs);
       for j in [1..Length(li)] do
           if not(IsZero(w[li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
       for j in [1..len] do
           if w[dstposs[j]] <> v[srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect v, w, srcposs, dstposs");
           fi;
       od;
@@ -759,7 +760,7 @@ end;
 CVEC.TEST.COPYSUBMATRIX := function(p,d)
   local c,dstposs,f,i,ii,j,l,len,li,m,one,po,q,srcposs,v,w;
   q := p^d;
-  l := 256;
+  l := CVEC.TEST.LIMIT_SLICE;
   f := GF(p,d);
   c := CVEC_NewCVecClass(p,d,l);
   m := CMat([],CVEC_New(c));
@@ -771,11 +772,11 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       od;
       Add(m,v);
   od;
-  Print("\nTesting lists for srcposs and dstposs...\n");
+  Print("Testing lists for srcposs and dstposs...\n");
   for i in [1..1000] do   # a randomized test
       w := ZeroMutable(m);
       len := Random(1,l);
-      srcposs := List([1..len],i->Random(1,256));
+      srcposs := List([1..len],i->Random(1,l));
       li := [1..l];
       dstposs := [];
       for j in [1..len] do
@@ -786,7 +787,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..Length(li)] do
           if not(IsZero(w[ii][li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -794,7 +795,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..len] do
           if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -803,7 +804,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
   Print("Testing list for srcposs and range for dstposs...\n");
   for i in [1..1000] do   # a randomized test
       len := Random(1,l);
-      srcposs := List([1..len],i->Random(1,256));
+      srcposs := List([1..len],i->Random(1,l));
       if Random(0,1) = 0 then
           po := Random(1,l-len+1);
           dstposs := [po..po+len-1];
@@ -817,7 +818,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..Length(li)] do
           if not(IsZero(w[ii][li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -825,7 +826,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..len] do
           if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -852,7 +853,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..Length(li)] do
           if not(IsZero(w[ii][li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -860,7 +861,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..len] do
           if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -889,7 +890,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..Length(li)] do
           if not(IsZero(w[ii][li[j]])) then
-              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero      \n");
+              Print("Alarm p=",p," d=",d," j=",li[j]," should be zero\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -897,7 +898,7 @@ CVEC.TEST.COPYSUBMATRIX := function(p,d)
       for ii in [1..3] do
         for j in [1..len] do
           if w[ii][dstposs[j]] <> m[ii][srcposs[j]] then
-              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong     \n");
+              Print("Alarm p=",p," d=",d," j=",dstposs[j]," is wrong\n");
                   Error("You can inspect m, w, srcposs, dstposs");
           fi;
         od;
@@ -1164,123 +1165,123 @@ CVEC.TEST.DOALL := function()
   CVEC.TEST.ALLFFE("POSITION_LAST_NONZERO_CVEC",
                    CVEC.TEST.POSITION_LAST_NONZERO_CVEC);
   CVEC.TEST.COMPRESSED_ALL("MATMUL",CVEC.TEST.MATMUL);
-  Print("Testing MATMUL 2^9...\r");
+  Print("Testing MATMUL 2^9...\n");
   CVEC.TEST.MATMUL(2,9);
-  Print("Testing MATMUL 3^10...\r");
+  Print("Testing MATMUL 3^10...\n");
   CVEC.TEST.MATMUL(3,10);
-  Print("Testing MATMUL 31^3...\r");
+  Print("Testing MATMUL 31^3...\n");
   CVEC.TEST.MATMUL(31,3);
-  Print("Testing MATMUL 257^1...\r");
+  Print("Testing MATMUL 257^1...\n");
   CVEC.TEST.MATMUL(257,1);
-  Print("Testing SLICE 2^1 (bitsperel=1)...\r");
+  Print("Testing SLICE 2^1 (bitsperel=1)...\n");
   CVEC.TEST.SLICE(2,1);
-  Print("Testing SLICE 3^1 (bitsperel=3)...\r");
+  Print("Testing SLICE 3^1 (bitsperel=3)...\n");
   CVEC.TEST.SLICE(3,1);
-  Print("Testing SLICE 5^1 (bitsperel=4)...\r");
+  Print("Testing SLICE 5^1 (bitsperel=4)...\n");
   CVEC.TEST.SLICE(5,1);
-  Print("Testing SLICE 11^1 (bitsperel=5)...\r");
+  Print("Testing SLICE 11^1 (bitsperel=5)...\n");
   CVEC.TEST.SLICE(11,1);
-  Print("Testing SLICE 19^1 (bitsperel=6)...\r");
+  Print("Testing SLICE 19^1 (bitsperel=6)...\n");
   CVEC.TEST.SLICE(19,1);
-  Print("Testing SLICE 37^1 (bitsperel=7)...\r");
+  Print("Testing SLICE 37^1 (bitsperel=7)...\n");
   CVEC.TEST.SLICE(37,1);
-  Print("Testing SLICE 101^1 (bitsperel=8)...\r");
+  Print("Testing SLICE 101^1 (bitsperel=8)...\n");
   CVEC.TEST.SLICE(101,1);
-  Print("Testing SLICE 2^2 (bitsperel=1)...\r");
+  Print("Testing SLICE 2^2 (bitsperel=1)...\n");
   CVEC.TEST.SLICE(2,2);
-  Print("Testing SLICE 3^2 (bitsperel=3)...\r");
+  Print("Testing SLICE 3^2 (bitsperel=3)...\n");
   CVEC.TEST.SLICE(3,2);
-  Print("Testing SLICE 5^2 (bitsperel=4)...\r");
+  Print("Testing SLICE 5^2 (bitsperel=4)...\n");
   CVEC.TEST.SLICE(5,2);
-  Print("Testing SLICE 2^3 (bitsperel=1)...\r");
+  Print("Testing SLICE 2^3 (bitsperel=1)...\n");
   CVEC.TEST.SLICE(2,3);
-  Print("Testing SLICE 3^3 (bitsperel=3)...\r");
+  Print("Testing SLICE 3^3 (bitsperel=3)...\n");
   CVEC.TEST.SLICE(3,3);
-  Print("Testing SLICE 2^4 (bitsperel=1)...\r");
+  Print("Testing SLICE 2^4 (bitsperel=1)...\n");
   CVEC.TEST.SLICE(2,4);
-  Print("Testing SLICELIST 2^1 (bitsperel=1)...\r");
+  Print("Testing SLICELIST 2^1 (bitsperel=1)...\n");
   CVEC.TEST.SLICELIST(2,1);
-  Print("Testing SLICELIST 3^1 (bitsperel=3)...\r");
+  Print("Testing SLICELIST 3^1 (bitsperel=3)...\n");
   CVEC.TEST.SLICELIST(3,1);
-  Print("Testing SLICELIST 5^1 (bitsperel=4)...\r");
+  Print("Testing SLICELIST 5^1 (bitsperel=4)...\n");
   CVEC.TEST.SLICELIST(5,1);
-  Print("Testing SLICELIST 11^1 (bitsperel=5)...\r");
+  Print("Testing SLICELIST 11^1 (bitsperel=5)...\n");
   CVEC.TEST.SLICELIST(11,1);
-  Print("Testing SLICELIST 19^1 (bitsperel=6)...\r");
+  Print("Testing SLICELIST 19^1 (bitsperel=6)...\n");
   CVEC.TEST.SLICELIST(19,1);
-  Print("Testing SLICELIST 37^1 (bitsperel=7)...\r");
+  Print("Testing SLICELIST 37^1 (bitsperel=7)...\n");
   CVEC.TEST.SLICELIST(37,1);
-  Print("Testing SLICELIST 101^1 (bitsperel=8)...\r");
+  Print("Testing SLICELIST 101^1 (bitsperel=8)...\n");
   CVEC.TEST.SLICELIST(101,1);
-  Print("Testing SLICELIST 2^2 (bitsperel=1)...\r");
+  Print("Testing SLICELIST 2^2 (bitsperel=1)...\n");
   CVEC.TEST.SLICELIST(2,2);
-  Print("Testing SLICELIST 3^2 (bitsperel=3)...\r");
+  Print("Testing SLICELIST 3^2 (bitsperel=3)...\n");
   CVEC.TEST.SLICELIST(3,2);
-  Print("Testing SLICELIST 5^2 (bitsperel=4)...\r");
+  Print("Testing SLICELIST 5^2 (bitsperel=4)...\n");
   CVEC.TEST.SLICELIST(5,2);
-  Print("Testing SLICELIST 2^3 (bitsperel=1)...\r");
+  Print("Testing SLICELIST 2^3 (bitsperel=1)...\n");
   CVEC.TEST.SLICELIST(2,3);
-  Print("Testing SLICELIST 3^3 (bitsperel=3)...\r");
+  Print("Testing SLICELIST 3^3 (bitsperel=3)...\n");
   CVEC.TEST.SLICELIST(3,3);
-  Print("Testing SLICELIST 2^4 (bitsperel=1)...\r");
+  Print("Testing SLICELIST 2^4 (bitsperel=1)...\n");
   CVEC.TEST.SLICELIST(2,4);
-  Print("Testing COPYSUBMATRIX 2^1 (bitsperel=1)...\r");
+  Print("Testing COPYSUBMATRIX 2^1 (bitsperel=1)...\n");
   CVEC.TEST.COPYSUBMATRIX(2,1);
-  Print("Testing COPYSUBMATRIX 3^1 (bitsperel=3)...\r");
+  Print("Testing COPYSUBMATRIX 3^1 (bitsperel=3)...\n");
   CVEC.TEST.COPYSUBMATRIX(3,1);
-  Print("Testing COPYSUBMATRIX 5^1 (bitsperel=4)...\r");
+  Print("Testing COPYSUBMATRIX 5^1 (bitsperel=4)...\n");
   CVEC.TEST.COPYSUBMATRIX(5,1);
-  Print("Testing COPYSUBMATRIX 11^1 (bitsperel=5)...\r");
+  Print("Testing COPYSUBMATRIX 11^1 (bitsperel=5)...\n");
   CVEC.TEST.COPYSUBMATRIX(11,1);
-  Print("Testing COPYSUBMATRIX 19^1 (bitsperel=6)...\r");
+  Print("Testing COPYSUBMATRIX 19^1 (bitsperel=6)...\n");
   CVEC.TEST.COPYSUBMATRIX(19,1);
-  Print("Testing COPYSUBMATRIX 37^1 (bitsperel=7)...\r");
+  Print("Testing COPYSUBMATRIX 37^1 (bitsperel=7)...\n");
   CVEC.TEST.COPYSUBMATRIX(37,1);
-  Print("Testing COPYSUBMATRIX 101^1 (bitsperel=8)...\r");
+  Print("Testing COPYSUBMATRIX 101^1 (bitsperel=8)...\n");
   CVEC.TEST.COPYSUBMATRIX(101,1);
-  Print("Testing COPYSUBMATRIX 2^2 (bitsperel=1)...\r");
+  Print("Testing COPYSUBMATRIX 2^2 (bitsperel=1)...\n");
   CVEC.TEST.COPYSUBMATRIX(2,2);
-  Print("Testing COPYSUBMATRIX 3^2 (bitsperel=3)...\r");
+  Print("Testing COPYSUBMATRIX 3^2 (bitsperel=3)...\n");
   CVEC.TEST.COPYSUBMATRIX(3,2);
-  Print("Testing COPYSUBMATRIX 5^2 (bitsperel=4)...\r");
+  Print("Testing COPYSUBMATRIX 5^2 (bitsperel=4)...\n");
   CVEC.TEST.COPYSUBMATRIX(5,2);
-  Print("Testing COPYSUBMATRIX 2^3 (bitsperel=1)...\r");
+  Print("Testing COPYSUBMATRIX 2^3 (bitsperel=1)...\n");
   CVEC.TEST.COPYSUBMATRIX(2,3);
-  Print("Testing COPYSUBMATRIX 3^3 (bitsperel=3)...\r");
+  Print("Testing COPYSUBMATRIX 3^3 (bitsperel=3)...\n");
   CVEC.TEST.COPYSUBMATRIX(3,3);
-  Print("Testing COPYSUBMATRIX 2^4 (bitsperel=1)...\r");
+  Print("Testing COPYSUBMATRIX 2^4 (bitsperel=1)...\n");
   CVEC.TEST.COPYSUBMATRIX(2,4);
   CVEC.TEST.ALLCHEAP("IO", CVEC.TEST.IO);
   CVEC.TEST.ALLCONWAY("SCALAR_IN", CVEC.TEST.SCALAR_IN);
-  Print("Testing SCALAR_IN 65537^1...\r");
+  Print("Testing SCALAR_IN 65537^1...\n");
   CVEC.TEST.SCALAR_IN(65537,1);
-  Print("Testing SCALAR_IN 65537^2...\r");
+  Print("Testing SCALAR_IN 65537^2...\n");
   CVEC.TEST.SCALAR_IN(65537,2);
-  Print("Testing SCALAR_IN 65537^3...\r");
+  Print("Testing SCALAR_IN 65537^3...\n");
   CVEC.TEST.SCALAR_IN(65537,3);
   CVEC.TEST.ALLCONWAY("SCALAR_OUT", CVEC.TEST.SCALAR_OUT);
-  Print("Testing SCALAR_OUT 65537^1...\r");
+  Print("Testing SCALAR_OUT 65537^1...\n");
   CVEC.TEST.SCALAR_OUT(65537,1);
-  Print("Testing SCALAR_OUT 65537^2...\r");
+  Print("Testing SCALAR_OUT 65537^2...\n");
   CVEC.TEST.SCALAR_OUT(65537,2);
-  Print("Testing SCALAR_OUT 65537^3...\r");
+  Print("Testing SCALAR_OUT 65537^3...\n");
   CVEC.TEST.SCALAR_OUT(65537,3);
   CVEC.TEST.ALLCONWAY("SCALAR_UNPACK", CVEC.TEST.SCALAR_UNPACK);
-  Print("Testing SCALAR_UNPACK 65537^1...\r");
+  Print("Testing SCALAR_UNPACK 65537^1...\n");
   CVEC.TEST.SCALAR_UNPACK(65537,1);
-  Print("Testing SCALAR_UNPACK 65537^2...\r");
+  Print("Testing SCALAR_UNPACK 65537^2...\n");
   CVEC.TEST.SCALAR_UNPACK(65537,2);
-  Print("Testing SCALAR_UNPACK 65537^3...\r");
+  Print("Testing SCALAR_UNPACK 65537^3...\n");
   CVEC.TEST.SCALAR_UNPACK(65537,3);
-  Print("Testing NumberFFVector...\r");
+  Print("Testing NumberFFVector...\n");
   CVEC.TEST.ALLCHEAP("NUMBERFFVECTOR",CVEC.TEST.NUMBERFFVECTOR);
-  Print("Testing TransposedMat...\r");
+  Print("Testing TransposedMat...\n");
   CVEC.TEST.ALLCHEAP("TRANSPOSED_MAT",CVEC.TEST.TRANSPOSED_MAT);
-  Print("Testing inversion...\r");
+  Print("Testing inversion...\n");
   CVEC.TEST.COMPRESSED_ALL("INVERSION",CVEC.TEST.INVERSION);
-  Print("Testing ScalarProduct...\r");
+  Print("Testing ScalarProduct...\n");
   CVEC.TEST.ALLFFE("SCALARPRODUCT",CVEC.TEST.SCALARPRODUCT);
-  Print("Testing EntryOfMatrixProduct...\r");
+  Print("Testing EntryOfMatrixProduct...\n");
   CVEC.TEST.ALLFFE("ENTRYOFMATPROD",CVEC.TEST.ENTRYOFMATRIXPRODUCT);
   SetInfoLevel(InfoWarning,inf);
 end;
