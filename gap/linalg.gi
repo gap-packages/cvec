@@ -95,7 +95,7 @@ InstallMethod( ViewObj, "for a semi echelonised basis",
         Print("immutable ");
     fi;
     Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
-          Length(b!.vectors),">");
+          NumberRows(b!.vectors),">");
   end);
 
 InstallMethod( Display, "for a semi echelonised basis",
@@ -106,7 +106,7 @@ InstallMethod( Display, "for a semi echelonised basis",
         Print("immutable ");
     fi;
     Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
-          Length(b!.vectors),"\n");
+          NumberRows(b!.vectors),"\n");
     Display(b!.vectors);
     Print(">");
   end );
