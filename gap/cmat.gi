@@ -642,13 +642,18 @@ InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
     od;
   end);
 
-InstallOtherMethod( NumberRows, "for a cmat",
+# for backwards compatibility, add Length method for cmat
+InstallOtherMethod( Length, "for a cmat",
   [IsCMatRep and IsMatrix],
   function(m) return m!.len; end);
 
 InstallOtherMethod( DimensionsMat, "for a cmat",
   [IsCMatRep and IsMatrixObj],
   function(m) return [m!.len,m!.vecclass![2]]; end );
+
+InstallMethod( NumberRows, "for a cmat",
+  [IsCMatRep and IsMatrix],
+  function(m) return m!.len; end);
 
 InstallMethod( NumberColumns, "for a cmat",
   [IsCMatRep and IsMatrix and IsMatrixObj],
