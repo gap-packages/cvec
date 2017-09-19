@@ -636,7 +636,8 @@ Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
         return OurErrorBreakQuit(
       "CVEC_INTLI_TO_FFELI: Must be called with a field info and a plain list");
     }
-    {
+    Int size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
+    if (size <= 0) {
         Int len;
         Int i;
         Obj e;
@@ -649,6 +650,23 @@ Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
             if (!IS_INTOBJ(e) || INT_INTOBJ(e) < 0 || INT_INTOBJ(e) >= q) {
                 return OurErrorBreakQuit("CVEC_INTLI_TO_FFELI: Elements of l "
                                          "must be integers between 0 and q-1");
+            }
+            e = ELM_PLIST(tab2,INT_INTOBJ(e)+1);
+            SET_ELM_PLIST(l,i,e);
+        }
+    } else {
+        Int len;
+        Int i;
+        Obj e;
+        PREPARE_p(fi);
+        PREPARE_tab2(fi);
+
+        len = LEN_PLIST(l);
+        for (i = 1;i <= len;i++) {
+            e = ELM_PLIST(l,i);
+            if (!IS_INTOBJ(e) || INT_INTOBJ(e) < 0 || INT_INTOBJ(e) >= p) {
+                return OurErrorBreakQuit("CVEC_INTLI_TO_FFELI: Elements of l "
+                                         "must be integers between 0 and p-1");
             }
             e = ELM_PLIST(tab2,INT_INTOBJ(e)+1);
             SET_ELM_PLIST(l,i,e);
