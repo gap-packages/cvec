@@ -1,8 +1,9 @@
-dist: trusty
 language: c
 env:
   global:
+    - GAPROOT=gaproot
     - COVDIR=coverage
+    - GAP_PKGS_TO_BUILD="io profiling orb"
 
 addons:
   apt_packages:
@@ -17,7 +18,7 @@ matrix:
   include:
     - env: ABI=64
     - env: ABI=32
-    - env: GAPBRANCH="stable-4.8"
+    #- env: GAPBRANCH="stable-4.9"
     #- env: HPCGAP=yes  # cvec kernel extension is not HPC-GAP ready
 
 branches:
