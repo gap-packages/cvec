@@ -1345,9 +1345,9 @@ CVEC.BENCH.ADDOLD := function(p,d)
     v := 0*[1..l]; ConvertToVectorRep(v,q);
     w := ShallowCopy(v);
     if p = 2 and d = 1 then
-        vecsize := SHALLOW_SIZE(v)-4;
+        vecsize := SIZE_OBJ(v)-4;
     else
-        vecsize := SHALLOW_SIZE(v)-8;
+        vecsize := SIZE_OBJ(v)-8;
     fi;
     Print("Doing vectors of length ",l," using ", vecsize," bytes each...\n");
     Print("Initialising...\c");

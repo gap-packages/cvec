@@ -1321,7 +1321,7 @@ InstallOtherMethod( Memory, "for a cvec", [ IsCVecRep ],
   function( v )
     # the header is 2 words on 64bit and 3 words on 32bit machines:
     # we count the master pointer!
-    return SHALLOW_SIZE(v) + 8 + 2 * GAPInfo.BytesPerVariable;
+    return SIZE_OBJ(v) + 8 + 2 * GAPInfo.BytesPerVariable;
   end );
 
 ##

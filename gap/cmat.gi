@@ -2157,9 +2157,9 @@ InstallOtherMethod( Memory, "for a cmat", [ IsCMatRep ],
     # Bytes per bag (in addition to content):
     bpb := 8 + 2*bpw;   # this counts the header and the master pointer!
     if NumberRows(m) = 0 then
-        return 2*bpb + SHALLOW_SIZE(m) + SHALLOW_SIZE(m!.rows);
+        return 2*bpb + SIZE_OBJ(m) + SIZE_OBJ(m!.rows);
     else
-        return 2*bpb + SHALLOW_SIZE(m) + SHALLOW_SIZE(m!.rows)
+        return 2*bpb + SIZE_OBJ(m) + SIZE_OBJ(m!.rows)
                + NumberRows(m) * Memory(m!.rows[2]);
     fi;
     # FIXME: this does not include greased data!
