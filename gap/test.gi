@@ -1351,7 +1351,7 @@ CVEC.BENCH.ADDOLD := function(p,d)
     fi;
     Print("Doing vectors of length ",l," using ", vecsize," bytes each...\n");
     Print("Initialising...\c");
-    li := Elements(GF(q));
+    li := AsSet(GF(q));
     j := 0;
     for i in [1..l] do
         v[i] := li[j+1];
