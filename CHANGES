@@ -1,9 +1,11 @@
 This file describes changes in the cvec package.
 
-2.X.X
+2.6.0
+  - Fix crash in CLEANROWKERNEL
   - Fix link to issue tracker in manual
-  - Adapt to changes in GAP's MatrixObj interface (which will appear
-    in GAP 4.9)
+  - Adapt to changes in GAP's MatrixObj interface (to appear in GAP 4.9)
+  - Convert README to markdown
+  - Various other internal fixes and improvements
 
 2.5.7 (2017-08-01)
   - Remove CompatibleMatrix method (this *undocumented* API will be
