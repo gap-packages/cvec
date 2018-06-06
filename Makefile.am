@@ -6,9 +6,9 @@ GAPINSTALLLIB = $(BINARCHDIR)/cvec.so
 lib_LTLIBRARIES = cvec.la
 
 cvec_la_SOURCES = src/cvec.c
-cvec_la_CPPFLAGS = $(CPPFLAGS) $(GAP_CPPFLAGS) -DCONFIG_H
-# Note that the latter is only for GAP 4.4.12
-cvec_la_LDFLAGS = -module -avoid-version
+cvec_la_CPPFLAGS = $(GAP_CPPFLAGS)
+cvec_la_CFLAGS = $(GAP_CFLAGS)
+cvec_la_LDFLAGS = $(GAP_LDFLAGS) -module -avoid-version
 if SYS_IS_CYGWIN
 cvec_la_LDFLAGS += -no-undefined -version-info 0:0:0 -Wl,$(GAPROOT)/bin/$(GAPARCH)/gap.dll
 endif
