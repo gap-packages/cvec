@@ -4524,8 +4524,14 @@ static Int InitKernel ( StructInitInfo *module )
     return 0;
 }
 
+#if defined(GAP_KERNEL_API_VERSION) && GAP_KERNEL_API_VERSION >= 1001
+#define CVEC_PUBLISH(nam) \
+    AssConstantGVar(GVarName("CVEC_"#nam), INTOBJ_INT(nam))
+
+#else
 #define CVEC_PUBLISH(nam) gvar=GVarName("CVEC_"#nam); \
     AssGVar( gvar, INTOBJ_INT(nam)); MakeReadOnlyGVar(gvar)
+#endif
 
 /******************************************************************************
 *F  InitLibrary( <module> ) . . . . . . .  initialise library data structures
@@ -4538,12 +4544,9 @@ static Int InitLibrary ( StructInitInfo *module )
     /* init filters and functions */
     /* init functions */
     InitGVarFuncsFromTable(GVarFuncs);
-    gvar = GVarName("CVEC_BYTESPERWORD");
-    AssGVar(gvar,INTOBJ_INT(BYTESPERWORD));
-    MakeReadOnlyGVar(gvar);
-    gvar = GVarName("CVEC_MAXDEGREE");
-    AssGVar(gvar,INTOBJ_INT(MAXDEGREE));
-    MakeReadOnlyGVar(gvar);
+
+    CVEC_PUBLISH(BYTESPERWORD);
+    CVEC_PUBLISH(MAXDEGREE);
 
     /* Export position numbers: */
     CVEC_PUBLISH(IDX_p);
