@@ -1,5 +1,9 @@
 This file describes changes in the cvec package.
 
+2.6.1
+  - Workaround a linker issue with GNU ld 2.30
+  - Improved build system when using GAP >= 4.9
+
 2.6.0
   - Fix crash in CLEANROWKERNEL
   - Fix link to issue tracker in manual
