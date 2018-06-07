@@ -352,7 +352,7 @@ typedef struct SeqAcc {
   }
 
 /* Initializes the sequential access struct, v is a cvec: */
-INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
+static INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_d(fi);
