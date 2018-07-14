@@ -2825,7 +2825,7 @@ InstallMethod( EntryOfMatrixProduct, "generic method",
     f := BaseDomain(m);
     res := Zero(f);
     for k in [1..NumberColumns(m)] do
-        res := res + MatElm(m,i,k) * MatElm(n,k,j);
+        res := res + m[i,k] * n[k,j];
     od;
     return res;
   end );

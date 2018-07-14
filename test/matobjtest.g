@@ -243,18 +243,18 @@ RowListMatrixObjTester := function( m, level )
   # Test RowList behaviour:
   v := n[1];
   v[1] := one;
-  if MatElm(n,1,1) <> one then MyError(66); fi;
+  if n[1,1] <> one then MyError(66); fi;
   v[1] := two;
-  if MatElm(n,1,1) <> two then MyError(67); fi;
-  SetMatElm(n,1,1,one);
+  if n[1,1] <> two then MyError(67); fi;
+  n[1,1] := one;
   if v[1] <> one then MyError(68); fi;
 
   # Test sharing of rows:
   n[2] := v;
-  SetMatElm(n,1,2,one);
-  if MatElm(n,2,2) <> one then MyError(69); fi;
-  SetMatElm(n,2,1,two);
-  if MatElm(n,1,1) <> two then MyError(70); fi;
+  n[1,2] := one;
+  if n[2,2] <> one then MyError(69); fi;
+  n[2,1] := two;
+  if n[1,1] <> two then MyError(70); fi;
   # Test for identical row objects:
   if not(IsIdenticalObj(n[1],n[1])) then
       Print("Warning: Row objects of same row are not identical!\n");
@@ -307,14 +307,14 @@ RowListMatrixObjTester := function( m, level )
       Print("Warning: ExtractSubMatrix does not return an object in ",
             "IsMatrixObj!\n");
   fi;
-  if not(m[1][1] = n[1][1] and m[1][2] = n[1][2] and m[2][1] = n[2][1] and
-         m[2][2] = n[2][2] and NumberRows(n) = 2 and NumberColumns(n) = 2) then
+  if not(m[1,1] = n[1,1] and m[1,2] = n[1,2] and m[2,1] = n[2,1] and
+         m[2,2] = n[2,2] and NumberRows(n) = 2 and NumberColumns(n) = 2) then
       MyError(89);
   fi;
   n := MutableCopyMat(n);
   CopySubMatrix(m,n,[2,1],[1,2],[2,1],[1,2]);
-  if not(m[1][1] = n[2][2] and m[1][2] = n[2][1] and m[2][1] = n[1][2] and
-         m[2][2] = n[1][1] and NumberRows(n) = 2 and NumberColumns(n) = 2) then
+  if not(m[1,1] = n[2,2] and m[1,2] = n[2,1] and m[2,1] = n[1,2] and
+         m[2,2] = n[1,1] and NumberRows(n) = 2 and NumberColumns(n) = 2) then
       MyError(90);
   fi;
   n := StructuralCopy(m);
@@ -432,9 +432,9 @@ RowListMatrixObjTester := function( m, level )
       for j in [1..NumberColumns(wt)] do
           s := Zero(BaseDomain(w));
           for k in [1..NumberColumns(w)] do
-              s := s + MatElm(w,i,k) * MatElm(wt,k,j);
+              s := s + w[i,k] * wt[k,j];
           od;
-          if s <> MatElm(u,i,j) then MyError(139); fi;
+          if s <> u[i,j] then MyError(139); fi;
       od;
   od;
   if not(IsMutable(u)) or not(IsMutable(u[1])) then MyError(140); fi;
@@ -475,15 +475,15 @@ RowListMatrixObjTester := function( m, level )
   u := ZeroMatrix(3,3,m);
   if not(IsMutable(u)) then MyError(159); fi;
   if not(IsZero(u)) then MyError(160); fi;
-  u[1][1] := one;
-  u[2][1] := one;
-  u[1][2] := one;
+  u[1,1] := one;
+  u[2,1] := one;
+  u[1,2] := one;
   if IsDiagonalMat(u) then MyError(161); fi;
   if IsLowerTriangularMat(u) then MyError(162); fi;
   if IsUpperTriangularMat(u) then MyError(163); fi;
-  u[1][2] := zero;
+  u[1,2] := zero;
   if not(IsLowerTriangularMat(u)) then MyError(164); fi;
-  u[2][1] := zero;
+  u[2,1] := zero;
   if not(IsUpperTriangularMat(u)) then MyError(165); fi;
   if not(IsDiagonalMat(u)) then MyError(166); fi;
 
@@ -638,23 +638,23 @@ RowListMatrixObjTester := function( m, level )
 
   # Now ScalarProduct:
   vvv2 := ScalarProduct(vvv[1],vvv[1]);
-  if vvv2 <> Sum([1..Length(vvv[1])],i->vvv[1][i] * vvv[1][i]) then
+  if vvv2 <> Sum([1..Length(vvv[1])],i->vvv[1,i] * vvv[1,i]) then
       MyError(222);
   fi;
 
   # Now TraceMat:
   vvv2 := TraceMat(vvv);
-  if vvv2 <> Sum([1..Length(vvv)],i->MatElm(vvv,i,i)) then MyError(223); fi;
+  if vvv2 <> Sum([1..Length(vvv)],i->vvv[i,i]) then MyError(223); fi;
 
   # Now WeightOfVector:
   vvv2 := WeightOfVector(vvv[1]);
-  if vvv2 <> Number([1..Length(vvv[1])],i->not(IsZero(vvv[1][i]))) then
+  if vvv2 <> Number([1..Length(vvv[1])],i->not(IsZero(vvv[1,i]))) then
       MyError(224);
   fi;
 
   # Now DistanceOfVectors:
   vvv2 := DistanceOfVectors(vvv[1],vvv[2]);
-  if vvv2 <> Number([1..Length(vvv[1])],i->vvv[1][i] <> vvv[2][i]) then
+  if vvv2 <> Number([1..Length(vvv[1])],i->vvv[1,i] <> vvv[2,i]) then
       MyError(225);
   fi;
 
