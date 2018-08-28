@@ -284,22 +284,22 @@ RowListMatrixObjTester := function( m, level )
   # List operations:
   nn := MutableCopyMat(n);
   Add(n,v);
-  if not(Length(n) = 3) then MyError(80); fi;
+  if not(NrRows(n) = 3) then MyError(80); fi;
   Add(n,v,1);
-  if not(Length(n) = 4) then MyError(81); fi;
+  if not(NrRows(n) = 4) then MyError(81); fi;
   if not(IsIdenticalObj(n[1],n[4])) then MyError(82); fi;
   Remove(n,1);
-  if not(Length(n) = 3) then MyError(83); fi;
+  if not(NrRows(n) = 3) then MyError(83); fi;
   Remove(n);
-  if not(Length(n) = 2) then MyError(84); fi;
+  if not(NrRows(n) = 2) then MyError(84); fi;
   if not(n = nn) then MyError(85); fi;
   Unbind(n[2]);
-  if not(Length(n) = 1) then MyError(85); fi;
+  if not(NrRows(n) = 1) then MyError(85); fi;
   if not(n = nn{[1]}) then MyError(86); fi;
   Append(nn,n);
-  if not(Length(nn) = 3 and nn[1] = nn[3]) then MyError(87); fi;
+  if not(NrRows(nn) = 3 and nn[1] = nn[3]) then MyError(87); fi;
   u := Concatenation(n,nn);
-  if not(Length(u) = 4 and IsIdenticalObj(u[1],u[4])) then MyError(88); fi;
+  if not(NrRows(u) = 4 and IsIdenticalObj(u[1],u[4])) then MyError(88); fi;
 
   # We already have tested MutableCopyMat, how about ExtractSubMatrix?
   n := ExtractSubMatrix(m,[1,2],[1,2]);
@@ -340,7 +340,7 @@ RowListMatrixObjTester := function( m, level )
   if IsMutable(wi) or IsMutable(wi[1]) then MyError(93); fi;
   
   # Now we try to do some arithmetic:
-  l := Length(w);
+  l := NrRows(w);
   u := w + w;
   for i in [1..l] do if u[i] <> w[i]+w[i] then MyError(94); fi; od;
   if not(IsMutable(u)) or not(IsMutable(u[1])) then MyError(95); fi;
@@ -505,7 +505,7 @@ RowListMatrixObjTester := function( m, level )
   w := MutableCopyMat(m);
   wi := MutableCopyMat(w);
   MakeImmutable(wi);
-  u := Matrix(List(w,v->v*wt),Length(w),w);
+  u := Matrix(List(w,v->v*wt),NrRows(w),w);
   if u <> w*wt then MyError(170); fi;
   v := w[1];
   vi := ShallowCopy(v);
@@ -674,7 +674,7 @@ RowListMatrixObjTester := function( m, level )
   if not(IsRowVectorObj(u)) then
       Print("Warning: Empty vector is not in IsRowVectorObj!\n");
   fi;
-  if NumberRows(u) <> 0 then MyError(413); fi;
+  if Length(u) <> 0 then MyError(413); fi;
   u := w{[]};
   if not(IsMatrixObj(u)) then
       Print("Warning: Matrix with no rows is not in IsMatrixObj!\n");
