@@ -1,0 +1,538 @@
+  
+  [1X4 [33X[0;0YVectors[133X[101X
+  
+  [33X[0;0YSee  Section  [14X3.2[114X  for  a  documentation of the data format of [10Xcvec[110Xs and its
+  restrictions.[133X
+  
+  
+  [1X4.1 [33X[0;0YCreation[133X[101X
+  
+  [33X[0;0YNote  that  many functions described later in this chapter implicitly create
+  new  [10Xcvec[110Xs,  such  that it is usually only in the beginning of a calculation
+  necessary to create [10Xcvec[110Xs explicitly.[133X
+  
+  [1X4.1-1 CVec[101X
+  
+  [33X[1;0Y[29X[2XCVec[102X( [3Xarg[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ya new mutable [10Xcvec[110X[133X
+  
+  [33X[0;0YCreates a new [10Xcvec[110X. See the method descriptions for details.[133X
+  
+  [1X4.1-2 CVec[101X
+  
+  [33X[1;0Y[29X[2XCVec[102X( [3Xcvecclass[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new mutable [10Xcvec[110X[133X
+  
+  [33X[0;0Y[3Xcvecclass[103X  must  be  a [10Xcvecclass[110X. Creates a new [10Xcvec[110X containing only zeroes.
+  For  an  explanation  of  the  term  [10Xcvecclass[110X see Section [14X3.2[114X and [2XCVecClass[102X
+  ([14X4.1-12[114X).[133X
+  
+  [1X4.1-3 CVec[101X
+  
+  [33X[1;0Y[29X[2XCVec[102X( [3Xcoeffs[103X, [3Xcvecclass[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new mutable [10Xcvec[110X[133X
+  
+  [33X[0;0YThis  method  takes  a coefficient list and a [10Xcvecclass[110X as arguments. Assume
+  the  vector will be over [22XGF(p,d)[122X with [22Xq=p^d[122X. For the coefficient list [3Xcoeffs[103X
+  there  exist  several  possibilities,  partially depending on the base field
+  size. The easiest way is to use [5XGAP[105X finite field elements, which will be put
+  into  the  new  vector  in  the  same  order. If [22Xd=1[122X, one can always use [5XGAP[105X
+  immediate  integers  between  [22X0[122X  and  [22Xp-1[122X,  the vector will then contain the
+  corresponding  cosets  in  [22XGF(p)=Z/pZ[122X.  If  [22Xq[122X  is  small  enough to be a [5XGAP[105X
+  immediate integer, then one can use [5XGAP[105X immediate integers that are equal to
+  the  [22Xp[122X-adic  expansion using the coefficients of the representing polynomial
+  as  coefficients.  That  is,  if an element in [22XGF(p,d)[122X is represented by the
+  polynomial [22X∑_{i=0}^{d-1} a_i x^i[122X with [22Xa_i ∈ {0,...,p-1}[122X, then one has to put
+  [22X∑_{i=0}^{d-1}  a_i  p^i[122X as integer into the coefficient list [3Xcoeffs[103X. If [22Xq[122X is
+  larger,  then  [3Xcoeffs[103X  must  be a list of lists of length [22Xd[122X and contains for
+  each  field element of [22XGF(p,d)[122X in the vector a list of its [22Xd[122X coefficients of
+  the  representing  polynomial.  For an explanation of the term [10Xcvecclass[110X see
+  Section [14X3.2[114X and [2XCVecClass[102X ([14X4.1-12[114X). Of course, the length of the list [3Xcoeffs[103X
+  must match the length of the vector given in the [10Xcvecclass[110X.[133X
+  
+  [1X4.1-4 CVec[101X
+  
+  [33X[1;0Y[29X[2XCVec[102X( [3Xcoeffs[103X, [3Xp[103X, [3Xd[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new mutable [10Xcvec[110X[133X
+  
+  [33X[0;0YThis  method  takes  a coefficient list and two positive integers [3Xp[103X and [3Xd[103X as
+  arguments. A new [10Xcvec[110X over [22XGF(p,d)[122X will be created. Let [22Xq := p^d[122X.[133X
+  
+  [33X[0;0YFor  a description of the possible values of the coefficient list [3Xcoeffs[103X see
+  the description of the method [2XCVec[102X ([14X4.1-3[114X).[133X
+  
+  [1X4.1-5 CVec[101X
+  
+  [33X[1;0Y[29X[2XCVec[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcvec[110X[133X
+  
+  [33X[0;0Y[3Xv[103X  must  be  a [5XGAP[105X compressed vector either over [22XGF(2)[122X or [22XGF(p,d)[122X with [22Xp^d ≤
+  256[122X.  Creates  a  new  [10Xcvec[110X  containing the same numbers as [3Xv[103X over the field
+  which the [10XField[110X operation returns for [3Xv[103X.[133X
+  
+  [1X4.1-6 CVec[101X
+  
+  [33X[1;0Y[29X[2XCVec[102X( [3Xcoeffs[103X, [3Xf[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new mutable [10Xcvec[110X[133X
+  
+  [33X[0;0YThis  method  takes  a coefficient list and a finite field [3Xf[103X as arguments. A
+  new [10Xcvec[110X over [3Xf[103X will be created. Let [22Xq :=[122X[10XSize([110X[3Xf[103X[10X)[110X.[133X
+  
+  [33X[0;0YFor  a description of the possible values of the coefficient list [3Xcoeffs[103X see
+  the description of the method [2XCVec[102X ([14X4.1-3[114X).[133X
+  
+  [33X[0;0YAfter  having  encountered the concept of a [10Xcvecclass[110X already a few times it
+  is time to learn how to create one. The following operation is used first to
+  create  new [10Xcvecclass[110Xes and second to ask a [10Xcvec[110X for its class. In addition,
+  it is used for [10Xcsca[110Xs.[133X
+  
+  [1X4.1-7 CVecClass[101X
+  
+  [33X[1;0Y[29X[2XCVecClass[102X( [3Xarg[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
+  
+  [33X[0;0YCreates  new  [10Xcvecclass[110Xes  and asks [10Xcvec[110Xs for their class. See the following
+  method  descriptions  for  details. For an explanation of the term [10Xcvecclass[110X
+  see Section [14X3.2[114X.[133X
+  
+  [1X4.1-8 CVecClass[101X
+  
+  [33X[1;0Y[29X[2XCVecClass[102X( [3Xp[103X, [3Xd[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
+  
+  [33X[0;0YAll three arguments must be integers. The arguments [3Xp[103X and [3Xd[103X must be positive
+  and describe the base field [22XGF(p,d)[122X. The third argument must be non-negative
+  and the method returns the [10Xcvecclass[110X of vectors over [22XGF(p,d)[122X of length [3Xl[103X.[133X
+  
+  [33X[0;0YFor  an explanation of the term [10Xcvecclass[110X and its data structure see Section
+  [14X3.2[114X.[133X
+  
+  [1X4.1-9 CVecClass[101X
+  
+  [33X[1;0Y[29X[2XCVecClass[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
+  
+  [33X[0;0YThe  argument  [3Xv[103X  must  be  a  [10Xcvec[110X.  The  method  returns the corresponding
+  [10Xcvecclass[110X.  For  an explanation of the term [10Xcvecclass[110X and its data structure
+  see Section [14X3.2[114X.[133X
+  
+  [1X4.1-10 CVecClass[101X
+  
+  [33X[1;0Y[29X[2XCVecClass[102X( [3Xv[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
+  
+  [33X[0;0YThe  argument  [3Xv[103X  must  be  a  [10Xcvec[110X.  The  method  returns the corresponding
+  [10Xcvecclass[110X  for  vectors  over the same field as [3Xv[103X but with length [3Xl[103X. This is
+  much  faster  than  producing  the  same  object  by  giving [22Xp[122X and [22Xd[122X. For an
+  explanation of the term [10Xcvecclass[110X and its data structure see Section [14X3.2[114X.[133X
+  
+  [1X4.1-11 CVecClass[101X
+  
+  [33X[1;0Y[29X[2XCVecClass[102X( [3Xc[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
+  
+  [33X[0;0YThe  argument  [3Xc[103X  must  be a [10Xcvecclass[110X. The method returns the corresponding
+  [10Xcvecclass[110X  for  vectors over the same field as those in [3Xc[103X but with length [3Xl[103X.
+  This is much faster than producing the same object by giving [22Xp[122X and [22Xd[122X. For an
+  explanation of the term [10Xcvecclass[110X and its data structure see Section [14X3.2[114X.[133X
+  
+  [1X4.1-12 CVecClass[101X
+  
+  [33X[1;0Y[29X[2XCVecClass[102X( [3Xf[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
+  
+  [33X[0;0YThe  argument [3Xf[103X must be a [10Xfinite field[110X. The method returns the corresponding
+  [10Xcvecclass[110X  for vectors over the field [3Xf[103X with length [3Xl[103X. For an explanation of
+  the term [10Xcvecclass[110X and its data structure see Section [14X3.2[114X.[133X
+  
+  [1X4.1-13 ZeroSameMutability[101X
+  
+  [33X[1;0Y[29X[2XZeroSameMutability[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe zero [10Xcvec[110X in the same [10Xcvecclass[110X as [3Xv[103X[133X
+  
+  [33X[0;0Y[3Xv[103X must be a [10Xcvec[110X.[133X
+  
+  [1X4.1-14 ShallowCopy[101X
+  
+  [33X[1;0Y[29X[2XShallowCopy[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya mutable copy of [3Xv[103X[133X
+  
+  [33X[0;0Y[3Xv[103X must be a [10Xcvec[110X.[133X
+  
+  [1X4.1-15 Randomize[101X
+  
+  [33X[1;0Y[29X[2XRandomize[102X( [3Xv[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XRandomize[102X( [3Xv[103X, [3Xrs[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe vector [3Xv[103X[133X
+  
+  [33X[0;0Y[3Xv[103X must be a [10Xcvec[110X and [3Xrs[103X must be a random source object if given. This method
+  changes  the  vector  [3Xv[103X in place by (pseudo) random values in the field over
+  which  the  vector  lives.  If  a  random source is given, the pseudo random
+  numbers  used are taken from this source, otherwise the global random source
+  in the [5XGAP[105X library is taken.[133X
+  
+  
+  [1X4.2 [33X[0;0YArithmetic[133X[101X
+  
+  [33X[0;0YOf  course, the standard arithmetic infix operations [22X+[122X, [22X-[122X and [22X*[122X (for vectors
+  and  scalars)  work  as  expected  by using the methods below. We start this
+  section  with  a subsection on the usage of scalars in arithmetic operations
+  involving vectors.[133X
+  
+  
+  [1X4.2-1 [33X[0;0YHandling of scalars in arithmetic operations[133X[101X
+  
+  [33X[0;0YIn  all  places  (like in [10X\*[110X) where vectors and scalars occur, the following
+  conventions apply to scalars:[133X
+  
+  [33X[0;0Y[5XGAP[105X finite field elements can be used as scalars.[133X
+  
+  [33X[0;0YIntegers  between  [22X0[122X  and  [22Xp-1[122X  (inclusively)  can always be used as scalars
+  representing  prime  field elements via the isomorphism [22XGF(p)=Z/pZ[122X, also for
+  extension  fields.  Larger  integers  than  [22Xp-1[122X,  as  long  as  they are [5XGAP[105X
+  immediate   integers,  are  interpreted  as  the  [22Xp[122X-adic  expansion  of  the
+  coefficient  list  of the polynomial representing the scalar. Note that this
+  usage of immediate integers differs from the standard list arithmetic in [5XGAP[105X
+  because  multiplication  with  the  integer [22Xn[122X not necessarily means the same
+  than  [22Xn[122X  times  addition!  Larger  integers  than immediate integers are not
+  supported.[133X
+  
+  [1X4.2-2 \+[101X
+  
+  [33X[1;0Y[29X[2X\+[102X( [3Xv[103X, [3Xw[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe sum [22X[3Xv[103X+[3Xw[103X[122X as a new [10Xcvec[110X[133X
+  
+  [33X[0;0YFor two [10Xcvec[110Xs [3Xv[103X and [3Xw[103X. Works as expected.[133X
+  
+  [1X4.2-3 \-[101X
+  
+  [33X[1;0Y[29X[2X\-[102X( [3Xv[103X, [3Xw[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe difference [22X[3Xv[103X-[3Xw[103X[122X as a new [10Xcvec[110X[133X
+  
+  [33X[0;0YFor two [10Xcvec[110Xs [3Xv[103X and [3Xw[103X. Works as expected.[133X
+  
+  [1X4.2-4 AdditiveInverseSameMutability[101X
+  
+  [33X[1;0Y[29X[2XAdditiveInverseSameMutability[102X( [3Xv[103X ) [32X method[133X
+  [33X[1;0Y[29X[2X\-[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe additive inverse of [3Xv[103X as a new [10Xcvec[110X[133X
+  
+  [33X[0;0YFor a [10Xcvec[110X [3Xv[103X. Works as expected.[133X
+  
+  [1X4.2-5 AdditiveInverseMutable[101X
+  
+  [33X[1;0Y[29X[2XAdditiveInverseMutable[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe additive inverse of [3Xv[103X as a new mutable [10Xcvec[110X[133X
+  
+  [33X[0;0YFor a [10Xcvec[110X [3Xv[103X. Works as expected.[133X
+  
+  [1X4.2-6 \*[101X
+  
+  [33X[1;0Y[29X[2X\*[102X( [3Xv[103X, [3Xs[103X ) [32X method[133X
+  [33X[1;0Y[29X[2X\*[102X( [3Xs[103X, [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe scalar multiple [3Xs[103X[22X⋅[122X[3Xv[103X[133X
+  
+  [33X[0;0YFor  a  [10Xcvec[110X [3Xv[103X and a scalar [3Xs[103X. For the format of the scalar see [14X4.2-1[114X. Works
+  as expected.[133X
+  
+  [1X4.2-7 AddRowVector[101X
+  
+  [33X[1;0Y[29X[2XAddRowVector[102X( [3Xv[103X, [3Xw[103X, [3Xs[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XAddRowVector[102X( [3Xv[103X, [3Xw[103X, [3Xs[103X, [3Xfr[103X, [3Xto[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0Y[3Xv[103X and [3Xw[103X must be [10Xcvec[110Xs over the same field with equal length, [3Xs[103X a scalar (see
+  Subsection  [14X4.2-1[114X)  and  [3Xv[103X must be mutable. Adds [3Xs[103X[22X⋅[122X[3Xw[103X to [3Xv[103X modifying [3Xv[103X. If [3Xfr[103X
+  and  [3Xto[103X  are given, they give a hint, that [3Xw[103X is zero outside positions [3Xfr[103X to
+  [3Xto[103X  (inclusively).  The  method  can,  if  it  chooses  so, save time by not
+  computing  outside that range. In fact, the implemented method restricts the
+  operation to the [10XWord[110Xs involved.[133X
+  
+  [33X[0;0YIf either [3Xfr[103X or [3Xto[103X is [22X0[122X it defaults to [22X1[122X and [10XLength(v)[110X respectively.[133X
+  
+  [1X4.2-8 MultVector[101X
+  
+  [33X[1;0Y[29X[2XMultVector[102X( [3Xv[103X, [3Xs[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XMultVector[102X( [3Xv[103X, [3Xs[103X, [3Xfr[103X, [3Xto[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0Y[3Xv[103X must be a mutable [10Xcvec[110X and [3Xs[103X a scalar (see Subsection [14X4.2-1[114X). Multiplies [3Xv[103X
+  by  [3Xs[103X  modifying [3Xv[103X. If [3Xfr[103X and [3Xto[103X are given, they give a hint, that [3Xv[103X is zero
+  outside  positions [3Xfr[103X to [3Xto[103X (inclusively). The method can, if it chooses so,
+  save  time  by  not  computing  outside that range. In fact, the implemented
+  method restricts the operation to the [10XWord[110Xs involved.[133X
+  
+  [33X[0;0YIf either [3Xfr[103X or [3Xto[103X is [22X0[122X it defaults to [22X1[122X and [10XLength(v)[110X respectively.[133X
+  
+  [1X4.2-9 ScalarProduct[101X
+  
+  [33X[1;0Y[29X[2XScalarProduct[102X( [3Xv[103X, [3Xw[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe scalar product[133X
+  
+  [33X[0;0YBoth  [3Xv[103X  and  [3Xw[103X  must  be  [10Xcvec[110Xs  over the same field with equal length. The
+  function returns the scalar product of the two vectors. Note that there is a
+  very  efficient  method  for prime fields with [22Xp < 65536[122X. In the other cases
+  the method taken is not extremely fast.[133X
+  
+  [1X4.2-10 ZeroMutable[101X
+  
+  [33X[1;0Y[29X[2XZeroMutable[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya mutable copy of the zero [10Xcvec[110X in the same [10Xcvecclass[110X as [3Xv[103X[133X
+  
+  [33X[0;0Y[3Xv[103X must be a [10Xcvec[110X.[133X
+  
+  [1X4.2-11 ZeroVector[101X
+  
+  [33X[1;0Y[29X[2XZeroVector[102X( [3Xl[103X, [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya  mutable  copy  of  the zero [10Xcvec[110X over the same field than [3Xv[103X but
+            with length [3Xl[103X[133X
+  
+  [33X[0;0Y[3Xv[103X must be a [10Xcvec[110X and [3Xl[103X a [5XGAP[105X integer.[133X
+  
+  
+  [1X4.3 [33X[0;0YElement access and slicing[133X[101X
+  
+  [33X[0;0Y[10Xcvec[110Xs  behave  to  some extend like lists with respect to element access and
+  slicing.   However,   they  allow  only  actions  that  can  be  implemented
+  efficiently  and  that  do  not  change their length. In addition there is a
+  highly  optimised function to copy contiguous sections of [10Xcvec[110Xs into another
+  [10Xcvec[110X.[133X
+  
+  [1X4.3-1 ELM_LIST[101X
+  
+  [33X[1;0Y[29X[2XELM_LIST[102X( [3Xv[103X, [3Xpos[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya finite field element[133X
+  
+  [33X[0;0YThis  is  a method for (reading) element access of vectors. [3Xv[103X must be a [3Xcvec[103X
+  and  [3Xpos[103X  must  be  a positive integer not greater than the length of [3Xv[103X. The
+  finite field element at position [3Xpos[103X in [3Xv[103X is returned.[133X
+  
+  [33X[0;0YNote  that  the  list  access  syntax [21X[3Xv[103X[[3Xpos[103X][121X triggers a call to the [2XELM_LIST[102X
+  operation.[133X
+  
+  [1X4.3-2 ASS_LIST[101X
+  
+  [33X[1;0Y[29X[2XASS_LIST[102X( [3Xv[103X, [3Xpos[103X, [3Xs[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YThis  is  a method for (writing) element access of vectors. [3Xv[103X must be a [3Xcvec[103X
+  and  [3Xpos[103X must be a positive integer not greater than the length of [3Xv[103X. [3Xs[103X must
+  be  a  finite  field  element  or  an  integer.  The finite field element at
+  position [3Xpos[103X in [3Xv[103X is set to [3Xs[103X.[133X
+  
+  [33X[0;0YThe scalar [3Xs[103X is treated exactly as described in Subsection [14X4.2-1[114X.[133X
+  
+  [33X[0;0YNote that the list access syntax [21X[3Xv[103X[10X[[110X[3Xpos[103X[10X] := [110X[3Xs[103X[121X triggers a call to the [2XASS_LIST[102X
+  operation.[133X
+  
+  [1X4.3-3 ELMS_LIST[101X
+  
+  [33X[1;0Y[29X[2XELMS_LIST[102X( [3Xv[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvec[110X[133X
+  
+  [33X[0;0YThis is a method for (reading) slice access of vectors. [3Xv[103X must be a [3Xcvec[103X and
+  [3Xl[103X must be a range object or a list of positive integers not greater than the
+  length  of  [3Xv[103X.  In both cases the list of numbers must be contiguous list of
+  valid  positions in the vector. A new [10Xcvec[110X over the same field as [3Xv[103X and with
+  the  same length as [3Xl[103X is created and returned. The finite field element at i
+  positions [3Xl[103X in [3Xv[103X are copied into the new vector.[133X
+  
+  [33X[0;0YNote that the list slice access syntax [21X[3Xv[103X{[3Xl[103X}[121X triggers a call to the [2XELMS_LIST[102X
+  operation.[133X
+  
+  [33X[0;0YNote  that there intentionally is no write slice access to [10Xcvec[110Xs, because in
+  most  cases this would lead to code that unnecessarily copies data around in
+  an expensive way. Please use the following function instead:[133X
+  
+  [1X4.3-4 CVEC_Slice[101X
+  
+  [33X[1;0Y[29X[2XCVEC_Slice[102X( [3Xsrc[103X, [3Xdst[103X, [3Xsrcpos[103X, [3Xlen[103X, [3Xdstpos[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0Y[3Xsrc[103X  and  [3Xdst[103X  must  be  [10Xcvec[110Xs  over the same field. The field elements from
+  positions  [3Xsrcpos[103X to [22X[3Xsrcpos[103X+[3Xlen[103X-1[122X in [3Xsrc[103X are copied to positions from [3Xdstpos[103X
+  in [3Xdst[103X. Of course all positions must be within the vectors.[133X
+  
+  [33X[0;0YNote  that  this  functions  is  quite  efficient,  however,  the ranges are
+  checked.  If  you  want  to  avoid  this,  use [10XCVEC_SLICE[110X instead (with same
+  calling  convention),  but do not complain later if crashes occur in case of
+  illegal positions used.[133X
+  
+  [1X4.3-5 CopySubVector[101X
+  
+  [33X[1;0Y[29X[2XCopySubVector[102X( [3Xsrc[103X, [3Xdst[103X, [3Xsrcposs[103X, [3Xdstposs[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YImplements  the operation [2XCopySubVector[102X ([14XCopySubVector???[114X) for [10Xcvec[110Xs [3Xsrc[103X and
+  [3Xdst[103X,  that is, [3Xsrcposs[103X and [3Xdstposs[103X must be ranges or plain lists of integers
+  of equal length such that all numbers contained lie between [22X1[122X and the length
+  of  [3Xsrc[103X and [3Xdst[103X respectively. The result is undefined if [3Xsrc[103X and [3Xdst[103X are the
+  same  objects.  The  method  is  particularly  efficient if both [3Xsrcposs[103X and
+  [3Xdstposs[103X are ranges with increment [22X1[122X.[133X
+  
+  [1X4.3-6 CVEC_Concatenation[101X
+  
+  [33X[1;0Y[29X[2XCVEC_Concatenation[102X( [3Xarg[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcvec[110X by concatenating all arguments[133X
+  
+  [33X[0;0YThis  function provides concatenation of [10Xcvec[110Xs over the same base field. The
+  result  is a new [10Xcvec[110X. A variable number of [10Xcvec[110Xs over the same field can be
+  given.[133X
+  
+  
+  [1X4.4 [33X[0;0YComparison of Vectors and other information[133X[101X
+  
+  [1X4.4-1 =[101X
+  
+  [33X[1;0Y[29X[2X=[102X( [3Xv[103X, [3Xw[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns  [10Xtrue[110X  if  the [10Xcvec[110Xs [3Xv[103X and [3Xw[103X are equal. The vectors must be over the
+  same field and must have equal length.[133X
+  
+  [1X4.4-2 LT[101X
+  
+  [33X[1;0Y[29X[2XLT[102X( [3Xv[103X, [3Xw[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns  [10Xtrue[110X  if the [10Xcvec[110X [3Xv[103X is smaller than [3Xw[103X. The vectors must be over the
+  same  field  and  must  have  equal  length.  The  order implemented is very
+  efficient  but  is  [13Xnot[113X  compatible  with lexicographic ordering of lists of
+  finite  field elements! This method should therefore only be used for binary
+  search purposes. Note that the operation [10XLT[110X is the same as [10X\<[110X.[133X
+  
+  [1X4.4-3 IsZero[101X
+  
+  [33X[1;0Y[29X[2XIsZero[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns  [10Xtrue[110X  if  the [10Xcvec[110X [3Xv[103X is equal to zero, meaning that all entries are
+  equal to zero.[133X
+  
+  [1X4.4-4 PositionNonZero[101X
+  
+  [33X[1;0Y[29X[2XPositionNonZero[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya positive integer[133X
+  
+  [33X[0;0YReturns  the  index  of  the  first entry in the [10Xcvec[110X [3Xv[103X that is not equal to
+  zero. If the vector is equal to zero, then its [10XLength[110X plus one is returned.[133X
+  
+  [1X4.4-5 PositionLastNonZero[101X
+  
+  [33X[1;0Y[29X[2XPositionLastNonZero[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya non-negative integer[133X
+  
+  [33X[0;0YReturns the index of the last entry in the [10Xcvec[110X [3Xv[103X that is not equal to zero.
+  If the vector is equal to zero, then [22X0[122X is returned.[133X
+  
+  [1X4.4-6 Length[101X
+  
+  [33X[1;0Y[29X[2XLength[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya non-negative integer[133X
+  
+  [33X[0;0YReturns the length of the [10Xcvec[110X [3Xv[103X.[133X
+  
+  
+  [1X4.5 [33X[0;0YChanging representation, Unpacking[133X[101X
+  
+  [1X4.5-1 Unpack[101X
+  
+  [33X[1;0Y[29X[2XUnpack[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya list of finite field elements[133X
+  
+  [33X[0;0YThis   operation  unpacks  a  [10Xcvec[110X  [3Xv[103X.  A  new  plain  list  containing  the
+  corresponding  numbers  as [5XGAP[105X finite field elements. Note that the vector [3Xv[103X
+  remains unchanged.[133X
+  
+  [1X4.5-2 IntegerRep[101X
+  
+  [33X[1;0Y[29X[2XIntegerRep[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya list of integers or of lists of integers[133X
+  
+  [33X[0;0YThis operation unpacks a [10Xcvec[110X [3Xv[103X into its integer representation. A new plain
+  list  containing  the  corresponding  numbers of the vector is returned. The
+  integer  representation  of  a  finite  field  element is either one integer
+  (containing  the  p-adic  expansion  of the polynomial representative of the
+  residue  class  modulo the Conway polynomial, if the field has less or equal
+  to   [22X65536[122X  elements.  For  larger  finite  fields  each  field  element  is
+  represented as a list of [22Xd[122X integers between [22X0[122X and [22Xp-1[122X, where [22Xd[122X is the degree
+  of  the  finite  field  over its prime field. Note that the vector [3Xv[103X remains
+  unchanged.[133X
+  
+  [1X4.5-3 NumberFFVector[101X
+  
+  [33X[1;0Y[29X[2XNumberFFVector[102X( [3Xv[103X, [3Xsz[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Yan integer[133X
+  
+  [33X[0;0YThis   implements   the   library   operation   [2XNumberFFVector[102X   ([14XReference:
+  NumberFFVector[114X).  Note  that only the case that [3Xsz[103X is the number of elements
+  in  the base field of [3Xv[103X is implemented. There is an inverse operation called
+  [2XCVecNumber[102X ([14X4.5-4[114X).[133X
+  
+  [1X4.5-4 CVecNumber[101X
+  
+  [33X[1;0Y[29X[2XCVecNumber[102X( [3Xnr[103X, [3Xcl[103X ) [32X operation[133X
+  [33X[1;0Y[29X[2XCVecNumber[102X( [3Xnr[103X, [3Xp[103X, [3Xd[103X, [3Xl[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvec[110X[133X
+  
+  [33X[0;0YThis is the inverse operation to [2XNumberFFVector[102X ([14XReference: NumberFFVector[114X).
+  Of  course, the base field of the vector and its length has to be specified,
+  either  by  giving  a  [10Xcvecclass[110X  [3Xcl[103X or the parameters [3Xp[103X, [3Xd[103X, and [3Xl[103X. For both
+  cases corresponding methods are available.[133X
+  
+  
+  [1X4.6 [33X[0;0YAccess to the base field[133X[101X
+  
+  [1X4.6-1 BaseDomain[101X
+  
+  [33X[1;0Y[29X[2XBaseDomain[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe base field of [3Xv[103X[133X
+  
+  [33X[0;0YFor a [10Xcvec[110X [3Xv[103X this returns the [5XGAP[105X object [10XGF(p,d)[110X.[133X
+  
+  [1X4.6-2 BaseField[101X
+  
+  [33X[1;0Y[29X[2XBaseField[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe base field of [3Xv[103X[133X
+  
+  [33X[0;0YFor a [10Xcvec[110X [3Xv[103X this returns the [5XGAP[105X object [10XGF(p,d)[110X.[133X
+  
+  [1X4.6-3 Characteristic[101X
+  
+  [33X[1;0Y[29X[2XCharacteristic[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe characteristic of the base field of [3Xv[103X[133X
+  
+  [33X[0;0YReturns the characteristic of the base field of [3Xv[103X (see [2XBaseField[102X ([14X4.6-2[114X)).[133X
+  
+  [1X4.6-4 DegreeFFE[101X
+  
+  [33X[1;0Y[29X[2XDegreeFFE[102X( [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe degree of the base field of [3Xv[103X over its prime field[133X
+  
+  [33X[0;0YReturns  the  degree  of  the  base  field  of  [3Xv[103X  over its prime field (see
+  [2XBaseField[102X ([14X4.6-2[114X)).[133X
+  
+  
+  [1X4.7 [33X[0;0YHashing techniques for [10Xcvec[110X[101X[1Xs[133X[101X
+  
+  [1X4.7-1 CVEC_HashFunctionForCVecs[101X
+  
+  [33X[1;0Y[29X[2XCVEC_HashFunctionForCVecs[102X( [3Xv[103X, [3Xdata[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Yan integer hash value[133X
+  
+  [33X[0;0YThis   is   a   hash   function  usable  for  the  [2XChooseHashFunction[102X  ([14Xorb:
+  ChooseHashFunction[114X)  framework.  It  takes  as arguments a [10Xcvec[110X [3Xv[103X and a list
+  [3Xdata[103X  of  length  [22X2[122X. The first entry of [3Xdata[103X is the length of the hash table
+  used and the second entry is the number of bytes looked at in the [10Xcvec[110X.[133X
+  
+  [1X4.7-2 ChooseHashFunction[101X
+  
+  [33X[1;0Y[29X[2XChooseHashFunction[102X( [3Xv[103X, [3Xhashlen[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya record describing a hash function[133X
+  
+  [33X[0;0YChooses  a  hash  function  to  store [10Xcvec[110Xs like [3Xv[103X in a hash table of length
+  [3Xhashlen[103X. The return value is a record with components [10Xfunc[110X and [10Xdata[110X bound to
+  [2XCVEC_HashFunctionForCVecs[102X  ([14X4.7-1[114X)  and  a list of length [22X2[122X to be given as a
+  second  argument  to  [2XCVEC_HashFunctionForCVecs[102X  ([14X4.7-1[114X). This allows to use
+  [10Xcvec[110Xs in the [2XChooseHashFunction[102X ([14Xorb: ChooseHashFunction[114X) framework.[133X
+  

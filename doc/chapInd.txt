@@ -1,0 +1,131 @@
+  
+  
+  [1XIndex[101X
+  
+  [2X=[102X 4.4-1  5.4-1 
+  [2X\*[102X, cmatcmat 5.3-8 
+      cmatsca 5.3-5 
+      cveccmat 5.3-6 
+      cvecsca 4.2-6 
+      scacmat 5.3-5 
+      scacvec 4.2-6 
+  [2X\+[102X, cmatcmat 5.3-1 
+      cveccvec 4.2-2 
+  [2X\-[102X, cmat 5.3-3 
+      cmatcmat 5.3-2 
+      cvec 4.2-4 
+      cveccvec 4.2-3 
+  [2X\^[102X, cveccmat 5.3-7 
+  [2XAdd[102X 5.2-1 
+  [2XAdditiveInverseMutable[102X, cmat 5.3-4 
+      cvec 4.2-5 
+  [2XAdditiveInverseSameMutability[102X, cmat 5.3-3 
+      cvec 4.2-4 
+  [2XAddRowVector[102X, cveccvecsca 4.2-7 
+      cveccvecscapospos 4.2-7 
+  [2XAppend[102X 5.2-11 
+  [2XASS_LIST[102X 4.3-2  5.2-4 
+  [2XASSS_LIST[102X 5.2-6 
+  [2XBaseDomain[102X, cvec 4.6-1 
+  [2XBaseField[102X, cmat 5.6-1 
+      cvec 4.6-2 
+  [2XCharacteristic[102X, cmat 5.6-2 
+      cvec 4.6-3 
+  [2XCharacteristicPolynomialOfMatrix[102X 6.2-1  6.2-1 
+  [2XCharAndMinimalPolynomialOfMatrix[102X 6.2-4  6.2-4 
+  [2XChooseHashFunction[102X 4.7-2  5.4-9 
+  [2XCleanRow[102X 6.1-4 
+  [2XCMat[102X 5.1-1  5.1-1  5.1-2  5.1-2  5.1-3  5.1-4 
+  [2XCollected[102X 5.2-9 
+  [2XCopySubMatrix[102X 5.5-2 
+  [2XCopySubVector[102X 4.3-5 
+  [5Xcvec[105X 2. 
+  [2XCVec[102X 4.1-1 
+      coefflcvecclass 4.1-3 
+      coefflff 4.1-6 
+      coefflpd 4.1-4 
+      compvec 4.1-5 
+      cvecclass 4.1-2 
+  [2XCVEC_Concatenation[102X 4.3-6 
+  [2XCVEC_HashFunctionForCMats[102X 5.4-8 
+  [2XCVEC_HashFunctionForCVecs[102X 4.7-1 
+  [2XCVEC_IdentityMat[102X 5.1-6  5.1-6 
+  [2XCVEC_RandomMat[102X 5.1-7  5.1-7 
+  [2XCVEC_ReadMat[102X 5.7-4 
+  [2XCVEC_ReadMatFromFile[102X 5.7-5 
+  [2XCVEC_ReadMatsFromFile[102X 5.7-6 
+  [2XCVEC_Slice[102X 4.3-4 
+  [2XCVEC_WriteMat[102X 5.7-1 
+  [2XCVEC_WriteMatsToFile[102X 5.7-3 
+  [2XCVEC_WriteMatToFile[102X 5.7-2 
+  [2XCVEC_ZeroMat[102X 5.1-5  5.1-5 
+  [2XCVecClass[102X 4.1-7  4.1-8  4.1-9  4.1-10  4.1-11  4.1-12 
+  [2XCVecNumber[102X 4.5-4  4.5-4 
+  [2XDefaultField[102X, cmat 5.6-4 
+  [2XDegreeFFE[102X, cmat 5.6-3 
+      cvec 4.6-4 
+  [2XDuplicateFreeList[102X 5.2-10 
+  [2XELM_LIST[102X 4.3-1  5.2-3 
+  [2XELMS_LIST[102X 4.3-3  5.2-5 
+  [2XEmptySemiEchelonBasis[102X 6.1-1 
+  [2XExtractSubMatrix[102X 5.5-1 
+  [2XFactorsOfCharacteristicPolynomial[102X 6.2-2  6.2-2 
+  [2XFiltered[102X 5.2-12 
+  [2XGreaseMat[102X 5.8-1  5.8-1 
+  [2XIntegerRep[102X, cvec 4.5-2 
+  [2XInverseMutable[102X 5.3-13 
+  [2XInverseSameMutability[102X 5.3-14 
+  [2XIsDiagonalMat[102X 5.4-5 
+  [2XIsLowerTriangularMat[102X 5.4-7 
+  [2XIsOne[102X 5.4-4 
+  [2XIsUpperTriangularMat[102X 5.4-6 
+  [2XIsZero[102X 4.4-3  5.4-3 
+  [2XKroneckerProduct[102X 5.3-16 
+  [2XLength[102X 4.4-6  5.2-7 
+      for a semi echelonised basis 6.1-3 
+  [2XLT[102X 4.4-2  5.4-2 
+  [2XMatrix[102X 5.1-9 
+  [2XMatrixNC[102X 5.1-9 
+  [2XMinimalPolynomialOfMatrix[102X 6.2-3  6.2-3 
+  [2XMinimalPolynomialOfMatrixMC[102X 6.2-5 
+  [2XMultVector[102X, cvecsca 4.2-8 
+      cvecscapospos 4.2-8 
+  [2XMutableCopyMat[102X 5.1-8 
+  [2XMutableNullspaceMat[102X 6.1-12 
+  [2XMutableNullspaceMatX[102X 6.1-13 
+  [2XNullspaceMat[102X 6.1-14 
+  [2XNullspaceMatDestructive[102X 6.1-15 
+  [2XNumberFFVector[102X, cvec 4.5-3 
+  [2XOneMutable[102X, cmat 5.3-12 
+  [2XOneSameMutability[102X, cmat 5.3-11 
+  [2XOverviewMat[102X, cmat 5.9-2 
+  [2XPositionLastNonZero[102X 4.4-5 
+  [2XPositionNonZero[102X 4.4-4 
+  [2XRandomize[102X, cmat 5.9-1 
+      cmatrandomsource 5.9-1 
+      cvec 4.1-15 
+      cvecrandomsource 4.1-15 
+  [2XRemove[102X 5.2-2 
+  [2XScalarProduct[102X, cveccvec 4.2-9 
+  [2XSemiEchelonBasisMutable[102X 6.1-5  6.1-6 
+  [2XSemiEchelonBasisMutableP[102X 6.1-10 
+  [2XSemiEchelonBasisMutablePX[102X 6.1-11 
+  [2XSemiEchelonBasisMutableT[102X 6.1-8 
+  [2XSemiEchelonBasisMutableTX[102X 6.1-9 
+  [2XSemiEchelonBasisMutableX[102X 6.1-7 
+  [2XShallowCopy[102X 5.2-8 
+      cvec 4.1-14 
+  [2XTransposedMat[102X 5.3-15 
+  [2XUnbind[102X 5.2-13 
+  [2XUnGreaseMat[102X 5.8-2 
+  [2XUnpack[102X, cmat 5.9-3 
+      cvec 4.5-1 
+  [2XVectors[102X 6.1-2 
+  [2XZeroMutable[102X, cmat 5.3-10 
+      cvec 4.2-10 
+  [2XZeroSameMutability[102X, cmat 5.3-9 
+      cvec 4.1-13 
+  [2XZeroVector[102X, cvec 4.2-11 
+  
+  
+  -------------------------------------------------------

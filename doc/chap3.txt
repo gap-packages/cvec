@@ -1,0 +1,314 @@
+  
+  [1X3 [33X[0;0YThe Data Structures[133X[101X
+  
+  [33X[0;0YThis  chapter  describes  all  the  data structures used in this package. We
+  start  with  a section on finite fields and what is already there in the [5XGAP[105X
+  kernel  and  library.  Then  we  describe  compressed vectors and compressed
+  matrices.[133X
+  
+  
+  [1X3.1 [33X[0;0YFinite field elements[133X[101X
+  
+  [33X[0;0YThroughout  the  package,  elements  in  the  field  [22XGF(p)[122X of [22Xp[122X elements are
+  represented  by  numbers  [22X0,1,...,p-1[122X  and  arithmetic  is just the standard
+  arithmetic in the integers modulo [22Xp[122X.[133X
+  
+  [33X[0;0YBigger finite fields are done by calculating in the polynomial ring [22XGF(p)[x][122X
+  in   one  indeterminate  [22Xx[122X  modulo  a  certain  irreducible  polynomial.  By
+  convention,    we    use    the    so-called    [21XConway    polynomials[121X   (see
+  [7Xhttp://www.math.rwth-aachen.de:8001/~Frank.Luebeck/data/ConwayPol/index.html[107X)
+  for  this  purpose,  because they provide a standard way of embedding finite
+  fields into their extension fields. Because Conway polynomials are monic, we
+  can  store  coset representatives by storing polynomials of degree less than
+  [22Xd[122X, where [22Xd[122X is the degree of the finite field over its prime field.[133X
+  
+  [33X[0;0YAs  of  this  writing,  [5XGAP[105X  has two implementation of finite field elements
+  built  into  its  kernel and library, the first of which stores finite field
+  elements  by storing the discrete logarithm with respect to a primitive root
+  of  the  field. Although this is nice and efficient for small finite fields,
+  it  becomes  unhandy  for  larger  finite fields, because one needs a lookup
+  table  of  length [22Xp^d[122X for doing efficient addition. This implementation thus
+  is  limited  to  fields with less than or equal to [22X65536[122X elements. The other
+  implementation  using  polynomial arithmetic modulo the Conway polynomial is
+  used  for  fields  with  more  than  [22X65536[122X  elements.  For  prime  fields of
+  characteristic  [22Xp[122X  with  more than that elements, there is an implementation
+  using integers modulo [22Xp[122X.[133X
+  
+  
+  [1X3.2 [33X[0;0YCompressed Vectors in Memory[133X[101X
+  
+  
+  [1X3.2-1 [33X[0;0YPacking of prime field elements[133X[101X
+  
+  [33X[0;0YFor this section, we assume that the base field is [22XGF(p^d)[122X, the finite field
+  with  [22Xp^d[122X  elements, where [22Xp[122X is a prime and [22Xd[122X is a positive integer. This is
+  realized  as  a field extension of degree [22Xd[122X over the prime field [22XGF(p)[122X using
+  the  Conway  polynomial  [22Xc ∈ GF(p)[x][122X. We always represent field elements of
+  [22XGF(p^d)[122X   by   polynomials  [23Xa  =  \sum_{{i=0}}^{{d-1}}  a_i  x^i[123X  where  the
+  coefficients  [22Xa_i[122X  are in [22XGF(p)[122X. Because [22Xc[122X is monic, this gives a one-to-one
+  correspondence between polynomials and finite field elements.[133X
+  
+  [33X[0;0YThe  memory  layout  for  compressed  vectors is determined by two important
+  constants,  depending only on [22Xp[122X and the word length of the machine. The word
+  length  is  4 bytes on 32bit machines (for example on the i386 architecture)
+  and  8 bytes on 64bit machines (for example on the AMD64 architecture). More
+  concretely,  a [21X[10XWord[110X[121X is an [10Xunsigned long int[110X in C and the length of a [10XWord[110X is
+  [10Xsizeof(unsigned long int)[110X.[133X
+  
+  [33X[0;0YThose  constants are [10Xbitsperel[110X (bits per prime field element) and [10Xelsperword[110X
+  (prime  field  elements  per [10XWord[110X). [10Xbitsperel[110X is [22X1[122X for [22Xp=2[122X and otherwise the
+  smallest  integer,  such  that [22X2^bitsperel > 2⋅ p-1[122X. This means, that we can
+  store  the  numbers  from  [22X0[122X  to  [22X2⋅  p - 1[122X in [10Xbitsperel[110X bits. [10Xelsperword[110X is
+  [22X32/bitsperel[122X  rounded  down  to  the next integer and multiplied by [22X2[122X if the
+  length  of  a  [10XWord[110X  is [22X8[122X bytes. Note that we thus store as many prime field
+  elements as possible into one [10XWord[110X, however, on 64bit machines we store only
+  twice as much as would fit into 32bit, even if we could pack one more into a
+  [10XWord[110X.  This  has  technical  reasons  to  make  conversion between different
+  architectures more efficient.[133X
+  
+  [33X[0;0YThese definitions imply that we can put [10Xelsperword[110X prime field elements into
+  one  [10XWord[110X.  We  do this by using the [10Xbitsperel[110X least significant bits in the
+  [10XWord[110X  for  the  first prime field element, using the next [10Xbitsperel[110X bits for
+  the  next  prime  field element and so on. Here is an example that shows how
+  the  [22X6[122X  finite field elements [22X0,1,2,3,4,5[122X of [22XGF(11)[122X are stored in that order
+  in  one 32bit [10XWord[110X. [10Xbitsperel[110X is here [22X4[122X, because [22X2^4 < 2⋅ 11 - 1 = 21 < 2^5[122X.
+  Therefore [10Xelsperword[110X is [22X5[122X on a 32bit machine.[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[28X most significant xx|.....|.....|.....|.....|.....|..... least significant[128X[104X
+    [4X[28X                  00|00101|00100|00011|00010|00001|00000 [128X[104X
+    [4X[28X                    |    5|    4|    3|    2|    1|    0[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YHere  is  another  example  that  shows  how  the  [22X20[122X  finite field elements
+  [22X0,1,2,0,0,0,1,1,1,2,2,2,0,1,2,2,1,0,2,2[122X of [22XGF(3)[122X are stored in that order in
+  one  64bit  [10XWord[110X.  [10Xbitsperel[110X  is  here  [22X3[122X, because [22X2^2 < 2⋅ 3 - 1 = 5 < 2^3[122X.
+  Therefore  [10Xelsperword[110X  is  [22X20[122X on a 32bit machine. Remember, that we only put
+  twice as many elements in one 64bit [10XWord[110X than we could in one 32bit [10XWord[110X![133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[28X xxxx..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..![128X[104X
+    [4X[28X 0000010010000001010010001000010010010001001001000000000010001000[128X[104X
+    [4X[28X       2  2  0  1  2  2  1  0  2  2  2  1  1  1  0  0  0  2  1  0[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0Y(The  exclamation  marks  mark  the  right  hand  side  of  the  prime field
+  elements.)[133X
+  
+  [33X[0;0YNote  that  different  architectures  store  their [10XWord[110Xs in a different byte
+  order  in  memory ([21Xendianess[121X). We do [13Xnot[113X specify how the data is distributed
+  into  bytes  here!  All  access is via [10XWord[110Xs and their arithmetic (shifting,
+  addition,  multiplication,  etc.).  See Section [14X3.4[114X for a discussion of this
+  with respect to our external representation.[133X
+  
+  
+  [1X3.2-2 [33X[0;0YExtension Fields[133X[101X
+  
+  [33X[0;0YNow  that  we  have  seen how prime field elements are packed into [10XWord[110Xs, we
+  proceed  to the description how compressed vectors are stored over arbitrary
+  extension fields:[133X
+  
+  [33X[0;0YAssume a compressed vector has length [22Xl[122X with [22Xl ≥ 0[122X. If [22Xd=1[122X (prime field), it
+  just  uses  [22Xelsperword/l[122X  [10XWord[110Xs  (division  rounded up to the next integer),
+  where  the  first  [10XWord[110X stores the leftmost [10Xelsperword[110X field elements in the
+  first  [10XWord[110X  as  described  above and so on. This means, that the very first
+  field element is stored in the least significant bits of the first [10XWord[110X.[133X
+  
+  [33X[0;0YIn   the   extension   field  case  [22XGF(p^d)[122X,  a  vector  of  length  [22Xl[122X  uses
+  [22X(elsperword/l)*d[122X  [10XWord[110Xs (division rounded up to the next integer), where the
+  first  [22Xd[122X  [10XWord[110Xs store the leftmost [10Xelsperword[110X field elements. The very first
+  word  stores  all  the constant coefficients of the polynomials representing
+  the  first  [10Xelsperword[110X field elements in their order from left to right, the
+  second  [10XWord[110X  stores  the coefficients of [22Xx^1[122X and so on until the [22Xd[122X'th [10XWord[110X,
+  which  stores  the coefficients of [22Xx^{d-1}[122X. Unused entries behind the end of
+  the actual vector data within the last [10XWord[110X has to be zero!.[133X
+  
+  [33X[0;0YThe  following  example  shows,  how the [22X9[122X field elements [22Xx^2+x+1[122X, [22Xx^2+2x+2[122X,
+  [22Xx^2+3x+3[122X,  [22Xx^2+4x+4[122X,  [22X2x^2+x[122X,  [22X2x^2+3x+1[122X, [22X2x^2+4x+2[122X, [22X3x^2+1[122X, and [22X4x^2+x+3[122X of
+  [22XGF(5^3)[122X  occurring  in  a  vector  of length [22X9[122X in that order are stored on a
+  32bit machine:[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[28X ^^^ lower memory addresses ^^^[128X[104X
+    [4X[28X            ....|....|....|....|....|....|....|....  (least significant bit)[128X[104X
+    [4X[28X 1st Word:  0001|0010|0001|0000|0100|0011|0010|0001| (first[128X[104X
+    [4X[28X 2nd Word:  0000|0100|0011|0001|0100|0011|0010|0001|     8 field[128X[104X
+    [4X[28X 3rd Word:  0011|0010|0010|0010|0001|0001|0001|0001|        elements)[128X[104X
+    [4X[28X ---------------------------------------------------[128X[104X
+    [4X[28X 4th Word:  0000|0000|0000|0000|0000|0000|0000|0011| (second[128X[104X
+    [4X[28X 5th Word:  0000|0000|0000|0000|0000|0000|0000|0001|     8 field[128X[104X
+    [4X[28X 6th Word:  0000|0000|0000|0000|0000|0000|0000|0100|        elements)[128X[104X
+    [4X[28X VVV higher memory addresses VVV[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YA  [21X[10Xcvec[110X[121X  (one  of our compressed vectors) is a [5XGAP[105X [21XData object[121X (that is with
+  [10XTNUM[110X  equal  to [10XT_DATOBJ[110X). The first machine word in its bag is a pointer to
+  its  type,  from  the  second machine word on the [10XWord[110Xs containing the above
+  data are stored. The bag is exactly long enough to hold the type pointer and
+  the data [10XWord[110Xs.[133X
+  
+  
+  [1X3.2-3 [33X[0;0YHow is information about the base field stored?[133X[101X
+  
+  [33X[0;0YBut how does the system know, over which field the vector is and how long it
+  is? The type of a [5XGAP[105X object consists of [22X3[122X pieces: A family, a bit list (for
+  the  filters),  and  one  [5XGAP[105X  object  for  [21Xdefining  data[121X.  The  additional
+  information  about  the  vector  is  stored in the third piece, the defining
+  data, and is called a [21X[10Xcvecclass[110X[121X.[133X
+  
+  [33X[0;0YA [10Xcvecclass[110X is a positional object with [22X5[122X components:[133X
+  
+        Position   Name            Content                                                                           
+        ────────   ─────────────   ───────────────────────────────────────────────────────────────────────────────  
+           1       [10XIDX_fieldinfo[110X   a [10Xfieldinfo[110X object, see below                                                     
+           2       [10XIDX_len[110X         the length of the vector as immediate [5XGAP[105X integer                                 
+           3       [10XIDX_wordlen[110X     the number of [10XWord[110Xs used as immediate [5XGAP[105X integer                                 
+           4       [10XIDX_type[110X        a [5XGAP[105X type used to create new vectors                                             
+           5       [10XIDX_GF[110X          a [5XGAP[105X object for the base field                                                   
+           6       [10XIDX_lens[110X        a list holding lengths of vectors in [10Xcvecclasses[110X for the same field               
+           7       [10XIDX_classes[110X     a list holding [10Xcvecclass[110Xes for the same field with lengths as in entry number 6   
+  
+       [1XTable:[101X Components of a [10Xcvecclass[110X
+  
+  
+  [33X[0;0YIn  position  5  we have just the [5XGAP[105X finite field object [10XGF(p,d)[110X. The names
+  appear as symbols in the code.[133X
+  
+  [33X[0;0YThe  field  is  described  by  the  [5XGAP[105X  object  in  position 1, a so-called
+  [10Xfieldinfo[110X object, which is described in the following table:[133X
+  
+        [13XPosition[113X   Name             [13XContent[113X                                                                                
+        ────────   ──────────────   ────────────────────────────────────────────────────────────────────────────────────  
+           1       [10XIDX_p[110X            [22Xp[122X as an immediate [5XGAP[105X integer                                                          
+           2       [10XIDX_d[110X            [22Xd[122X as an immediate [5XGAP[105X integer                                                          
+           3       [10XIDX_q[110X            [22Xq=p^d[122X as a [5XGAP[105X integer                                                                 
+           4       [10XIDX_conway[110X       a [5XGAP[105X string containing the coefficients of the Conway Polynomial as unsigned int []   
+           5       [10XIDX_bitsperel[110X    number of bits per element of the prime field ([10Xbitsperel[110X)                              
+           6       [10XIDX_elsperword[110X   prime field elements per [10XWord[110X ([10Xelsperword[110X)                                             
+           7       [10XIDX_wordinfo[110X     a [5XGAP[105X string containing C data for internal use                                        
+           8       [10XIDX_bestgrease[110X   the best grease level (see Section [14X5.8[114X)                                                
+           9       [10XIDX_greasetabl[110X   the length of a grease table using best grease                                         
+           10      [10XIDX_filts[110X        a filter list for the creation of new vectors over this field                          
+           11      [10XIDX_tab1[110X         a table for [22XGF(q)[122X to [10X[0..q-1][110X conversion if [22Xq ≤ 65536[122X                                  
+           12      [10XIDX_tab2[110X         a table for [10X[0..q-1][110X to [22XGF(q)[122X conversion if [22Xq ≤ 65536[122X                                  
+           13      [10XIDX_size[110X         0 for [22Xq ≤ 65536[122X, otherwise 1 if [22Xq[122X is a [5XGAP[105X immediate integer and 2 if not              
+           14      [10XIDX_scafam[110X       the scalars family                                                                     
+  
+       [1XTable:[101X Components of a [10Xfieldinfo[110X
+  
+  
+  [33X[0;0YNote  that  [5XGAP[105X  has  a  family  for  all  finite  field elements of a given
+  characteristic  [22Xp[122X,  vectors  over a finite field are then in the collections
+  family  of  that  family  and  matrices are in the collections family of the
+  collections  family  of  the scalars family. We use the same families in the
+  same way for compressed vectors and matrices.[133X
+  
+  
+  [1X3.2-4 [33X[0;0YLimits that follow from the Data Format[133X[101X
+  
+  [33X[0;0YThe  following  limits  come  from  the above mentioned data format or other
+  internal  restrictions  (an [21Ximmediate integer[121X in [5XGAP[105X can take values between
+  [22X2^{-28}[122X and [22X(2^{28})-1[122X inclusively on 32bit machines and between [22X2^{-60}[122X and
+  [22X(2^{60})-1[122X on 64bit machines):[133X
+  
+  [30X    [33X[0;6YThe prime [22Xp[122X must be an immediate integer.[133X
+  
+  [30X    [33X[0;6YThe  degree  [22Xd[122X  must  be  smaller than [22X1024[122X (this limit is arbitrarily
+        chosen at the moment and could be increased easily).[133X
+  
+  [30X    [33X[0;6YThe Conway polynomial must be known to [5XGAP[105X.[133X
+  
+  [30X    [33X[0;6YThe length of a vector must be an immediate integer.[133X
+  
+  
+  [1X3.3 [33X[0;0YCompressed Matrices[133X[101X
+  
+  [33X[0;0YThe  implementation of [10Xcmats[110X (compressed matrices) is done mainly on the [5XGAP[105X
+  level  without using too many C parts. Only the time critical parts for some
+  operations for matrices are done in the kernel.[133X
+  
+  [33X[0;0YA [10Xcmat[110X object is a positional object with at least the following components:[133X
+  
+        Component name   Content                                                     
+        ──────────────   ─────────────────────────────────────────────────────────  
+        [10Xlen[110X              the number of rows, can be [22X0[122X                                
+        [10Xvecclass[110X         a [10Xcvecclass[110X object describing the class of rows             
+        [10Xscaclass[110X         a [10Xcscaclass[110X object holding a reference to [10XGF(p,d)[110X           
+        [10Xrows[110X             a list containing the rows of the matrix, which are [10Xcvec[110Xs   
+        [10Xgreasehint[110X       the recommended greasing level                              
+  
+       [1XTable:[101X Components of a [10Xcmat[110X object
+  
+  
+  [33X[0;0YThe  [10Xcvecclass[110X in the component [10Xvecclass[110X determines the number of columns of
+  the matrix by the length of the rows.[133X
+  
+  [33X[0;0YThe  length  of  the  list  in  component  [10Xrows[110X  is [10Xlen+1[110X, because the first
+  position  is  equal to the integer [22X0[122X such that the type of the list [10Xrows[110X can
+  always  be  computed efficiently. The rows are then stored in positions 2 to
+  [10Xlen+1[110X.[133X
+  
+  [33X[0;0YThe  component  [10Xgreasehint[110X  contains  the greasing level for the next matrix
+  multiplication,  in which this matrix occurs as the factor on the right hand
+  side (if greasing is worth the effort, see Section [14X5.8[114X).[133X
+  
+  [33X[0;0YA [10Xcmat[110X can be [21Xpre-greased[121X, which just means, that a certain number of linear
+  combinations  of  its rows is already precomputed (see Section [14X5.8[114X). In that
+  case,  the object is in the additional filter [10XHasGreaseTab[110X and the following
+  components are bound additionally:[133X
+  
+        Component name   Content                                                    
+        ──────────────   ────────────────────────────────────────────────────────  
+        [10Xgreaselev[110X        the grease level                                           
+        [10Xgreasetab[110X        the grease table, a list of lists of [10Xcvecs[110X                 
+        [10Xgreaseblo[110X        the number of greasing blocks                              
+        [10Xspreadtab[110X        a lookup table for indexing the right linear combination   
+  
+       [1XTable:[101X Additional components of a [10Xcmat[110X object when pre-greased
+  
+  
+  
+  [1X3.4 [33X[0;0YExternal Representation of Matrices on Storage[133X[101X
+  
+  
+  [1X3.4-1 [33X[0;0YByte ordering and word length[133X[101X
+  
+  [33X[0;0YThis  section  describes  the external representation of matrices. A special
+  data  format  is  needed  here,  because  of  differences  between  computer
+  architectures  with  respect to word length (32bit/64bit) and endianess. The
+  term  [21Xendianess[121X refers to the fact, that different architectures store their
+  long  words  in  a different way in memory, namely they order the bytes that
+  together make up a long word in different orders.[133X
+  
+  [33X[0;0YThe  external  representation  is the same as the internal format of a 32bit
+  machine with little endianess, which means, that the lower significant bytes
+  of  a  [10XWord[110X are stored in lower addresses. The reasons for this decision are
+  firstly  that  64bit  machines  can  do  the bit shifting to convert between
+  internal  and external representation easier using their wide registers, and
+  secondly,  that  the  nowadays most popular architectures i386 and AMD64 use
+  both  little endianess, such that conversion is only necessary on a minority
+  of machines.[133X
+  
+  
+  [1X3.4-2 [33X[0;0YThe header of a [10Xcmat[110X[101X[1X file[133X[101X
+  
+  [33X[0;0YThe header of a [10Xcmat[110X file consists of 5 words of 64bit each, that are stored
+  in little endian byte order:[133X
+  
+        the magic value [21X[10XGAPCMat1[110X[121X as ASCII letters (8 bytes) in this order   
+        the value of [22Xp[122X to describe the base field                             
+        the value of [22Xd[122X to describe the base field                             
+        the number of rows of the matrix                                      
+        the number of columns of the matrix                                   
+  
+       [1XTable:[101X Header of a [10Xcmat[110X file
+  
+  
+  [33X[0;0YAfter  these  [22X40[122X bytes follow the data words as described above using little
+  endian 32bit [10XWord[110Xs as in the internal representation on 32bit machines.[133X
+  
+  [33X[0;0YNote  that  the  decision  to  put  not  more than twice as many prime field
+  elements  into  a  64bit  [10XWord[110X  than  would  fit into a 32bit [10XWord[110X makes the
+  conversion  between  internal  and  external  representation  much easier to
+  implement.[133X
+  

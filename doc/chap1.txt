@@ -1,0 +1,61 @@
+  
+  [1X1 [33X[0;0YIntroduction[133X[101X
+  
+  
+  [1X1.1 [33X[0;0YPhilosophy[133X[101X
+  
+  [33X[0;0YThis  package  implements  a complete infrastructure for vectors over finite
+  fields.  The  basic idea is, that one can store an element of a finite field
+  using  only  a  few  bits rather than a full machine word. Therefore one can
+  pack more than one finite field element in a machine word. This approach not
+  only saves memory but also allows fast arithmetic.[133X
+  
+  [33X[0;0YContrary  to  other implementations this package uses long word instructions
+  for  arithmetic  and  other  operations  rather  than table lookups, because
+  modern  microprocessor  designs seem to support faster memory access in this
+  way  and  memory  access  is  the main limiting factor for computations over
+  finite  fields. This approach also allows for bigger finite fields with more
+  than  256  elements.  For  a  more  detailed descriptions of this design see
+  Chapter [14X3[114X.[133X
+  
+  [33X[0;0YThe  main  purpose  of  this  implementation  is  to  use it in [5XMeatAxe[105X-like
+  applications,  that  is,  working  with  matrices  consisting  of compressed
+  vectors   over   finite  fields,  doing  linear  algebra  calculations  like
+  nullspaces,  spinning of vectors, multiplying and inverting matrices and the
+  like.  Another  purpose  could be matrix group calculations. Usually in such
+  computations,  the  base  field  does  not  change  too  often  and not many
+  different  lengths  of  vectors occur. This implementation is optimized with
+  these  applications  in  mind  and  might  not  be  very efficient for other
+  purposes like using compressed vectors as coefficient lists of polynomials.[133X
+  
+  [33X[0;0YAnother  important  point  is that compressed vectors in this package do not
+  even  try  to  behave exactly like [5XGAP[105X lists. To the contrary, they disallow
+  many  operations  that are possible for [5XGAP[105X lists for example changing their
+  length  or  assigning  arbitrary [5XGAP[105X objects to positions in the vector. The
+  reason  for  this is that the chosen data structure does not allow to assign
+  anything  but  elements of the one base field to positions in the vector and
+  the  option to change the representation [21Xon the fly[121X is not desirable in most
+  applications.  On  the  other  hand  one  can be relatively sure not to [21Xlose
+  compression[121X along the way.[133X
+  
+  
+  [1X1.2 [33X[0;0YOverview over this manual[133X[101X
+  
+  [33X[0;0YChapter  [14X2[114X  describes  the installation of this package. Chapter [14X3[114X describes
+  the basic design and all the data structures used in this package, including
+  the external representation of matrices on storage. These descriptions might
+  be  very  valuable  to  understand  the  behaviour of the implementation and
+  various  performance  issues. Those and other performance issues are covered
+  in  Chapter  [14X7[114X, where you mainly find hints on how to tune your own programs
+  that  use this package. Chapters [14X4[114X to [14X5[114X describe the available functionality
+  for  vectors  and  matrices  respectively.  Chapter  [14X8[114X  describes,  how  the
+  functionality in this package is or is not usable in connection with the [5XGAP[105X
+  library. Finally, Chapter [14X9[114X shows instructive examples for the usage of this
+  package.[133X
+  
+  
+  [1X1.3 [33X[0;0YFeedback[133X[101X
+  
+  [33X[0;0YFor  bug  reports,  feature  requests  and suggestions, please use our issue
+  tracker ([7Xhttps://github.com/gap-packages/cvec/issues[107X).[133X
+  

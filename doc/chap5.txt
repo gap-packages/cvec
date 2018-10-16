@@ -1,0 +1,663 @@
+  
+  [1X5 [33X[0;0YMatrices[133X[101X
+  
+  [33X[0;0YA  compressed  matrix  (a  [10Xcmat[110X)  behaves  very  much  like a list of [10Xcvec[110Xs.
+  However,  it  insists  on  having only [10Xcvec[110Xs of the same length and over the
+  same  base  field  as  its  elements, and it insists on being a list without
+  holes.  Apart  from  these  restrictions,  you can use all the standard list
+  operations with [10Xcmat[110Xs (see Section [14X5.2[114X.[133X
+  
+  [33X[0;0YIn  the  rest  of this chapter, we document all methods for matrices for the
+  sake  of  completeness.  If  they behave exactly as is to be expected by the
+  already defined operation no further explanation is given.[133X
+  
+  
+  [1X5.1 [33X[0;0YCreation[133X[101X
+  
+  [33X[0;0YThe  basic  operation  to  create  new [10Xcmat[110Xs is [11XCMat[111X, for which a variety of
+  methods is available:[133X
+  
+  [1X5.1-1 CMat[101X
+  
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xcl[103X, [3Xdochecks[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xcl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YA  new  [10Xcmat[110X is created with rows being in the [10Xcvecclass[110X [3Xcl[103X. All elements of
+  the list [3Xl[103X must be [10Xcvec[110Xs in that class. The boolean flag [3Xdochecks[103X indicates,
+  whether  this  should  be checked or not. If the flag is omitted, checks are
+  performed. Note that [3Xl[103X may be the empty list.[133X
+  
+  [1X5.1-2 CMat[101X
+  
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xdochecks[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YA  new [10Xcmat[110X is created with rows being in the [10Xcvecclass[110X of the vectors in [3Xl[103X.
+  All elements of the list [3Xl[103X must be [10Xcvec[110Xs in the same class. The boolean flag
+  [3Xdochecks[103X  indicates,  whether  this should be checked or not. If the flag is
+  omitted, checks are performed. Note that [3Xl[103X may not be the empty list.[133X
+  
+  [1X5.1-3 CMat[101X
+  
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YA  new  [10Xcmat[110X  is created with rows being in the [10Xcvecclass[110X of the [10Xcvec[110X [3Xv[103X. All
+  elements  of  the  list  [3Xl[103X  must  be  [10Xcvec[110Xs  in the that same class. This is
+  checked. Note that [3Xl[103X may be the empty list.[133X
+  
+  [1X5.1-4 CMat[101X
+  
+  [33X[1;0Y[29X[2XCMat[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YCreates a new [10Xcmat[110X which is equal to [3Xm[103X, which must be a compressed matrix in
+  the filter [11XIsGF2MatrixRep[111X or the filter [11XIs8BitMatrixRep[111X.[133X
+  
+  [33X[0;0YThere are some methods to create [10Xcmat[110Xs of special form:[133X
+  
+  [1X5.1-5 CVEC_ZeroMat[101X
+  
+  [33X[1;0Y[29X[2XCVEC_ZeroMat[102X( [3Xrows[103X, [3Xcl[103X ) [32X function[133X
+  [33X[1;0Y[29X[2XCVEC_ZeroMat[102X( [3Xrows[103X, [3Xcols[103X, [3Xp[103X, [3Xd[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YCreates  a  zero  matrix  with  [3Xrows[103X  rows  and  [3Xcols[103X columns over the field
+  [10XGF([3Xp[103X[10X,[3Xd[103X[10X)[110X.  If  a  [10Xcvecclass[110X  [3Xcl[103X is given, the number of columns and the field
+  follow from that.[133X
+  
+  [1X5.1-6 CVEC_IdentityMat[101X
+  
+  [33X[1;0Y[29X[2XCVEC_IdentityMat[102X( [3Xcl[103X ) [32X function[133X
+  [33X[1;0Y[29X[2XCVEC_IdentityMat[102X( [3Xn[103X, [3Xp[103X, [3Xd[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YCreates  an  identity matrix with [3Xn[103X rows and columns over the field [10XGF([3Xp[103X[10X,[3Xd[103X[10X)[110X.
+  If  a [10Xcvecclass[110X [3Xcl[103X is given, the number of columns and the field follow from
+  that.[133X
+  
+  [1X5.1-7 CVEC_RandomMat[101X
+  
+  [33X[1;0Y[29X[2XCVEC_RandomMat[102X( [3Xrows[103X, [3Xcl[103X ) [32X function[133X
+  [33X[1;0Y[29X[2XCVEC_RandomMat[102X( [3Xrows[103X, [3Xcols[103X, [3Xp[103X, [3Xd[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
+  
+  [33X[0;0YCreates  a  random  matrix  with  [3Xrows[103X  rows and [3Xcols[103X columns over the field
+  [10XGF([3Xp[103X[10X,[3Xd[103X[10X)[110X.  If  a  [10Xcvecclass[110X  [3Xcl[103X is given, the number of columns and the field
+  follow from that. Note that this is not particularly efficient.[133X
+  
+  [1X5.1-8 MutableCopyMat[101X
+  
+  [33X[1;0Y[29X[2XMutableCopyMat[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya mutable copy of [3Xm[103X[133X
+  
+  [33X[0;0YCreates a mutable copy of the [10Xcmat[110X [3Xm[103X.[133X
+  
+  [1X5.1-9 Matrix[101X
+  
+  [33X[1;0Y[29X[2XMatrix[102X( [3Xvectorlist[103X, [3Xvector[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XMatrixNC[102X( [3Xvectorlist[103X, [3Xvector[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new mutable [10Xcmat[110X[133X
+  
+  [33X[0;0YReturns  a  new  [10Xcmat[110X  containing  the  vectors  in  [3Xvectorlist[103X as rows. The
+  elements  in  [3Xvectorlist[103X  must  be  vectors of the same length as the sample
+  vector  [3Xvector[103X  and must live over the same base field. The sample vector is
+  always  necessary to be able to use the method selection. The [3Xvectorlist[103X may
+  be empty. The NC method does not check the inputs.[133X
+  
+  
+  [1X5.2 [33X[0;0YMatrices as lists[133X[101X
+  
+  [33X[0;0YIn  this  section,  arguments  named [3Xm[103X and [3Xn[103X are [10Xcmat[110Xs and [3Xv[103X and [3Xw[103X are [10Xcvec[110Xs
+  that  fit  into  the corresponding matrices. [3Xpos[103X is an integer between [22X1[122X and
+  [10XLength(m)[110X if it applies to the matrix [3Xm[103X.[133X
+  
+  [1X5.2-1 Add[101X
+  
+  [33X[1;0Y[29X[2XAdd[102X( [3Xm[103X, [3Xv[103X[, [3Xpos[103X] ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YBehaves  exactly  as expected. Note that one can only add [10Xcvec[110Xs of the right
+  length and over the right field.[133X
+  
+  [1X5.2-2 Remove[101X
+  
+  [33X[1;0Y[29X[2XRemove[102X( [3Xm[103X[, [3Xpos[103X] ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvec[110X[133X
+  
+  [33X[0;0YBehaves exactly as expected. No holes can be made.[133X
+  
+  [1X5.2-3 ELM_LIST[101X
+  
+  [33X[1;0Y[29X[2XELM_LIST[102X( [3Xm[103X, [3Xpos[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcvec[110X[133X
+  
+  [33X[0;0YBehaves  exactly  as  expected.  Note that this method is triggered when one
+  uses the (reading) syntax [21X[10Xm[pos][110X[121X.[133X
+  
+  [1X5.2-4 ASS_LIST[101X
+  
+  [33X[1;0Y[29X[2XASS_LIST[102X( [3Xm[103X, [3Xpos[103X, [3Xv[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YBehaves exactly as expected. Note that one can only assign to positions such
+  that  the  resulting  matrix has no holes. This method is triggered when one
+  uses the (assignment) syntax [21X[10Xm[pos] := [110X[121X.[133X
+  
+  [1X5.2-5 ELMS_LIST[101X
+  
+  [33X[1;0Y[29X[2XELMS_LIST[102X( [3Xm[103X, [3Xposs[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya sub [10Xcmat[110X[133X
+  
+  [33X[0;0YBehaves exactly as expected: A new matrix containing a subset of the rows is
+  returned.  Note  that  the  row  vectors  are  the  same  [5XGAP[105X objects as the
+  corresponding  rows  of  [3Xm[103X.  This  operation  is triggered by the expression
+  [3Xm[103X[10X{[3Xposs[103X[10X}[110X.[133X
+  
+  [1X5.2-6 ASSS_LIST[101X
+  
+  [33X[1;0Y[29X[2XASSS_LIST[102X( [3Xm[103X, [3Xposs[103X, [3Xvals[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YBehaves exactly as expected. Of course all values in [3Xvals[103X must be [10Xcvec[110Xs over
+  the  correct  field  and  the  [10Xcmat[110X  [3Xm[103X must be a dense list afterwards. This
+  operation is triggered by the statement [3Xm[103X[10X{[3Xposs[103X[10X} := [3Xvals[103X[10X[110X.[133X
+  
+  [1X5.2-7 Length[101X
+  
+  [33X[1;0Y[29X[2XLength[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe number of rows of the [10Xcmat[110X [3Xm[103X[133X
+  
+  [33X[0;0YBehaves exactly as expected.[133X
+  
+  [1X5.2-8 ShallowCopy[101X
+  
+  [33X[1;0Y[29X[2XShallowCopy[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new matrix containing the same rows than the [10Xcmat[110X [3Xm[103X[133X
+  
+  [33X[0;0YBehaves  exactly  as expected. Note that the rows of the result are the very
+  same [5XGAP[105X objects than the rows of the [10Xcmat[110X [3Xm[103X.[133X
+  
+  [1X5.2-9 Collected[101X
+  
+  [33X[1;0Y[29X[2XCollected[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe same as the collected list of the rows of [3Xm[103X[133X
+  
+  [33X[0;0YBehaves  exactly  as  expected. Just uses the standard [2XCollected[102X ([14XReference:
+  Collected[114X) on the list of rows.[133X
+  
+  [1X5.2-10 DuplicateFreeList[101X
+  
+  [33X[1;0Y[29X[2XDuplicateFreeList[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya  new  mutable  [10Xcmat[110X  containing  the  rows  of [3Xm[103X with duplicates
+            removed[133X
+  
+  [33X[0;0YBehaves  exactly  as  expected.  Just  uses  the  standard [2XDuplicateFreeList[102X
+  ([14XReference: DuplicateFreeList[114X) on the list of rows.[133X
+  
+  [1X5.2-11 Append[101X
+  
+  [33X[1;0Y[29X[2XAppend[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YBehaves  exactly  as expected. Of course, the [10Xcmat[110Xs [3Xm[103X and [3Xn[103X must be over the
+  same  field  and  have  the  same number of columns. Note that the rows of [3Xn[103X
+  themselves (and no copies) will be put into the matrix [3Xm[103X.[133X
+  
+  [1X5.2-12 Filtered[101X
+  
+  [33X[1;0Y[29X[2XFiltered[102X( [3Xm[103X, [3Xf[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X containing some of the rows of [3Xm[103X[133X
+  
+  [33X[0;0YBehaves  exactly  as expected. The function [3Xf[103X will be called for each row of
+  [3Xm[103X.[133X
+  
+  [1X5.2-13 Unbind[101X
+  
+  [33X[1;0Y[29X[2XUnbind[102X( [3Xm[103X, [3Xf[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YBehaves  exactly  as  expected.  Of  course,  only the last bound row may be
+  unbound.[133X
+  
+  
+  [1X5.3 [33X[0;0YArithmetic[133X[101X
+  
+  [33X[0;0YOf  course, the standard arithmetic infix operations [22X+[122X, [22X-[122X and [22X*[122X (for vectors
+  and  scalars)  work  as expected by using the methods below. The comments on
+  the  usage  of  scalars  in  arithmetic  operations  involving  vectors from
+  Subsection [14X4.2-1[114X apply analogously.[133X
+  
+  [1X5.3-1 \+[101X
+  
+  [33X[1;0Y[29X[2X\+[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe sum [22X[3Xm[103X+[3Xn[103X[122X as a new [10Xcmat[110X[133X
+  
+  [33X[0;0YFor two [10Xcmat[110Xs [3Xm[103X and [3Xn[103X. Works as expected.[133X
+  
+  [1X5.3-2 \-[101X
+  
+  [33X[1;0Y[29X[2X\-[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe difference [22X[3Xm[103X-[3Xn[103X[122X as a new [10Xcmat[110X[133X
+  
+  [33X[0;0YFor two [10Xcmat[110Xs [3Xm[103X and [3Xn[103X. Works as expected.[133X
+  
+  [1X5.3-3 AdditiveInverseSameMutability[101X
+  
+  [33X[1;0Y[29X[2XAdditiveInverseSameMutability[102X( [3Xm[103X ) [32X method[133X
+  [33X[1;0Y[29X[2X\-[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe additive inverse of [3Xm[103X as a new [10Xcmat[110X[133X
+  
+  [33X[0;0YFor a [10Xcmat[110X [3Xm[103X. Works as expected.[133X
+  
+  [1X5.3-4 AdditiveInverseMutable[101X
+  
+  [33X[1;0Y[29X[2XAdditiveInverseMutable[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe additive inverse of [3Xm[103X as a new mutable [10Xcmat[110X[133X
+  
+  [33X[0;0YFor a [10Xcmat[110X [3Xm[103X. Works as expected.[133X
+  
+  [1X5.3-5 \*[101X
+  
+  [33X[1;0Y[29X[2X\*[102X( [3Xm[103X, [3Xs[103X ) [32X method[133X
+  [33X[1;0Y[29X[2X\*[102X( [3Xs[103X, [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe scalar multiple [3Xs[103X[22X⋅[122X[3Xm[103X[133X
+  
+  [33X[0;0YFor  a  [10Xcmat[110X [3Xm[103X and a scalar [3Xs[103X. For the format of the scalar see [14X4.2-1[114X. Works
+  as expected.[133X
+  
+  [1X5.3-6 \*[101X
+  
+  [33X[1;0Y[29X[2X\*[102X( [3Xv[103X, [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe product [3Xv[103X[22X⋅[122X[3Xm[103X[133X
+  
+  [33X[0;0YFor  a  [10Xcmat[110X [3Xm[103X and a [10Xcvec[110X [3Xs[103X with the same length as the number of rows of [3Xm[103X.
+  Works as expected. Note that there is a very fast method for the case that [3Xm[103X
+  is pre-greased (see [14X5.8[114X).[133X
+  
+  [1X5.3-7 \^[101X
+  
+  [33X[1;0Y[29X[2X\^[102X( [3Xv[103X, [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe product [3Xv[103X[22X⋅[122X[3Xm[103X[133X
+  
+  [33X[0;0YFor  a  [10Xcmat[110X [3Xm[103X and a [10Xcvec[110X [3Xs[103X with the same length as the number of rows of [3Xm[103X.
+  Works as expected. Note that there is a very fast method for the case that [3Xm[103X
+  is pre-greased (see [14X5.8[114X).[133X
+  
+  [1X5.3-8 \*[101X
+  
+  [33X[1;0Y[29X[2X\*[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe product [3Xm[103X[22X⋅[122X[3Xn[103X[133X
+  
+  [33X[0;0YOf  course,  the  [10Xcmat[110X  [3Xm[103X  must have as many columns as the [10Xcmat[110X [3Xn[103X has rows.
+  Works as expected. Note that there is a very fast method for the case that [3Xn[103X
+  is pre-greased (see [14X5.8[114X).[133X
+  
+  [1X5.3-9 ZeroSameMutability[101X
+  
+  [33X[1;0Y[29X[2XZeroSameMutability[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe  zero [10Xcmat[110X over the same field and with the same dimensions as
+            [3Xm[103X[133X
+  
+  [33X[0;0Y[3Xm[103X must be a [10Xcmat[110X.[133X
+  
+  [1X5.3-10 ZeroMutable[101X
+  
+  [33X[1;0Y[29X[2XZeroMutable[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya  mutable  copy of the zero [10Xcmat[110X over the same field and with the
+            same dimensions as [3Xm[103X[133X
+  
+  [33X[0;0Y[3Xm[103X must be a [10Xcmat[110X.[133X
+  
+  [1X5.3-11 OneSameMutability[101X
+  
+  [33X[1;0Y[29X[2XOneSameMutability[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe identity [10Xcmat[110X over the same field and with the same dimensions
+            as [3Xm[103X[133X
+  
+  [33X[0;0Y[3Xm[103X must be a square [10Xcmat[110X.[133X
+  
+  [1X5.3-12 OneMutable[101X
+  
+  [33X[1;0Y[29X[2XOneMutable[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya  mutable  copy of the identity [10Xcmat[110X over the same field and with
+            the same dimensions as [3Xm[103X[133X
+  
+  [33X[0;0Y[3Xm[103X must be a square [10Xcmat[110X.[133X
+  
+  [1X5.3-13 InverseMutable[101X
+  
+  [33X[1;0Y[29X[2XInverseMutable[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe multiplicative inverse of [3Xm[103X[133X
+  
+  [33X[0;0YIf  the  [10Xcmat[110X is not square or not invertible then [10Xfail[110X is returned. Behaves
+  exactly as expected.[133X
+  
+  [1X5.3-14 InverseSameMutability[101X
+  
+  [33X[1;0Y[29X[2XInverseSameMutability[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe multiplicative inverse of [3Xm[103X[133X
+  
+  [33X[0;0YIf  the  [10Xcmat[110X is not square or not invertible then [10Xfail[110X is returned. Behaves
+  exactly as expected.[133X
+  
+  [1X5.3-15 TransposedMat[101X
+  
+  [33X[1;0Y[29X[2XTransposedMat[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe transpose of [3Xm[103X[133X
+  
+  [33X[0;0YBehaves exactly as expected.[133X
+  
+  [1X5.3-16 KroneckerProduct[101X
+  
+  [33X[1;0Y[29X[2XKroneckerProduct[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe Kronecker product of [3Xm[103X and [3Xn[103X[133X
+  
+  [33X[0;0YBehaves exactly as expected.[133X
+  
+  
+  [1X5.4 [33X[0;0YComparison of matrices and other information[133X[101X
+  
+  [1X5.4-1 =[101X
+  
+  [33X[1;0Y[29X[2X=[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns  [10Xtrue[110X  if the [10Xcmat[110Xs [3Xm[103X and [3Xn[103X are equal. The matrices must be over the
+  same field and must have equal dimensions.[133X
+  
+  [1X5.4-2 LT[101X
+  
+  [33X[1;0Y[29X[2XLT[102X( [3Xm[103X, [3Xn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns  [10Xtrue[110X if the [10Xcmat[110X [3Xm[103X is smaller than [3Xn[103X. The matrices must be over the
+  same  field  and  must  have  equal  dimensions.  The  method implements the
+  lexicographic  order  and uses [2XLT[102X for the ordering of vectors. Note that the
+  operation [10XLT[110X is the same as [10X\<[110X.[133X
+  
+  [1X5.4-3 IsZero[101X
+  
+  [33X[1;0Y[29X[2XIsZero[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns  [10Xtrue[110X  if  the [10Xcmat[110X [3Xm[103X is equal to zero, meaning that all entries are
+  equal to zero.[133X
+  
+  [1X5.4-4 IsOne[101X
+  
+  [33X[1;0Y[29X[2XIsOne[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns [10Xtrue[110X iff the [10Xcmat[110X [3Xm[103X is equal to the identity matrix.[133X
+  
+  [1X5.4-5 IsDiagonalMat[101X
+  
+  [33X[1;0Y[29X[2XIsDiagonalMat[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns [10Xtrue[110X iff the [10Xcmat[110X [3Xm[103X is a diagonal matrix.[133X
+  
+  [1X5.4-6 IsUpperTriangularMat[101X
+  
+  [33X[1;0Y[29X[2XIsUpperTriangularMat[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns [10Xtrue[110X iff the [10Xcmat[110X [3Xm[103X is an upper triangular matrix.[133X
+  
+  [1X5.4-7 IsLowerTriangularMat[101X
+  
+  [33X[1;0Y[29X[2XIsLowerTriangularMat[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfalse[110X[133X
+  
+  [33X[0;0YReturns [10Xtrue[110X iff the [10Xcmat[110X [3Xm[103X is a lower triangular matrix.[133X
+  
+  [1X5.4-8 CVEC_HashFunctionForCMats[101X
+  
+  [33X[1;0Y[29X[2XCVEC_HashFunctionForCMats[102X( [3Xm[103X, [3Xdata[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Yan integer hash value[133X
+  
+  [33X[0;0YThis   is   a   hash   function  usable  for  the  [2XChooseHashFunction[102X  ([14Xorb:
+  ChooseHashFunction[114X)  framework.  It  takes  as arguments a [10Xcmat[110X [3Xm[103X and a list
+  [3Xdata[103X  of  length  [22X2[122X. The first entry of [3Xdata[103X is the length of the hash table
+  used  and  the second entry is the number of bytes looked at in the [10Xcvec[110Xs in
+  the matrices.[133X
+  
+  [1X5.4-9 ChooseHashFunction[101X
+  
+  [33X[1;0Y[29X[2XChooseHashFunction[102X( [3Xm[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya record with entries [10Xfunc[110X and [10Xdata[110X.[133X
+  
+  [33X[0;0YChooses  a hash function to be used for [10Xcmat[110Xs like [3Xm[103X (that is, over the same
+  field  with the same number of columns) and for hash tables of length [3Xl[103X. The
+  hash  function  itself  is  stored  in  the  [10Xfunc[110X component of the resulting
+  record.  The  hash  function  has to be called with two arguments: the first
+  must  be  a  matrix  like  [3Xm[103X  and  the  second must be the value of the [10Xdata[110X
+  component of the resulting record.[133X
+  
+  
+  [1X5.5 [33X[0;0YSlicing and submatrices[133X[101X
+  
+  [33X[0;0YAs  described  in Section [14X5.2[114X you can use the slicing operator [10X\{\}[110X for read
+  and  write  access  of  a  subset of the rows of a [10Xcmat[110X. However, the double
+  slicing  operator  is  not  supported. The reason for this is twofold: First
+  there is a technical issue that the double slicing operator cannot easily be
+  overloaded  in  the  [5XGAP[105X  system.  The second is, that very often the double
+  slicing  operator  is  used  to copy a part of one matrix to another part of
+  another  matrix using double slicing on both sides of an assignment. This is
+  quite  inefficient  because  it  creates  an intermediate object, namely the
+  submatrix which is extracted.[133X
+  
+  [33X[0;0YTherefore  we have chosen to support submatrix access through two operations
+  [2XExtractSubMatrix[102X ([14X5.5-1[114X) and [2XCopySubMatrix[102X ([14X5.5-2[114X) described below.[133X
+  
+  [1X5.5-1 ExtractSubMatrix[101X
+  
+  [33X[1;0Y[29X[2XExtractSubMatrix[102X( [3Xm[103X, [3Xrows[103X, [3Xcols[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ya submatrix of [3Xm[103X[133X
+  
+  [33X[0;0YThis operation extracts the submatrix of the matrix [3Xm[103X consisting of the rows
+  described  by  the integer list (or range) [3Xrows[103X and of the columns described
+  by  the  integer  list (or range) [3Xcols[103X. This is thus equivalent to the usage
+  [3Xm[103X[10X{[110X[3Xrows[103X[10X}{[110X[3Xcols[103X[10X}[110X. Note that the latter does not work for [10Xcmat[110Xs, whereas a quite
+  efficient method for [2XExtractSubMatrix[102X is available for [10Xcmat[110Xs.[133X
+  
+  [1X5.5-2 CopySubMatrix[101X
+  
+  [33X[1;0Y[29X[2XCopySubMatrix[102X( [3Xsrc[103X, [3Xdst[103X, [3Xsrows[103X, [3Xdrows[103X, [3Xscols[103X, [3Xdcols[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YThis  operation  extracts  the submatrix of the matrix [3Xsrc[103X consisting of the
+  rows  described  by  the  integer  list  (or range) [3Xsrows[103X and of the columns
+  described  by  the  integer  list  (or  range)  [3Xscols[103X and copies it into the
+  submatrix of [3Xdst[103X described by the integer lists (or ranges) [3Xdrows[103X and [3Xdcols[103X.
+  No  intermediate  object  is  created.  This is thus equivalent to the usage
+  [3Xdst[103X[10X{[110X[3Xdrows[103X[10X}{[110X[3Xdcols[103X[10X}  :=  [110X[3Xsrc[103X[10X{[110X[3Xsrows[103X[10X}{[110X[3Xscols[103X[10X}[110X. Note that the latter does not work
+  for  [10Xcmat[110Xs,  whereas a quite efficient method for [2XCopySubMatrix[102X is available
+  for [10Xcmat[110Xs.[133X
+  
+  
+  [1X5.6 [33X[0;0YInformation about matrices[133X[101X
+  
+  [1X5.6-1 BaseField[101X
+  
+  [33X[1;0Y[29X[2XBaseField[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe base field of [3Xm[103X[133X
+  
+  [33X[0;0YFor  a  [10Xcmat[110X [3Xm[103X this returns the [5XGAP[105X object [10XGF(p,d)[110X corresponding to the base
+  field of [3Xm[103X. Note that this is a relatively fast lookup.[133X
+  
+  [1X5.6-2 Characteristic[101X
+  
+  [33X[1;0Y[29X[2XCharacteristic[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe characteristic of the base field of [3Xm[103X[133X
+  
+  [33X[0;0YReturns the characteristic of the base field of [3Xm[103X (see [2XBaseField[102X ([14X5.6-1[114X)).[133X
+  
+  [1X5.6-3 DegreeFFE[101X
+  
+  [33X[1;0Y[29X[2XDegreeFFE[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe degree of the base field of [3Xm[103X over its prime field[133X
+  
+  [33X[0;0YReturns  the  degree  of  the  base  field  of  [3Xm[103X  over its prime field (see
+  [2XBaseField[102X ([14X5.6-1[114X)).[133X
+  
+  [1X5.6-4 DefaultField[101X
+  
+  [33X[1;0Y[29X[2XDefaultField[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe base field of [3Xm[103X[133X
+  
+  [33X[0;0YFor  a  [10Xcmat[110X [3Xm[103X this returns the [5XGAP[105X object [10XGF(p,d)[110X corresponding to the base
+  field of [3Xm[103X. Note that this is a relatively fast lookup.[133X
+  
+  
+  [1X5.7 [33X[0;0YInput and output[133X[101X
+  
+  [1X5.7-1 CVEC_WriteMat[101X
+  
+  [33X[1;0Y[29X[2XCVEC_WriteMat[102X( [3Xf[103X, [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfail[110X[133X
+  
+  [33X[0;0Y[3Xf[103X  must be a file object from the [5XIO[105X package (see [2XIsFile[102X ([14XIO: IsFile[114X)) and [3Xm[103X
+  must  be a [10Xcmat[110X. The matrix [3Xm[103X is written to the file [3Xf[103X. Note that the format
+  (see  Section  [14X3.4[114X)  is  platform  independent,  such  that  matrices can be
+  exchanged  between  different  architectures.  The  result  is  [10Xtrue[110X or [10Xfail[110X
+  depending on whether everything worked or an error occurred respectively.[133X
+  
+  [1X5.7-2 CVEC_WriteMatToFile[101X
+  
+  [33X[1;0Y[29X[2XCVEC_WriteMatToFile[102X( [3Xfn[103X, [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfail[110X[133X
+  
+  [33X[0;0Y[3Xfn[103X  must be a string object containing a file name and [3Xm[103X must be a [10Xcmat[110X. The
+  matrix [3Xm[103X is written to the file with name [3Xfn[103X on the local storage. Note that
+  the format (see Section [14X3.4[114X) is platform independent, such that matrices can
+  be  exchanged  between  different  architectures. The result is [10Xtrue[110X or [10Xfail[110X
+  depending on whether everything worked or an error occurred respectively.[133X
+  
+  [1X5.7-3 CVEC_WriteMatsToFile[101X
+  
+  [33X[1;0Y[29X[2XCVEC_WriteMatsToFile[102X( [3Xfnpref[103X, [3Xl[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Y[10Xtrue[110X or [10Xfail[110X[133X
+  
+  [33X[0;0Y[3Xfnpref[103X must be a string object containing a file name prefix and [3Xm[103X must be a
+  list  of  [10Xcmat[110Xs.  The  matrices  in  [3Xl[103X  are  written to the files with names
+  determined by using the string [3Xfnpref[103X and appending the natural numbers from
+  [22X1[122X to the length of [3Xl[103X on the local storage. Note that the format (see Section
+  [14X3.4[114X)  is  platform  independent, such that matrices can be exchanged between
+  different  architectures.  The  result  is [10Xtrue[110X or [10Xfail[110X depending on whether
+  everything worked or an error occurred respectively.[133X
+  
+  [1X5.7-4 CVEC_ReadMat[101X
+  
+  [33X[1;0Y[29X[2XCVEC_ReadMat[102X( [3Xf[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcmat[110X or [10Xfail[110X[133X
+  
+  [33X[0;0Y[3Xf[103X  must  be  a  file object from the [5XIO[105X package (see [2XIsFile[102X ([14XIO: IsFile[114X)). A
+  matrix  is  read  from the file [3Xf[103X. Note that the format (see Section [14X3.4[114X) is
+  platform  independent, such that matrices can be exchanged between different
+  architectures. The result is [10Xfail[110X if an error occurred.[133X
+  
+  [1X5.7-5 CVEC_ReadMatFromFile[101X
+  
+  [33X[1;0Y[29X[2XCVEC_ReadMatFromFile[102X( [3Xfn[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya [10Xcmat[110X or [10Xfail[110X[133X
+  
+  [33X[0;0Y[3Xfn[103X must be a string object containing a file name. A matrix is read from the
+  file  with  name  [3Xfn[103X on the local storage. Note that the format (see Section
+  [14X3.4[114X)  is  platform  independent, such that matrices can be exchanged between
+  different architectures. The result is [10Xfail[110X if an error occurred.[133X
+  
+  [1X5.7-6 CVEC_ReadMatsFromFile[101X
+  
+  [33X[1;0Y[29X[2XCVEC_ReadMatsFromFile[102X( [3Xfnpref[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya list of [10Xcmat[110Xs or [10Xfail[110X[133X
+  
+  [33X[0;0Y[3Xfnpref[103X  must  be  a  string  object containing a file name prefix. A list of
+  matrices  is  read  from the files with names determined by using the string
+  [3Xfnpref[103X  and  appending the natural numbers from [22X1[122X on from the local storage.
+  The  number  of  matrices read is determined by the highest number such that
+  the  corresponding  filename  exists in the filesystem. Note that the format
+  (see  Section  [14X3.4[114X)  is  platform  independent,  such  that  matrices can be
+  exchanged  between  different  architectures. The result is [10Xfail[110X if an error
+  occurred.[133X
+  
+  
+  [1X5.8 [33X[0;0YGrease[133X[101X
+  
+  [33X[0;0YThe basic idea behind the [21Xgrease[121X technique is that over a finite field there
+  are only finitely many linear combinations of a fixed list of vectors. Thus,
+  many  operations  including  matrix  multiplication  can  be  speeded  up by
+  precomputing  all  possible linear combinations and then just looking up the
+  right one. For the case of matrix multiplication this can for example gain a
+  factor  of about [22X4[122X over the field with [22X2[122X elements using [21Xgrease level[22X8[122X[121X, which
+  means that for blocks of [22X8[122X rows all linear combinations are precomputed.[133X
+  
+  [33X[0;0YThe  [5Xcvec[105X  uses  grease  whenever  appropriate automatically for example for
+  matrix  multiplication.  However,  occasionally  the  user  has  to  take  a
+  conscious  decision,  which  matrices to grease, because this of course uses
+  more memory.[133X
+  
+  [33X[0;0YA  [10Xcmat[110X can be [21Xpre-greased[121X with level [22Xl[122X, which means that it is chopped into
+  chunks  of  [22Xl[122X  rows and for each such chunk all possible linear combinations
+  are  precomputed  and  stored.  This  increases the memory used to store the
+  matrix  by  a  factor of [22Xq^l[122X if the base field of the matrix has [22Xq[122X elements.
+  However,  operations  like  vector  matrix  multiplication and matrix matrix
+  multiplication  (here  the  right  hand  side  matrix  must be greased!) are
+  speeded  up.  As  a  rule  of thumb the factor one can hope for is about [22Xl ⋅
+  (q-1)/q[122X.  Note  that for big matrices matrix multiplication does greasing on
+  the  fly  anyway  and  therefore  one  cannot  hope for such a big factor by
+  pre-greasing.[133X
+  
+  [1X5.8-1 GreaseMat[101X
+  
+  [33X[1;0Y[29X[2XGreaseMat[102X( [3Xm[103X, [3Xl[103X ) [32X operation[133X
+  [33X[1;0Y[29X[2XGreaseMat[102X( [3Xm[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0Y[3Xm[103X  must  be  a [10Xcmat[110X. It is pregreased with level [3Xl[103X. Without the argument [3Xl[103X a
+  grease  level depending of the field size is chosen automatically. Note that
+  the matrix will need much more memory when pregreased.[133X
+  
+  [1X5.8-2 UnGreaseMat[101X
+  
+  [33X[1;0Y[29X[2XUnGreaseMat[102X( [3Xm[103X ) [32X operation[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0Y[3Xm[103X must be a [10Xcmat[110X. The pregreased information is deleted. This can save a lot
+  of memory.[133X
+  
+  
+  [1X5.9 [33X[0;0YEverything else[133X[101X
+  
+  [1X5.9-1 Randomize[101X
+  
+  [33X[1;0Y[29X[2XRandomize[102X( [3Xm[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XRandomize[102X( [3Xm[103X, [3Xrs[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ythe matrix [3Xm[103X[133X
+  
+  [33X[0;0Y[3Xm[103X must be a [10Xcmat[110X and [3Xrs[103X must be a random source object if given. This method
+  changes  the  matrix  [3Xm[103X in place by (pseudo) random values in the field over
+  which  the  matrix  lives.  If  a  random source is given, the pseudo random
+  numbers  used are taken from this source, otherwise the global random source
+  in the [5XGAP[105X library is taken.[133X
+  
+  [1X5.9-2 OverviewMat[101X
+  
+  [33X[1;0Y[29X[2XOverviewMat[102X( [3Xm[103X ) [32X function[133X
+  [6XReturns:[106X  [33X[0;10Ynothing[133X
+  
+  [33X[0;0YAn  ASCII  art  overview  over the [10Xcmat[110X [3Xm[103X is printed. Stars indicate nonzero
+  blocks in the matrix and dots zero blocks.[133X
+  
+  [1X5.9-3 Unpack[101X
+  
+  [33X[1;0Y[29X[2XUnpack[102X( [3Xm[103X ) [32X method[133X
+  [6XReturns:[106X  [33X[0;10Ya list of lists of finite field elements[133X
+  
+  [33X[0;0YThis  operation unpacks a [10Xcmat[110X [3Xm[103X. A new plain list of plain lists containing
+  the corresponding numbers as [5XGAP[105X finite field elements. Note that the matrix
+  [3Xm[103X remains unchanged.[133X
+  

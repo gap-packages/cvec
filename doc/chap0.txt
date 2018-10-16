@@ -1,1 +1,228 @@
-Placeholder
+  
+  
+                                     [1X cvec [101X
+  
+  
+                      [1X Compact vectors over finite fields [101X
+  
+  
+                                     2.6.1
+  
+  
+                                  7 June 2018
+  
+  
+                                 Max Neunhöffer
+  
+                                    Max Horn
+  
+  
+  
+  Max Neunhöffer
+      Email:    [7Xmailto:max@9hoeffer.de[107X
+      Homepage: [7Xhttp://www-groups.mcs.st-and.ac.uk/~neunhoef[107X
+      Address:  [33X[0;14YGustav-Freytag-Straße 40[133X
+                [33X[0;14Y50354 Hürth[133X
+                [33X[0;14YGermany[133X
+  
+  
+  Max Horn
+      Email:    [7Xmailto:max.horn@math.uni-giessen.de[107X
+      Homepage: [7Xhttp://www.quendi.de/math[107X
+      Address:  [33X[0;14YAG Algebra[133X
+                [33X[0;14YMathematisches Institut[133X
+                [33X[0;14YJustus-Liebig-Universität Gießen[133X
+                [33X[0;14YArndtstraße 2[133X
+                [33X[0;14Y35392 Gießen[133X
+                [33X[0;14YGermany[133X
+  
+  
+  
+  -------------------------------------------------------
+  [1XCopyright[101X
+  [33X[0;0Y© 2005-2014 by Max Neunhöffer[133X
+  
+  [33X[0;0YThis  package  may  be distributed under the terms and conditions of the GNU
+  Public License Version 2.[133X
+  
+  
+  -------------------------------------------------------
+  
+  
+  [1XContents (cvec)[101X
+  
+  1 [33X[0;0YIntroduction[133X
+    1.1 [33X[0;0YPhilosophy[133X
+    1.2 [33X[0;0YOverview over this manual[133X
+    1.3 [33X[0;0YFeedback[133X
+  2 [33X[0;0YInstallation of the [5Xcvec[105X-Package[133X
+  3 [33X[0;0YThe Data Structures[133X
+    3.1 [33X[0;0YFinite field elements[133X
+    3.2 [33X[0;0YCompressed Vectors in Memory[133X
+      3.2-1 [33X[0;0YPacking of prime field elements[133X
+      3.2-2 [33X[0;0YExtension Fields[133X
+      3.2-3 [33X[0;0YHow is information about the base field stored?[133X
+      3.2-4 [33X[0;0YLimits that follow from the Data Format[133X
+    3.3 [33X[0;0YCompressed Matrices[133X
+    3.4 [33X[0;0YExternal Representation of Matrices on Storage[133X
+      3.4-1 [33X[0;0YByte ordering and word length[133X
+      3.4-2 [33X[0;0YThe header of a [10Xcmat[110X file[133X
+  4 [33X[0;0YVectors[133X
+    4.1 [33X[0;0YCreation[133X
+      4.1-1 CVec
+      4.1-2 CVec
+      4.1-3 CVec
+      4.1-4 CVec
+      4.1-5 CVec
+      4.1-6 CVec
+      4.1-7 CVecClass
+      4.1-8 CVecClass
+      4.1-9 CVecClass
+      4.1-10 CVecClass
+      4.1-11 CVecClass
+      4.1-12 CVecClass
+      4.1-13 ZeroSameMutability
+      4.1-14 ShallowCopy
+      4.1-15 Randomize
+    4.2 [33X[0;0YArithmetic[133X
+      4.2-1 [33X[0;0YHandling of scalars in arithmetic operations[133X
+      4.2-2 \+
+      4.2-3 \-
+      4.2-4 AdditiveInverseSameMutability
+      4.2-5 AdditiveInverseMutable
+      4.2-6 \*
+      4.2-7 AddRowVector
+      4.2-8 MultVector
+      4.2-9 ScalarProduct
+      4.2-10 ZeroMutable
+      4.2-11 ZeroVector
+    4.3 [33X[0;0YElement access and slicing[133X
+      4.3-1 ELM_LIST
+      4.3-2 ASS_LIST
+      4.3-3 ELMS_LIST
+      4.3-4 CVEC_Slice
+      4.3-5 CopySubVector
+      4.3-6 CVEC_Concatenation
+    4.4 [33X[0;0YComparison of Vectors and other information[133X
+      4.4-1 =
+      4.4-2 LT
+      4.4-3 IsZero
+      4.4-4 PositionNonZero
+      4.4-5 PositionLastNonZero
+      4.4-6 Length
+    4.5 [33X[0;0YChanging representation, Unpacking[133X
+      4.5-1 Unpack
+      4.5-2 IntegerRep
+      4.5-3 NumberFFVector
+      4.5-4 CVecNumber
+    4.6 [33X[0;0YAccess to the base field[133X
+      4.6-1 BaseDomain
+      4.6-2 BaseField
+      4.6-3 Characteristic
+      4.6-4 DegreeFFE
+    4.7 [33X[0;0YHashing techniques for [10Xcvec[110Xs[133X
+      4.7-1 CVEC_HashFunctionForCVecs
+      4.7-2 ChooseHashFunction
+  5 [33X[0;0YMatrices[133X
+    5.1 [33X[0;0YCreation[133X
+      5.1-1 CMat
+      5.1-2 CMat
+      5.1-3 CMat
+      5.1-4 CMat
+      5.1-5 CVEC_ZeroMat
+      5.1-6 CVEC_IdentityMat
+      5.1-7 CVEC_RandomMat
+      5.1-8 MutableCopyMat
+      5.1-9 Matrix
+    5.2 [33X[0;0YMatrices as lists[133X
+      5.2-1 Add
+      5.2-2 Remove
+      5.2-3 ELM_LIST
+      5.2-4 ASS_LIST
+      5.2-5 ELMS_LIST
+      5.2-6 ASSS_LIST
+      5.2-7 Length
+      5.2-8 ShallowCopy
+      5.2-9 Collected
+      5.2-10 DuplicateFreeList
+      5.2-11 Append
+      5.2-12 Filtered
+      5.2-13 Unbind
+    5.3 [33X[0;0YArithmetic[133X
+      5.3-1 \+
+      5.3-2 \-
+      5.3-3 AdditiveInverseSameMutability
+      5.3-4 AdditiveInverseMutable
+      5.3-5 \*
+      5.3-6 \*
+      5.3-7 \^
+      5.3-8 \*
+      5.3-9 ZeroSameMutability
+      5.3-10 ZeroMutable
+      5.3-11 OneSameMutability
+      5.3-12 OneMutable
+      5.3-13 InverseMutable
+      5.3-14 InverseSameMutability
+      5.3-15 TransposedMat
+      5.3-16 KroneckerProduct
+    5.4 [33X[0;0YComparison of matrices and other information[133X
+      5.4-1 =
+      5.4-2 LT
+      5.4-3 IsZero
+      5.4-4 IsOne
+      5.4-5 IsDiagonalMat
+      5.4-6 IsUpperTriangularMat
+      5.4-7 IsLowerTriangularMat
+      5.4-8 CVEC_HashFunctionForCMats
+      5.4-9 ChooseHashFunction
+    5.5 [33X[0;0YSlicing and submatrices[133X
+      5.5-1 ExtractSubMatrix
+      5.5-2 CopySubMatrix
+    5.6 [33X[0;0YInformation about matrices[133X
+      5.6-1 BaseField
+      5.6-2 Characteristic
+      5.6-3 DegreeFFE
+      5.6-4 DefaultField
+    5.7 [33X[0;0YInput and output[133X
+      5.7-1 CVEC_WriteMat
+      5.7-2 CVEC_WriteMatToFile
+      5.7-3 CVEC_WriteMatsToFile
+      5.7-4 CVEC_ReadMat
+      5.7-5 CVEC_ReadMatFromFile
+      5.7-6 CVEC_ReadMatsFromFile
+    5.8 [33X[0;0YGrease[133X
+      5.8-1 GreaseMat
+      5.8-2 UnGreaseMat
+    5.9 [33X[0;0YEverything else[133X
+      5.9-1 Randomize
+      5.9-2 OverviewMat
+      5.9-3 Unpack
+  6 [33X[0;0YLinear Algebra routines[133X
+    6.1 [33X[0;0YSemi echelonised bases and cleaning[133X
+      6.1-1 EmptySemiEchelonBasis
+      6.1-2 Vectors
+      6.1-3 Length
+      6.1-4 CleanRow
+      6.1-5 SemiEchelonBasisMutable
+      6.1-6 SemiEchelonBasisMutable
+      6.1-7 SemiEchelonBasisMutableX
+      6.1-8 SemiEchelonBasisMutableT
+      6.1-9 SemiEchelonBasisMutableTX
+      6.1-10 SemiEchelonBasisMutableP
+      6.1-11 SemiEchelonBasisMutablePX
+      6.1-12 MutableNullspaceMat
+      6.1-13 MutableNullspaceMatX
+      6.1-14 NullspaceMat
+      6.1-15 NullspaceMatDestructive
+    6.2 [33X[0;0YCharacteristic and minimal polynomial[133X
+      6.2-1 CharacteristicPolynomialOfMatrix
+      6.2-2 FactorsOfCharacteristicPolynomial
+      6.2-3 MinimalPolynomialOfMatrix
+      6.2-4 CharAndMinimalPolynomialOfMatrix
+      6.2-5 MinimalPolynomialOfMatrixMC
+  7 [33X[0;0YPerformance[133X
+  8 [33X[0;0YCooperation with the [5XGAP[105X library[133X
+  9 [33X[0;0YExamples[133X
+  
+  
+  [32X
