@@ -144,11 +144,6 @@ void gf2_mul(int d, int a, int rows, int words)
     WORD *r,*p,*q;
     int i,j,k;
     WORD w;
-#if WPR == 1
-    WORD w2;
-#else
-    WORD *qq;
-#endif
     r = REGS[d];
     p = REGS[a];
     if (words == 1 ) {
@@ -159,7 +154,7 @@ void gf2_mul(int d, int a, int rows, int words)
             w = *p++;
             if (w) {
 #if WPR == 1
-                w2 = 0;
+                WORD w2 = 0;
                 for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
                     if (q[w & GREASEMASK]) w2 ^= q[w & GREASEMASK];
                     w >>= GREASE;
@@ -168,7 +163,7 @@ void gf2_mul(int d, int a, int rows, int words)
                 *r = w2;
 #else
                 for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
-                    qq = q + WPR * (w & GREASEMASK);
+                    WORD *qq = q + WPR * (w & GREASEMASK);
                     ROWADD2(r,qq);
                     r -= WPR;
                     w >>= GREASE;
@@ -188,7 +183,7 @@ void gf2_mul(int d, int a, int rows, int words)
                 w = *p++;
                 if (w) {
 #if WPR == 1
-                    w2 = 0;
+                    WORD w2 = 0;
                     for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
                         if (q[w & GREASEMASK]) w2 ^= q[w & GREASEMASK];
                         w >>= GREASE;
@@ -197,7 +192,7 @@ void gf2_mul(int d, int a, int rows, int words)
                     *r = w2;
 #else
                     for (j = sizeof(WORD)*8/GREASE;j > 0;j--) {
-                        qq = q + WPR * (w & GREASEMASK);
+                        WORD *qq = q + WPR * (w & GREASEMASK);
                         ROWADD2(r,qq);
                         r -= WPR;
                         w >>= GREASE;

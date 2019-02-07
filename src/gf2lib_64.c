@@ -2,8 +2,8 @@
 /* This is for 64bit machines. */
 
 /* Here come the global definitions: */
-#define WORD unsigned long
-#define PTRINT unsigned long
+typedef uint64_t WORD;
+#define PTRINT uint64_t
 #define ALIGN 0x100000L
 
 /* Now for 512x512 matrices: */
@@ -61,4 +61,3 @@
 #undef MATROWS
 #undef GREASE
 #undef GREASE2
-
