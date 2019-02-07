@@ -1,3 +1,4 @@
+gap> START_TEST("polynomials.tst");
 gap> f := GF(5);;
 gap> z := Zero(f);;
 gap> o := One(f);;
@@ -104,3 +105,6 @@ gap> c = cm.charpoly;
 true
 gap> mi = cm.minpoly;
 true
+
+#
+gap> STOP_TEST("polynomials.tst", 0);
