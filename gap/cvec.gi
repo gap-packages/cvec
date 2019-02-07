@@ -167,13 +167,13 @@ InstallGlobalFunction( CVEC_NewCVecClass, function(p,d,len)
       if q <= MAXSIZE_GF_INTERNAL then
           tab1 := 0*[1..q];
           tab2 := 0*[1..q];
-          CVEC_INIT_SMALL_GFQ_TABS(p,d,q,tab1,tab2,Z(q));
+          CVEC_INIT_SMALL_GFQ_TABS(p,ConwayPol(p,d),tab1,tab2);
       else
           # If p is < 65536, we need access to the prime field:
           if p < MAXSIZE_GF_INTERNAL then
               tab1 := 0*[1..p];
               tab2 := 0*[1..p];
-              CVEC_INIT_SMALL_GFQ_TABS(p,1,p,tab1,tab2,Z(p));
+              CVEC_INIT_SMALL_GFQ_TABS(p,ConwayPol(p,1),tab1,tab2);
           else
               tab1 := [];
               tab2 := [];

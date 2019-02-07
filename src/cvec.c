@@ -232,42 +232,32 @@ static Obj FINALIZE_FIELDINFO(Obj self, Obj f)
     return f;
 }
 
-Obj INIT_SMALL_GFQ_TABS(Obj self, Obj pp, Obj dd, Obj qq, Obj tab1, Obj tab2,
-                        Obj primroot)
+Obj INIT_SMALL_GFQ_TABS(Obj self, Obj pp, Obj cp, Obj tab1, Obj tab2)
 {
-    extern unsigned long PolsFF[];
     UInt p = INT_INTOBJ(pp);
-    UInt d = INT_INTOBJ(dd);
-    UInt q = INT_INTOBJ(qq);
+    UInt d = LEN_PLIST(cp) - 1;
+    FF ff = FiniteField(p, d);
+    UInt q = SIZE_FF(ff);
     UInt poly;           /* Conway polynomial of extension  */
     UInt i, l, f, n, e;  /* loop variables                  */
-    /* We already know that tab1 and tab2 are lists of length q. */
-    
-    /* The following code is from finfield.c in the GAP kernel: */
 
-    /* if q is a prime find the smallest primitive root $e$, use $x - e$   */
-    if ( d == 1 ) {
-        for ( e = 1, i = 1; i != p-1; ++e ) {
-            for ( f = e, i = 1; f != 1; ++i )
-                f = (f * e) % p;
-        }
-        poly = p-(e-1);
+    // convert the Conway polynomial
+    poly = 0;
+    for ( i = 1, l = 1; i <= d; l *= p, i++ ) {
+        poly += l * INT_INTOBJ(ELM_PLIST(cp, i));
     }
-    /* otherwise look up the polynomial used to construct this field       */
-    else {
-        for ( i = 0; PolsFF[i] != q; i += 2 ) ;
-        poly = PolsFF[i+1];
-    }
+
+    /* We already know that tab1 and tab2 are lists of length q. */
 
     /* We want ELM_PLIST(tab1,VAL_FFE(fe)+1) to be the small integer
      * whose p-adic expansion corresponds to fe in F_p[x]/cp where
      * cp is the Conway polynomial. tab2 works the opposite way, that is,
      * ELM_PLIST(tab2,e+1) = fe for the corresponding FFE. */
     SET_ELM_PLIST(tab1,1,INTOBJ_INT(0));
-    SET_ELM_PLIST(tab2,1,NEW_FFE(FLD_FFE(primroot),0));
+    SET_ELM_PLIST(tab2,1,NEW_FFE(ff,0));
     for ( e = 1, n = 0; n < q-1; ++n ) {
         SET_ELM_PLIST(tab1,n+2,INTOBJ_INT(e));
-        SET_ELM_PLIST(tab2,e+1,NEW_FFE(FLD_FFE(primroot),n+1));
+        SET_ELM_PLIST(tab2,e+1,NEW_FFE(ff,n+1));
         if ( p != 2 ) {
             f = p * (e % (q/p));  l = (p - (e/(q/p))) % p;  e = 0;
             for ( i = 1; i < q; i *= p )
@@ -4273,7 +4263,7 @@ static StructGVarFunc GVarFuncs [] = {
     FINALIZE_FIELDINFO,
     "cvec.c:FINALIZE_FIELDINFO" },
 
-  { "CVEC_INIT_SMALL_GFQ_TABS", 6, "p, d, q, tab1, tab2, primroot",
+  { "CVEC_INIT_SMALL_GFQ_TABS", 4, "p, cp, tab1, tab2",
     INIT_SMALL_GFQ_TABS,
     "cvec.c:INIT_SMALL_GFQ_TABS" },
 
