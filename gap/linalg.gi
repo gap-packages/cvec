@@ -1009,14 +1009,16 @@ InstallGlobalFunction( MinimalPolynomialOfMatrixMC,
 function( arg )
   # The new algorithm of Cheryl and Max. Can be used as Monte Carlo algorithm
   # or as deterministic algorithm with verification.
+  #    Neunhöffer, Max; Praeger, Cheryl E., Computing minimal polynomials 
+  #    of matrices.  LMS J. Comput. Math. 11 (2008), 252–279.
   # Arguments: m, eps [,indetnr]
   #   m a matrix
   #   eps is a cyclotomic which is an upper bound for the error probability
   #       if it is set to 0 then deterministic verification is done
   #   indetnr is the number of an indeterminate, if omitted 1 is taken
-  local A,B,S,coeffs,col,d,dec,eps,g,i,indetnr,irreds,j,l,lcm,lowbounds,m,
-        mm,mult,multmin,newBrow,nrunclear,opi,ordpol,ordpolsinv,p,pivs,
-        pr,prob,proof,res,rl,se,ti,ti2,veri,verify,w,wcopy,ww,zero;
+  local A,B,S,coeffs,col,d,dec,eps,g,i,indetnr,irreds,j,l,lcm,lowbounds,m,bound,
+        mm,mult,multmin,newBrow,nrunclear,opi,ordpol,ordpolsinv,p,pivs, est,
+        pr,prob,proof,res,rl,se,ti,ti2,veri,verify,w,wcopy,ww,zero, wred, c;
   if Length(arg) < 2 or Length(arg) > 3 then
       Error("Usage: m, eps [,indetnr]"); 
   fi;
@@ -1058,32 +1060,23 @@ function( arg )
 
   Info(InfoCVec,2,"Spinning up vectors...");
   while Length(S!.vectors) < Length(m) do
-      p := pivs[1];
-      w := ShallowCopy(zero);
-      w[p] := opi.o;
-      # The following randomisation seems to cost a lot because of 
-      # non-sparseness, so we stick to the standard basis vectors.
-      #w := ShallowCopy(zero);
-      #repeat
-      #    Print(".\c");
-      #    Randomize(w);
-      #    CleanRow(S,w,false,fail);
-      #until not(IsZero(w));
-      #Print("!\c");
-
-      #re := CVEC_RelativeOrderPoly(m,w,b,indetnr);
-      # We inline a relative order calculation mod the current b:
+      # random vector cleaned with known subspace
+      wred := ShallowCopy(zero);
+      while IsZero(wred) do
+        Randomize(wred);
+        c := wred{S!.pivots};
+        wred{S!.pivots} := 0*c;
+      od;
+      # add random vector from subspace
+      if Length(c) > 0  then
+        w := wred + c*S!.vectors;
+      else
+        w := wred;
+      fi;
       d := Length(S!.vectors);  # dimension of subspace:
-      Add(S!.vectors,w);
-      Add(S!.pivots,p);
-      l := d+1;  # is always equal to Length(S!.vectors)
-      ww := ShallowCopy(zero);
-      ww[l] := opi.o;
-      Add(A,ww);
-      Add(B,ww);
+      l := d;  # is always equal to Length(S!.vectors)
       while true do
           dec := ShallowCopy(zero);
-          w := w * m;
           wcopy := ShallowCopy(w);
           if CleanRow(S,wcopy,true,dec) then break; fi;
           l := l + 1;
@@ -1093,11 +1086,16 @@ function( arg )
           # Thus: dec[l]*S[l] = Y[l] - dec{[1..l-1]}*S{[1..l-1]}
           #                   = Y[l] - dec{[1..l-1]}*B*Y{[1..l-1]}
           # by a slight abuse of "*" because dec{[1..l-1]}*B has full length.
-          newBrow := dec{[1..l-1]}*B;
+          if l=1 then
+            newBrow := ShallowCopy(zero);
+          else
+            newBrow := dec{[1..l-1]}*B;
+          fi;
           MultVector(newBrow,-opi.o);
           newBrow[l] := opi.o;
           MultVector(newBrow,dec[l]^-1);
           Add(B,newBrow);
+          w := w * m;
       od;
       # Now we have extended the basis S together with A and B, such that
       # we still have Y = A*S and S = B*Y. The latest dec expresses 
@@ -1165,9 +1163,14 @@ function( arg )
 
     nrunclear := 0;   # number of irreducible factors the multiplicity of which
                       # are not yet known
+    est := [];        # for estimate that we have not yet found full 
+                      # multiplicities, see Prop. 6.1, 6.3 (only need to
+                      # consider irreds not known to have same multiplicity
+                      # as in characteristic polynomial)
     for i in [1..Length(irreds)] do
         if mult[i] > lowbounds[i] then
             nrunclear := nrunclear + 1;
+            Add(est, Degree(irreds[i]));
         fi;
     od;
     Info(InfoCVec,2,"Time until now: ",Runtime()-ti," lap: ",Runtime()-ti2);
@@ -1209,21 +1212,24 @@ function( arg )
                 Info(InfoCVec,2,"Cyclic matrix, found proof.");
                 break;
             fi;
-            prob := prob * p;  # probability to have missed one Jordan block
-            Info( InfoCVec, 2, "Probability to have them all (%%): ",
-                   Int((1-prob)^nrunclear*10000),"/10000");
-            if 1-(1-prob)^nrunclear < eps and Length(opi.rordpols)-i > 5 then
+            prob := prob * p;  # = (1/q)^u in Prop. 6.3
+            bound := Sum(est, d-> prob^d);
+            i := i + 1;
+            Info( InfoCVec, 2, "Probability to have missed a factor: ",
+                   1.0*bound);
+            if bound < eps  then
                 break;   # this is the probability to have missed one
             fi;
-            i := i + 1;
         od;
 
         Info(InfoCVec,2,"Checking multiplicities...");
         nrunclear := 0;
+        est := [];
         for j in [1..Length(irreds)] do
             multmin[j] := CVEC_FactorMultiplicity(ordpol,irreds[j]);
             if j >= veri and multmin[j] < mult[j] then
                 nrunclear := nrunclear + 1;
+                Add(est, Degree(irreds[j]));
             fi;
         od;
         if nrunclear = 0 then proof := true; break; fi;   # result is correct!
