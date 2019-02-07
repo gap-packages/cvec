@@ -161,9 +161,7 @@ kernel headers, so that we do not need to rely on magic constants anymore.
 
 static Obj OurErrorBreakQuit(char *msg)
 {
-    ErrorReturnVoid(msg,0L,0L,
-                    "    try 'return;' (which will not work here!)");
-    ErrorQuit("You were told, 'return;' did not work!",0L,0L);
+    ErrorMayQuit(msg,0,0);
     return 0L;
 }
 
