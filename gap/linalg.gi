@@ -94,8 +94,12 @@ InstallMethod( ViewObj, "for a semi echelonised basis",
     if not(IsMutable(b)) or not(IsMutable(b!.vectors)) then
         Print("immutable ");
     fi;
-    Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
+    if Length(b!.vectors) = 0 then
+        Print("empty semi echelonized basis>");
+    else
+      Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
           NumberRows(b!.vectors),">");
+    fi;
   end);
 
 InstallMethod( Display, "for a semi echelonised basis",
@@ -105,10 +109,14 @@ InstallMethod( Display, "for a semi echelonised basis",
     if not(IsMutable(b)) or not(IsMutable(b!.vectors)) then
         Print("immutable ");
     fi;
-    Print("semi echelonized basis over ",BaseDomain(b!.vectors)," of length ",
-          NumberRows(b!.vectors),"\n");
-    Display(b!.vectors);
-    Print(">");
+    if Length(b!.vectors) = 0 then
+        Print("empty semi echelonized basis>");
+    else
+        Print("semi echelonized basis over ",BaseDomain(b!.vectors),
+              " of length ", NumberRows(b!.vectors),"\n");
+        Display(b!.vectors);
+        Print(">");
+    fi;
   end );
 
 #############################################################################

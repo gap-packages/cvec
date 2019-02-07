@@ -7,6 +7,8 @@ gap> ConvertToMatrixRep(id);
 gap> c:=CMat(id);
 <cmat 3x3 over GF(3,1)>
 gap> EmptySemiEchelonBasis(c);
-<semi echelonized basis over GF(3) of length 0>
+<empty semi echelonized basis>
 gap> EmptySemiEchelonBasis(c[1]);
-<semi echelonized basis over GF(3) of length 0>
+<empty semi echelonized basis>
+gap> EmptySemiEchelonBasis(id);
+<empty semi echelonized basis>
