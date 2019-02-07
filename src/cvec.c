@@ -50,13 +50,6 @@ typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
  * corresponding value in cvec.gi in CVEC_NewCVecClass! */
 #define MAXDEGREE 1024
 
-/* Define this to empty if you want global access to functions: */
-#define STATIC static
-/* #define STATIC */
-
-/* Define this to empty if your compiler does not support inlined functions: */
-#define INLINE inline
-
 
 /************************************/
 /* Macros to access the data types: */
@@ -166,7 +159,7 @@ kernel headers, so that we do not need to rely on magic constants anymore.
  /* Internal or test functions: */
 /*******************************/
 
-STATIC Obj OurErrorBreakQuit(char *msg)
+static Obj OurErrorBreakQuit(char *msg)
 {
     ErrorReturnVoid(msg,0L,0L,
                     "    try 'return;' (which will not work here!)");
@@ -174,7 +167,7 @@ STATIC Obj OurErrorBreakQuit(char *msg)
     return 0L;
 }
 
-STATIC Obj TEST_ASSUMPTIONS(Obj self)
+static Obj TEST_ASSUMPTIONS(Obj self)
 /* Result 0 is OK, otherwise something is wrong... */
 {
     /* Note in addition, that d * length of a vector must fit into a
@@ -195,7 +188,7 @@ STATIC Obj TEST_ASSUMPTIONS(Obj self)
 #endif
 }
 
-STATIC Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
+static Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
 {
     /* po is a list of (small) GAP integers, s a GAP string. */
     Int l,i;
@@ -209,7 +202,7 @@ STATIC Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
     return s;
 }
 
-STATIC Obj FINALIZE_FIELDINFO(Obj self, Obj f)
+static Obj FINALIZE_FIELDINFO(Obj self, Obj f)
 {
     Obj s;
     Word *po;
@@ -352,7 +345,7 @@ typedef struct SeqAcc {
   }
 
 /* Initializes the sequential access struct, v is a cvec: */
-static INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
+static inline void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_d(fi);
@@ -379,7 +372,7 @@ static INLINE void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
  /* Interfacing stuff for the objects to the GAP level: */
 /*******************************************************/
 
-STATIC Obj NEW(Obj self, Obj cl, Obj type)
+static Obj NEW(Obj self, Obj cl, Obj type)
 {
     Obj v;
     Int si;
@@ -394,7 +387,7 @@ STATIC Obj NEW(Obj self, Obj cl, Obj type)
     return v;
 }
 
-STATIC Obj MAKEZERO(Obj self, Obj v)
+static Obj MAKEZERO(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_MAKEZERO: no cvec");
@@ -408,7 +401,7 @@ STATIC Obj MAKEZERO(Obj self, Obj v)
     return 0L;
 }
     
-STATIC Obj COPY(Obj self, Obj v, Obj w)
+static Obj COPY(Obj self, Obj v, Obj w)
 {
     if (!IS_CVEC(v) || !IS_CVEC(w)) {
         return OurErrorBreakQuit("CVEC_COPY: no cvec");
@@ -428,7 +421,7 @@ STATIC Obj COPY(Obj self, Obj v, Obj w)
     }
 }
 
-STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
+static Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
 /* This function returns the vector in its integer representation. This
  * means, that for the case that q <= 65536 or d = 1 each integer
  * corresponds to one field entry (p-adic expansion for d>1). For bigger
@@ -505,7 +498,7 @@ STATIC Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
     return 0L;
 }
 
-STATIC Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
+static Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
 /* This function transfers data in integer representation to the vector. This
  * means, that for the case that q <= 65536 or d = 1, each integer
  * corresponds to one field entry (p-adic expansion for d > 1). For
@@ -700,7 +693,7 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
     return 0L;
 }
 
-STATIC Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
+static Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_epw(fi);
@@ -732,7 +725,7 @@ STATIC Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
     return 0L;
 }
 
-STATIC Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
+static Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_epw(fi);
@@ -763,7 +756,7 @@ STATIC Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
     return 0L;
 }
 
-STATIC Obj GREASEPOS(Obj self, Obj v, Obj pivs)
+static Obj GREASEPOS(Obj self, Obj v, Obj pivs)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_p(fi);
@@ -808,7 +801,7 @@ static Word buf[MAXDEGREE+1];
  /* scalar multiplication:                                   */
 /*                                                          */
 
-static INLINE void ADD2_INL(Word *vv,Word *ww,Obj f,long i)
+static inline void ADD2_INL(Word *vv,Word *ww,Obj f,long i)
 /* This internal inlined function adds i Words at *ww to the corresponding
  * Words at *vv. Characteristic 2 and odd characteristic are handled
  * separately. */
@@ -834,7 +827,7 @@ static INLINE void ADD2_INL(Word *vv,Word *ww,Obj f,long i)
     }
 }
 
-static INLINE void ADD3_INL(Word *uu,Word *vv,Word *ww,Obj f,long i)
+static inline void ADD3_INL(Word *uu,Word *vv,Word *ww,Obj f,long i)
 /* This internal inlined function adds i Words at *ww to the corresponding
  * Words at *vv and stores them to *uu. Characteristic 2 and odd 
  * characteristic are handled separately. */
@@ -862,7 +855,7 @@ static INLINE void ADD3_INL(Word *uu,Word *vv,Word *ww,Obj f,long i)
     }
 }
 
-static INLINE void MUL_INL(Word *vv,Obj f,Word s,long i)
+static inline void MUL_INL(Word *vv,Obj f,Word s,long i)
 /* This interal inlined function multiplies i Words at *vv by the scalar
  * s from the prime field (0 <= s < p). Special cases 0, 1, p-1, and 2
  * are handled especially fast. 
@@ -924,7 +917,7 @@ static INLINE void MUL_INL(Word *vv,Obj f,Word s,long i)
     }
 }
 
-static INLINE Word MUL1_INL(Word wo,Obj f,Word s)
+static inline Word MUL1_INL(Word wo,Obj f,Word s)
 /* This interal inlined function multiplies 1 Word wo by the scalar
  * s from the prime field (0 <= s < p). Special cases 0, 1, p-1, and 2
  * are handled especially fast. 
@@ -970,7 +963,7 @@ static INLINE Word MUL1_INL(Word wo,Obj f,Word s)
     }
 }
 
-static INLINE void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
+static inline void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
 /* This interal inlined function multiplies i Words at *ww by the scalar
  * s from the prime field (0 <= s < p) and stores the result to *vv. 
  * Special cases 0, 1, p-1, and 2 are handled especially fast. 
@@ -1033,7 +1026,7 @@ static INLINE void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
     }
 }
 
-static INLINE void ADDMUL_INL(Word *vv,Word *ww,Obj f,Word s,long i)
+static inline void ADDMUL_INL(Word *vv,Word *ww,Obj f,Word s,long i)
 /* This interal inlined function multiplies i Words at *ww by the scalar
  * s from the prime field (0 <= s < p) and adds the result to *vv. 
  * Special cases 0, 1, p-1, and 2 are handled especially fast. 
@@ -1098,7 +1091,7 @@ static INLINE void ADDMUL_INL(Word *vv,Word *ww,Obj f,Word s,long i)
     }
 }
 
-static INLINE Word ADDMUL1_INL(Word vv,Word ww,Obj f,Word s)
+static inline Word ADDMUL1_INL(Word vv,Word ww,Obj f,Word s)
 /* This interal inlined function multiplies one Word ww by the scalar
  * s from the prime field (0 <= s < p) and adds the result to the Word vv. 
  * Special cases 0, 1, p-1, and 2 are handled especially fast. 
@@ -1158,7 +1151,7 @@ static INLINE Word ADDMUL1_INL(Word vv,Word ww,Obj f,Word s)
  * GAP level: 
  */
 
-static INLINE Int CVEC_Itemp(Obj fi, Word *v, Int i)
+static inline Int CVEC_Itemp(Obj fi, Word *v, Int i)
 {
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
@@ -1167,7 +1160,7 @@ static INLINE Int CVEC_Itemp(Obj fi, Word *v, Int i)
     return (Int) ((v[i/elsperword] >> (bitsperel * (i % elsperword))) & maskp);
 }
 
-static INLINE void CVEC_Itemq(Obj fi, Word *v, Int i)
+static inline void CVEC_Itemq(Obj fi, Word *v, Int i)
 /* Writes scalar into scbuf. */
 {
     Int *sc = scbuf;
@@ -1189,7 +1182,7 @@ static INLINE void CVEC_Itemq(Obj fi, Word *v, Int i)
     }
 }
 
-static INLINE void CVEC_AssItemp(Obj fi, Word *v, Int i, Word sc)
+static inline void CVEC_AssItemp(Obj fi, Word *v, Int i, Word sc)
 {
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
@@ -1200,7 +1193,7 @@ static INLINE void CVEC_AssItemp(Obj fi, Word *v, Int i, Word sc)
     *v = (*v & (WORDALLONE ^ (maskp << shift))) | (sc << shift);
 }
 
-static INLINE void CVEC_AssItemq(Obj fi, Word *v, Int i, Int *sc)
+static inline void CVEC_AssItemq(Obj fi, Word *v, Int i, Int *sc)
 {
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
@@ -1217,7 +1210,7 @@ static INLINE void CVEC_AssItemq(Obj fi, Word *v, Int i, Int *sc)
     }
 }
 
-static INLINE Int CVEC_Firstnzp(Obj fi, Word *v, Int len)
+static inline Int CVEC_Firstnzp(Obj fi, Word *v, Int len)
 /* Returns the index of the first non-zero element in the vector or len+1
  * if the vector is equal to zero. This is only for prime fields. */
 {
@@ -1245,7 +1238,7 @@ static INLINE Int CVEC_Firstnzp(Obj fi, Word *v, Int len)
     return len+1;
 }
 
-static INLINE Int CVEC_Firstnzq(Obj fi, Word *v, Int len, Int wordlen)
+static inline Int CVEC_Firstnzq(Obj fi, Word *v, Int len, Int wordlen)
 /* Returns the index of the first non-zero element in the vector or 0,
  * if the vector is equal to zero. This is for extension fields. */
 {
@@ -1277,7 +1270,7 @@ static INLINE Int CVEC_Firstnzq(Obj fi, Word *v, Int len, Int wordlen)
     return 0;
 }
 
-static INLINE Int CVEC_Lastnzp(Obj fi, Word *v, Int len)
+static inline Int CVEC_Lastnzp(Obj fi, Word *v, Int len)
 /* Returns the index of the last non-zero element in the vector or 0
  * if the vector is equal to zero. This is only for prime fields. */
 {
@@ -1310,7 +1303,7 @@ static INLINE Int CVEC_Lastnzp(Obj fi, Word *v, Int len)
     return 0;
 }
     
-static INLINE Int CVEC_Lastnzq(Obj fi, Word *v, Int len, Int wordlen)
+static inline Int CVEC_Lastnzq(Obj fi, Word *v, Int len, Int wordlen)
 /* Returns the index of the last non-zero element in the vector or 0,
  * if the vector is equal to zero. This is for extension fields. */
 {
@@ -1348,7 +1341,7 @@ static INLINE Int CVEC_Lastnzq(Obj fi, Word *v, Int len, Int wordlen)
  /* Arithmetic for finite field scalars: */
 /****************************************/
 
-static INLINE Int invert_modp(Int s,Int p)
+static inline Int invert_modp(Int s,Int p)
 {
     /* This is a standard extended Euclidean algorithm for p and s.
      * We start with x:=p and y:=s and assume p>s>0. We always keep
@@ -1377,7 +1370,7 @@ static INLINE Int invert_modp(Int s,Int p)
     return 0;   /* Never reached */
 }
 
-static INLINE Int mulmodp(Int a, Int b, Int p)
+static inline Int mulmodp(Int a, Int b, Int p)
 {
     return (Int)( (((long long)a) * b) % p);
 }
@@ -1401,7 +1394,7 @@ static INLINE Int mulmodp(Int a, Int b, Int p)
  * copy anyway. Both fr and to can be 0, which indicates 1 and length of
  * the vector respectively. */
 
-static INLINE Int handle_hints(Obj cl, Obj fi, Obj fr, Obj to, 
+static inline Int handle_hints(Obj cl, Obj fi, Obj fr, Obj to, 
                                Int *start, Int *end)
 {
     Int st,en;
@@ -1422,7 +1415,7 @@ static INLINE Int handle_hints(Obj cl, Obj fi, Obj fr, Obj to,
     return 1;
 }
 
-STATIC Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
+static Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_ADD2: no cvec");
@@ -1446,7 +1439,7 @@ STATIC Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
     return 0L;
 }
 
-STATIC Obj ADD3(Obj self, Obj u, Obj v,Obj w)
+static Obj ADD3(Obj self, Obj u, Obj v,Obj w)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
         return OurErrorBreakQuit("CVEC_ADD3: no cvec");
@@ -1468,7 +1461,7 @@ STATIC Obj ADD3(Obj self, Obj u, Obj v,Obj w)
     return 0L;
 }
 
-static INLINE Int *prepare_scalar(Obj fi, Obj s)
+static inline Int *prepare_scalar(Obj fi, Obj s)
 /* A NULL pointer indicates failure. */
 {
     Int sc;
@@ -1538,7 +1531,7 @@ static INLINE Int *prepare_scalar(Obj fi, Obj s)
     return scbuf;
 }
 
-STATIC INLINE void MUL1_INT(Obj u, Obj ucl, Obj ufi, Int d, Int *sc,
+static inline void MUL1_INT(Obj u, Obj ucl, Obj ufi, Int d, Int *sc,
                             Int start, Int end)
 /* This does the multiplication in place in the non-prime field case.
  * This is an internal function, called by MUL1 and possibly during
@@ -1584,7 +1577,7 @@ STATIC INLINE void MUL1_INT(Obj u, Obj ucl, Obj ufi, Int d, Int *sc,
   } 
 }
 
-STATIC Obj MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
+static Obj MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u)) {
         return OurErrorBreakQuit("CVEC_MUL1: no cvec");
@@ -1611,7 +1604,7 @@ STATIC Obj MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
     return 0L;
 }
 
-STATIC INLINE void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v, 
+static inline void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v, 
                             Int d, Int wordlen, Int *sc)
 /* This does the multiplication with result somewhere else in the non-prime 
  * field case.
@@ -1658,7 +1651,7 @@ STATIC INLINE void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v,
   } 
 }
 
-STATIC Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
+static Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_MUL1: no cvec");
@@ -1690,7 +1683,7 @@ STATIC Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
     return 0L;
 }
 
-STATIC INLINE void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
+static inline void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
                               Int d, Int *sc, Int start, Int end)
 /* This does the multiplication plus addition to something else in the 
  * non-prime field case.
@@ -1738,7 +1731,7 @@ STATIC INLINE void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
   } 
 }
 
-STATIC Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
+static Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_ADDMUL: no cvec");
@@ -1773,7 +1766,7 @@ STATIC Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
     return 0L;
 }
 
-STATIC Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
+static Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
 {
     Int i;
     Int *sc;
@@ -1808,7 +1801,7 @@ STATIC Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
     return 0L;
 }
 
-STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
+static Obj ELM_CVEC(Obj self, Obj v, Obj pos)
 {
     Int i;
     if (!IS_CVEC(v)) {
@@ -1871,7 +1864,7 @@ STATIC Obj ELM_CVEC(Obj self, Obj v, Obj pos)
     return 0L;
 }
 
-STATIC Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
+static Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_POSITION_NONZERO_CVEC: no cvec");
@@ -1890,7 +1883,7 @@ STATIC Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
     }
 }
 
-STATIC Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
+static Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_POSITION_LAST_NONZERO_CVEC: no cvec");
@@ -1909,7 +1902,7 @@ STATIC Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
     }
 }
     
-STATIC Obj CVEC_LT(Obj self, Obj u, Obj v)
+static Obj CVEC_LT(Obj self, Obj u, Obj v)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_CVEC_LT: no cvecs");
@@ -1941,7 +1934,7 @@ STATIC Obj CVEC_LT(Obj self, Obj u, Obj v)
     return 0L;
 }
 
-STATIC Obj CVEC_EQ(Obj self, Obj u, Obj v)
+static Obj CVEC_EQ(Obj self, Obj u, Obj v)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_CVEC_EQ: no cvecs");
@@ -1972,7 +1965,7 @@ STATIC Obj CVEC_EQ(Obj self, Obj u, Obj v)
     return 0L;
 }
 
-STATIC Obj CVEC_ISZERO(Obj self, Obj u)
+static Obj CVEC_ISZERO(Obj self, Obj u)
 {
     if (!IS_CVEC(u)) {
         return OurErrorBreakQuit("CVEC_CVEC_EQ: no cvec");
@@ -1994,7 +1987,7 @@ STATIC Obj CVEC_ISZERO(Obj self, Obj u)
     return 0L;
 }
 
-STATIC Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
+static Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
 /* Extracts ll field elements from the vector self at position ii into
  * one Word in a convenient way, fitting to FILL_GREASE_TAB.
  * Here is an example with l = 3, d = 2:
@@ -2163,7 +2156,7 @@ static Word VecEx_Worker_ext_bad(Word *data)
     return res;
 }
 
-STATIC Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
+static Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
 /* See comment of EXTRACT. This initializes the extraction routines.
  * Use Vector_Extract_Worker(Word *data) afterwards. */
 {
@@ -2231,13 +2224,13 @@ STATIC Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
     return 0L;  /* return nothing */
 }
 
-STATIC Obj EXTRACT_DOIT(Obj self, Obj v)
+static Obj EXTRACT_DOIT(Obj self, Obj v)
 {
     /* Dereference the function pointer and call the worker routine: */
     return INTOBJ_INT( (Int) ( (*Vector_Extract_Worker)(DATA_CVEC(v)) ) );
 }
 
-STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
+static Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
                           Obj offset)
 /* This function does the precalculation for greasing. This is the internal
  * version to be called from GAP. tab must already be long enough, no
@@ -2323,7 +2316,7 @@ STATIC Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
     return 0L;
 }
 
-STATIC Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
+static Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
 /* Note that m is the list of vectors with first component unbound. */
 {
     PREPARE_clfi(u,ucl,ufi);
@@ -2351,7 +2344,7 @@ STATIC Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
     return 0L;
 }
 
-STATIC Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
+static Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
                                   Obj spreadtab, Obj glev)
 {
     PREPARE_clfi(u,ucl,ufi);
@@ -2376,7 +2369,7 @@ STATIC Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
     return 0;
 }
 
-STATIC Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab, 
+static Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab, 
                                   Obj spreadtab, Obj len, Obj glev)
 {  /* See mult. routine "for two cmats, second one greased" in cvec.gi */
     Int k = INT_INTOBJ(len);
@@ -2408,7 +2401,7 @@ STATIC Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab,
     return 0L;
 }
 
-STATIC Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
+static Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
                                      Obj greasetab, Obj spreadtab, Obj glev)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
@@ -2443,7 +2436,7 @@ STATIC Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
     return 0L;
 }
 
-STATIC INLINE void ld(WORD *reg, Obj mat,
+static inline void ld(WORD *reg, Obj mat,
                       int wordscp, int wordscl, int rowscp)
 {
     int i,j;
@@ -2455,7 +2448,7 @@ STATIC INLINE void ld(WORD *reg, Obj mat,
     }
 }
 
-STATIC INLINE void st(Obj mat, WORD *reg,
+static inline void st(Obj mat, WORD *reg,
                       int wordscp, int wordsskip, int rowscp)
 {
     int i,j;
@@ -2467,7 +2460,7 @@ STATIC INLINE void st(Obj mat, WORD *reg,
     }
 }
 
-STATIC Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
+static Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
 {
     Int maxdim;
     PREPARE_cl(ELM_PLIST(m,2),clm);
@@ -2522,7 +2515,7 @@ STATIC Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
     return 0L;
 }
 
-STATIC Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
+static Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
     Int t = LEN_PLIST(l)-1;    /* dito */
@@ -2564,7 +2557,7 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
     return 0L;
 }
 
-STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
+static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
     Int t = LEN_PLIST(l)-1;    /* dito */
@@ -2645,7 +2638,7 @@ STATIC Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
 
 /* Our contribution to slicing: */
 
-STATIC void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
+static void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
                       Int d, Int elsperword, Int bitsperel)
 {
     Word stamask,endmask,upmask,domask,kupmask,kdomask;
@@ -2764,7 +2757,7 @@ STATIC void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
     }
 }
 
-STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
+static Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
 /* No checks are done at all. src and dst must be cvecs over the same field and
  * 1 <= srcpos <= srcpos+len-1 <= Length(src) and
  * 1 <= dstpos <= dstpos+len-1 <= Length(dst) must hold. */
@@ -2779,7 +2772,7 @@ STATIC Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
     return 0L;
 }
     
-STATIC Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
+static Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
 /* srcposs and dstposs may each be ranges or dense plain lists. src and
  * dst must be cvecs over the same field (this is not checked!).
  * srcposs and dstposs must be lists of integers within 
@@ -2952,7 +2945,7 @@ STATIC Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
     return 0L;
 }
 
-STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst, 
+static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst, 
      Obj srcrows, Obj dstrows, Obj srcposs, Obj dstposs)
 /* srcposs and dstposs may each be ranges or dense plain lists. src and
  * dst must be lists of cvecs over the same field (this is not checked!).
@@ -3156,7 +3149,7 @@ STATIC Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
     return 0L;
 }
 
-STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
+static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_d(fi);
@@ -3286,7 +3279,7 @@ STATIC Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     return 0L;
 }
 
-STATIC Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
+static Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_d(fi);
@@ -3476,7 +3469,7 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
     return 0L;
 }
 
-STATIC Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
+static Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
 {
     /* n is empty, correct size, >0 rows, >0 cols, right size, same field. */
     PREPARE_clfi(ELM_PLIST(m,2),cl,fi);
@@ -3521,7 +3514,7 @@ STATIC Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
     return 0L;
 }
 
-STATIC inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
+static inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
         Obj cl, Obj fi, Int p, Int d, Int saver, Int wordlen, Word *helperdata)
 {
     register Int k;
@@ -3559,7 +3552,7 @@ STATIC inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
     }
 }
 
-STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
+static Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
 {
     PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We know that the length is >=2 */
     PREPARE_p(fi);
@@ -3631,7 +3624,7 @@ STATIC Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
     return True;
 }
     
-STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun, 
+static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun, 
                                Obj helper, Obj grease)
 {
     PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We known that the length is >=3 */
@@ -3761,7 +3754,7 @@ STATIC Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
     
 /* Cleaning vectors: */
 
-STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
+static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
 {
   /* INPUT:
      basis: record with fields
@@ -3919,12 +3912,12 @@ STATIC Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   }
 }
 
-STATIC Obj CVEC_EQINT(Obj self, Obj a, Obj b)
+static Obj CVEC_EQINT(Obj self, Obj a, Obj b)
 {
     return (EQ( a, b ) ? True : False);
 }
 
-STATIC Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
+static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
 {
     /* m and n must be cmats over the same prime field with #cols(m)=#rows(n).
      * i must be a row number of m and j a row number of n. */
@@ -4007,7 +4000,7 @@ STATIC Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
     return ELM_PLIST(tab2,res+1);
 }
 
-STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
+static Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
 {
     /* v and w must be cvecs over the same prime field with equal length! */
     if (!IS_CVEC(v) || !IS_CVEC(w)) {
@@ -4082,9 +4075,9 @@ STATIC Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
     }
 }
 
-STATIC UInt rnam_rows = 0;
+static UInt rnam_rows = 0;
 
-STATIC Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
+static Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
 {
     if (!rnam_rows) {
        rnam_rows = RNamName("rows");
@@ -4092,11 +4085,11 @@ STATIC Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
     return ELM_PLIST(ElmPRec(m,rnam_rows),INT_INTOBJ(p)+1);
 }
 
-STATIC UInt rnam_vecclass = 0;
+static UInt rnam_vecclass = 0;
 
 Obj             SumFFEFFE ( Obj opL, Obj opR );
 
-STATIC Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
+static Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
 /* m and n must have equal row length l */
 {
     Obj cl,fi;
@@ -4145,7 +4138,7 @@ static UInt RNAM_rows = 0;
 static UInt RNAM_scaclass = 0;
 static UInt RNAM_vecclass = 0;
 
-STATIC Obj CVEC_CMatMaker_C( Obj self, Obj l, Obj cl )
+static Obj CVEC_CMatMaker_C( Obj self, Obj l, Obj cl )
 {
     /* Create a cmat object. This is internal, so no checks are done! */
     Obj m;
@@ -4191,7 +4184,7 @@ STATIC Obj CVEC_CMatMaker_C( Obj self, Obj l, Obj cl )
     return m;
 }
 
-STATIC Obj CVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
+static Obj CVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
 {
     Int i;
     Obj cvectype;
@@ -4215,7 +4208,7 @@ STATIC Obj CVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
 
 static Obj CVEC_PROD_CMAT_CMAT_BIG;
 
-STATIC Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
+static Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
 {
     /* This function is installed as the multiplication function for cmats.
      * It dispatches very quickly for small matrices and calls back
