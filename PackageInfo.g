@@ -7,8 +7,9 @@ SetPackageInfo( rec(
 
 PackageName := "cvec",
 Subtitle := "Compact vectors over finite fields",
-Version := "2.6.1",
-Date := "07/06/2018", # dd/mm/yyyy format
+Version := "2.7.0",
+Date := "19/02/2019", # dd/mm/yyyy format
+License := "GPL-2.0-or-later",
 
 ##  Information about authors and maintainers.
 Persons := [
@@ -32,7 +33,7 @@ Persons := [
     IsAuthor      := false,
     IsMaintainer  := true,
     Email         := "max.horn@math.uni-giessen.de",
-    WWWHome       := "http://www.quendi.de/math",
+    WWWHome       := "https://www.quendi.de/math",
     PostalAddress := Concatenation(
                        "AG Algebra\n",
                        "Mathematisches Institut\n",
@@ -100,7 +101,7 @@ PackageDoc := rec(
 ),
 
 Dependencies := rec(
-  GAP := ">=4.8.8",
+  GAP := ">=4.9",
   NeededOtherPackages := [
     ["GAPDoc", ">= 1.2"],
     ["IO", ">= 4.1"],
@@ -129,12 +130,23 @@ Keywords := [],
 
 AutoDoc := rec(
     TitlePage := rec(
-        Copyright := Concatenation(
-                    "&copyright; 2005-2014 by Max Neunhöffer<P/>\n",
-                    "\n",
-                    "This package may be distributed under the terms and conditions of the\n",
-                    "GNU Public License Version 2.\n"
-                ),
+    Copyright := """
+      &copyright; 2005-2014 by Max Neunhöffer<P/>
+
+      &cvec; is free software: you can redistribute it and/or modify
+      it under the terms of the GNU General Public License as published by
+      the Free Software Foundation, either version 2 of the License, or
+      (at your option) any later version. <P/>
+
+      &cvec; is distributed in the hope that it will be useful,
+      but WITHOUT ANY WARRANTY; without even the implied warranty of
+      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+      GNU General Public License for more details. <P/>
+
+      For a copy of the GNU General Public License, see
+      the file <F>LICENSE</F> included with this software,
+      or see <URL>http://www.gnu.org/licenses/gpl.html</URL>.
+      """,
     )
 ),
 

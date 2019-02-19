@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <script type="text/javascript"
-  src="http://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 <title>GAP (cvec) - Chapter 5: Matrices</title>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -577,7 +577,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CVEC_HashFunctionForCMats</code>( <var class="Arg">m</var>, <var class="Arg">data</var> )</td><td class="tdright">(&nbsp;function&nbsp;)</td></tr></table></div>
 <p>Returns: an integer hash value</p>
 
-<p>This is a hash function usable for the <code class="func">ChooseHashFunction</code> (<a href="../../../pkg/orb-4.8.0/doc/chap4_mj.html#X7ACED4FB7C971A5A"><span class="RefLink">orb: ChooseHashFunction</span></a>) framework. It takes as arguments a <code class="code">cmat</code> <var class="Arg">m</var> and a list <var class="Arg">data</var> of length <span class="SimpleMath">\(2\)</span>. The first entry of <var class="Arg">data</var> is the length of the hash table used and the second entry is the number of bytes looked at in the <code class="code">cvec</code>s in the matrices.</p>
+<p>This is a hash function usable for the <code class="func">ChooseHashFunction</code> (<a href="../../../pkg/orb-4.8.1/doc/chap4_mj.html#X7ACED4FB7C971A5A"><span class="RefLink">orb: ChooseHashFunction</span></a>) framework. It takes as arguments a <code class="code">cmat</code> <var class="Arg">m</var> and a list <var class="Arg">data</var> of length <span class="SimpleMath">\(2\)</span>. The first entry of <var class="Arg">data</var> is the length of the hash table used and the second entry is the number of bytes looked at in the <code class="code">cvec</code>s in the matrices.</p>
 
 <p><a id="X7ACED4FB7C971A5A" name="X7ACED4FB7C971A5A"></a></p>
 
@@ -665,7 +665,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CVEC_WriteMat</code>( <var class="Arg">f</var>, <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: <code class="code">true</code> or <code class="code">fail</code></p>
 
-<p><var class="Arg">f</var> must be a file object from the <strong class="pkg">IO</strong> package (see <code class="func">IsFile</code> (<a href="../../../pkg/io-4.5.1/doc/chap4_mj.html#X80C9B80A80E3A555"><span class="RefLink">IO: IsFile</span></a>)) and <var class="Arg">m</var> must be a <code class="code">cmat</code>. The matrix <var class="Arg">m</var> is written to the file <var class="Arg">f</var>. Note that the format (see Section <a href="chap3_mj.html#X783395FC81A451F3"><span class="RefLink">3.4</span></a>) is platform independent, such that matrices can be exchanged between different architectures. The result is <code class="code">true</code> or <code class="code">fail</code> depending on whether everything worked or an error occurred respectively.</p>
+<p><var class="Arg">f</var> must be a file object from the <strong class="pkg">IO</strong> package (see <code class="func">IsFile</code> (<a href="../../../pkg/io-4.5.4/doc/chap4_mj.html#X80C9B80A80E3A555"><span class="RefLink">IO: IsFile</span></a>)) and <var class="Arg">m</var> must be a <code class="code">cmat</code>. The matrix <var class="Arg">m</var> is written to the file <var class="Arg">f</var>. Note that the format (see Section <a href="chap3_mj.html#X783395FC81A451F3"><span class="RefLink">3.4</span></a>) is platform independent, such that matrices can be exchanged between different architectures. The result is <code class="code">true</code> or <code class="code">fail</code> depending on whether everything worked or an error occurred respectively.</p>
 
 <p><a id="X794D936C7E99F805" name="X794D936C7E99F805"></a></p>
 
@@ -692,7 +692,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CVEC_ReadMat</code>( <var class="Arg">f</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a <code class="code">cmat</code> or <code class="code">fail</code></p>
 
-<p><var class="Arg">f</var> must be a file object from the <strong class="pkg">IO</strong> package (see <code class="func">IsFile</code> (<a href="../../../pkg/io-4.5.1/doc/chap4_mj.html#X80C9B80A80E3A555"><span class="RefLink">IO: IsFile</span></a>)). A matrix is read from the file <var class="Arg">f</var>. Note that the format (see Section <a href="chap3_mj.html#X783395FC81A451F3"><span class="RefLink">3.4</span></a>) is platform independent, such that matrices can be exchanged between different architectures. The result is <code class="code">fail</code> if an error occurred.</p>
+<p><var class="Arg">f</var> must be a file object from the <strong class="pkg">IO</strong> package (see <code class="func">IsFile</code> (<a href="../../../pkg/io-4.5.4/doc/chap4_mj.html#X80C9B80A80E3A555"><span class="RefLink">IO: IsFile</span></a>)). A matrix is read from the file <var class="Arg">f</var>. Note that the format (see Section <a href="chap3_mj.html#X783395FC81A451F3"><span class="RefLink">3.4</span></a>) is platform independent, such that matrices can be exchanged between different architectures. The result is <code class="code">fail</code> if an error occurred.</p>
 
 <p><a id="X824FA01878D60EE1" name="X824FA01878D60EE1"></a></p>
 
