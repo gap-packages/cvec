@@ -1,10 +1,22 @@
 This file describes changes in the cvec package.
 
-2.6.1
+2.7.0 (2019-02-19)
+  - Require GAP version >= 4.9
+  - Clarify that license is GPL 2 *or later* (as agreed with Max N.)
+  - Internal: stop using the GAP kernel variable PolsFF
+  - Fix error viewing empty semiechelon matrices (patch provided by Frank
+    Lübeck)
+  - Fix bug in MinimalPolynomialOfMatrixMC which could lead to an infinite
+    loop for certain inputs, in particular lower triangular matrices with
+    multiple eigenvalues (patch provided by Frank Lübeck)
+  - Add methods to allow access to cmats via  `mat[i,j]`
+  - Various janitorial changes
+
+2.6.1 (2018-06-07)
   - Workaround a linker issue with GNU ld 2.30
   - Improved build system when using GAP >= 4.9
 
-2.6.0
+2.6.0 (2018-03-20)
   - Fix crash in CLEANROWKERNEL
   - Fix link to issue tracker in manual
   - Adapt to changes in GAP's MatrixObj interface (to appear in GAP 4.9)
