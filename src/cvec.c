@@ -4075,8 +4075,6 @@ static Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
 
 static UInt rnam_vecclass = 0;
 
-Obj             SumFFEFFE ( Obj opL, Obj opR );
-
 static Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
 /* m and n must have equal row length l */
 {
@@ -4114,7 +4112,7 @@ static Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
     for (i = 3;i <= ll;i++) {
         /*sum = CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
                                                ELM_PLIST(rowsn,i));*/
-        sum = SumFFEFFE(sum,CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
+        sum = SUM(sum,CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
                                                      ELM_PLIST(rowsn,i)));
     }
     return sum;
