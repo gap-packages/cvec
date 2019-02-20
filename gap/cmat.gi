@@ -84,7 +84,7 @@ InstallMethod( NewZeroMatrix,
   end );
     
 InstallMethod( NewIdentityMatrix,
-  "for IsCMatRep, a finite field, and two integers",
+  "for IsCMatRep, a finite field, and an integer",
   [ IsCMatRep, IsField and IsFinite, IsInt ],
   function( filt, f, rows )
     local p, d, c, li, o, i;
@@ -2078,7 +2078,8 @@ InstallOtherMethod( KroneckerProduct, "for cmats",
       for i in [1..rowsA] do
 	for j in [1..colsA] do
 	  CopySubMatrix( A[i][j] * B, AxB, 
-			 [ 1 .. rowsB ], [ rowsB * (i-1) + 1 .. rowsB * i ],                             [ 1 .. colsB ], [ (j-1) * colsB + 1 .. j * colsB ] );
+			 [ 1 .. rowsB ], [ rowsB * (i-1) + 1 .. rowsB * i ],
+			 [ 1 .. colsB ], [ (j-1) * colsB + 1 .. j * colsB ] );
 	od;
       od;
       return AxB;
