@@ -1,5 +1,8 @@
 This file describes changes in the cvec package.
 
+2.7.1 (2019-02-23)
+  - Fixed an incompatibility with GAP version >= 4.11
+
 2.7.0 (2019-02-19)
   - Require GAP version >= 4.9
   - Clarify that license is GPL 2 *or later* (as agreed with Max N.)
