@@ -20,7 +20,7 @@ A semi echelonised basis is a record with the following components:
 (and optimally) they can be wrapped to a matrix. <C>pivots</C>
 is a list of integers. The number <M>i</M> in position <M>j</M> indicates
 that the <M>j</M>th vector in <C>vectors</C> has a one in column number
-<M>i</M> and all vectors with a number bigger than <M>j</M> in <C>vectors</C>
+<M>i</M> and all vectors with a number bigger than <M>i</M> in <C>vectors</C>
 have a zero in column number <M>i</M>.
 
 <P/>
