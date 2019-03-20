@@ -7,8 +7,8 @@ SetPackageInfo( rec(
 
 PackageName := "cvec",
 Subtitle := "Compact vectors over finite fields",
-Version := "2.7.1",
-Date := "23/02/2019", # dd/mm/yyyy format
+Version := "2.7.2",
+Date := "20/03/2019", # dd/mm/yyyy format
 License := "GPL-2.0-or-later",
 
 ##  Information about authors and maintainers.
@@ -133,12 +133,12 @@ AutoDoc := rec(
     Copyright := """
       &copyright; 2005-2014 by Max Neunhöffer<P/>
 
-      &cvec; is free software: you can redistribute it and/or modify
+      <Package>cvec</Package> is free software: you can redistribute it and/or modify
       it under the terms of the GNU General Public License as published by
       the Free Software Foundation, either version 2 of the License, or
       (at your option) any later version. <P/>
 
-      &cvec; is distributed in the hope that it will be useful,
+      <Package>cvec</Package> is distributed in the hope that it will be useful,
       but WITHOUT ANY WARRANTY; without even the implied warranty of
       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
       GNU General Public License for more details. <P/>
