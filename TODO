@@ -43,7 +43,6 @@ Update documentation of vector/matrix interface operations, ZeroVector ...
 Memory for cmats should look at grease tables
 Use new MinimalPolynomial method with verification
 document MC method
-Document Fold and Unfold
 
 Document destructiveness of Matrix{NC} and CMat
 

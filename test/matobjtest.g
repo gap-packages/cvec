@@ -580,11 +580,6 @@ RowListMatrixObjTester := function( m, level )
   if IsMutable(u) or IsMutable(u[1]) then MyError(204); fi;
   if not(IsOne(u*wi)) then MyError(205); fi;
 
-  # Folding/Unfolding:
-  v := Vector([one,zero,two,one],w[1]);
-  if Unfold(w,v) <> v then MyError(206); fi;
-  if Fold(v,2,w) <> w then MyError(207); fi;
-
   # Now the constructors:
   filter := ConstructingFilter(v);
   vv := NewRowVector(filter,bd,Unpack(v));

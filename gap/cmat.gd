@@ -101,13 +101,6 @@ DeclareGlobalFunction( "CVEC_ReadMatFromFile" );
 DeclareGlobalFunction( "CVEC_ReadMatsFromFile" );
 
 #############################################################################
-# Folding of matrices and vectors:
-#############################################################################
-
-DeclareOperation( "Unfold", [ IsCMatRep ] );
-DeclareOperation( "Fold", [ IsCVecRep, IsInt ] );
-
-#############################################################################
 # Grease calibration:
 #############################################################################
 
