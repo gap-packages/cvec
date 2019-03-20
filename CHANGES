@@ -1,5 +1,9 @@
 This file describes changes in the cvec package.
 
+2.7.2 (2019-03-20)
+  - Removed the (undocumented) Fold and Unfold method
+  - Clarify the licensing terms again
+
 2.7.1 (2019-02-23)
   - Fixed an incompatibility with GAP version >= 4.11
 
