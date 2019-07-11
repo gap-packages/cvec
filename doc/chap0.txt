@@ -6,15 +6,13 @@
                       [1X Compact vectors over finite fields [101X
   
   
-                                     2.7.2
+                                     2.7.3
   
   
-                                 20 March 2019
+                                  11 July 2019
   
   
                                  Max Neunhöffer
-  
-                                    Max Horn
   
   
   
@@ -23,17 +21,6 @@
       Homepage: [7Xhttp://www-groups.mcs.st-and.ac.uk/~neunhoef[107X
       Address:  [33X[0;14YGustav-Freytag-Straße 40[133X
                 [33X[0;14Y50354 Hürth[133X
-                [33X[0;14YGermany[133X
-  
-  
-  Max Horn
-      Email:    [7Xmailto:max.horn@math.uni-giessen.de[107X
-      Homepage: [7Xhttps://www.quendi.de/math[107X
-      Address:  [33X[0;14YAG Algebra[133X
-                [33X[0;14YMathematisches Institut[133X
-                [33X[0;14YJustus-Liebig-Universität Gießen[133X
-                [33X[0;14YArndtstraße 2[133X
-                [33X[0;14Y35392 Gießen[133X
                 [33X[0;14YGermany[133X
   
   

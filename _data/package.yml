@@ -1,6 +1,6 @@
 name: cvec
-version: 2.7.2
-date: 2019-03-20
+version: 2.7.3
+date: 2019-07-11
 description: |
     Compact vectors over finite fields
 
@@ -31,9 +31,9 @@ packageinfo: https://gap-packages.github.io/cvec/PackageInfo.g
 
 downloads:
     - name: .tar.gz
-      url: https://github.com/gap-packages/cvec/releases/download/v2.7.2/cvec-2.7.2.tar.gz
+      url: https://github.com/gap-packages/cvec/releases/download/v2.7.3/cvec-2.7.3.tar.gz
     - name: .tar.bz2
-      url: https://github.com/gap-packages/cvec/releases/download/v2.7.2/cvec-2.7.2.tar.bz2
+      url: https://github.com/gap-packages/cvec/releases/download/v2.7.3/cvec-2.7.3.tar.bz2
 
 abstract: |
     This package provides an implementation of compact vectors over finite   fields. Contrary to earlier implementations no table lookups are used   but only word-based processor arithmetic. This allows for bigger finite   fields and higher speed.
@@ -45,7 +45,7 @@ citeas: |
     <p class='BibEntry'>
     [<span class='BibKey'>NH19</span>]   <b class='BibAuthor'>Neunhöffer, M. and Horn, M.</b>,
      <i class='BibTitle'>cvec, Compact vectors over finite fields,
-             Version 2.7.2</i>
+             Version 2.7.3</i>
      (<span class='BibYear'>2019</span>)<br />
     (<span class='BibNote'>GAP package</span>),
     <span class='BibHowpublished'><a href="https://gap-packages.github.io/cvec">https://gap-packages.github.io/cvec</a></span>.
@@ -53,11 +53,11 @@ citeas: |
     
 
 bibtex: |
-    @misc{ cvec2.7.2,
+    @misc{ cvec2.7.3,
       author =           {Neunh{\"o}ffer, M. and Horn, M.},
       title =            {{cvec},  Compact vectors over finite fields, {V}ersion
-                          2.7.2},
-      month =            {Mar},
+                          2.7.3},
+      month =            {Jul},
       year =             {2019},
       note =             {GAP package},
       howpublished =     {\href            {https://gap-packages.github.io/cvec}

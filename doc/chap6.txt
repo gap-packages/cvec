@@ -8,7 +8,7 @@
   is a list of vectors of equal length, optionally (and optimally) they can be
   wrapped  to a matrix. [10Xpivots[110X is a list of integers. The number [22Xi[122X in position
   [22Xj[122X  indicates that the [22Xj[122Xth vector in [10Xvectors[110X has a one in column number [22Xi[122X and
-  all  vectors  with  a  number bigger than [22Xj[122X in [10Xvectors[110X have a zero in column
+  all  vectors  with  a  number bigger than [22Xi[122X in [10Xvectors[110X have a zero in column
   number [22Xi[122X.[133X
   
   [33X[0;0YNote that for technical reasons another component [10Xhelper[110X is bound containing
