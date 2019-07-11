@@ -441,7 +441,7 @@ InstallMethod( CompatibleVector, "for a cmat",
 # Viewing, Printing, Displaying of cmats:
 #############################################################################
 
-InstallMethod( ViewObj, "for a cmat", [IsCMatRep and IsMatrix],
+InstallMethod( ViewObj, "for a cmat", [IsCMatRep],
 function(m)
   local c;
   c := m!.vecclass;
@@ -453,7 +453,7 @@ function(m)
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],")>");
 end);
 
-InstallMethod( PrintObj, "for a cmat", [IsCMatRep and IsMatrix],
+InstallMethod( PrintObj, "for a cmat", [IsCMatRep],
 function(m)
   local c,i;
   c := m!.vecclass;
@@ -467,7 +467,7 @@ function(m)
 end);
   
 InstallMethod( Display, "for a cmat", 
-  [IsCMatRep and IsMatrix and IsFFECollColl],
+  [IsCMatRep and IsFFECollColl],
 function(m)
   local i;
   Print("[");
@@ -534,7 +534,7 @@ InstallMethod( Randomize, "for a cmat and a random source",
 # PostMakeImmutable to make subobjects immutable:
 #############################################################################
 
-InstallMethod( PostMakeImmutable, "for a cmat", [IsCMatRep and IsMatrix],
+InstallMethod( PostMakeImmutable, "for a cmat", [IsCMatRep],
   function(m)
     MakeImmutable(m!.rows);
   end);
@@ -544,7 +544,7 @@ InstallMethod( PostMakeImmutable, "for a cmat", [IsCMatRep and IsMatrix],
 #############################################################################
 
 InstallOtherMethod( Add, "for a cmat, and a cvec",
-  [IsCMatRep and IsMatrix and IsMutable, IsCVecRep],
+  [IsCMatRep and IsMutable, IsCVecRep],
   function(m,v)
     if not(IsIdenticalObj(DataObj(v),m!.vecclass)) then
         Error("Add: only correct cvecs allowed in this matrix");
@@ -554,7 +554,7 @@ InstallOtherMethod( Add, "for a cmat, and a cvec",
     m!.rows[m!.len+1] := v;
   end);
 InstallOtherMethod( Add, "for a cmat, a cvec, and a position",
-  [IsCMatRep and IsMatrix and IsMutable, IsCVecRep, IsPosInt],
+  [IsCMatRep and IsMutable, IsCVecRep, IsPosInt],
   function(m,v,pos)
     if not(IsIdenticalObj(DataObj(v),m!.vecclass)) then
         Error("Add: only correct cvecs allowed in this matrix");
@@ -568,7 +568,7 @@ InstallOtherMethod( Add, "for a cmat, a cvec, and a position",
   end);
 
 InstallOtherMethod( Remove, "for a cmat, and a position",
-  [IsCMatRep and IsMatrix and IsMutable, IsPosInt],
+  [IsCMatRep and IsMutable, IsPosInt],
   function(m,pos)
     if pos < 1 or pos > m!.len then
         Error("Remove: position not possible");
@@ -579,7 +579,7 @@ InstallOtherMethod( Remove, "for a cmat, and a position",
   end);
 
 #InstallOtherMethod( \[\], "for a cmat, and a position", 
-#  [IsCMatRep and IsMatrix, IsPosInt],
+#  [IsCMatRep, IsPosInt],
 #  function(m,pos)
 #    #if pos < 1 or pos > m!.len then
 #    #    Error("\\[\\]: illegal position");
@@ -588,11 +588,11 @@ InstallOtherMethod( Remove, "for a cmat, and a position",
 #    return m!.rows[pos+1];
 #  end);
 InstallOtherMethod( \[\], "for a cmat, and a position",
-  [IsCMatRep and IsMatrix, IsPosInt],
+  [IsCMatRep, IsPosInt],
   CMAT_ELM_LIST );
 
 InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
-  [IsCMatRep and IsMatrix and IsMutable, IsPosInt, IsCVecRep],
+  [IsCMatRep and IsMutable, IsPosInt, IsCVecRep],
   function(m,pos,v)
     if pos < 1 or pos > m!.len+1 then
         Error("\\[\\]\\:\\=: illegal position");
@@ -607,31 +607,31 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
   end);
 
 InstallMethod( MatElm, "for a cmat and two positions",
-  [IsCMatRep and IsMatrix, IsPosInt, IsPosInt],
+  [IsCMatRep, IsPosInt, IsPosInt],
   function( m, row, col )
     return m!.rows[row+1][col];
   end );
 
 InstallMethod( SetMatElm, "for a cmat, two positions, and an ffe",
-  [IsCMatRep and IsMatrix and IsMutable, IsPosInt, IsPosInt, IsObject],
+  [IsCMatRep and IsMutable, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
     m!.rows[row+1][col] := el;
   end );
 
 InstallMethod( \[\], "for a cmat and two positions",
-  [IsCMatRep and IsMatrix, IsPosInt, IsPosInt],
+  [IsCMatRep, IsPosInt, IsPosInt],
   function( m, row, col )
     return m!.rows[row+1][col];
   end );
 
 InstallMethod( \[\]\:\=, "for a cmat, two positions, and an ffe",
-  [IsCMatRep and IsMatrix and IsMutable, IsPosInt, IsPosInt, IsObject],
+  [IsCMatRep and IsMutable, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
     m!.rows[row+1][col] := el;
   end );
 
 InstallOtherMethod( \{\}, "for a cmat, and a list",
-  [IsCMatRep and IsMatrix, IsList],
+  [IsCMatRep, IsList],
   function(m,li)
     local l,what;
     what := EmptyPlist(Length(li)+1);
@@ -642,8 +642,8 @@ InstallOtherMethod( \{\}, "for a cmat, and a list",
   end);
 
 InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
-  [IsCMatRep and IsMatrix and IsMutable, IsList, 
-   IsCMatRep and IsMatrix],
+  [IsCMatRep and IsMutable, IsList, 
+   IsCMatRep],
   function(m,l,n)
     local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
@@ -656,7 +656,7 @@ InstallOtherMethod( \{\}\:\=, "for a cmat, a homogeneous list, and a cmat",
 
 # for backwards compatibility, add Length method for cmat
 InstallOtherMethod( Length, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m) return m!.len; end);
 
 InstallOtherMethod( DimensionsMat, "for a cmat",
@@ -664,25 +664,25 @@ InstallOtherMethod( DimensionsMat, "for a cmat",
   function(m) return [m!.len,m!.vecclass![2]]; end );
 
 InstallMethod( NumberRows, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m) return m!.len; end);
 
 InstallMethod( NumberColumns, "for a cmat",
-  [IsCMatRep and IsMatrix and IsMatrixObj],
+  [IsCMatRep and IsMatrixObj],
   function(m) return m!.vecclass![2]; end );
 
 InstallOtherMethod( ShallowCopy, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m) return CVEC_CMatMaker(ShallowCopy(m!.rows),m!.vecclass); end);
 
 InstallOtherMethod( Collected, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     return Collected(m!.rows{[2..m!.len+1]});
   end);
 
 InstallOtherMethod( DuplicateFreeList, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local l;
     l := DuplicateFreeList(m!.rows);
@@ -690,7 +690,7 @@ InstallOtherMethod( DuplicateFreeList, "for a cmat",
   end);
 
 InstallOtherMethod( Append, "for two cmats",
-  [IsCMatRep and IsMatrix and IsMutable, IsCMatRep and IsMatrix],
+  [IsCMatRep and IsMutable, IsCMatRep],
   function(m1,m2)
       local i;
       if not(IsIdenticalObj(m1!.vecclass,m2!.vecclass)) then
@@ -704,7 +704,7 @@ InstallOtherMethod( Append, "for two cmats",
   end);
 
 InstallOtherMethod( FilteredOp, "for a cmat and a function",
-  [IsCMatRep and IsMatrix, IsFunction],
+  [IsCMatRep, IsFunction],
   function(m,f)
     local l;
     l := Filtered(m!.rows{[2..m!.len+1]},f);
@@ -713,7 +713,7 @@ InstallOtherMethod( FilteredOp, "for a cmat and a function",
   end);
 
 InstallOtherMethod( UNB_LIST, "for a cmat and a position",
-  [IsCMatRep and IsMatrix and IsMutable, IsPosInt],
+  [IsCMatRep and IsMutable, IsPosInt],
   function(m,pos)
     if pos = m!.len then
         Unbind(m!.rows[m!.len+1]);
@@ -833,7 +833,7 @@ function(src,dst,srows,drows,scols,dcols)
 end );
 
 InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and IsMutable,
+  [IsCMatRep, IsCMatRep and IsMutable,
    IsList,IsList,IsList,IsList],
   function( src,dst,srows,drows,scols,dcols )
     if Length(srows) <> Length(drows) then
@@ -856,7 +856,7 @@ InstallOtherMethod( CopySubMatrix, "for two cmats and stuff",
   end );
 
 InstallMethod( ExtractSubMatrix, "for a cmats and stuff",
-  [IsCMatRep and IsMatrix, IsList, IsList],
+  [IsCMatRep, IsList, IsList],
   function( mat, rows, cols )
     local i,l,res,vcl;
     vcl := mat!.vecclass;
@@ -908,7 +908,7 @@ InstallMethod( ExtractSubMatrix, "for a compressed 8bit matrix",
 #############################################################################
 
 InstallOtherMethod( \+, "for cmats", 
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
+  [IsCMatRep, IsCMatRep],
   function(m,n)
     local l,res,i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
@@ -930,7 +930,7 @@ InstallOtherMethod( \+, "for cmats",
   end);
 
 InstallOtherMethod( \-, "for cmats", 
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
+  [IsCMatRep, IsCMatRep],
   function(m,n)
     local l,res,p,i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) then
@@ -953,7 +953,7 @@ InstallOtherMethod( \-, "for cmats",
   end);
 
 InstallOtherMethod( AdditiveInverseSameMutability, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local l,res,i;
     l := 0*[1..m!.len+1];
@@ -967,7 +967,7 @@ InstallOtherMethod( AdditiveInverseSameMutability, "for a cmat",
     return res;
   end);
 InstallOtherMethod( AdditiveInverseMutable, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local l,i;
     l := 0*[1..m!.len+1];
@@ -978,7 +978,7 @@ InstallOtherMethod( AdditiveInverseMutable, "for a cmat",
   end);
 
 InstallOtherMethod( ZeroImmutable, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local i,l,res,v;
     l := [0];
@@ -992,7 +992,7 @@ InstallOtherMethod( ZeroImmutable, "for a cmat",
     return res;
   end);
 InstallOtherMethod( ZeroMutable, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local i,l;
     l := [0];
@@ -1002,7 +1002,7 @@ InstallOtherMethod( ZeroMutable, "for a cmat",
     return CVEC_CMatMaker(l,m!.vecclass);
   end);
 InstallOtherMethod( ZeroSameMutability, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     if IsMutable(m) then
         return ZeroMutable(m);
@@ -1012,7 +1012,7 @@ InstallOtherMethod( ZeroSameMutability, "for a cmat",
   end);
     
 InstallOtherMethod( OneMutable, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local i,l,one,v,w;
     if m!.vecclass![CVEC_IDX_len] <> m!.len then
@@ -1030,7 +1030,7 @@ InstallOtherMethod( OneMutable, "for a cmat",
     return CVEC_CMatMaker(l,m!.vecclass);
   end);
 InstallOtherMethod( OneSameMutability, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local n;
     n := OneMutable(m);
@@ -1119,13 +1119,13 @@ BindGlobal( "CVEC_MATRIX_TIMES_SCALAR", function(m,s)
     fi;
     return res;
 end );
-InstallOtherMethod( \*, "for a cmat", [IsCMatRep and IsMatrix, IsInt], 
+InstallOtherMethod( \*, "for a cmat", [IsCMatRep, IsInt], 
   CVEC_MATRIX_TIMES_SCALAR);
-InstallOtherMethod( \*, "for a cmat", [IsCMatRep and IsMatrix, IsFFE], 
+InstallOtherMethod( \*, "for a cmat", [IsCMatRep, IsFFE], 
   CVEC_MATRIX_TIMES_SCALAR);
-InstallOtherMethod( \*, "for a cmat", [IsInt,IsCMatRep and IsMatrix], 
+InstallOtherMethod( \*, "for a cmat", [IsInt,IsCMatRep], 
   function(s,m) return CVEC_MATRIX_TIMES_SCALAR(m,s); end);
-InstallOtherMethod( \*, "for a cmat", [IsFFE,IsCMatRep and IsMatrix], 
+InstallOtherMethod( \*, "for a cmat", [IsFFE,IsCMatRep], 
   function(s,m) return CVEC_MATRIX_TIMES_SCALAR(m,s); end);
 
 
@@ -1134,7 +1134,7 @@ InstallOtherMethod( \*, "for a cmat", [IsFFE,IsCMatRep and IsMatrix],
 #############################################################################
 
 InstallOtherMethod( \=, "for two cmats",
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
+  [IsCMatRep, IsCMatRep],
   function(m,n)
     local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) or m!.len <> n!.len then
@@ -1149,7 +1149,7 @@ InstallOtherMethod( \=, "for two cmats",
   end);
 
 InstallOtherMethod( \<, "for two cmats",
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
+  [IsCMatRep, IsCMatRep],
   function(m,n)
     local i;
     if not(IsIdenticalObj(m!.vecclass,n!.vecclass)) or m!.len <> n!.len then
@@ -1165,12 +1165,12 @@ InstallOtherMethod( \<, "for two cmats",
     return false;
   end);
 
-InstallOtherMethod( IsZero, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( IsZero, "for a cmat", [IsCMatRep],
   function(m)
     return ForAll(m!.rows,IsZero);
   end);
 
-InstallOtherMethod( IsOne, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( IsOne, "for a cmat", [IsCMatRep],
   function(m)
     local i,v;
     if m!.vecclass![CVEC_IDX_len] <> m!.len then
@@ -1194,24 +1194,24 @@ InstallOtherMethod( IsOne, "for a cmat", [IsCMatRep and IsMatrix],
 # Access to the base field:
 #############################################################################
 
-InstallOtherMethod( Characteristic, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( Characteristic, "for a cmat", [IsCMatRep],
   function(m)
     return m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
   end);
     
-InstallOtherMethod( DegreeFFE, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( DegreeFFE, "for a cmat", [IsCMatRep],
   function(m)
     return m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
   end);
     
-InstallMethod( BaseDomain, "for a cmat", [IsCMatRep and IsMatrix],
+InstallMethod( BaseDomain, "for a cmat", [IsCMatRep],
   function(m)
     local c;
     c := m!.vecclass;
     return c![CVEC_IDX_GF];
   end);
     
-InstallMethod( BaseField, "for a cmat", [IsCMatRep and IsMatrix],
+InstallMethod( BaseField, "for a cmat", [IsCMatRep],
   function(m)
     local c;
     c := m!.vecclass;
@@ -1240,7 +1240,7 @@ InstallMethod(FieldOfMatrixList,
   end);
 
 InstallMethod(DefaultFieldOfMatrix,
-  [IsMatrix and IsCMatRep and IsFFECollColl],
+  [IsCMatRep and IsFFECollColl],
   function(m)
     local f;
     return m!.vecclass![CVEC_IDX_GF];
@@ -1319,7 +1319,7 @@ InstallGlobalFunction( CVEC_MakeSpreadTab, function(p,d,l,bitsperel)
 end );
 
 InstallOtherMethod( GreaseMat, "for a cmat",
-  [IsMatrix and IsCMatRep],
+  [IsCMatRep],
   function(m)
     if m!.vecclass![CVEC_IDX_fieldinfo]![CVEC_IDX_bestgrease] = 0 then
         Info(InfoWarning,1,"GreaseMat: bestgrease is 0, we do not grease");
@@ -1329,7 +1329,7 @@ InstallOtherMethod( GreaseMat, "for a cmat",
   end);
 
 InstallMethod( GreaseMat, "for a cmat, and a level", 
-  [IsMatrix and IsCMatRep, IsInt],
+  [IsCMatRep, IsInt],
   function(m,l)
     local bitsperel,d,dim,e,f,i,j,k,mm,nrblocks,p,pot,q,tablen;
     f := m!.vecclass![CVEC_IDX_fieldinfo];   # the field info
@@ -1358,7 +1358,7 @@ InstallMethod( GreaseMat, "for a cmat, and a level",
   end); 
 
 InstallMethod( UnGreaseMat, "for a cmat",
-  [IsMatrix and IsCMatRep],
+  [IsCMatRep],
   function(m)
     ResetFilterObj(m,HasGreaseTab);
     Unbind(m!.greasetab);
@@ -1391,7 +1391,7 @@ end );
 #############################################################################
     
 InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
-  [IsCVecRep, IsCMatRep and IsMatrix],
+  [IsCVecRep, IsCMatRep],
   function(v,m)
     local i,res,vcl,s,z;
     vcl := DataObj(v);
@@ -1411,7 +1411,7 @@ InstallOtherMethod(\*, "for a cvec and a cmat, without greasing",
   end);
  
 InstallOtherMethod(\^, "for a cvec and a cmat, without greasing",
-  [IsCVecRep, IsCMatRep and IsMatrix],
+  [IsCVecRep, IsCMatRep],
   function(v,m)
     local i,res,vcl,s,z;
     vcl := DataObj(v);
@@ -1431,7 +1431,7 @@ InstallOtherMethod(\^, "for a cvec and a cmat, without greasing",
   end);
  
 InstallOtherMethod(\*, "for a cvec and a greased cmat",
-  [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
+  [IsCVecRep, IsCMatRep and HasGreaseTab],
   function(v,m)
     local i,res,vcl,l,pos,val;
     vcl := DataObj(v);
@@ -1451,7 +1451,7 @@ InstallOtherMethod(\*, "for a cvec and a greased cmat",
   end);
  
 InstallOtherMethod(\^, "for a cvec and a greased cmat",
-  [IsCVecRep, IsCMatRep and IsMatrix and HasGreaseTab],
+  [IsCVecRep, IsCMatRep and HasGreaseTab],
   function(v,m)
     local i,res,vcl,l,pos,val;
     vcl := DataObj(v);
@@ -1471,7 +1471,7 @@ InstallOtherMethod(\^, "for a cvec and a greased cmat",
   end);
  
 InstallOtherMethod(\*, "for two cmats, second one not greased",
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix],
+  [IsCMatRep, IsCMatRep],
   CVEC_PROD_CMAT_CMAT_DISPATCH );
 
 InstallGlobalFunction( CVEC_PROD_CMAT_CMAT_BIG,
@@ -1559,7 +1559,7 @@ InstallGlobalFunction( CVEC_PROD_CMAT_CMAT_BIG,
   end);
 
 InstallOtherMethod(\*, "for two cmats, second one greased",
-  [IsCMatRep and IsMatrix, IsCMatRep and IsMatrix and HasGreaseTab],
+  [IsCMatRep, IsCMatRep and HasGreaseTab],
   function(m,n)
     local i,l,res,vcl,q;
     if not(IsIdenticalObj(m!.scaclass,n!.scaclass)) then
@@ -1680,7 +1680,7 @@ InstallGlobalFunction (CVEC_InverseWithGrease,
   end );
 
 InstallOtherMethod( InverseMutable, "for a square cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local i,l,vcl;
     vcl := m!.vecclass;
@@ -1703,7 +1703,7 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
   end );
 
 InstallOtherMethod( InverseSameMutability, "for a square cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local mi;
     mi := InverseMutable(m);
@@ -1719,7 +1719,7 @@ InstallOtherMethod( InverseSameMutability, "for a square cmat",
 #############################################################################
 
 InstallOtherMethod( TransposedMatOp, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     # First make a new matrix:
     local c,ct,i,l,mt,newlen;
@@ -1738,7 +1738,7 @@ InstallOtherMethod( TransposedMatOp, "for a cmat",
   end);
 
 InstallOtherMethod( TransposedMat, "for a cmat",
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local mt;
     mt := TransposedMatOp(m);
@@ -1936,7 +1936,7 @@ end );
 #############################################################################
 
 InstallOtherMethod( PositionNonZero, "for a cmat",
-  [ IsCMatRep and IsMatrix and IsMatrixObj ],
+  [ IsCMatRep and IsMatrixObj ],
   function(m)
     local i;
     i := 1;
@@ -1945,7 +1945,7 @@ InstallOtherMethod( PositionNonZero, "for a cmat",
   end );
 
 InstallOtherMethod( PositionNonZero, "for a cmat, and an integer",
-  [ IsCMatRep and IsMatrix, IsInt ],
+  [ IsCMatRep, IsInt ],
   function(m,j)
     local i;
     i := Maximum(j+1,1);
@@ -1958,7 +1958,7 @@ InstallOtherMethod( PositionNonZero, "for a cmat, and an integer",
   end );
 
 InstallOtherMethod( PositionLastNonZero, "for a cmat",
-  [ IsCMatRep and IsMatrix and IsMatrixObj ],
+  [ IsCMatRep and IsMatrixObj ],
   function(m)
     local i;
     i := m!.len;;
@@ -1967,7 +1967,7 @@ InstallOtherMethod( PositionLastNonZero, "for a cmat",
   end );
 
 InstallOtherMethod( PositionLastNonZero, "for a cmat, and an integer",
-  [ IsCMatRep and IsMatrix and IsMatrixObj, IsInt ],
+  [ IsCMatRep and IsMatrixObj, IsInt ],
   function(m,j)
     local i;
     i := Minimum(j-1,m!.len);
@@ -1975,7 +1975,7 @@ InstallOtherMethod( PositionLastNonZero, "for a cmat, and an integer",
     return i;
   end );
 
-InstallOtherMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
+InstallOtherMethod( IsDiagonalMat, "for a cmat", [IsCMatRep],
   function(m)
     local i,mi;
     mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
@@ -1997,7 +1997,7 @@ InstallOtherMethod( IsDiagonalMat, "for a cmat", [IsCMatRep and IsMatrix],
   end);
 
 InstallOtherMethod( IsUpperTriangularMat, "for a cmat", 
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local i,mi;
     mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
@@ -2018,7 +2018,7 @@ InstallOtherMethod( IsUpperTriangularMat, "for a cmat",
   end);
 
 InstallOtherMethod( IsLowerTriangularMat, "for a cmat", 
-  [IsCMatRep and IsMatrix],
+  [IsCMatRep],
   function(m)
     local i,mi;
     mi := Minimum(m!.len,m!.vecclass![CVEC_IDX_len]);
