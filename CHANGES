@@ -1,5 +1,10 @@
 This file describes changes in the cvec package.
 
+2.7.3 (2019-07-11)
+  - Rewrote build system to use gac, not autoconf/automake/libtool
+  - Improve compatibility with upcoming GAP 4.11
+  - Various janitorial changes
+
 2.7.2 (2019-03-20)
   - Removed the (undocumented) Fold and Unfold method
   - Clarify the licensing terms again
