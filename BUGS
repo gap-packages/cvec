@@ -1,6 +1,0 @@
-Known problems:
-
-Compiling with clang 3.0 in 32-bit mode on Linux produces a module
-which seems to work but which fails the tests because some symbol
-(of an inlined function!) is not found. This is probably a compiler
-bug.
