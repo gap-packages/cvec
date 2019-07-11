@@ -618,6 +618,12 @@ InstallMethod( SetMatElm, "for a cmat, two positions, and an ffe",
     m!.rows[row+1][col] := el;
   end );
 
+
+# The following two method installations are useful in
+# GAP 4.9 and 4.10, but won't be in GAP 4.11, where it
+# suffices to install methods for MatElm and SetMatElm.
+if not IsBound(ELM_MAT) then
+
 InstallMethod( \[\], "for a cmat and two positions",
   [IsCMatRep, IsPosInt, IsPosInt],
   function( m, row, col )
@@ -629,6 +635,8 @@ InstallMethod( \[\]\:\=, "for a cmat, two positions, and an ffe",
   function( m, row, col, el )
     m!.rows[row+1][col] := el;
   end );
+
+fi;
 
 InstallOtherMethod( \{\}, "for a cmat, and a list",
   [IsCMatRep, IsList],
