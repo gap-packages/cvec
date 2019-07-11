@@ -12,16 +12,6 @@
 
 #include "src/compiled.h"          /* GAP headers                */
 
-#undef PACKAGE
-#undef PACKAGE_BUGREPORT
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_URL
-#undef PACKAGE_VERSION
-
-#include "pkgconfig.h"             /* our own configure results */
-
 #ifdef SYS_IS_64_BIT
 #include "gf2lib_64.c"
 WORD myarena[(4096*1024+1024*1024)/8];      
