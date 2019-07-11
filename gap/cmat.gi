@@ -613,7 +613,7 @@ InstallMethod( MatElm, "for a cmat and two positions",
   end );
 
 InstallMethod( SetMatElm, "for a cmat, two positions, and an ffe",
-  [IsCMatRep and IsMatrix, IsPosInt, IsPosInt, IsObject],
+  [IsCMatRep and IsMatrix and IsMutable, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
     m!.rows[row+1][col] := el;
   end );
@@ -625,7 +625,7 @@ InstallMethod( \[\], "for a cmat and two positions",
   end );
 
 InstallMethod( \[\]\:\=, "for a cmat, two positions, and an ffe",
-  [IsCMatRep and IsMatrix, IsPosInt, IsPosInt, IsObject],
+  [IsCMatRep and IsMatrix and IsMutable, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
     m!.rows[row+1][col] := el;
   end );
