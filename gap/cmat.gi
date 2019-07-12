@@ -56,7 +56,7 @@ InstallMethod( NewMatrix,
     for i in [1..Length(l)] do
         if IsCVecRep(l[i]) and IsIdenticalObj(c,DataObj(l[i])) then
             li[i+1] := ShallowCopy(l[i]);
-        elif IsRowVectorObj(l[i]) then
+        elif IsVectorObj(l[i]) then
             li[i+1] := CVec(Unpack(l[i]),c);
         elif IsPlistRep(l[i]) then
             li[i+1] := CVec(l[i],c);

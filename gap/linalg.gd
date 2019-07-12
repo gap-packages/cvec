@@ -38,7 +38,7 @@ DeclareOperation( "Vectors", [SEBType] );
 DeclareOperation( "Pivots", [SEBType] );
 
 DeclareOperation( "CleanRow", 
- [SEBType,IsRowVectorObj,IsBool,IsObject]);
+ [SEBType,IsVectorObj,IsBool,IsObject]);
 # CleanRow ( basis, vec, extend, dec )
 #   basis is record with the following components:
 #       .vectors  : matrix whose rows are the vectors
@@ -57,7 +57,7 @@ DeclareOperation( "CleanRow",
 # linear combination of the vectors in the basis that represents vec
 # is put into dec.
 
-DeclareOperation( "LinearCombination", [SEBType, IsRowVectorObj] );
+DeclareOperation( "LinearCombination", [SEBType, IsVectorObj] );
 
 DeclareOperation( "NullspaceMatMutableX", [IsRowListMatrix] );
 DeclareOperation( "NullspaceMatMutable", [IsRowListMatrix] );

@@ -26,7 +26,7 @@ BindGlobal("CVecClassFamily",NewFamily("CVecClassFamily"));
 DeclareRepresentation( "IsCVecRep", 
   IsDataObjectRep and HasLength and IsCopyable and CanEasilyCompareElements and
   CanEasilySortElements and IsListDefault and IsSmallList and 
-  IsConstantTimeAccessList and IsFinite and IsRowVectorObj, [] );
+  IsConstantTimeAccessList and IsFinite and IsVectorObj, [] );
   # How about IsNoImmediateMethodsObject???
 DeclareFilter( "IsCVecRepOverSmallField" );
 DeclareFilter( "IsCVecRepOverPrimeField" );

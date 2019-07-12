@@ -188,7 +188,7 @@ end );
     
 InstallMethod( CleanRow, 
   "GAP method for a semi echelon basis, a vector, and a boolean or vector", 
-  [SEBType and IsMutable, IsRowVectorObj, IsBool, IsObject], CVEC_CleanRow );
+  [SEBType and IsMutable, IsVectorObj, IsBool, IsObject], CVEC_CleanRow );
 
 InstallMethod( CleanRow, 
   "kernel method for a record, a cvec, and a boolean or cvec", 
@@ -215,7 +215,7 @@ IO_Unpicklers.CSEB :=
   end;
 
 InstallMethod( Coefficients, "for a semi echelonized basis, and a vector",
-  [SEBType, IsRowVectorObj],
+  [SEBType, IsVectorObj],
   function(b,v)
     local dec;
     dec := ZeroVector(Length(b),v);
@@ -227,7 +227,7 @@ InstallMethod( Coefficients, "for a semi echelonized basis, and a vector",
   end );
 
 InstallMethod( LinearCombination, "for a semi echelonized basis, and a vector",
-  [SEBType, IsRowVectorObj],
+  [SEBType, IsVectorObj],
   function(b,v)
     return v * b!.vectors;
   end );
