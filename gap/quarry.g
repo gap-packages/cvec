@@ -7,7 +7,7 @@ InstallMethod( LazyGreaser, "for a vector and a positive grease level",
   function( vecs, lev )
     local lg;
     lg := rec( vecs := vecs, tab := vecs{[]}, ind := [], lev := lev, 
-               fs := Size(BaseField(vecs)) );
+               fs := Size(BaseDomain(vecs)) );
     if lg.fs > 65536 then
         Error("Lazy grease only supported for fields with <= 65536 elements");
         return;
@@ -96,7 +96,7 @@ CVEC_TESTLAZY := function(m,lev)
   local erg,f,i,j,l,offset,newpos,poss,v,w;
   v := ShallowCopy(m[1]);
   l := LazyGreaser(m,lev);
-  f := BaseField(m);
+  f := BaseDomain(m);
   offset := Random(1,Length(m)-lev+1);
   offset := QuoInt(offset-1,lev)*lev + 1;  # make it congruent 1 mod lev
   for i in [1..10000] do
@@ -205,7 +205,7 @@ InstallGlobalFunction( CVEC_RelativeOrderPoly, function( m, v, subb, indetnr )
   # is bound.
   # The original v is untouched!
   local A,B,b,closed,d,dec,f,fam,i,l,lambda,o,ordpol,vcopy,vl,vv;
-  f := BaseField(m);
+  f := BaseDomain(m);
   o := One(f);
   fam := FamilyObj(o);
   b := EmptySemiEchelonBasis(v);
@@ -333,7 +333,7 @@ function( m, eps, verify, indetnr )
   A := [];   # base changes within each subquotient
   l := [];   # a list of semi echelon bases for the subquotients
   # order polynomial infrastructure (grows over time):
-  opi := rec( f := BaseField(m),
+  opi := rec( f := BaseDomain(m),
               d := [],
               ranges := [],
               rordpols := [],   # list of relative order polynomials
@@ -495,7 +495,7 @@ InstallGlobalFunction( CVEC_NewMinimalPolynomial, function( m, indetnr )
   A := [];   # base changes within each subquotient
   l := [];   # a list of semi echelon bases for the subquotients
   # order polynomial infrastructure (grows over time):
-  opi := rec( f := BaseField(m),
+  opi := rec( f := BaseDomain(m),
               d := [],
               ranges := [],
               rordpols := [],   # list of relative order polynomials

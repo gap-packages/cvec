@@ -662,7 +662,7 @@ InstallGlobalFunction( CVEC_MinimalPolynomial, function(m)
   d := NumberRows(m);
   b := EmptySemiEchelonBasis(m);
   pivs := [1..d];
-  f := BaseField(m);
+  f := BaseDomain(m);
   poly := One(PolynomialRing(f,[1]));
   o := One(f);
   fam := FamilyObj(o);

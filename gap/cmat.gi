@@ -905,7 +905,7 @@ InstallMethod( ExtractSubMatrix, "for a compressed 8bit matrix",
   function(m, rows, cols)
     local mm,s;
     mm := m{rows}{cols};
-    s := Size(BaseField(m));
+    s := Size(BaseDomain(m));
     ConvertToMatrixRep(mm,s);
     return mm;
   end );
@@ -1219,13 +1219,16 @@ InstallMethod( BaseDomain, "for a cmat", [IsCMatRep],
     return c![CVEC_IDX_GF];
   end);
     
+# compatibility with GAP <= 4.11
+if IsBound(BaseField) and not IsIdenticalObj(BaseDomain, BaseField) then
 InstallMethod( BaseField, "for a cmat", [IsCMatRep],
   function(m)
     local c;
     c := m!.vecclass;
     return c![CVEC_IDX_GF];
   end);
-    
+fi;
+
 InstallMethod(FieldOfMatrixList,
   [IsListOrCollection and IsFFECollCollColl],1,
   function(l)
@@ -2725,7 +2728,7 @@ InstallGlobalFunction( CVEC_ValueLaurentPoly,
     if not(IsOne(s)) then
         for j in [1..n] do MultVector(val[j],s); od;
     fi;
-    o := One(BaseField(x));
+    o := One(BaseDomain(x));
     while true do
         i := i - 1;
         # Add a multiple of the identity:

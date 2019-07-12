@@ -1073,14 +1073,17 @@ InstallMethod( BaseDomain, "for cvecs", [IsCVecRep],
     c := DataObj(v);
     return c![CVEC_IDX_GF];
   end);
-    
+
+# compatibility with GAP <= 4.11
+if IsBound(BaseField) and not IsIdenticalObj(BaseDomain, BaseField) then
 InstallMethod( BaseField, "for cvecs", [IsCVecRep],
   function(v)
     local c;
     c := DataObj(v);
     return c![CVEC_IDX_GF];
   end);
-    
+fi;
+
 #############################################################################
 # Slicing:
 #############################################################################
