@@ -6,10 +6,10 @@
                       [1X Compact vectors over finite fields [101X
   
   
-                                     2.7.3
+                                     2.7.4
   
   
-                                  11 July 2019
+                                  17 July 2019
   
   
                                  Max Neunhöffer
