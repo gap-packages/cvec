@@ -4,7 +4,7 @@ gap> START_TEST("babymonster.tst");
 # big matrix from Neunhöffer/Praeger article
 gap> LoadPackage("AtlasRep", false);
 true
-gap> g := AtlasGroup("B",1);;
+gap> g := AtlasGroup([ "B", [ "BG1-f2r4370B0.m1", "BG1-f2r4370B0.m2" ], 1, 2 ]);;
 gap> m := (g.1+g.2+g.1*g.2);
 <an immutable 4370x4370 matrix over GF2>
 gap> cm := CMat(m);
