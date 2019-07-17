@@ -99,11 +99,11 @@ order in one 32bit <C>Word</C>.
 <M>2^4 &lt; 2\cdot 11 - 1 = 21 &lt; 2^5</M>. Therefore <C>elsperword</C>
 is <M>5</M> on a 32bit machine.
 
-<Example>
+<Log>
  most significant xx|.....|.....|.....|.....|.....|..... least significant
                   00|00101|00100|00011|00010|00001|00000 
                     |    5|    4|    3|    2|    1|    0
-</Example>
+</Log>
 
 Here is another example that shows how the <M>20</M> finite field elements
 <M>0,1,2,0,0,0,1,1,1,2,2,2,0,1,2,2,1,0,2,2</M> of <M>GF(3)</M> are stored 
@@ -114,11 +114,11 @@ is <M>20</M> on a 32bit machine. Remember, that we only put twice as
 many elements in one 64bit <C>Word</C> than we could in one 32bit
 <C>Word</C>!
 
-<Example>
+<Log>
  xxxx..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!..!
  0000010010000001010010001000010010010001001001000000000010001000
        2  2  0  1  2  2  1  0  2  2  2  1  1  1  0  0  0  2  1  0
-</Example>
+</Log>
 
 (The exclamation marks mark the right hand side of the prime field
 elements.)<P/>
@@ -164,7 +164,7 @@ The following example shows, how the <M>9</M> field elements
 and <M>4x^2+x+3</M> of <M>GF(5^3)</M> occurring in a vector of length 
 <M>9</M> in that order are stored on a 32bit machine:
 
-<Example>
+<Log>
  ^^^ lower memory addresses ^^^
             ....|....|....|....|....|....|....|....  (least significant bit)
  1st Word:  0001|0010|0001|0000|0100|0011|0010|0001| (first
@@ -175,7 +175,7 @@ and <M>4x^2+x+3</M> of <M>GF(5^3)</M> occurring in a vector of length
  5th Word:  0000|0000|0000|0000|0000|0000|0000|0001|     8 field
  6th Word:  0000|0000|0000|0000|0000|0000|0000|0100|        elements)
  VVV higher memory addresses VVV
-</Example>
+</Log>
 
 A <Q><C>cvec</C></Q> (one of our compressed vectors) is a &GAP; 
 <Q>Data object</Q> (that is with <C>TNUM</C> equal to <C>T&uscore;DATOBJ</C>). 
