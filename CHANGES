@@ -1,5 +1,9 @@
 This file describes changes in the cvec package.
 
+2.7.4 (2019-07-17)
+  - Improve compatibility with upcoming GAP 4.11 (replace uses of
+    IsRowVectorObj by IsVectorObj, and of BaseField by BaseDomain)
+
 2.7.3 (2019-07-11)
   - Rewrote build system to use gac, not autoconf/automake/libtool
   - Improve compatibility with upcoming GAP 4.11
