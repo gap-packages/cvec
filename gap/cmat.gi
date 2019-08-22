@@ -514,21 +514,21 @@ InstallMethod( Unpack, "for a cmat", [IsCMatRep],
 # (Pseudo) random matrices:
 
 InstallMethod( Randomize, "for a cmat", [ IsCMatRep and IsMutable ],
-  function( m )
-    local i;
-    for i in [2..m!.len+1] do
-      Randomize(m!.rows[i]);
-    od;
-  end );
+    m -> Randomize(GlobalMersenneTwister, m) );
 
-InstallMethod( Randomize, "for a cmat and a random source", 
-  [ IsCMatRep and IsMutable, IsRandomSource ],
+InstallOtherMethod( Randomize, "for a cmat and a random source",
+  [ IsRandomSource, IsCMatRep and IsMutable ],
   function( m, rs )
     local i;
     for i in [2..m!.len+1] do
-      Randomize(m!.rows[i],rs);
+      Randomize(rs, m!.rows[i]);
     od;
   end );
+
+# for compatibility with GAP < 4.11
+InstallOtherMethod( Randomize, "for a cmat and a random source",
+  [ IsCMatRep and IsMutable, IsRandomSource ],
+    { m, rs } -> Randomize( rs, m ) );
 
 #############################################################################
 # PostMakeImmutable to make subobjects immutable:
