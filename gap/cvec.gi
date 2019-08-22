@@ -1212,33 +1212,11 @@ end);
 ############################################################################
 
 InstallMethod( Randomize, "for cvecs", [IsCVecRep and IsMutable],
-  function( v )
-    local cl,d,j,len,li,p,q,size;
-    cl := DataObj(v);
-    len := Length(v);
-    size := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_size];
-    d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
-    if size <= 1 then
-        q := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_q];
-        li := 0*[1..len];
-        for j in [1..len] do
-            li[j] := Random(0,q-1);
-        od;
-        CVEC_INTREP_TO_CVEC(li,v);
-    else    # big scalars!
-        li := 0*[1..len*d];
-        p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
-        for j in [1..len*d] do
-            li[j] := Random(0,p-1);
-        od;
-        CVEC_INTREP_TO_CVEC(li,v);
-    fi;
-    return v;
-  end );
+    v -> Randomize(GlobalMersenneTwister, v) );
 
-InstallMethod( Randomize, "for a cvec and a random source", 
-  [IsCVecRep and IsMutable, IsRandomSource],
-  function( v, rs )
+InstallOtherMethod( Randomize, "for a random source and a cvec",
+  [IsRandomSource, IsCVecRep and IsMutable],
+  function( rs, v )
     local cl,d,j,len,li,p,q,size;
     cl := DataObj(v);
     len := Length(v);
@@ -1261,6 +1239,11 @@ InstallMethod( Randomize, "for a cvec and a random source",
     fi;
     return v;
   end );
+
+# for compatibility with GAP < 4.11
+InstallOtherMethod( Randomize, "for a cvec and a random source",
+  [IsCVecRep and IsMutable, IsRandomSource],
+    { v, rs } -> Randomize( rs, v ) );
 
 
 #############################################################################
