@@ -1,23 +1,9 @@
 #
 # Makefile rules for the cvec package
 #
-# This requires GNU make (just as the main GAP does).
-#
-# For simple packages one should only need to modify the MODULE_NAME
-# and the SOURCES variable.
-#
-MODULE_NAME = cvec
+KEXT_NAME = cvec
+KEXT_SOURCES = src/cvec.c
 
-SOURCES = src/cvec.c
-
-########################################################################
-# Do not edit below unless you know what you're doing
-########################################################################
-
-########################################################################
-# Some variables that come from GAP via our configure script
-########################################################################
+# include shared GAP package build system
 GAPPATH = @GAPPATH@
-GAPARCH = @GAPARCH@
-
 include Makefile.gappkg
