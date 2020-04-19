@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#include "src/compiled.h"          /* GAP headers                */
+#include "compiled.h" // GAP headers
 
 #ifdef SYS_IS_64_BIT
 #include "gf2lib_64.c"
