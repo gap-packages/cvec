@@ -358,9 +358,6 @@ static Obj NEW(Obj self, Obj cl, Obj type)
     si = sizeof(Word) * INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
     /* GARBAGE COLLECTION POSSIBLE */
     v = NewBag( T_DATOBJ, sizeof( Obj ) + si );
-    if (v == 0L) {
-        return OurErrorBreakQuit("CVEC_NEW: Cannot allocate memory");
-    }
     SET_TYPE_DATOBJ(v, type);
     return v;
 }
