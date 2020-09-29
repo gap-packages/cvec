@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/gap-packages/cvec.svg?branch=master)](https://travis-ci.org/gap-packages/cvec)
+[![Build Status](https://travis-ci.com/gap-packages/cvec.svg?branch=master)](https://travis-ci.com/gap-packages/cvec)
 [![Code Coverage](https://codecov.io/github/gap-packages/cvec/coverage.svg?branch=master&token=)](https://codecov.io/gh/gap-packages/cvec)
 
 # README file for the 'CVEC' GAP4 package 
