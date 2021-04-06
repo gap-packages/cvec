@@ -95,7 +95,7 @@ InstallMethod( NewIdentityMatrix,
     o := One(f);
     for i in [1..rows] do
         li[i+1] := CVEC_NEW(c,c![CVEC_IDX_type]);
-        li[i+1][i] := o;
+        li[i+1,i] := o;
     od;
     return CVEC_CMatMaker(li,c);
   end );
@@ -296,7 +296,7 @@ InstallGlobalFunction( CVEC_IdentityMat, function(arg)
   l := 0*[1..y+1];
   for i in [1..y] do
       l[i+1] := CVEC_NEW(c,c![CVEC_IDX_type]);
-      l[i+1][i] := 1;   # note that this works for all fields!
+      l[i+1,i] := 1;   # note that this works for all fields!
   od;
   return CVEC_CMatMaker(l,c);
 end );
@@ -336,7 +336,7 @@ InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
     ll[n+1] := l;
     for i in [1..n-1] do
         ll[i+1] := CVEC_NEW(cl,cl![CVEC_IDX_type]);
-        ll[i+1][i+1] := 1;   # this works for all fields!
+        ll[i+1,i+1] := 1;   # this works for all fields!
     od;
     return CVEC_CMatMaker(ll,cl);
   end );
@@ -360,7 +360,7 @@ InstallMethod( NewCompanionMatrix,
     l := Vector(-l{[1..n]},CompatibleVector(ll));
     for i in [1..n-1] do
         Add(ll,ZeroMutable(l));
-        ll[i][i+1] := one;
+        ll[i,i+1] := one;
     od;
     Add(ll,l);
     return ll;
@@ -609,13 +609,13 @@ InstallOtherMethod( \[\]\:\=, "for a cmat, a position, and a cvec",
 InstallMethod( MatElm, "for a cmat and two positions",
   [IsCMatRep, IsPosInt, IsPosInt],
   function( m, row, col )
-    return m!.rows[row+1][col];
+    return m!.rows[row+1,col];
   end );
 
 InstallMethod( SetMatElm, "for a cmat, two positions, and an ffe",
   [IsCMatRep and IsMutable, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
-    m!.rows[row+1][col] := el;
+    m!.rows[row+1,col] := el;
   end );
 
 
@@ -627,13 +627,13 @@ if not IsBound(ELM_MAT) then
 InstallMethod( \[\], "for a cmat and two positions",
   [IsCMatRep, IsPosInt, IsPosInt],
   function( m, row, col )
-    return m!.rows[row+1][col];
+    return m!.rows[row+1,col];
   end );
 
 InstallMethod( \[\]\:\=, "for a cmat, two positions, and an ffe",
   [IsCMatRep and IsMutable, IsPosInt, IsPosInt, IsObject],
   function( m, row, col, el )
-    m!.rows[row+1][col] := el;
+    m!.rows[row+1,col] := el;
   end );
 
 fi;
@@ -1185,7 +1185,7 @@ InstallOtherMethod( IsOne, "for a cmat", [IsCMatRep],
         return false;
     fi;
     for i in [1..m!.len] do
-        if not(IsOne(m!.rows[i+1][i])) then
+        if not(IsOne(m!.rows[i+1,i])) then
             return false;
         fi;
         v := ShallowCopy(m!.rows[i+1]);
@@ -1623,7 +1623,7 @@ InstallGlobalFunction( CVEC_InverseWithoutGrease, function(m)
     l := [0];
     for i in [m!.len+1,m!.len..2] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-        l[i][i-1] := 1;   # note that this works for all fields!
+        l[i,i-1] := 1;   # note that this works for all fields!
     od;
     mi := CVEC_CMatMaker(l,vcl);
     # Now make a copy of the matrix:
@@ -1648,18 +1648,18 @@ InstallGlobalFunction (CVEC_InverseWithGrease,
     if m!.len = 0 then return fail; fi;
     if m!.len = 1 then
         l := [0,CVEC_New(vcl)];
-        i := m!.rows[2][1]^-1;
+        i := m!.rows[2,1]^-1;
         if i = fail then
             return fail;
         fi;
-        l[2][1] := i;
+        l[2,1] := i;
         return CVEC_CMatMaker(l,m!.vecclass);
     fi;
     # Now make a new identity matrix:
     l := [0];
     for i in [m!.len+1,m!.len..2] do
         l[i] := CVEC_NEW(vcl,vcl![CVEC_IDX_type]);
-        l[i][i-1] := 1;   # note that this works for all fields!
+        l[i,i-1] := 1;   # note that this works for all fields!
     od;
     mi := CVEC_CMatMaker(l,vcl);
     # Now make a copy of the matrix:
@@ -1699,11 +1699,11 @@ InstallOtherMethod( InverseMutable, "for a square cmat",
     if m!.len = 0 then return fail; fi;
     if m!.len = 1 then
         l := [0,CVEC_New(vcl)];
-        i := m!.rows[2][1]^-1;
+        i := m!.rows[2,1]^-1;
         if i = fail then
             return fail;
         fi;
-        l[2][1] := i;
+        l[2,1] := i;
         return CVEC_CMatMaker(l,m!.vecclass);
     fi;
     if m!.greasehint = 0 or m!.len < 100 then
@@ -2088,7 +2088,7 @@ InstallOtherMethod( KroneckerProduct, "for cmats",
 
       for i in [1..rowsA] do
 	for j in [1..colsA] do
-	  CopySubMatrix( A[i][j] * B, AxB, 
+	  CopySubMatrix( A[i,j] * B, AxB, 
 			 [ 1 .. rowsB ], [ rowsB * (i-1) + 1 .. rowsB * i ],
 			 [ 1 .. colsB ], [ (j-1) * colsB + 1 .. j * colsB ] );
 	od;
@@ -2555,7 +2555,7 @@ InstallGlobalFunction( CVEC_MultiplyWinogradMemory, function(M,N,limit)
       r := NumberColumns(m);
       z := Zero(BaseDomain(m));
       for i in [1..NumberRows(m)] do
-          m[i][r] := z;
+          m[i,r] := z;
       od;
   end;
 
@@ -2734,7 +2734,7 @@ InstallGlobalFunction( CVEC_ValueLaurentPoly,
         # Add a multiple of the identity:
         if not(IsZero(f[1][i])) then
             s := f[1][i];
-            for j in [1..n] do val[j][j] := s + val[j][j]; od;
+            for j in [1..n] do val[j,j] := s + val[j,j]; od;
         fi;
         if i = 1 then break; fi;
         val := x*val;   # this is mutable!
