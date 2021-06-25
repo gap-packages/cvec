@@ -70,9 +70,9 @@ gap> omega := Z(5^2);;
 gap> mat2 := List(BasisVectors(basis), t -> Coefficients(basis, t*omega));;
 gap> mat = mat2;
 true
-gap> cmat := NewMatrix(IsCMatRep,GF(5),Length(mat[1]),mat);
+gap> cmat := NewMatrix(IsCMatRep,GF(5),mat,Length(mat[1]));
 <cmat 2x2 over GF(5,1)>
-gap> cmat2 := NewMatrix(IsCMatRep,GF(5),Length(mat2[1]),mat2);
+gap> cmat2 := NewMatrix(IsCMatRep,GF(5),mat2,Length(mat2[1]));
 <cmat 2x2 over GF(5,1)>
 gap> cmat = cmat2;
 true

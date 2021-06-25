@@ -46,8 +46,8 @@ InstallMethod( ConstructingFilter, "for a cmat",
 
 InstallMethod( NewMatrix, 
   "for IsCMatRep, a finite field, an integer, and finite field data",
-  [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
-  function( filt, f, rl, l )
+  [ IsCMatRep, IsField and IsFinite, IsList, IsInt ],
+  function( filt, f, l, rl )
     local p,d,c,li,i,v;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
@@ -356,7 +356,7 @@ InstallMethod( NewCompanionMatrix,
         Error("CompanionMatrix: polynomial is not monic");
         return fail;
     fi;
-    ll := NewMatrix(ty,bd,n,[]);
+    ll := NewMatrix(ty,bd,[],n);
     l := Vector(-l{[1..n]},CompatibleVector(ll));
     for i in [1..n-1] do
         Add(ll,ZeroMutable(l));
@@ -459,11 +459,11 @@ function(m)
   c := m!.vecclass;
   Print("NewMatrix(IsCMatRep,GF(",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
-        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),",NumberColumns(m),",[");
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),[");
   for i in [1..m!.len] do
       Print(Unpack(m!.rows[i+1]),",");
   od;
-  Print("])");
+  Print("],",NumberColumns(m),")");
 end);
   
 InstallMethod( Display, "for a cmat", 
