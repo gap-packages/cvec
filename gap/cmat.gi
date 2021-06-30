@@ -45,55 +45,41 @@ InstallMethod( ConstructingFilter, "for a cmat",
   function( m ) return IsCMatRep; end );
 
 ## duplicate installations of NewMatrix while waiting for the 
-## ordering of parameters to be changed in the development version
+## ordering of parameters to be changed in the development version 
+## this is achieved by introducing a new global function: 
 
+BindGlobal( "CVEC_NewMatrix", function( filt, f, l, rl ) 
+    local p,d,c,li,i,v;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    c := CVEC_NewCVecClass(p,d,rl);
+    li := 0*[1..Length(l)+1];
+    for i in [1..Length(l)] do
+        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataObj(l[i])) then
+            li[i+1] := ShallowCopy(l[i]);
+        elif IsVectorObj(l[i]) then
+            li[i+1] := CVec(Unpack(l[i]),c);
+        elif IsPlistRep(l[i]) then
+            li[i+1] := CVec(l[i],c);
+        else
+            Error("I do not know how to handle initialization data");
+            return fail;
+        fi;
+    od;
+    return CVEC_CMatMaker(li,c);
+  end);
+
+## for GAP <= 4.11 
 InstallOtherMethod( NewMatrix, 
   "for IsCMatRep, a finite field, an integer, and finite field data",
   [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
-  function( filt, f, rl, l )
-    local p,d,c,li,i,v;
-    p := Characteristic(f);
-    d := DegreeOverPrimeField(f);
-    c := CVEC_NewCVecClass(p,d,rl);
-    li := 0*[1..Length(l)+1];
-    for i in [1..Length(l)] do
-        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataObj(l[i])) then
-            li[i+1] := ShallowCopy(l[i]);
-        elif IsVectorObj(l[i]) then
-            li[i+1] := CVec(Unpack(l[i]),c);
-        elif IsPlistRep(l[i]) then
-            li[i+1] := CVec(l[i],c);
-        else
-            Error("I do not know how to handle initialization data");
-            return fail;
-        fi;
-    od;
-    return CVEC_CMatMaker(li,c);
-  end);
+  { filt, f, rl, l } -> CVEC_NewMatrix( filt, f, l, rl ) ); 
 
+## for GAP >= 4.12 
 InstallOtherMethod( NewMatrix, 
-  "for IsCMatRep, a finite field, an integer, and finite field data",
+  "for IsCMatRep, a finite field, finite field data, and an integer",
   [ IsCMatRep, IsField and IsFinite, IsList, IsInt ],
-  function( filt, f, l, rl )
-    local p,d,c,li,i,v;
-    p := Characteristic(f);
-    d := DegreeOverPrimeField(f);
-    c := CVEC_NewCVecClass(p,d,rl);
-    li := 0*[1..Length(l)+1];
-    for i in [1..Length(l)] do
-        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataObj(l[i])) then
-            li[i+1] := ShallowCopy(l[i]);
-        elif IsVectorObj(l[i]) then
-            li[i+1] := CVec(Unpack(l[i]),c);
-        elif IsPlistRep(l[i]) then
-            li[i+1] := CVec(l[i],c);
-        else
-            Error("I do not know how to handle initialization data");
-            return fail;
-        fi;
-    od;
-    return CVEC_CMatMaker(li,c);
-  end);
+  CVEC_NewMatrix ); 
 
 InstallMethod( NewZeroMatrix,
   "for IsCMatRep, a finite field, and two integers",
@@ -383,7 +369,7 @@ InstallMethod( NewCompanionMatrix,
         Error("CompanionMatrix: polynomial is not monic");
         return fail;
     fi;
-    ll := NewMatrix(ty,bd,[],n);
+    ll := CVEC_NewMatrix(ty,bd,[],n);
     l := Vector(-l{[1..n]},CompatibleVector(ll));
     for i in [1..n-1] do
         Add(ll,ZeroMutable(l));
@@ -484,7 +470,7 @@ InstallMethod( PrintObj, "for a cmat", [IsCMatRep],
 function(m)
   local c,i;
   c := m!.vecclass;
-  Print("NewMatrix(IsCMatRep,GF(",
+  Print("CVEC_NewMatrix(IsCMatRep,GF(",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),[");
   for i in [1..m!.len] do
