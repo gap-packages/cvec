@@ -44,10 +44,11 @@ InstallMethod( ConstructingFilter, "for a cmat",
   [ IsCMatRep ],
   function( m ) return IsCMatRep; end );
 
-InstallMethod( NewMatrix, 
-  "for IsCMatRep, a finite field, an integer, and finite field data",
-  [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
-  function( filt, f, rl, l )
+## duplicate installations of NewMatrix while waiting for the 
+## ordering of parameters to be changed in the development version 
+## this is achieved by introducing a new global function: 
+
+BindGlobal( "CVEC_NewMatrix", function( filt, f, l, rl ) 
     local p,d,c,li,i,v;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
@@ -67,6 +68,18 @@ InstallMethod( NewMatrix,
     od;
     return CVEC_CMatMaker(li,c);
   end);
+
+## for GAP <= 4.11 
+InstallOtherMethod( NewMatrix, 
+  "for IsCMatRep, a finite field, an integer, and finite field data",
+  [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
+  { filt, f, rl, l } -> CVEC_NewMatrix( filt, f, l, rl ) ); 
+
+## for GAP >= 4.12 
+InstallOtherMethod( NewMatrix, 
+  "for IsCMatRep, a finite field, finite field data, and an integer",
+  [ IsCMatRep, IsField and IsFinite, IsList, IsInt ],
+  CVEC_NewMatrix ); 
 
 InstallMethod( NewZeroMatrix,
   "for IsCMatRep, a finite field, and two integers",
@@ -356,7 +369,7 @@ InstallMethod( NewCompanionMatrix,
         Error("CompanionMatrix: polynomial is not monic");
         return fail;
     fi;
-    ll := NewMatrix(ty,bd,n,[]);
+    ll := CVEC_NewMatrix(ty,bd,[],n);
     l := Vector(-l{[1..n]},CompatibleVector(ll));
     for i in [1..n-1] do
         Add(ll,ZeroMutable(l));
@@ -457,13 +470,13 @@ InstallMethod( PrintObj, "for a cmat", [IsCMatRep],
 function(m)
   local c,i;
   c := m!.vecclass;
-  Print("NewMatrix(IsCMatRep,GF(",
+  Print("CVEC_NewMatrix(IsCMatRep,GF(",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
-        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),",NumberColumns(m),",[");
+        c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),[");
   for i in [1..m!.len] do
       Print(Unpack(m!.rows[i+1]),",");
   od;
-  Print("])");
+  Print("],",NumberColumns(m),")");
 end);
   
 InstallMethod( Display, "for a cmat", 

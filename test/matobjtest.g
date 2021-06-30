@@ -592,7 +592,7 @@ RowListMatrixObjTester := function( m, level )
       MyError(209); 
   fi;
   filter := ConstructingFilter(m);
-  vv := NewMatrix(filter,bd,NumberColumns(m),Unpack(m));
+  vv := NewMatrix(filter,bd,Unpack(m),NumberColumns(m));
   if not(IsMutable(m)) then MakeImmutable(vv); fi;
   if vv <> m or not(IsIdenticalObj(TypeObj(vv),TypeObj(m))) then
       MyError(210);
