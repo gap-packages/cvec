@@ -44,7 +44,34 @@ InstallMethod( ConstructingFilter, "for a cmat",
   [ IsCMatRep ],
   function( m ) return IsCMatRep; end );
 
-InstallMethod( NewMatrix, 
+## duplicate installations of NewMatrix while waiting for the 
+## ordering of parameters to be changed in the development version
+
+InstallOtherMethod( NewMatrix, 
+  "for IsCMatRep, a finite field, an integer, and finite field data",
+  [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
+  function( filt, f, rl, l )
+    local p,d,c,li,i,v;
+    p := Characteristic(f);
+    d := DegreeOverPrimeField(f);
+    c := CVEC_NewCVecClass(p,d,rl);
+    li := 0*[1..Length(l)+1];
+    for i in [1..Length(l)] do
+        if IsCVecRep(l[i]) and IsIdenticalObj(c,DataObj(l[i])) then
+            li[i+1] := ShallowCopy(l[i]);
+        elif IsVectorObj(l[i]) then
+            li[i+1] := CVec(Unpack(l[i]),c);
+        elif IsPlistRep(l[i]) then
+            li[i+1] := CVec(l[i],c);
+        else
+            Error("I do not know how to handle initialization data");
+            return fail;
+        fi;
+    od;
+    return CVEC_CMatMaker(li,c);
+  end);
+
+InstallOtherMethod( NewMatrix, 
   "for IsCMatRep, a finite field, an integer, and finite field data",
   [ IsCMatRep, IsField and IsFinite, IsList, IsInt ],
   function( filt, f, l, rl )
