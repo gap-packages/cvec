@@ -1,5 +1,11 @@
 This file describes changes in the cvec package.
 
+2.7.5 (2021-09-06)
+  - Require GAP version >= 4.10
+  - Replace buildsystem with the "standard GAP package buildsystem"
+    based on Makefile.gappkg, for quicker and more robust compilation
+  - Various janitorial changes
+
 2.7.4 (2019-07-17)
   - Improve compatibility with upcoming GAP 4.11 (replace uses of
     IsRowVectorObj by IsVectorObj, and of BaseField by BaseDomain)
