@@ -24,7 +24,7 @@ WORD myarena[(2048*1024+1024*1024)/4];
 WORD *arenastart;
 #endif
 
-#if SYS_IS_CYGWIN32
+#if defined(__CYGWIN__) || defined(__CYGWIN32__)
 #include <cygwin/in.h>
 #endif
 
