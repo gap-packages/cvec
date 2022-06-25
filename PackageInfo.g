@@ -144,7 +144,7 @@ AutoDoc := rec(
 
       For a copy of the GNU General Public License, see
       the file <F>LICENSE</F> included with this software,
-      or see <URL>http://www.gnu.org/licenses/gpl.html</URL>.
+      or see <URL>https://www.gnu.org/licenses/gpl.html</URL>.
       """,
     )
 ),
