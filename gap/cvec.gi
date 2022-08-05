@@ -413,8 +413,13 @@ InstallGlobalFunction( CVEC_HandleScalar, function(cl,s)
   fi;
   # Now we have to check, whether the field element is over the right field:
   d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
-  if s![2] <> d then
+  if s![2] < d then
       s := FFECONWAY.WriteOverLargerField(s,d);
+  elif s![2] > d then
+      s := FFECONWAY.TryToWriteInSmallerField(s,d);
+      # s now could be internal
+      if IsInternalRep(s) then return s; fi;
+      if s = fail then Error("input vector not defined over the expected field"); fi;
   fi;
   if IsGF2VectorRep(s![1]) then
     v := ShallowCopy(s![1]);

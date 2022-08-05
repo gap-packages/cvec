@@ -1,3 +1,6 @@
+gap> START_TEST("conversion.tst");
+
+#
 gap> m2 := [ 0 * Z(2), Z(2)^0 ];
 [ 0*Z(2), Z(2)^0 ]
 gap> m4 := [ 0 * Z(4), Z(4)^0 ];
@@ -76,3 +79,11 @@ gap> cmat2 := NewMatrix(IsCMatRep,GF(5),Length(mat2[1]),mat2);
 <cmat 2x2 over GF(5,1)>
 gap> cmat = cmat2;
 true
+
+# The following used to give an error.
+# See https://github.com/gap-packages/FinInG/issues/21
+gap> CVec([0*Z(2^18)], 2, 1);
+<cvec over GF(2,1) of length 1>
+
+#
+gap> STOP_TEST("conversion.tst", 0);

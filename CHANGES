@@ -1,5 +1,9 @@
 This file describes changes in the cvec package.
 
+X.Y (2022-MM-DD)
+  - Fix a bug converting vectors defined over large (non-internal) finite fields
+    to cvec format
+
 2.7.5 (2021-09-06)
   - Require GAP version >= 4.10
   - Replace buildsystem with the "standard GAP package buildsystem"
