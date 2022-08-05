@@ -3736,7 +3736,6 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
             vectors : matrix of basis vectors in semi echelon form
                       must be a cmat here!
             pivots  : integer list of pivot columns of basis matrix
-                      will be made into a plain list rep.
      vec : vector of same length as basis vectors
            must be a cvec here
      extend : either true or false, indicating, whether the basis is extended
@@ -3768,10 +3767,8 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   Int newpiv;
   int fnzcounter = 0;
 
-  PLAIN_LIST(pivots);
-  if (TNUM_OBJ(pivots) < FIRST_PLIST_TNUM || 
-      TNUM_OBJ(pivots) > LAST_PLIST_TNUM) {
-      return OurErrorBreakQuit("CLEANROWKERNEL: pivots is not in plist rep");
+  if (!IS_POSS_LIST(pivots)) {
+      return OurErrorBreakQuit("CLEANROWKERNEL: pivots must be a list of positive integers");
   }
 
   if (dec == Fail)
@@ -3800,7 +3797,7 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
       Int c;
       if (cldec) decdec = DATA_CVEC(dec);
       for (j = 1;j <= len;j++) {
-          Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
+          Int piv = INT_INTOBJ(ELM_LIST(pivots,j));
           if (++fnzcounter >= 10) {
               firstnz = CVEC_Firstnzp(fi,vecvec,vlen);
               fnzcounter = 0;
@@ -3836,7 +3833,7 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
       Word *decdec = 0L;
       if (cldec) decdec = DATA_CVEC(dec);
       for (j = 1;j <= len;j++) {
-          Int piv = INT_INTOBJ(ELM_PLIST(pivots,j));
+          Int piv = INT_INTOBJ(ELM_LIST(pivots,j));
           if (++fnzcounter >= 10) {
               firstnz = CVEC_Firstnzq(fi,vecvec,vlen,wordlen);
               fnzcounter = 0;
