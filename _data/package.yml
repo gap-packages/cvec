@@ -1,6 +1,6 @@
 name: cvec
-version: 2.7.5
-date: 2021-09-06
+version: 2.7.6
+date: 2022-08-06
 description: |
     Compact vectors over finite fields
 
@@ -31,39 +31,39 @@ packageinfo: https://gap-packages.github.io/cvec/PackageInfo.g
 
 downloads:
     - name: .tar.gz
-      url: https://github.com/gap-packages/cvec/releases/download/v2.7.5/cvec-2.7.5.tar.gz
+      url: https://github.com/gap-packages/cvec/releases/download/v2.7.6/cvec-2.7.6.tar.gz
     - name: .tar.bz2
-      url: https://github.com/gap-packages/cvec/releases/download/v2.7.5/cvec-2.7.5.tar.bz2
+      url: https://github.com/gap-packages/cvec/releases/download/v2.7.6/cvec-2.7.6.tar.bz2
 
 abstract: |
     This package provides an implementation of compact vectors over finite   fields. Contrary to earlier implementations no table lookups are used   but only word-based processor arithmetic. This allows for bigger finite   fields and higher speed.
 
 status: deposited
-doc-html: doc/chap0.html
+doc-html: doc/chap0_mj.html
 doc-pdf: doc/manual.pdf
 citeas: |
     <p class='BibEntry'>
-    [<span class='BibKey'>NH21</span>]   <b class='BibAuthor'>Neunhöffer, M. and Horn, M.</b>,
+    [<span class='BibKey'>NH22</span>]   <b class='BibAuthor'>Neunhöffer, M. and Horn, M.</b>,
      <i class='BibTitle'>cvec, Compact vectors over finite fields,
-             Version 2.7.5</i>
-     (<span class='BibYear'>2021</span>)<br />
+             Version 2.7.6</i>
+     (<span class='BibYear'>2022</span>)<br />
     (<span class='BibNote'>GAP package</span>),
     <span class='BibHowpublished'><a href="https://gap-packages.github.io/cvec">https://gap-packages.github.io/cvec</a></span>.
     </p>
     
 
 bibtex: |
-    @misc{ cvec2.7.5,
+    @misc{ cvec2.7.6,
       author =           {Neunh{\"o}ffer, M. and Horn, M.},
       title =            {{cvec},  Compact vectors over finite fields, {V}ersion
-                          2.7.5},
-      month =            {Sep},
-      year =             {2021},
+                          2.7.6},
+      month =            {Aug},
+      year =             {2022},
       note =             {GAP package},
       howpublished =     {\href            {https://gap-packages.github.io/cvec}
                           {\texttt{https://gap-packages.github.io/}\discretionary
                           {}{}{}\texttt{cvec}}},
       keywords =         {},
-      printedkey =       {NH21}
+      printedkey =       {NH22}
     }
 

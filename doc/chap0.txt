@@ -6,10 +6,10 @@
                       [1X Compact vectors over finite fields [101X
   
   
-                                     2.7.5
+                                     2.7.6
   
   
-                                6 September 2021
+                                 6 August 2022
   
   
                                  Max Neunhöffer
@@ -40,7 +40,7 @@
   details.[133X
   
   [33X[0;0YFor  a copy of the GNU General Public License, see the file [11XLICENSE[111X included
-  with this software, or see [7Xhttp://www.gnu.org/licenses/gpl.html[107X.[133X
+  with this software, or see [7Xhttps://www.gnu.org/licenses/gpl.html[107X.[133X
   
   
   -------------------------------------------------------

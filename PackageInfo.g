@@ -7,8 +7,8 @@ SetPackageInfo( rec(
 
 PackageName := "cvec",
 Subtitle := "Compact vectors over finite fields",
-Version := "2.7.5",
-Date := "06/09/2021", # dd/mm/yyyy format
+Version := "2.7.6",
+Date := "06/08/2022", # dd/mm/yyyy format
 License := "GPL-2.0-or-later",
 
 ##  Information about authors and maintainers.
@@ -93,7 +93,7 @@ AbstractHTML :=
 PackageDoc := rec(
   BookName  := "cvec",
   ArchiveURLSubset := ["doc"],
-  HTMLStart := "doc/chap0.html",
+  HTMLStart := "doc/chap0_mj.html",
   PDFFile   := "doc/manual.pdf",
   SixFile   := "doc/manual.six",
   LongTitle := "Compact vectors over finite fields",
@@ -144,7 +144,7 @@ AutoDoc := rec(
 
       For a copy of the GNU General Public License, see
       the file <F>LICENSE</F> included with this software,
-      or see <URL>http://www.gnu.org/licenses/gpl.html</URL>.
+      or see <URL>https://www.gnu.org/licenses/gpl.html</URL>.
       """,
     )
 ),
