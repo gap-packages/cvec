@@ -135,6 +135,7 @@ kernel headers, so that we do not need to rely on magic constants anymore.
 
 
 #define DATA_CVEC(cvec) ((Word *)((ADDR_OBJ(cvec))+1))
+#define CONST_DATA_CVEC(cvec) ((const Word *)((CONST_ADDR_OBJ(cvec))+1))
 
 /* The following macros is called IS_CVEC, but actually does not test
  * the complete type. It only does some cheap plausibility check. In
@@ -404,7 +405,7 @@ static Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
  * integers for each vector entry, giving the coefficients of the
  * polynomial over the prime field representing the residue class. */
 {
-    register Word *pw;
+    register const Word *pw;
     Int len;
     Int size;
 
@@ -425,7 +426,7 @@ static Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
             return OurErrorBreakQuit("CVEC_CVEC_TO_INTREP: different lengths");
         }
 
-        pw = DATA_CVEC(v);
+        pw = CONST_DATA_CVEC(v);
         {
             PREPARE_p(fi);
             PREPARE_epw(fi);
@@ -676,7 +677,7 @@ static Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
     PREPARE_maskp(fi);
     PREPARE_p(fi);
     Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
-    Word *vv = DATA_CVEC(v);
+    const Word *vv = CONST_DATA_CVEC(v);
     Word wo;
     Word res;
     Int i,j;
@@ -739,7 +740,7 @@ static Obj GREASEPOS(Obj self, Obj v, Obj pivs)
     Int i,j;
     seqaccess sa;
     Int res;
-    Word *ww = DATA_CVEC(v);
+    const Word *ww = CONST_DATA_CVEC(v);
 
     i = LEN_PLIST(pivs);
     INIT_SEQ_ACCESS(&sa,v,INT_INTOBJ(ELM_PLIST(pivs,i)));
@@ -776,23 +777,21 @@ static Word buf[MAXDEGREE+1];
  /* scalar multiplication:                                   */
 /*                                                          */
 
-static inline void ADD2_INL(Word *vv,Word *ww,Obj f,long i)
+static inline void ADD2_INL(Word *vv,const Word *ww,Obj f,long i)
 /* This internal inlined function adds i Words at *ww to the corresponding
  * Words at *vv. Characteristic 2 and odd characteristic are handled
  * separately. */
 {
     PREPARE_p(f);
+    register Word *vv_r = vv;
+    register const Word *ww_r = ww;
     if (p == 2) {
         /* Characteristic 2: */
-        register Word *vv_r = vv;
-        register Word *ww_r = ww;
         register long j = i;
         while (--j >= 0) *vv_r++ ^= *ww_r++;
     } else {
         /* Odd characteristic: */
         register Word wo;
-        register Word *vv_r = vv;
-        register Word *ww_r = ww;
         register long i_r = i;
         PREPARE(f);
         while (--i_r >= 0) {
@@ -802,26 +801,23 @@ static inline void ADD2_INL(Word *vv,Word *ww,Obj f,long i)
     }
 }
 
-static inline void ADD3_INL(Word *uu,Word *vv,Word *ww,Obj f,long i)
+static inline void ADD3_INL(Word *uu,const Word *vv,const Word *ww,Obj f,long i)
 /* This internal inlined function adds i Words at *ww to the corresponding
  * Words at *vv and stores them to *uu. Characteristic 2 and odd 
  * characteristic are handled separately. */
 {
     PREPARE_p(f);
+    register Word *uu_r = uu;
+    register const Word *vv_r = vv;
+    register const Word *ww_r = ww;
     if (p == 2) {
         /* Characteristic 2: */
-        register Word *uu_r = uu;
-        register Word *vv_r = vv;
-        register Word *ww_r = ww;
         register long i_r = i;
         while (--i_r >= 0) *uu_r++ = (*vv_r++) ^ (*ww_r++);
     } else {
         /* Odd characteristic: */
         register Word wo;
         register long i_r = i;
-        register Word *uu_r = uu;
-        register Word *vv_r = vv;
-        register Word *ww_r = ww;
         PREPARE(f);
         while (--i_r >= 0) {
             wo = *vv_r++ + *ww_r++;
@@ -938,7 +934,7 @@ static inline Word MUL1_INL(Word wo,Obj f,Word s)
     }
 }
 
-static inline void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
+static inline void MUL2_INL(Word *vv,const Word *ww,Obj f,Word s,long i)
 /* This interal inlined function multiplies i Words at *ww by the scalar
  * s from the prime field (0 <= s < p) and stores the result to *vv. 
  * Special cases 0, 1, p-1, and 2 are handled especially fast. 
@@ -958,7 +954,7 @@ static inline void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
         /* Here we can calculate p-x for all entries x. */
         register Word pm1 = (mask >> (bitsperel - 1)) * p;
         register long i_r = i;
-        register Word *ww_r = ww;
+        register const Word *ww_r = ww;
         register Word *vv_r = vv;
         register Word wo;
         while (--i_r >= 0) {
@@ -970,7 +966,7 @@ static inline void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
         PREPARE(f);
         register Word wo,res;
         register long i_r = i;
-        register Word *ww_r = ww;
+        register const Word *ww_r = ww;
         register Word *vv_r = vv;
 
         if (s == 2) { /* Here we can add v to v */
@@ -1001,7 +997,7 @@ static inline void MUL2_INL(Word *vv,Word *ww,Obj f,Word s,long i)
     }
 }
 
-static inline void ADDMUL_INL(Word *vv,Word *ww,Obj f,Word s,long i)
+static inline void ADDMUL_INL(Word *vv,const Word *ww,Obj f,Word s,long i)
 /* This interal inlined function multiplies i Words at *ww by the scalar
  * s from the prime field (0 <= s < p) and adds the result to *vv. 
  * Special cases 0, 1, p-1, and 2 are handled especially fast. 
@@ -1022,7 +1018,7 @@ static inline void ADDMUL_INL(Word *vv,Word *ww,Obj f,Word s,long i)
         register Word pm1 = (mask >> (bitsperel - 1)) * p;
         register Word wo;
         register long i_r = i;
-        register Word *ww_r = ww;
+        register const Word *ww_r = ww;
         register Word *vv_r = vv;
         while (--i_r >= 0) {
             wo = (pm1 - *ww_r++) + *vv_r;
@@ -1033,7 +1029,7 @@ static inline void ADDMUL_INL(Word *vv,Word *ww,Obj f,Word s,long i)
         PREPARE(f);
         register Word wo,res;
         register long i_r = i;
-        register Word *ww_r = ww;
+        register const Word *ww_r = ww;
         register Word *vv_r = vv;
 
         if (s == 2) { /* Here we can add v to v */
@@ -1126,7 +1122,7 @@ static inline Word ADDMUL1_INL(Word vv,Word ww,Obj f,Word s)
  * GAP level: 
  */
 
-static inline Int CVEC_Itemp(Obj fi, Word *v, Int i)
+static inline Int CVEC_Itemp(Obj fi, const Word *v, Int i)
 {
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
@@ -1135,7 +1131,7 @@ static inline Int CVEC_Itemp(Obj fi, Word *v, Int i)
     return (Int) ((v[i/elsperword] >> (bitsperel * (i % elsperword))) & maskp);
 }
 
-static inline void CVEC_Itemq(Obj fi, Word *v, Int i)
+static inline void CVEC_Itemq(Obj fi, const Word *v, Int i)
 /* Writes scalar into scbuf. */
 {
     Int *sc = scbuf;
@@ -1185,14 +1181,14 @@ static inline void CVEC_AssItemq(Obj fi, Word *v, Int i, Int *sc)
     }
 }
 
-static inline Int CVEC_Firstnzp(Obj fi, Word *v, Int len)
+static inline Int CVEC_Firstnzp(Obj fi, const Word *v, Int len)
 /* Returns the index of the first non-zero element in the vector or len+1
  * if the vector is equal to zero. This is only for prime fields. */
 {
     register PREPARE_epw(fi);
     register PREPARE_bpe(fi);
     register PREPARE_maskp(fi);
-    register Word *p = v;
+    register const Word *p = v;
     register Int i = 1;
     register Int im = 0;  /* i mod elsperword */
     register Word w = 0;
@@ -1213,14 +1209,14 @@ static inline Int CVEC_Firstnzp(Obj fi, Word *v, Int len)
     return len+1;
 }
 
-static inline Int CVEC_Firstnzq(Obj fi, Word *v, Int len, Int wordlen)
+static inline Int CVEC_Firstnzq(Obj fi, const Word *v, Int len, Int wordlen)
 /* Returns the index of the first non-zero element in the vector or 0,
  * if the vector is equal to zero. This is for extension fields. */
 {
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
     PREPARE_d(fi);
-    register Word *p = v;
+    register const Word *p = v;
     register Int i = 0;
     register Int im = 0;
 
@@ -1245,7 +1241,7 @@ static inline Int CVEC_Firstnzq(Obj fi, Word *v, Int len, Int wordlen)
     return 0;
 }
 
-static inline Int CVEC_Lastnzp(Obj fi, Word *v, Int len)
+static inline Int CVEC_Lastnzp(Obj fi, const Word *v, Int len)
 /* Returns the index of the last non-zero element in the vector or 0
  * if the vector is equal to zero. This is only for prime fields. */
 {
@@ -1253,7 +1249,7 @@ static inline Int CVEC_Lastnzp(Obj fi, Word *v, Int len)
     PREPARE_bpe(fi);
     PREPARE_maskp(fi);
     Int i = len-1;   /* code used to be zero based */
-    Word *p = v + i / elsperword;
+    const Word *p = v + i / elsperword;
     register Word w = *p--;
     register Word y = maskp << (bitsperel * (i % elsperword));
     if (w == 0) {
@@ -1278,7 +1274,7 @@ static inline Int CVEC_Lastnzp(Obj fi, Word *v, Int len)
     return 0;
 }
     
-static inline Int CVEC_Lastnzq(Obj fi, Word *v, Int len, Int wordlen)
+static inline Int CVEC_Lastnzq(Obj fi, const Word *v, Int len, Int wordlen)
 /* Returns the index of the last non-zero element in the vector or 0,
  * if the vector is equal to zero. This is for extension fields. */
 {
@@ -1286,7 +1282,7 @@ static inline Int CVEC_Lastnzq(Obj fi, Word *v, Int len, Int wordlen)
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
     PREPARE_d(fi);
-    register Word *p;
+    register const Word *p;
     register Int i;
     register Int im;
     register Word mask;
@@ -1409,7 +1405,7 @@ static Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
         /* Handle hints: */
         if (!handle_hints(ucl,ufi,fr,to,&start,&end)) return 0L;
 
-        ADD2_INL(DATA_CVEC(u)+start,DATA_CVEC(v)+start,ufi,end-start);
+        ADD2_INL(DATA_CVEC(u)+start,CONST_DATA_CVEC(v)+start,ufi,end-start);
     }
     return 0L;
 }
@@ -1430,7 +1426,7 @@ static Obj ADD3(Obj self, Obj u, Obj v,Obj w)
             return OurErrorBreakQuit(
                         "CVEC_ADD3: incompatible fields or lengths");
         }
-        ADD3_INL(DATA_CVEC(u),DATA_CVEC(v),DATA_CVEC(w),ufi,
+        ADD3_INL(DATA_CVEC(u),CONST_DATA_CVEC(v),CONST_DATA_CVEC(w),ufi,
              INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen)));
     }
     return 0L;
@@ -1588,8 +1584,8 @@ static inline void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v,
  * Note that this function is not exported to the GAP level and that
  * the global variable sclen must contain the length of the scalar. */
 {
-  register Word *vv;
   register Word *uu;
+  register const Word *vv;
   Int i;
   Int j;
   Int ss;
@@ -1598,7 +1594,7 @@ static inline void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v,
   PREPARE_cp(ufi);
 
   /* Now the ugly case involving conway polynomials: */
-  for (i = 0,uu = DATA_CVEC(u),vv = DATA_CVEC(v);i < wordlen;
+  for (i = 0,uu = DATA_CVEC(u),vv = CONST_DATA_CVEC(v);i < wordlen;
        i += d,uu += d) {
       /* Do one chunk of elsperword elements from F_q: */
 
@@ -1650,7 +1646,7 @@ static Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
         sc = prepare_scalar(ufi,s); if (!sc) return 0L;
         
         if (sclen == 1) {  /* Good luck, scalar is in prime field! */
-            MUL2_INL(DATA_CVEC(u),DATA_CVEC(v),ufi,*sc,wordlen);
+            MUL2_INL(DATA_CVEC(u),CONST_DATA_CVEC(v),ufi,*sc,wordlen);
             return 0L;
         }
         MUL2_INT(u,ucl,ufi,v,d,wordlen,sc);
@@ -1668,7 +1664,7 @@ static inline void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
  * the global variable sclen must contain the length of the scalar. */
 {
   register Word *uu;
-  register Word *vv;
+  register const Word *vv;
   Int c = end-start;
   Int i;
   Int j;
@@ -1678,7 +1674,7 @@ static inline void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
   PREPARE_cp(ufi);
 
   /* Now the ugly case involving conway polynomials: */
-  for (i = 0,uu = DATA_CVEC(u)+start,vv = DATA_CVEC(v)+start;
+  for (i = 0,uu = DATA_CVEC(u)+start,vv = CONST_DATA_CVEC(v)+start;
        i < c;i += d,uu += d) {
       /* Do one chunk of elsperword elements from F_q: */
 
@@ -1733,7 +1729,7 @@ static Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
         if (!handle_hints(ucl,ufi,fr,to,&start,&end)) return 0L;
             
         if (sclen == 1) {  /* Good luck, scalar is in prime field! */
-            ADDMUL_INL(DATA_CVEC(u)+start,DATA_CVEC(v)+start,ufi,*sc,end-start);
+            ADDMUL_INL(DATA_CVEC(u)+start,CONST_DATA_CVEC(v)+start,ufi,*sc,end-start);
             return 0L;
         }
         ADDMUL_INT(u,ucl,ufi,v,d,sc,start,end);
@@ -1813,13 +1809,13 @@ static Obj ELM_CVEC(Obj self, Obj v, Obj pos)
         } else sca = 0L;  /* just to please the compiler */
 
         if (d == 1) {
-            s = CVEC_Itemp(fi, DATA_CVEC(v), i);
+            s = CVEC_Itemp(fi, CONST_DATA_CVEC(v), i);
             if (p < 65536)    /* we do GAP FFEs */
                 return ELM_PLIST(tab2,s+1);
             else
                 return INTOBJ_INT(s);
         } else {
-            CVEC_Itemq(fi, DATA_CVEC(v), i);
+            CVEC_Itemq(fi, CONST_DATA_CVEC(v), i);
             if (size == 0) {
                 register Int i;
                 for (s = 0,i = d-1;i >= 0;i--) s = s * p + scbuf[i];
@@ -1848,10 +1844,10 @@ static Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
         PREPARE_clfi(v,cl,fi);
         PREPARE_d(fi);
         if (d == 1) {
-            return INTOBJ_INT(CVEC_Firstnzp(fi,DATA_CVEC(v),
+            return INTOBJ_INT(CVEC_Firstnzp(fi,CONST_DATA_CVEC(v),
                                       INT_INTOBJ(ELM_PLIST(cl,IDX_len))));
         } else {
-            return INTOBJ_INT(CVEC_Firstnzq(fi,DATA_CVEC(v),
+            return INTOBJ_INT(CVEC_Firstnzq(fi,CONST_DATA_CVEC(v),
                                       INT_INTOBJ(ELM_PLIST(cl,IDX_len)),
                                       INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen))));
         }
@@ -1867,10 +1863,10 @@ static Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
         PREPARE_clfi(v,cl,fi);
         PREPARE_d(fi);
         if (d == 1) {
-            return INTOBJ_INT(CVEC_Lastnzp(fi,DATA_CVEC(v),
+            return INTOBJ_INT(CVEC_Lastnzp(fi,CONST_DATA_CVEC(v),
                                       INT_INTOBJ(ELM_PLIST(cl,IDX_len))));
         } else {
-            return INTOBJ_INT(CVEC_Lastnzq(fi,DATA_CVEC(v),
+            return INTOBJ_INT(CVEC_Lastnzq(fi,CONST_DATA_CVEC(v),
                                       INT_INTOBJ(ELM_PLIST(cl,IDX_len)),
                                       INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen))));
         }
@@ -1884,8 +1880,8 @@ static Obj CVEC_LT(Obj self, Obj u, Obj v)
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         register Int wordlen;
-        register Word *p1;
-        register Word *p2;
+        register const Word *p1;
+        register const Word *p2;
         PREPARE_clfi(u,ucl,ufi);
         PREPARE_clfi(v,vcl,vfi);
 
@@ -1896,8 +1892,8 @@ static Obj CVEC_LT(Obj self, Obj u, Obj v)
                         "CVEC_CVEC_LT: incompatible fields or lengths");
         }
         wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
-        p1 = DATA_CVEC(u);
-        p2 = DATA_CVEC(v);
+        p1 = CONST_DATA_CVEC(u);
+        p2 = CONST_DATA_CVEC(v);
         while (wordlen > 0) {
             if (*p1 < *p2) return True;
             else if (*p1 > *p2) return False;
@@ -1916,8 +1912,8 @@ static Obj CVEC_EQ(Obj self, Obj u, Obj v)
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         register Int wordlen;
-        register Word *p1;
-        register Word *p2;
+        register const Word *p1;
+        register const Word *p2;
         PREPARE_clfi(u,ucl,ufi);
         PREPARE_clfi(v,vcl,vfi);
 
@@ -1928,8 +1924,8 @@ static Obj CVEC_EQ(Obj self, Obj u, Obj v)
                         "CVEC_CVEC_EQ: incompatible fields or lengths");
         }
         wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
-        p1 = DATA_CVEC(u);
-        p2 = DATA_CVEC(v);
+        p1 = CONST_DATA_CVEC(u);
+        p2 = CONST_DATA_CVEC(v);
         while (wordlen > 0) {
             if (*p1 != *p2) return False;
             p1++; p2++; wordlen--;
@@ -1947,11 +1943,11 @@ static Obj CVEC_ISZERO(Obj self, Obj u)
     }
     {  /* The PREPAREs define new variables, so we want an extra block! */
         register Int wordlen;
-        register Word *p;
+        register const Word *p;
         PREPARE_cl(u,ucl);
 
         wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
-        p = DATA_CVEC(u);
+        p = CONST_DATA_CVEC(u);
         while (wordlen > 0) {
             if (*p != 0) return False;
             p++; wordlen--;
@@ -1993,7 +1989,7 @@ static Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
     Int i = INT_INTOBJ(ii)-1; /* we are 1-based in GAP, here we want 0-based */
     Int l = INT_INTOBJ(ll);
     Word res = 0UL;
-    Word *p = DATA_CVEC(v) + (i / elsperword) * d;
+    const Word *p = CONST_DATA_CVEC(v) + (i / elsperword) * d;
     Int rest = i % elsperword;
     Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
 
@@ -2050,7 +2046,7 @@ static Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
                     pos += inc;
                 }
             } else {
-                Word *q = p + d;
+                const Word *q = p + d;
                 for (k = d;k > 0;k--) {
                     res |= (((*p++ >> s1) & mask1) | ((*q++ & mask2) << s2)) 
                            << pos;
@@ -2073,21 +2069,21 @@ static Int VecEx_s1, VecEx_s2;
 static Word VecEx_mask1, VecEx_mask2;
 static Int VecEx_overflow;  /* see EXTRACT */
 
-static Word (*Vector_Extract_Worker)(Word *data);
+static Word (*Vector_Extract_Worker)(const Word *data);
 /* Call this for repeated lookup. */
 
-static Word VecEx_Worker_prime_simple(Word *data)
+static Word VecEx_Worker_prime_simple(const Word *data)
 /* Extraction worker for prime fields in the simple case. */
 {
-    register Word *p = data + VecEx_offset;
+    register const Word *p = data + VecEx_offset;
     return (*p >> VecEx_s1) & VecEx_mask1;
 }
 
-static Word VecEx_Worker_ext_simple(Word *data)
+static Word VecEx_Worker_ext_simple(const Word *data)
 /* Extraction worker for extension fields in the simple case. */
 {
     register Word res = 0;
-    register Word *p = data + VecEx_offset;
+    register const Word *p = data + VecEx_offset;
     register Int pos = 0;
     register Int k;
     for (k = VecEx_d;k > 0;k--) {
@@ -2097,10 +2093,10 @@ static Word VecEx_Worker_ext_simple(Word *data)
     return res;
 }
 
-static Word VecEx_Worker_prime_bad(Word *data)
+static Word VecEx_Worker_prime_bad(const Word *data)
 /* Extraction worker for prime fields in the bad case. */
 {
-    register Word *p = data + VecEx_offset;
+    register const Word *p = data + VecEx_offset;
     if (VecEx_overflow)
         return (p[0] >> VecEx_s1) & VecEx_mask1;
     else
@@ -2108,11 +2104,11 @@ static Word VecEx_Worker_prime_bad(Word *data)
                ((p[1] & VecEx_mask2) << VecEx_s2);
 }
 
-static Word VecEx_Worker_ext_bad(Word *data)
+static Word VecEx_Worker_ext_bad(const Word *data)
 /* Extraction worker for extension fields in the bad case. */
 {
     register Word res = 0;
-    register Word *p = data + VecEx_offset;
+    register const Word *p = data + VecEx_offset;
     register Int pos = 0;
     register Int k;
     if (VecEx_overflow) {
@@ -2121,7 +2117,7 @@ static Word VecEx_Worker_ext_bad(Word *data)
             pos += VecEx_inc;
         }
     } else {
-        register Word *q = p + VecEx_d;
+        register const Word *q = p + VecEx_d;
         for (k = VecEx_d;k > 0;k--) {
             res |= (((*p++ >> VecEx_s1) & VecEx_mask1) |
                     ((*q++ & VecEx_mask2) << VecEx_s2)) << pos;
@@ -2202,7 +2198,7 @@ static Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
 static Obj EXTRACT_DOIT(Obj self, Obj v)
 {
     /* Dereference the function pointer and call the worker routine: */
-    return INTOBJ_INT( (Int) ( (*Vector_Extract_Worker)(DATA_CVEC(v)) ) );
+    return INTOBJ_INT( (Int) ( (*Vector_Extract_Worker)(CONST_DATA_CVEC(v)) ) );
 }
 
 static Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
@@ -2253,7 +2249,7 @@ static Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
                    0,sizeof(Word)*wordlen);
         else
             memcpy(DATA_CVEC(ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1+kk)),
-                   DATA_CVEC(ELM_PLIST(li,INT_INTOBJ(i)+kk)),
+                   CONST_DATA_CVEC(ELM_PLIST(li,INT_INTOBJ(i)+kk)),
                    sizeof(Word)*wordlen);
     }
 
@@ -2262,17 +2258,17 @@ static Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
         for (kk = 0;kk < INT_INTOBJ(l);kk++) {
             /* was: v = ELM_PLIST(li,INT_INTOBJ(i)+kk); */
             v = ELM_PLIST(tab,offs+INT_INTOBJ(tablen)+1+kk);
-            /* memcpy(DATA_CVEC(w),DATA_CVEC(v),sizeof(Word)*wordlen); */
+            /* memcpy(DATA_CVEC(w),CONST_DATA_CVEC(v),sizeof(Word)*wordlen); */
             /* MUL1(self,w,INTOBJ_INT(po),INTOBJ_INT(0),INTOBJ_INT(0)); */
-            memcpy(DATA_CVEC(u),DATA_CVEC(v),sizeof(Word)*wordlen);
+            memcpy(DATA_CVEC(u),CONST_DATA_CVEC(v),sizeof(Word)*wordlen);
             jj = len;
             for (kkk = p-1;kkk > 0;kkk--) {
                 for (j = 0;j < len;j++) {
                     x = ELM_PLIST(tab,offs + jj++);
                     y = ELM_PLIST(tab,offs + j);
-                    ADD3_INL(DATA_CVEC(x),DATA_CVEC(u),DATA_CVEC(y),fi,wordlen);
+                    ADD3_INL(DATA_CVEC(x),CONST_DATA_CVEC(u),CONST_DATA_CVEC(y),fi,wordlen);
                 }
-                if (kkk > 1) ADD2_INL(DATA_CVEC(u),DATA_CVEC(v),fi,wordlen);
+                if (kkk > 1) ADD2_INL(DATA_CVEC(u),CONST_DATA_CVEC(v),fi,wordlen);
             }
             len = jj;
         }
@@ -2300,14 +2296,14 @@ static Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
     Int k = INT_INTOBJ(ELM_PLIST(vcl,IDX_len));
     Int wordlen = INT_INTOBJ(ELM_PLIST(ucl,IDX_wordlen));
     Word *uu = DATA_CVEC(u);
-    Word *vv = DATA_CVEC(v);
+    const Word *vv = CONST_DATA_CVEC(v);
     register Int i;
 
     if (d == 1) {
         Int s;
         for (i = 1;i <= k;i++) {
             s = CVEC_Itemp(ufi,vv,i);
-            if (s) ADDMUL_INL(uu,DATA_CVEC(ELM_PLIST(m,i+1)),ufi,s,wordlen);
+            if (s) ADDMUL_INL(uu,CONST_DATA_CVEC(ELM_PLIST(m,i+1)),ufi,s,wordlen);
         }
     } else {   /* d > 1 */
         for (i = 1;i <= k;i++) {
@@ -2338,7 +2334,7 @@ static Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
         if (val != 0) {
             val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
             w = ELM_PLIST(ELM_PLIST(mgreasetab,i),val);
-            ADD2_INL(uu,DATA_CVEC(w),ufi,wordlen);
+            ADD2_INL(uu,CONST_DATA_CVEC(w),ufi,wordlen);
         }
     }
     return 0;
@@ -2363,12 +2359,12 @@ static Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab,
         for (i = 1,pos = 1;pos <= k;pos += lev,i++) {
             EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
             for (j = 2;j <= t+1;j++) {
-                val = (*Vector_Extract_Worker)(DATA_CVEC(ELM_PLIST(m,j)));
+                val = (*Vector_Extract_Worker)(CONST_DATA_CVEC(ELM_PLIST(m,j)));
                 if (val != 0) {
                     val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
                     v = ELM_PLIST(l,j);
                     w = ELM_PLIST(ELM_PLIST(ngreasetab,i),val);
-                    ADD2_INL(DATA_CVEC(v),DATA_CVEC(w),fi,wordlen);
+                    ADD2_INL(DATA_CVEC(v),CONST_DATA_CVEC(w),fi,wordlen);
                 }
             }
         }
@@ -2398,12 +2394,12 @@ static Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
                             INTOBJ_INT(1));
             EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
             for (j = 2;j <= t+1;j++) {
-                val = (*Vector_Extract_Worker)(DATA_CVEC(ELM_PLIST(m,j)));
+                val = (*Vector_Extract_Worker)(CONST_DATA_CVEC(ELM_PLIST(m,j)));
                 if (val != 0) {
                     val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
                     v = ELM_PLIST(l,j);
                     w = ELM_PLIST(greasetab,val);
-                    ADD2_INL(DATA_CVEC(v),DATA_CVEC(w),fi,wordlen);
+                    ADD2_INL(DATA_CVEC(v),CONST_DATA_CVEC(w),fi,wordlen);
                 }
             }
         }
@@ -2415,9 +2411,9 @@ static inline void ld(WORD *reg, Obj mat,
                       int wordscp, int wordscl, int rowscp)
 {
     int i,j;
-    WORD *data;
+    const WORD *data;
     for (i = 2;i <= rowscp+1;i++) {
-        data = (WORD *) DATA_CVEC(ELM_PLIST(mat,i));
+        data = (const WORD *)CONST_DATA_CVEC(ELM_PLIST(mat,i));
         for (j = wordscp; j > 0; j--) *reg++ = *data++;
         for (j = wordscl; j > 0; j--) *reg++ = 0UL;
     }
@@ -2509,9 +2505,9 @@ static Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
                 u = ELM_PLIST(l,j);
                 v = ELM_PLIST(m,j);
                 for (pos = 1;pos <= k;pos++) {
-                    val = CVEC_Itemp(fi,DATA_CVEC(v),pos);
+                    val = CVEC_Itemp(fi,CONST_DATA_CVEC(v),pos);
                     if (val != 0) {
-                        ADDMUL_INL(DATA_CVEC(u),DATA_CVEC(ELM_PLIST(n,pos+1)),
+                        ADDMUL_INL(DATA_CVEC(u),CONST_DATA_CVEC(ELM_PLIST(n,pos+1)),
                                    fi,val,wordlen);
                     }
                 }
@@ -2521,7 +2517,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
                 u = ELM_PLIST(l,j);
                 v = ELM_PLIST(m,j);
                 for (pos = 1;pos <= k;pos++) {
-                    CVEC_Itemq(fi,DATA_CVEC(v),pos);
+                    CVEC_Itemq(fi,CONST_DATA_CVEC(v),pos);
                     if (sclen != 1 || scbuf[0] != 0) {
                        ADDMUL_INT(u,cl,fi,ELM_PLIST(n,pos+1),d,scbuf,0,wordlen);
                     }
@@ -2560,7 +2556,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
                 for (pos = 1;pos <= k;pos++) {
                     val = INT_INTOBJ(ELM_PLIST(buf,pos));
                     if (val != 0) {
-                        ADDMUL_INL(DATA_CVEC(u),DATA_CVEC(ELM_PLIST(n,pos+1)),
+                        ADDMUL_INL(DATA_CVEC(u),CONST_DATA_CVEC(ELM_PLIST(n,pos+1)),
                                    fi,val,wordlen);
                     }
                 }
@@ -2613,7 +2609,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
 
 /* Our contribution to slicing: */
 
-static void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
+static void SLICE_INT(const Word *src, Word *dst, Int fr, Int le, Int to,
                       Int d, Int elsperword, Int bitsperel)
 {
     Word stamask,endmask,upmask,domask,kupmask,kdomask;
@@ -2641,7 +2637,7 @@ static void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
         endnr = (fr+le) % elsperword;
         endmask = (1UL << (endnr*bitsperel))-1UL;
         {
-            register Word *v = src + (fr/elsperword)*d;
+            register const Word *v = src + (fr/elsperword)*d;
             register Word *w = dst + (to/elsperword)*d;
             register Int i;
 
@@ -2682,7 +2678,7 @@ static void SLICE_INT(Word *src, Word *dst, Int fr, Int le, Int to,
         endmask = (1UL << (endnr*bitsperel))-1UL;
 
         {
-            register Word *v = src + (fr/elsperword)*d;
+            register const Word *v = src + (fr/elsperword)*d;
             register Word *w = dst + (to/elsperword)*d;
             register Int i;
             register Word wo;
@@ -2742,7 +2738,7 @@ static Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
     PREPARE_epw(fi);
     PREPARE_bpe(fi);
 
-    SLICE_INT(DATA_CVEC(src),DATA_CVEC(dst),INT_INTOBJ(srcpos),INT_INTOBJ(len),
+    SLICE_INT(CONST_DATA_CVEC(src),DATA_CVEC(dst),INT_INTOBJ(srcpos),INT_INTOBJ(len),
               INT_INTOBJ(dstpos),d,elsperword,bitsperel);
     return 0L;
 }
@@ -2759,7 +2755,7 @@ static Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
     PREPARE_d(fi);
     seqaccess sasrc,sadst;
     register Int i,j;
-    Word *so = DATA_CVEC(src);
+    const Word *so = CONST_DATA_CVEC(src);
     Word *de = DATA_CVEC(dst);
     Int srcl = INT_INTOBJ(ELM_PLIST(cl,IDX_len));
     Int dstl = INT_INTOBJ(ELM_PLIST(cldst,IDX_len));
@@ -2786,7 +2782,7 @@ static Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
             return OurErrorBreakQuit("CVEC_SLICE_LIST: "
                                      "destination positions not valid");
         }
-        SLICE_INT(DATA_CVEC(src),DATA_CVEC(dst),srcpos,len,dstpos,
+        SLICE_INT(CONST_DATA_CVEC(src),DATA_CVEC(dst),srcpos,len,dstpos,
                   d,elsperword,bitsperel);
         return 0L;
     }
@@ -2940,7 +2936,8 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
     Int dstl = INT_INTOBJ(ELM_PLIST(cldst,IDX_len));
     Int a,b;
     Int k;
-    Word *so,*de;
+    const Word *so;
+    Word *de;
 
     if (fi != fidst) {  /* we can do IsIdenticalObj here! */
         return OurErrorBreakQuit("CVEC_COPY_SUBMATRIX: " 
@@ -2964,7 +2961,7 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
                                      "destination positions not valid");
         }
         for (k = 1;k <= LEN_PLIST(srcrows);k++) {
-            so = DATA_CVEC(ELM_PLIST(src,INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
+            so = CONST_DATA_CVEC(ELM_PLIST(src,INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
             de = DATA_CVEC(ELM_PLIST(dst,INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
             SLICE_INT(so,de,srcpos,len,dstpos,d,elsperword,bitsperel);
         }
@@ -2991,7 +2988,7 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
             INIT_SEQ_ACCESS(&sadst,ELM_PLIST(dst,2),dstpos);
             while (1) {
                 for (k = 1;k <= LEN_PLIST(srcrows);k++) {
-                    so = DATA_CVEC(ELM_PLIST(src,
+                    so = CONST_DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
                                        INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
@@ -3025,7 +3022,7 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
             i = 1;
             while (1) {
                 for (k = 1;k <= LEN_PLIST(srcrows);k++) {
-                    so = DATA_CVEC(ELM_PLIST(src,
+                    so = CONST_DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
                                        INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
@@ -3065,7 +3062,7 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
             i = 1;
             while (1) {
                 for (k = 1;k <= LEN_PLIST(srcrows);k++) {
-                    so = DATA_CVEC(ELM_PLIST(src,
+                    so = CONST_DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
                                        INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
@@ -3100,7 +3097,7 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
             i = 1;
             while (1) {
                 for (k = 1;k <= LEN_PLIST(srcrows);k++) {
-                    so = DATA_CVEC(ELM_PLIST(src,
+                    so = CONST_DATA_CVEC(ELM_PLIST(src,
                                        INT_INTOBJ(ELM_PLIST(srcrows,k))+1));
                     de = DATA_CVEC(ELM_PLIST(dst,
                                        INT_INTOBJ(ELM_PLIST(dstrows,k))+1));
@@ -3143,13 +3140,13 @@ static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
 
 # if __BYTE_ORDER == __LITTLE_ENDIAN
     /* We are on a little endian machine, we just copy: */
-    memcpy(CHARS_STRING(s),DATA_CVEC(v),wordlen*BYTESPERWORD);
+    memcpy(CHARS_STRING(s),CONST_DATA_CVEC(v),wordlen*BYTESPERWORD);
 # else
     /* Big endian machine, swap bytes: */
-    register unsigned char *p;
+    register const unsigned char *p;
     register unsigned char *q;
     /* Do a byte copy: */
-    p = (unsigned char *) DATA_CVEC(v);
+    p = (const unsigned char *) CONST_DATA_CVEC(v);
     q = (unsigned char *) CHARS_STRING(s);
     while (--wordlen >= 0) {
         q[3] = p[0];
@@ -3171,7 +3168,7 @@ static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     /* note that elsperword is always even on 64bit machines! */
     Word wordlen32 = (len + elsperword32 - 1)/elsperword32;
     Word mask = (1UL << (elsperword32 * bitsperel))-1UL;
-    register Word *p;
+    register const Word *p;
     register Word wo;
     register int shift = elsperword32 * bitsperel;
     register int k;
@@ -3189,7 +3186,7 @@ static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     SET_LEN_STRING(s,wordlen32*4*d);
 
     if ((wordlen32 & 1) != 0) wordlen--;  /* Do not copy last word */
-    p = DATA_CVEC(v);
+    p = CONST_DATA_CVEC(v);
     q = (Word32 *) CHARS_STRING(s);
     while (--wordlen >= 0) {
         for (k = d-1;k >= 0;k--) {
@@ -3219,7 +3216,7 @@ static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     SET_LEN_STRING(s,wordlen32*4*d);
 
     if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
-    p = DATA_CVEC(v);
+    p = CONST_DATA_CVEC(v);
     q = (unsigned char *) CHARS_STRING(s);
     while (--wordlen >= 0) {
         for (k = d-1;k >= 0;k--) {
@@ -3272,10 +3269,10 @@ static Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
     memcpy(DATA_CVEC(v),CHARS_STRING(s),wordlen*BYTESPERWORD);
 # else
     /* Big endian machine, swap bytes: */
-    register unsigned char *p;
+    register const unsigned char *p;
     register unsigned char *q;
     /* Do a byte copy: */
-    p = (unsigned char *) CHARS_STRING(s);
+    p = (const unsigned char *) CHARS_STRING(s);
     q = (unsigned char *) DATA_CVEC(v);
     while (--wordlen >= 0) {
         q[3] = p[0];
@@ -3304,12 +3301,12 @@ static Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
     /* We are on a little endian machine, we copy, but have to
      * work for upper halves and lower halves separatedly. */
 
-    register Word32 *p;
+    register const Word32 *p;
 
     wordlen /= d;   /* We remember the factor d ourselves! */
 
     if ((wordlen32 & 1) != 0) wordlen--;  /* Do not copy last word */
-    p = (Word32 *) CHARS_STRING(s);
+    p = (const Word32 *)CHARS_STRING(s);
     q = DATA_CVEC(v);
     while (--wordlen >= 0) {
         for (k = d-1;k >= 0;k--) {
@@ -3328,13 +3325,13 @@ static Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
      * to swap bytes around! */
 
     register Word32 wo32;
-    register unsigned char *p;
+    register const unsigned char *p;
     register Word wo;
     
     wordlen /= d;   /* We remember the factor d ourselves! */
     
     if (wordlen32 & 1 != 0) wordlen--;  /* Do not copy last word */
-    p = (unsigned char *) CHARS_STRING(s);
+    p = (const unsigned char *)CHARS_STRING(s);
     q = DATA_CVEC(v);
     while (--wordlen >= 0) {
         for (k = d-1;k >= 0;k--) {
@@ -3402,7 +3399,7 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
         buf = (Word *) CHARS_STRING(tmp);
 
         /* Now do the slicing: */
-        Word *ww = DATA_CVEC(w);
+        const Word *ww = CONST_DATA_CVEC(w);
         for (i = 0;i < tablen;i++) {
             SLICE_INT(ww,buf + (i*(wordlenw+1)),1,lenw,i+2,
                       1 /* ==d */, elsperword, bitsperel);
@@ -3411,7 +3408,7 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
         {
             /* Now we are ready to prepare the result: */
             seqaccess sa;
-            Word *vv = DATA_CVEC(v);
+            const Word *vv = CONST_DATA_CVEC(v);
             Word *uu = DATA_CVEC(u);
             register Word s;
 
@@ -3497,7 +3494,7 @@ static inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
     
     /* Is entry non-zero? */
     for (k = d-1;k >= 0;k--) {
-        el = GET_VEC_ELM(sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+        el = GET_VEC_ELM(sa,CONST_DATA_CVEC(ELM_PLIST(mc,j+1)),k);
         if (el != 0)
             break;  /* Leave loop immediately to keep value of k! */
     }
@@ -3505,13 +3502,13 @@ static inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
         if (k == 0) {    /* Only a prime field component! */
             el = p - el;   /* We know it is nonzero! */
             ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1))+saver,
-                       DATA_CVEC(ELM_PLIST(mc,row+1))+saver,
+                       CONST_DATA_CVEC(ELM_PLIST(mc,row+1))+saver,
                        fi,el,wordlen-saver);
             ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
-                       DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
+                       CONST_DATA_CVEC(ELM_PLIST(mi,row+1)),fi,el,wordlen);
         } else {   /* extension field case! */
             for (k = 0;k < d;k++) {
-                el = GET_VEC_ELM(sa,DATA_CVEC(ELM_PLIST(mc,j+1)),k);
+                el = GET_VEC_ELM(sa,CONST_DATA_CVEC(ELM_PLIST(mc,j+1)),k);
                 if (el != 0) {
                     sclen = k;
                     helperdata[k] = p-el;
@@ -3550,7 +3547,7 @@ static Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
         while (row < dim && k == -1) {
             row++;
             for (k = d-1;k >= 0;k--) {
-                el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                el = GET_VEC_ELM(&sa,CONST_DATA_CVEC(ELM_PLIST(mc,row+1)),k);
                 if (el != 0)
                     break;  /* Leave loop immediately to keep value of k! */
             }
@@ -3560,7 +3557,7 @@ static Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
         if (k > 0) {   /* A non-prime field entry which is not equal to 1 */
             /* Here we need an inversion of a field element: */
             for (k = 0;k < d;k++) 
-                helperdata[k]=GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                helperdata[k]=GET_VEC_ELM(&sa,CONST_DATA_CVEC(ELM_PLIST(mc,row+1)),k);
             /* GARBAGE COLLECTION POSSIBLE */
             CALL_1ARGS(helperfun,helper);
             helperdata = DATA_CVEC(helper);  /* this is the only ref we have */
@@ -3644,7 +3641,7 @@ static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
                 }
                 /* Now look in our column: */
                 for (k = d-1;k >= 0;k--) {
-                    el = GET_VEC_ELM(&sa,DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                    el = GET_VEC_ELM(&sa,CONST_DATA_CVEC(ELM_PLIST(mc,row+1)),k);
                     if (el != 0)
                         break;  /* Leave loop immediately to keep value of k! */
                 }
@@ -3655,7 +3652,7 @@ static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
                 /* Here we need an inversion of a field element: */
                 for (k = 0;k < d;k++) 
                     helperdata[k] = GET_VEC_ELM(&sa,
-                              DATA_CVEC(ELM_PLIST(mc,row+1)),k);
+                              CONST_DATA_CVEC(ELM_PLIST(mc,row+1)),k);
                 /* GARBAGE COLLECTION POSSIBLE */
                 CALL_1ARGS(helperfun,helper);
                 helperdata = DATA_CVEC(helper);  
@@ -3709,14 +3706,14 @@ static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
         if (startgreaseclean <= blockend) startgreaseclean = blockend+1;
         j = 1; if (j == col) j = startgreaseclean;
         while (j <= dim) {
-            val = (*Vector_Extract_Worker)(DATA_CVEC(ELM_PLIST(mc,j+1)));
+            val = (*Vector_Extract_Worker)(CONST_DATA_CVEC(ELM_PLIST(mc,j+1)));
             if (val != 0) {
                 val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
                 ADDMUL_INL(DATA_CVEC(ELM_PLIST(mc,j+1)),
-                           DATA_CVEC(ELM_PLIST(greasetab1,val)),
+                           CONST_DATA_CVEC(ELM_PLIST(greasetab1,val)),
                            fi,p-1,wordlen);
                 ADDMUL_INL(DATA_CVEC(ELM_PLIST(mi,j+1)),
-                           DATA_CVEC(ELM_PLIST(greasetab2,val)),
+                           CONST_DATA_CVEC(ELM_PLIST(greasetab2,val)),
                            fi,p-1,wordlen);
             }
             j++;
@@ -3787,9 +3784,9 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
 
   /* First a little shortcut: */
   if (d == 1)
-      firstnz = CVEC_Firstnzp(fi,DATA_CVEC(vec),vlen);
+      firstnz = CVEC_Firstnzp(fi,CONST_DATA_CVEC(vec),vlen);
   else
-      firstnz = CVEC_Firstnzq(fi,DATA_CVEC(vec),vlen,wordlen);
+      firstnz = CVEC_Firstnzq(fi,CONST_DATA_CVEC(vec),vlen,wordlen);
   if (firstnz > vlen) return True;  /* The zero vector, all done */
 
   len = LEN_PLIST( rows )-1;  /* note that CMats start with a fail in pos 1 */
@@ -3809,7 +3806,7 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
               c = CVEC_Itemp(fi,vecvec,piv);
               if (c) {
                   if (cldec) CVEC_AssItemp(fi,decdec,j,c);
-                  ADDMUL_INL(vecvec,DATA_CVEC(ELM_PLIST(rows,j+1)),fi,
+                  ADDMUL_INL(vecvec,CONST_DATA_CVEC(ELM_PLIST(rows,j+1)),fi,
                              p-c,wordlen);
               }
               // firstnz = piv+1;
@@ -3832,7 +3829,7 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
       }
       return False;
   } else {   /* d > 1 */
-      Word *vecvec = DATA_CVEC(vec);
+      const Word *vecvec = CONST_DATA_CVEC(vec);
       Word *decdec = 0L;
       if (cldec) decdec = DATA_CVEC(dec);
       for (j = 1;j <= len;j++) {
@@ -3871,7 +3868,7 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
               
               /* these are the only refs we have and still use: */
               helperdata = DATA_CVEC(helper);
-              vecvec = DATA_CVEC(vec);
+              vecvec = CONST_DATA_CVEC(vec);
               
               for (sclen = d-1;sclen >= 0 && helperdata[sclen] == 0;sclen--) ;
               sclen++;
@@ -3928,7 +3925,7 @@ static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
     seqaccess sa;
     seqaccess saw;
     Word res;
-    Word *vv,*ww;
+    const Word *vv,*ww;
     Int size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
 
     if (fi != ELM_PLIST(wcl,IDX_fieldinfo)) {
@@ -3942,8 +3939,8 @@ static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
     INIT_SEQ_ACCESS( &saw, w, INT_INTOBJ(j) );
     k = 1;
     res = 0;
-    vv = DATA_CVEC(v);
-    ww = DATA_CVEC(w);
+    vv = CONST_DATA_CVEC(v);
+    ww = CONST_DATA_CVEC(w);
     /* We distinguish 2 cases: 
      * (1) 2*(p-1)*(p-1) does not fit into a Word
      * (2) 2*(p-1)*(p-1) does fit into a Word */
@@ -3954,7 +3951,7 @@ static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
             if (++k > len) break;
             STEP_RIGHT(&sa);
             w = ELM_PLIST(nrows,k+1);
-            ww = DATA_CVEC(w);
+            ww = CONST_DATA_CVEC(w);
         }
     } else {
         Word addsbeforereduce = WORDALLONE / ((p-1)*(p-1));
@@ -3968,7 +3965,7 @@ static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
             if (++k > len) break;
             STEP_RIGHT(&sa);
             w = ELM_PLIST(nrows,k+1);
-            ww = DATA_CVEC(w);
+            ww = CONST_DATA_CVEC(w);
         }
         res %= p;
     }
@@ -3991,7 +3988,7 @@ static Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
         seqaccess sa;
         Int i;
         Word res;
-        Word *vv,*ww;
+        const Word *vv,*ww;
         Int size;
 
         size = INT_INTOBJ(ELM_PLIST(fi,IDX_size));
@@ -4002,8 +3999,8 @@ static Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
         }
         /* This is a special case which is even higher optimised: */
         if (p == 2 && d == 1) {
-            vv = DATA_CVEC(v);
-            ww = DATA_CVEC(w);
+            vv = CONST_DATA_CVEC(v);
+            ww = CONST_DATA_CVEC(w);
             Int wlen = INT_INTOBJ(ELM_PLIST(vcl,IDX_wordlen));
             Word w = 0L;
             for (i = wlen;i > 0;i--) w ^= (*vv++ & *ww++);
@@ -4020,8 +4017,8 @@ static Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
         INIT_SEQ_ACCESS( &sa, v, 1 );
         i = 1;
         res = 0;
-        vv = DATA_CVEC(v);
-        ww = DATA_CVEC(w);
+        vv = CONST_DATA_CVEC(v);
+        ww = CONST_DATA_CVEC(w);
         /* We distinguish 2 cases: 
          * (1) 2*(p-1)*(p-1) does not fit into a Word
          * (2) 2*(p-1)*(p-1) does fit into a Word */
