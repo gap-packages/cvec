@@ -343,7 +343,7 @@ InstallMethod( PrintObj, "for a cvec", [IsCVecRep],
 function(v)
   local l,c,i;
   c := DataObj(v);
-  Print("NewRowVector(IsCVecRep,GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
+  Print("NewVector(IsCVecRep,GF(",c![CVEC_IDX_fieldinfo]![CVEC_IDX_p],",",
         c![CVEC_IDX_fieldinfo]![CVEC_IDX_d],"),[");
   if c![CVEC_IDX_fieldinfo]![CVEC_IDX_size] = 0 then   # GAP FFEs
       l := Unpack(v);
@@ -359,7 +359,7 @@ InstallMethod( String, "for a cvec", [IsCVecRep],
 function(v)
   local l,c,i,res;
   c := DataObj(v);
-  res := "NewRowVector(IsCVecRep,GF(";
+  res := "NewVector(IsCVecRep,GF(";
   Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_p]));
   Add(res,',');
   Append(res,String(c![CVEC_IDX_fieldinfo]![CVEC_IDX_d]));
@@ -868,10 +868,9 @@ InstallMethod( ConstructingFilter, "for a cvec",
     return IsCVecRep;
   end );
 
-InstallMethod( NewRowVector, 
-  "for IsCVecRep, a finite field, and a list of finite field elements",
-  [IsCVecRep, IsField and IsFinite, IsList],
-  function( filt, f, l )
+# `NewVector` was a constructor
+# in GAP <= 4.12 but is a tag based operation in GAP 4.13.
+Perform( [ function( filt, f, l )
     local p,d,c;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
@@ -881,17 +880,42 @@ InstallMethod( NewRowVector,
         c := CVEC_NewCVecClass(p,d,Length(l)/d);
     fi;
     return CVec(l,c);  # Delegate to another routine
+  end ],
+  function( method )
+    if IS_CONSTRUCTOR( NewVector ) then
+      # This holds in GAP <= 4.12.
+      InstallMethod( NewVector,
+        ["IsCVecRep", "IsField and IsFinite", "IsList"], method );
+    elif IsBoundGlobal( "InstallTagBasedMethod" ) then
+      # This should hold in GAP 4.13.
+      ValueGlobal("InstallTagBasedMethod")( NewVector, IsCVecRep, method );
+    else
+      # This should not happen.
+      Error( "NewVector is neither a constructor not a tag based operation" );
+    fi;
   end );
 
-InstallMethod( NewZeroVector,
-  "for IsCVecRep, a finite field, and an integer",
-  [ IsCVecRep, IsField and IsFinite, IsInt ],
-  function( filt, f, l )
+# `NewZeroVector` was a constructor
+# in GAP <= 4.12 but is a tag based operation in GAP 4.13.
+Perform( [ function( filt, f, l )
     local p,d,cl;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
     cl := CVEC_NewCVecClass(p,d,l);
     return CVEC_NEW(cl,cl![CVEC_IDX_type]);
+  end ],
+  function( method )
+    if IS_CONSTRUCTOR( NewZeroVector ) then
+      # This holds in GAP <= 4.12.
+      InstallMethod( NewZeroVector,
+        ["IsCVecRep", "IsField and IsFinite", "IsInt"], method );
+    elif IsBoundGlobal( "InstallTagBasedMethod" ) then
+      # This should hold in GAP 4.13.
+      ValueGlobal("InstallTagBasedMethod")( NewZeroVector, IsCVecRep, method );
+    else
+      # This should not happen.
+      Error( "NewZeroVector is neither a constructor not a tag based operation" );
+    fi;
   end );
 
 InstallMethod( Vector, "for a list of finite field elements, and a cvec",

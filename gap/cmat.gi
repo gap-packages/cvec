@@ -44,10 +44,9 @@ InstallMethod( ConstructingFilter, "for a cmat",
   [ IsCMatRep ],
   function( m ) return IsCMatRep; end );
 
-InstallMethod( NewMatrix, 
-  "for IsCMatRep, a finite field, an integer, and finite field data",
-  [ IsCMatRep, IsField and IsFinite, IsInt, IsList ],
-  function( filt, f, rl, l )
+# `NewMatrix` was a constructor
+# in GAP <= 4.12 but is a tag based operation in GAP 4.13.
+Perform( [ function( filt, f, rl, l )
     local p,d,c,li,i,v;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
@@ -66,12 +65,24 @@ InstallMethod( NewMatrix,
         fi;
     od;
     return CVEC_CMatMaker(li,c);
-  end);
+  end ],
+  function( method )
+    if IS_CONSTRUCTOR( NewMatrix ) then
+      # This holds in GAP <= 4.12.
+      InstallMethod( NewMatrix,
+        [ "IsCMatRep", "IsField and IsFinite", "IsInt", "IsList" ], method );
+    elif IsBoundGlobal( "InstallTagBasedMethod" ) then
+      # This should hold in GAP 4.13.
+      ValueGlobal("InstallTagBasedMethod")( NewMatrix, IsCMatRep, method );
+    else
+      # This should not happen.
+      Error( "NewMatrix is neither a constructor not a tag based operation" );
+    fi;
+  end );
 
-InstallMethod( NewZeroMatrix,
-  "for IsCMatRep, a finite field, and two integers",
-  [ IsCMatRep, IsField and IsFinite, IsInt, IsInt ],
-  function( filt, f, rows, cols )
+# `NewZeroMatrix` was a constructor
+# in GAP <= 4.12 but is a tag based operation in GAP 4.13.
+Perform( [ function( filt, f, rows, cols )
     local p, d, c, li, i;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
@@ -81,12 +92,24 @@ InstallMethod( NewZeroMatrix,
         li[i] := CVEC_NEW(c,c![CVEC_IDX_type]);
     od;
     return CVEC_CMatMaker(li,c);
+  end ],
+  function( method )
+    if IS_CONSTRUCTOR( NewZeroMatrix ) then
+      # This holds in GAP <= 4.12.
+      InstallMethod( NewZeroMatrix,
+        [ "IsCMatRep", "IsField and IsFinite", "IsInt", "IsInt" ], method );
+    elif IsBoundGlobal( "InstallTagBasedMethod" ) then
+      # This should hold in GAP 4.13.
+      ValueGlobal("InstallTagBasedMethod")( NewZeroMatrix, IsCMatRep, method );
+    else
+      # This should not happen.
+      Error( "NewZeroMatrix is neither a constructor not a tag based operation" );
+    fi;
   end );
-    
-InstallMethod( NewIdentityMatrix,
-  "for IsCMatRep, a finite field, and an integer",
-  [ IsCMatRep, IsField and IsFinite, IsInt ],
-  function( filt, f, rows )
+
+# `NewIdentityMatrix` was a constructor
+# in GAP <= 4.12 but is a tag based operation in GAP 4.13.
+Perform( [ function( filt, f, rows )
     local p, d, c, li, o, i;
     p := Characteristic(f);
     d := DegreeOverPrimeField(f);
@@ -98,8 +121,20 @@ InstallMethod( NewIdentityMatrix,
         li[i+1,i] := o;
     od;
     return CVEC_CMatMaker(li,c);
+  end ],
+  function( method )
+    if IS_CONSTRUCTOR( NewIdentityMatrix ) then
+      # This holds in GAP <= 4.12.
+      InstallMethod( NewIdentityMatrix,
+        [ "IsCMatRep", "IsField and IsFinite", "IsInt" ], method );
+    elif IsBoundGlobal( "InstallTagBasedMethod" ) then
+      # This should hold in GAP 4.13.
+      ValueGlobal("InstallTagBasedMethod")( NewIdentityMatrix, IsCMatRep, method );
+    else
+      # This should not happen.
+      Error( "NewIdentityMatrix is neither a constructor not a tag based operation" );
+    fi;
   end );
-    
 
 InstallMethod( CMat, "for a list of cvecs and a cvec", [IsList, IsCVecRep],
   function(l,v)
@@ -341,10 +376,9 @@ InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
     return CVEC_CMatMaker(ll,cl);
   end );
 
-InstallMethod( NewCompanionMatrix,
-  "for IsCMatRep, a polynomial and a ring",
-  [ IsCMatRep, IsUnivariatePolynomial, IsRing ],
-  function( ty, po, bd )
+# `NewCompanionMatrix` was a constructor
+# in GAP <= 4.12 but is a tag based operation in GAP 4.13.
+Perform( [ function( ty, po, bd )
     local i,l,ll,n,one;
     one := One(bd);
     l := CoefficientsOfUnivariatePolynomial(po);
@@ -364,6 +398,19 @@ InstallMethod( NewCompanionMatrix,
     od;
     Add(ll,l);
     return ll;
+  end ],
+  function( method )
+    if IS_CONSTRUCTOR( NewCompanionMatrix ) then
+      # This holds in GAP <= 4.12.
+      InstallMethod( NewCompanionMatrix,
+        [ "IsCMatRep", "IsUnivariatePolynomial", "IsRing" ], method );
+    elif IsBoundGlobal( "InstallTagBasedMethod" ) then
+      # This should hold in GAP 4.13.
+      ValueGlobal("InstallTagBasedMethod")( NewCompanionMatrix, IsCMatRep, method );
+    else
+      # This should not happen.
+      Error( "NewCompanionMatrix is neither a constructor not a tag based operation" );
+    fi;
   end );
 
 InstallGlobalFunction( CVEC_RandomMat, function(arg)
