@@ -351,7 +351,7 @@ InstallMethod( IdentityMatrix, "for an integer and a cmat",
 InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
   [ IsUnivariatePolynomial, IsCMatRep ],
   function( po, m )
-    local cl,d,i,l,ll,n,p;
+    local cl,i,l,ll,n;
     l := CoefficientsOfUnivariatePolynomial(po);
     n := Length(l)-1;
     if not(IsOne(l[n+1])) then
@@ -359,19 +359,13 @@ InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
         return fail;
     fi;
     cl := CVEC_NewCVecClassSameField(m!.vecclass,n);
-    if IsGF2VectorRep(l) or Is8BitVectorRep(l) then
-        l := -CVec(l{[1..n]});
-    else
-        p := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_p];
-        d := cl![CVEC_IDX_fieldinfo]![CVEC_IDX_d];
-        l := List(l{[1..n]},x->-x);   # to unpack!
-        l := CVec(l,p,d);
-    fi;
-    ll := 0*[1..n];
-    ll[n+1] := l;
-    for i in [1..n-1] do
-        ll[i+1] := CVEC_NEW(cl,cl![CVEC_IDX_type]);
-        ll[i+1,i+1] := 1;   # this works for all fields!
+    ll := 0*[0..n];
+    ll[2] := CVEC_NEW(cl,cl![CVEC_IDX_type]);
+    ll[2,n] := -l[1];
+    for i in [3..n+1] do
+        ll[i] := CVEC_NEW(cl,cl![CVEC_IDX_type]);
+        ll[i,i-2] := 1;   # this works for all fields!
+        ll[i,n] := -l[i-1];
     od;
     return CVEC_CMatMaker(ll,cl);
   end );
@@ -379,24 +373,23 @@ InstallMethod( CompanionMatrix, "for a polynomial and a cmat",
 # `NewCompanionMatrix` was a constructor
 # in GAP <= 4.12 but is a tag based operation in GAP 4.13.
 Perform( [ function( ty, po, bd )
-    local i,l,ll,n,one;
+    local i,l,ll,n,one,cl;
     one := One(bd);
     l := CoefficientsOfUnivariatePolynomial(po);
-    if not(IsPlistRep(l)) then
-        l := Unpack(l);
-    fi;
     n := Length(l)-1;
     if not(IsOne(l[n+1])) then
         Error("CompanionMatrix: polynomial is not monic");
         return fail;
     fi;
     ll := NewMatrix(ty,bd,n,[]);
-    l := Vector(-l{[1..n]},CompatibleVector(ll));
+    cl := CVEC_NewCVecClassSameField(ll!.vecclass,n);
+    Add(ll, CVEC_NEW(cl,cl![CVEC_IDX_type]));
+    ll[1,n]:= -l[1];
     for i in [1..n-1] do
-        Add(ll,ZeroMutable(l));
-        ll[i,i+1] := one;
+        Add(ll, CVEC_NEW(cl,cl![CVEC_IDX_type]));
+        ll[i+1,i] := one;
+        ll[i+1,n] := -l[i];
     od;
-    Add(ll,l);
     return ll;
   end ],
   function( method )
