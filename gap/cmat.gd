@@ -77,7 +77,6 @@ DeclareOperation( "EntryOfMatrixProduct",
 # Greasing:
 #############################################################################
 
-DeclareGlobalVariable( "CVEC_SpreadTabCache" );
 DeclareGlobalFunction( "CVEC_MakeSpreadTab" );
 DeclareGlobalFunction( "CVEC_OptimizeGreaseHint" );
 

@@ -1326,7 +1326,7 @@ InstallMethod( ChooseHashFunction, "for cmats",
 # Greasing:
 #############################################################################
 
-InstallValue( CVEC_SpreadTabCache, [] );
+BindGlobal( "CVEC_SpreadTabCache", [] );
 
 InstallGlobalFunction( CVEC_MakeSpreadTab, function(p,d,l,bitsperel)
     # Make up the spreadtab (EXTRACT values are 2^bitsperel-adic
