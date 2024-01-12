@@ -21,20 +21,20 @@ SetInfoLevel(InfoCVec,1);
 #############################################################################
 
 # A set holding all q's for which we have cvec classes:
-InstallValue( CVEC_q, [] );
+BindGlobal( "CVEC_q", [] );
 # A list holding field infos:
-InstallValue( CVEC_F, [] );
+BindGlobal( "CVEC_F", [] );
 # A list holding lengths of vectors existing for each q:
-InstallValue( CVEC_lens, [] );
+BindGlobal( "CVEC_lens", [] );
 # A list holding cvec classes (which are pairs [fieldinfo,len])
-InstallValue( CVEC_classes, [] );
+BindGlobal( "CVEC_classes", [] );
 
 
 #############################################################################
 ## Administration of field info and cvec class data:
 #############################################################################
 
-InstallValue( CVEC_BestGreaseTab,
+BindGlobal( "CVEC_BestGreaseTab",
   [ ,            # q=1
     8,           # q=2
     5,           # q=3
@@ -375,7 +375,7 @@ function(v)
   return res;
 end);
 
-InstallValue( CVEC_CharactersForDisplay,
+BindGlobal( "CVEC_CharactersForDisplay",
               ".123456789abcdefghijklmnopqrstuvwxyz" );
 
 InstallMethod( Display, "for a cvec", [IsCVecRep], 

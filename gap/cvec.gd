@@ -35,12 +35,6 @@ DeclareFilter( "IsCVecRepOverPrimeField" );
 ## Information about the base fields:
 #############################################################################
 
-DeclareGlobalVariable( "CVEC_q" );
-DeclareGlobalVariable( "CVEC_F" );
-DeclareGlobalVariable( "CVEC_lens" );
-DeclareGlobalVariable( "CVEC_classes" );
-DeclareGlobalVariable( "CVEC_BestGreaseTab" );
-
 DeclareGlobalFunction( "CVEC_NewCVecClass" );
 DeclareGlobalFunction( "CVEC_NewCVecClassSameField" );
 
@@ -109,8 +103,6 @@ DeclareOperation( "CVecNumber", [IsInt, IsCVecClass] );
 DeclareOperation( "CVecNumber", [IsInt, IsPosInt, IsPosInt, IsPosInt] );
 
 DeclareGlobalFunction( "CVEC_New" );
-
-DeclareGlobalVariable( "CVEC_CharactersForDisplay" );
 
 DeclareGlobalFunction( "CVEC_HandleScalar" );
 
