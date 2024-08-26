@@ -100,7 +100,7 @@ PackageDoc := rec(
 ),
 
 Dependencies := rec(
-  GAP := ">=4.10",
+  GAP := ">=4.12",
   NeededOtherPackages := [
     ["GAPDoc", ">= 1.2"],
     ["IO", ">= 4.1"],
@@ -111,24 +111,12 @@ Dependencies := rec(
 ),
 
 AvailabilityTest := function()
-  if CompareVersionNumbers(GAPInfo.Version, "4.12") then
-    if not IsKernelExtensionAvailable("cvec") then
-      LogPackageLoadingMessage(PACKAGE_WARNING,
-                              ["the kernel module is not compiled, ",
-                               "the package cannot be loaded."]);
-      return fail;
-    fi;
-  else
-    # TODO this clause can be removed once cvec requires GAP>=4.12.1
-    digraphs_so := Filename(DirectoriesPackagePrograms("digraphs"),
-                            "digraphs.so");
-    if not "cvec" in SHOW_STAT() and
-       Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") = fail then
-       LogPackageLoadingMessage(PACKAGE_WARNING,
-                                ["the kernel module is not compiled, ",
-                                 "the package cannot be loaded."]);
-      return fail;
-    fi;
+  if not IsKernelExtensionAvailable("cvec") then
+    LogPackageLoadingMessage(PACKAGE_WARNING,
+                            ["the kernel module is not compiled, ",
+                              "the package cannot be loaded."]);
+    return fail;
+  fi;
   return true;
 end,
 
