@@ -100,7 +100,7 @@ PackageDoc := rec(
 ),
 
 Dependencies := rec(
-  GAP := ">=4.10",
+  GAP := ">=4.12",
   NeededOtherPackages := [
     ["GAPDoc", ">= 1.2"],
     ["IO", ">= 4.1"],
@@ -111,9 +111,10 @@ Dependencies := rec(
 ),
 
 AvailabilityTest := function()
-  if not "cvec" in SHOW_STAT() and
-     Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") = fail then
-    #Info(InfoWarning, 1, "cvec: kernel cvec functions not available.");
+  if not IsKernelExtensionAvailable("cvec") then
+    LogPackageLoadingMessage(PACKAGE_WARNING,
+                            ["the kernel module is not compiled, ",
+                              "the package cannot be loaded."]);
     return fail;
   fi;
   return true;
