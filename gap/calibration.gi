@@ -859,13 +859,13 @@ CVEC_WinogradBounds :=
 # Now read hostname-specific calibration data:
 if IsBoundGlobal("IO_gethostname") then
     CVEC_hostname := IO_gethostname();
-    CVEC_calibrationfile := Concatenation("local/calibration.",
-                                            CVEC_hostname);
-    if CVEC_hostname <> "" then
-        if ReadPackage("cvec",CVEC_calibrationfile) = true then
-            Info(InfoCVec,1,"Have read host-specific calibration file ",
-                    CVEC_calibrationfile);
-        fi;
+    CVEC_calibrationfile := Filename(
+            DirectoriesPackageLibrary("cvec", "local"),
+            Concatenation("calibration.", CVEC_hostname));
+    if CVEC_hostname <> "" and CVEC_calibrationfile <> fail then
+        Read(CVEC_calibrationfile);
+        Info(InfoCVec,1,"Have read host-specific calibration file ",
+                CVEC_calibrationfile);
     fi;
 fi;
 
