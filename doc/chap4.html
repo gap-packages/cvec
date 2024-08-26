@@ -384,7 +384,7 @@
 
 <p>This is a method for (reading) element access of vectors. <var class="Arg">v</var> must be a <var class="Arg">cvec</var> and <var class="Arg">pos</var> must be a positive integer not greater than the length of <var class="Arg">v</var>. The finite field element at position <var class="Arg">pos</var> in <var class="Arg">v</var> is returned.</p>
 
-<p>Note that the list access syntax "<var class="Arg">v</var>[<var class="Arg">pos</var>]" triggers a call to the <code class="func">ELM_LIST</code> operation.</p>
+<p>Note that the list access syntax <q><var class="Arg">v</var>[<var class="Arg">pos</var>]</q> triggers a call to the <code class="func">ELM_LIST</code> operation.</p>
 
 <p><a id="X829C3BD17C7A6F4F" name="X829C3BD17C7A6F4F"></a></p>
 
@@ -397,7 +397,7 @@
 
 <p>The scalar <var class="Arg">s</var> is treated exactly as described in Subsection <a href="chap4.html#X788A3D6482290F7D"><span class="RefLink">4.2-1</span></a>.</p>
 
-<p>Note that the list access syntax "<var class="Arg">v</var><code class="code">[</code><var class="Arg">pos</var><code class="code">] := </code><var class="Arg">s</var>" triggers a call to the <code class="func">ASS_LIST</code> operation.</p>
+<p>Note that the list access syntax <q><var class="Arg">v</var><code class="code">[</code><var class="Arg">pos</var><code class="code">] := </code><var class="Arg">s</var></q> triggers a call to the <code class="func">ASS_LIST</code> operation.</p>
 
 <p><a id="X7E3A8E51853DEC58" name="X7E3A8E51853DEC58"></a></p>
 
@@ -408,7 +408,7 @@
 
 <p>This is a method for (reading) slice access of vectors. <var class="Arg">v</var> must be a <var class="Arg">cvec</var> and <var class="Arg">l</var> must be a range object or a list of positive integers not greater than the length of <var class="Arg">v</var>. In both cases the list of numbers must be contiguous list of valid positions in the vector. A new <code class="code">cvec</code> over the same field as <var class="Arg">v</var> and with the same length as <var class="Arg">l</var> is created and returned. The finite field element at i positions <var class="Arg">l</var> in <var class="Arg">v</var> are copied into the new vector.</p>
 
-<p>Note that the list slice access syntax "<var class="Arg">v</var>{<var class="Arg">l</var>}" triggers a call to the <code class="func">ELMS_LIST</code> operation.</p>
+<p>Note that the list slice access syntax <q><var class="Arg">v</var>{<var class="Arg">l</var>}</q> triggers a call to the <code class="func">ELMS_LIST</code> operation.</p>
 
 <p>Note that there intentionally is no write slice access to <code class="code">cvec</code>s, because in most cases this would lead to code that unnecessarily copies data around in an expensive way. Please use the following function instead:</p>
 
@@ -430,7 +430,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CopySubVector</code>( <var class="Arg">src</var>, <var class="Arg">dst</var>, <var class="Arg">srcposs</var>, <var class="Arg">dstposs</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: nothing</p>
 
-<p>Implements the operation <code class="func">CopySubVector</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap26_mj.html#X80EC354D78D7B5A6"><span class="RefLink">Reference: CopySubVector</span></a>) for <code class="code">cvec</code>s <var class="Arg">src</var> and <var class="Arg">dst</var>, that is, <var class="Arg">srcposs</var> and <var class="Arg">dstposs</var> must be ranges or plain lists of integers of equal length such that all numbers contained lie between <span class="SimpleMath">1</span> and the length of <var class="Arg">src</var> and <var class="Arg">dst</var> respectively. The result is undefined if <var class="Arg">src</var> and <var class="Arg">dst</var> are the same objects. The method is particularly efficient if both <var class="Arg">srcposs</var> and <var class="Arg">dstposs</var> are ranges with increment <span class="SimpleMath">1</span>.</p>
+<p>Implements the operation <code class="func">CopySubVector</code> (<a href="https://docs.gap-system.org/doc/ref/chap26_mj.html#X80EC354D78D7B5A6"><span class="RefLink">Reference: CopySubVector</span></a>) for <code class="code">cvec</code>s <var class="Arg">src</var> and <var class="Arg">dst</var>, that is, <var class="Arg">srcposs</var> and <var class="Arg">dstposs</var> must be ranges or plain lists of integers of equal length such that all numbers contained lie between <span class="SimpleMath">1</span> and the length of <var class="Arg">src</var> and <var class="Arg">dst</var> respectively. The result is undefined if <var class="Arg">src</var> and <var class="Arg">dst</var> are the same objects. The method is particularly efficient if both <var class="Arg">srcposs</var> and <var class="Arg">dstposs</var> are ranges with increment <span class="SimpleMath">1</span>.</p>
 
 <p><a id="X84347D8B7DFA790C" name="X84347D8B7DFA790C"></a></p>
 
@@ -528,7 +528,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; NumberFFVector</code>( <var class="Arg">v</var>, <var class="Arg">sz</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: an integer</p>
 
-<p>This implements the library operation <code class="func">NumberFFVector</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap23_mj.html#X872E17FF829DB50F"><span class="RefLink">Reference: NumberFFVector</span></a>). Note that only the case that <var class="Arg">sz</var> is the number of elements in the base field of <var class="Arg">v</var> is implemented. There is an inverse operation called <code class="func">CVecNumber</code> (<a href="chap4.html#X7A97E6E883E4BDCB"><span class="RefLink">4.5-4</span></a>).</p>
+<p>This implements the library operation <code class="func">NumberFFVector</code> (<a href="https://docs.gap-system.org/doc/ref/chap23_mj.html#X872E17FF829DB50F"><span class="RefLink">Reference: NumberFFVector</span></a>). Note that only the case that <var class="Arg">sz</var> is the number of elements in the base field of <var class="Arg">v</var> is implemented. There is an inverse operation called <code class="func">CVecNumber</code> (<a href="chap4.html#X7A97E6E883E4BDCB"><span class="RefLink">4.5-4</span></a>).</p>
 
 <p><a id="X7A97E6E883E4BDCB" name="X7A97E6E883E4BDCB"></a></p>
 
@@ -538,7 +538,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CVecNumber</code>( <var class="Arg">nr</var>, <var class="Arg">p</var>, <var class="Arg">d</var>, <var class="Arg">l</var> )</td><td class="tdright">(&nbsp;operation&nbsp;)</td></tr></table></div>
 <p>Returns: a <code class="code">cvec</code></p>
 
-<p>This is the inverse operation to <code class="func">NumberFFVector</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap23_mj.html#X872E17FF829DB50F"><span class="RefLink">Reference: NumberFFVector</span></a>). Of course, the base field of the vector and its length has to be specified, either by giving a <code class="code">cvecclass</code> <var class="Arg">cl</var> or the parameters <var class="Arg">p</var>, <var class="Arg">d</var>, and <var class="Arg">l</var>. For both cases corresponding methods are available.</p>
+<p>This is the inverse operation to <code class="func">NumberFFVector</code> (<a href="https://docs.gap-system.org/doc/ref/chap23_mj.html#X872E17FF829DB50F"><span class="RefLink">Reference: NumberFFVector</span></a>). Of course, the base field of the vector and its length has to be specified, either by giving a <code class="code">cvecclass</code> <var class="Arg">cl</var> or the parameters <var class="Arg">p</var>, <var class="Arg">d</var>, and <var class="Arg">l</var>. For both cases corresponding methods are available.</p>
 
 <p><a id="X853A85AE878B0CBF" name="X853A85AE878B0CBF"></a></p>
 
@@ -609,6 +609,6 @@
 <div class="chlinkbot"><span class="chlink1">Goto Chapter: </span><a href="chap0.html">Top</a>  <a href="chap1.html">1</a>  <a href="chap2.html">2</a>  <a href="chap3.html">3</a>  <a href="chap4.html">4</a>  <a href="chap5.html">5</a>  <a href="chap6.html">6</a>  <a href="chap7.html">7</a>  <a href="chap8.html">8</a>  <a href="chap9.html">9</a>  <a href="chapBib.html">Bib</a>  <a href="chapInd.html">Ind</a>  </div>
 
 <hr />
-<p class="foot">generated by <a href="http://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>
+<p class="foot">generated by <a href="https://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>
 </body>
 </html>

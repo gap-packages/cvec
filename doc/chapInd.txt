@@ -39,7 +39,7 @@
   [2XCollected[102X 5.2-9 
   [2XCopySubMatrix[102X 5.5-2 
   [2XCopySubVector[102X 4.3-5 
-  [5Xcvec[105X 2. 
+  [5Xcvec[105X 2.0 
   [2XCVec[102X 4.1-1 
       coefflcvecclass 4.1-3 
       coefflff 4.1-6 

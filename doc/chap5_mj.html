@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <script type="text/javascript"
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 <title>GAP (cvec) - Chapter 5: Matrices</title>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -259,7 +259,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; ELM_LIST</code>( <var class="Arg">m</var>, <var class="Arg">pos</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a <code class="code">cvec</code></p>
 
-<p>Behaves exactly as expected. Note that this method is triggered when one uses the (reading) syntax "<code class="code">m[pos]</code>".</p>
+<p>Behaves exactly as expected. Note that this method is triggered when one uses the (reading) syntax <q><code class="code">m[pos]</code></q>.</p>
 
 <p><a id="X829C3BD17C7A6F4F" name="X829C3BD17C7A6F4F"></a></p>
 
@@ -268,7 +268,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; ASS_LIST</code>( <var class="Arg">m</var>, <var class="Arg">pos</var>, <var class="Arg">v</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: nothing</p>
 
-<p>Behaves exactly as expected. Note that one can only assign to positions such that the resulting matrix has no holes. This method is triggered when one uses the (assignment) syntax "<code class="code">m[pos] := </code>".</p>
+<p>Behaves exactly as expected. Note that one can only assign to positions such that the resulting matrix has no holes. This method is triggered when one uses the (assignment) syntax <q><code class="code">m[pos] := </code></q>.</p>
 
 <p><a id="X7E3A8E51853DEC58" name="X7E3A8E51853DEC58"></a></p>
 
@@ -313,7 +313,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; Collected</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: the same as the collected list of the rows of <var class="Arg">m</var></p>
 
-<p>Behaves exactly as expected. Just uses the standard <code class="func">Collected</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap21_mj.html#X7ECE9056792F28BA"><span class="RefLink">Reference: Collected</span></a>) on the list of rows.</p>
+<p>Behaves exactly as expected. Just uses the standard <code class="func">Collected</code> (<a href="https://docs.gap-system.org/doc/ref/chap21_mj.html#X7ECE9056792F28BA"><span class="RefLink">Reference: Collected</span></a>) on the list of rows.</p>
 
 <p><a id="X8727F2928467C2F9" name="X8727F2928467C2F9"></a></p>
 
@@ -322,7 +322,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; DuplicateFreeList</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a new mutable <code class="code">cmat</code> containing the rows of <var class="Arg">m</var> with duplicates removed</p>
 
-<p>Behaves exactly as expected. Just uses the standard <code class="func">DuplicateFreeList</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap21_mj.html#X8727F2928467C2F9"><span class="RefLink">Reference: DuplicateFreeList</span></a>) on the list of rows.</p>
+<p>Behaves exactly as expected. Just uses the standard <code class="func">DuplicateFreeList</code> (<a href="https://docs.gap-system.org/doc/ref/chap21_mj.html#X8727F2928467C2F9"><span class="RefLink">Reference: DuplicateFreeList</span></a>) on the list of rows.</p>
 
 <p><a id="X79E31DB27C82D6E1" name="X79E31DB27C82D6E1"></a></p>
 
@@ -716,11 +716,11 @@
 
 <h4>5.8 <span class="Heading">Grease</span></h4>
 
-<p>The basic idea behind the "grease" technique is that over a finite field there are only finitely many linear combinations of a fixed list of vectors. Thus, many operations including matrix multiplication can be speeded up by precomputing all possible linear combinations and then just looking up the right one. For the case of matrix multiplication this can for example gain a factor of about <span class="SimpleMath">\(4\)</span> over the field with <span class="SimpleMath">\(2\)</span> elements using "grease level<span class="SimpleMath">\(8\)</span>", which means that for blocks of <span class="SimpleMath">\(8\)</span> rows all linear combinations are precomputed.</p>
+<p>The basic idea behind the <q>grease</q> technique is that over a finite field there are only finitely many linear combinations of a fixed list of vectors. Thus, many operations including matrix multiplication can be speeded up by precomputing all possible linear combinations and then just looking up the right one. For the case of matrix multiplication this can for example gain a factor of about <span class="SimpleMath">\(4\)</span> over the field with <span class="SimpleMath">\(2\)</span> elements using <q>grease level<span class="SimpleMath">\(8\)</span></q>, which means that for blocks of <span class="SimpleMath">\(8\)</span> rows all linear combinations are precomputed.</p>
 
 <p>The <strong class="pkg">cvec</strong> uses grease whenever appropriate automatically for example for matrix multiplication. However, occasionally the user has to take a conscious decision, which matrices to grease, because this of course uses more memory.</p>
 
-<p>A <code class="code">cmat</code> can be "pre-greased" with level <span class="SimpleMath">\(l\)</span>, which means that it is chopped into chunks of <span class="SimpleMath">\(l\)</span> rows and for each such chunk all possible linear combinations are precomputed and stored. This increases the memory used to store the matrix by a factor of <span class="SimpleMath">\(q^l\)</span> if the base field of the matrix has <span class="SimpleMath">\(q\)</span> elements. However, operations like vector matrix multiplication and matrix matrix multiplication (here the right hand side matrix must be greased!) are speeded up. As a rule of thumb the factor one can hope for is about <span class="SimpleMath">\(l \cdot (q-1)/q\)</span>. Note that for big matrices matrix multiplication does greasing on the fly anyway and therefore one cannot hope for such a big factor by pre-greasing.</p>
+<p>A <code class="code">cmat</code> can be <q>pre-greased</q> with level <span class="SimpleMath">\(l\)</span>, which means that it is chopped into chunks of <span class="SimpleMath">\(l\)</span> rows and for each such chunk all possible linear combinations are precomputed and stored. This increases the memory used to store the matrix by a factor of <span class="SimpleMath">\(q^l\)</span> if the base field of the matrix has <span class="SimpleMath">\(q\)</span> elements. However, operations like vector matrix multiplication and matrix matrix multiplication (here the right hand side matrix must be greased!) are speeded up. As a rule of thumb the factor one can hope for is about <span class="SimpleMath">\(l \cdot (q-1)/q\)</span>. Note that for big matrices matrix multiplication does greasing on the fly anyway and therefore one cannot hope for such a big factor by pre-greasing.</p>
 
 <p><a id="X7DF5A56F8747DD45" name="X7DF5A56F8747DD45"></a></p>
 
@@ -780,6 +780,6 @@
 <div class="chlinkbot"><span class="chlink1">Goto Chapter: </span><a href="chap0_mj.html">Top</a>  <a href="chap1_mj.html">1</a>  <a href="chap2_mj.html">2</a>  <a href="chap3_mj.html">3</a>  <a href="chap4_mj.html">4</a>  <a href="chap5_mj.html">5</a>  <a href="chap6_mj.html">6</a>  <a href="chap7_mj.html">7</a>  <a href="chap8_mj.html">8</a>  <a href="chap9_mj.html">9</a>  <a href="chapBib_mj.html">Bib</a>  <a href="chapInd_mj.html">Ind</a>  </div>
 
 <hr />
-<p class="foot">generated by <a href="http://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>
+<p class="foot">generated by <a href="https://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>
 </body>
 </html>

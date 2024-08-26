@@ -7,8 +7,8 @@ SetPackageInfo( rec(
 
 PackageName := "cvec",
 Subtitle := "Compact vectors over finite fields",
-Version := "2.8.1",
-Date := "28/03/2023", # dd/mm/yyyy format
+Version := "2.8.2",
+Date := "27/08/2024", # dd/mm/yyyy format
 License := "GPL-2.0-or-later",
 
 ##  Information about authors and maintainers.
@@ -100,7 +100,7 @@ PackageDoc := rec(
 ),
 
 Dependencies := rec(
-  GAP := ">=4.10",
+  GAP := ">=4.12",
   NeededOtherPackages := [
     ["GAPDoc", ">= 1.2"],
     ["IO", ">= 4.1"],
@@ -111,9 +111,10 @@ Dependencies := rec(
 ),
 
 AvailabilityTest := function()
-  if not "cvec" in SHOW_STAT() and
-     Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") = fail then
-    #Info(InfoWarning, 1, "cvec: kernel cvec functions not available.");
+  if not IsKernelExtensionAvailable("cvec") then
+    LogPackageLoadingMessage(PACKAGE_WARNING,
+                            ["the kernel module is not compiled, ",
+                              "the package cannot be loaded."]);
     return fail;
   fi;
   return true;

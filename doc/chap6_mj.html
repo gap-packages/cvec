@@ -6,7 +6,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
 <script type="text/javascript"
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+  src="https://cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 <title>GAP (cvec) - Chapter 6: Linear Algebra routines</title>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -65,7 +65,7 @@
 
 <p>Note that for technical reasons another component <code class="code">helper</code> is bound containing a <code class="code">cvec</code> of length <span class="SimpleMath">\(1\)</span> over the same field.</p>
 
-<p>Note further that the output of the <strong class="pkg">GAP</strong> library operation <code class="func">SemiEchelonMat</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap24_mj.html#X7D5D6BD07B7E981B"><span class="RefLink">Reference: SemiEchelonMat</span></a>) is not compatible to this setup, because it contains a component <code class="code">heads</code> that contains at position <span class="SimpleMath">\(i\)</span>, if nonzero, the number of the row for that the pivot element is in column <span class="SimpleMath">\(i\)</span>.</p>
+<p>Note further that the output of the <strong class="pkg">GAP</strong> library operation <code class="func">SemiEchelonMat</code> (<a href="https://docs.gap-system.org/doc/ref/chap24_mj.html#X7D5D6BD07B7E981B"><span class="RefLink">Reference: SemiEchelonMat</span></a>) is not compatible to this setup, because it contains a component <code class="code">heads</code> that contains at position <span class="SimpleMath">\(i\)</span>, if nonzero, the number of the row for that the pivot element is in column <span class="SimpleMath">\(i\)</span>.</p>
 
 <p><a id="X87855EEA8779C855" name="X87855EEA8779C855"></a></p>
 
@@ -114,7 +114,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; SemiEchelonBasisMutable</code>( <var class="Arg">b</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a semi echelonised basis</p>
 
-<p>Turns the output <var class="Arg">b</var> of <code class="func">SemiEchelonMat</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap24_mj.html#X7D5D6BD07B7E981B"><span class="RefLink">Reference: SemiEchelonMat</span></a>) into a valid semi echelonised basis in the sense of the <strong class="pkg">cvec</strong> package. This means that the component <code class="code">pivots</code> is calculated from the component <code class="code">heads</code>. Use this function only if absolutely necessary. Instead, directly invoke <code class="func">SemiEchelonBasisMutable</code> on the original matrix.</p>
+<p>Turns the output <var class="Arg">b</var> of <code class="func">SemiEchelonMat</code> (<a href="https://docs.gap-system.org/doc/ref/chap24_mj.html#X7D5D6BD07B7E981B"><span class="RefLink">Reference: SemiEchelonMat</span></a>) into a valid semi echelonised basis in the sense of the <strong class="pkg">cvec</strong> package. This means that the component <code class="code">pivots</code> is calculated from the component <code class="code">heads</code>. Use this function only if absolutely necessary. Instead, directly invoke <code class="func">SemiEchelonBasisMutable</code> on the original matrix.</p>
 
 <p><a id="X82A37BC982B1D8CA" name="X82A37BC982B1D8CA"></a></p>
 
@@ -125,15 +125,15 @@
 
 <p>The argument <var class="Arg">m</var> must be a <code class="code">cmat</code>. This method calculates a semi echelonised basis for the row space of <var class="Arg">m</var>.</p>
 
-<p>There are a number of similar operations the names of which are derived from <code class="func">SemiEchelonBasisMutable</code> by appending single letters: The letters "P", "T" and "X" are modifiers and there are operations for most of the <span class="SimpleMath">\(8\)</span> combinations of those letters being present or not respectively. Always give the present letters in alphabetical order.</p>
+<p>There are a number of similar operations the names of which are derived from <code class="func">SemiEchelonBasisMutable</code> by appending single letters: The letters <q>P</q>, <q>T</q> and <q>X</q> are modifiers and there are operations for most of the <span class="SimpleMath">\(8\)</span> combinations of those letters being present or not respectively. Always give the present letters in alphabetical order.</p>
 
-<p>The "X" indicates, that the input matrix may be destroyed, that is, the rows of <var class="Arg">m</var> will be changed and the very same objects be used in the semi echelonised result basis.</p>
+<p>The <q>X</q> indicates, that the input matrix may be destroyed, that is, the rows of <var class="Arg">m</var> will be changed and the very same objects be used in the semi echelonised result basis.</p>
 
-<p>The "T" indicates, that the transformation is calculated, that is, the resulting record <code class="code">r</code> will have a component <code class="code">coeffs</code>, such that <code class="code">r.coeffs * <var class="Arg">m</var></code> is equal to <code class="code">r.vectors</code> component of the semi echelonised result. Further, with given letter "T" there will be a component <code class="code">relations</code> which is a basis for the (left) nullspace of <var class="Arg">m</var>.</p>
+<p>The <q>T</q> indicates, that the transformation is calculated, that is, the resulting record <code class="code">r</code> will have a component <code class="code">coeffs</code>, such that <code class="code">r.coeffs * <var class="Arg">m</var></code> is equal to <code class="code">r.vectors</code> component of the semi echelonised result. Further, with given letter <q>T</q> there will be a component <code class="code">relations</code> which is a basis for the (left) nullspace of <var class="Arg">m</var>.</p>
 
-<p>The "P" indicates, that a component <code class="code">r.p</code> is calculated such that <code class="code">r.p * r.vectors</code> is the original matrix <var class="Arg">m</var>.</p>
+<p>The <q>P</q> indicates, that a component <code class="code">r.p</code> is calculated such that <code class="code">r.p * r.vectors</code> is the original matrix <var class="Arg">m</var>.</p>
 
-<p>Currently the variants with "P" and "T" both present are not implement because they will probably not be very useful.</p>
+<p>Currently the variants with <q>P</q> and <q>T</q> both present are not implement because they will probably not be very useful.</p>
 
 <p><a id="X839298477E3F7345" name="X839298477E3F7345"></a></p>
 
@@ -187,7 +187,7 @@
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; MutableNullspaceMat</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a <code class="code">cmat</code></p>
 
-<p>Returns a <code class="code">cmat</code> the rows of which are a basis of the (left) nullspace of the <code class="code">cmat</code> <var class="Arg">m</var>. Internally, <code class="func">SemiEchelonBasisMutableT</code> (<a href="chap6_mj.html#X8309FC85858FC96B"><span class="RefLink">6.1-8</span></a>) is used and the component <code class="code">relations</code> of the result is returned. The result is mutable, which is the reason for the introduction of a new operation besides <code class="func">NullspaceMat</code> (<a href="https://www.gap-system.org/Manuals/doc/ref/chap24_mj.html#X7DA0D5887DB12DC4"><span class="RefLink">Reference: NullspaceMat</span></a>).</p>
+<p>Returns a <code class="code">cmat</code> the rows of which are a basis of the (left) nullspace of the <code class="code">cmat</code> <var class="Arg">m</var>. Internally, <code class="func">SemiEchelonBasisMutableT</code> (<a href="chap6_mj.html#X8309FC85858FC96B"><span class="RefLink">6.1-8</span></a>) is used and the component <code class="code">relations</code> of the result is returned. The result is mutable, which is the reason for the introduction of a new operation besides <code class="func">NullspaceMat</code> (<a href="https://docs.gap-system.org/doc/ref/chap24_mj.html#X7DA0D5887DB12DC4"><span class="RefLink">Reference: NullspaceMat</span></a>).</p>
 
 <p><a id="X7A9596C98725862E" name="X7A9596C98725862E"></a></p>
 
@@ -280,6 +280,6 @@
 <div class="chlinkbot"><span class="chlink1">Goto Chapter: </span><a href="chap0_mj.html">Top</a>  <a href="chap1_mj.html">1</a>  <a href="chap2_mj.html">2</a>  <a href="chap3_mj.html">3</a>  <a href="chap4_mj.html">4</a>  <a href="chap5_mj.html">5</a>  <a href="chap6_mj.html">6</a>  <a href="chap7_mj.html">7</a>  <a href="chap8_mj.html">8</a>  <a href="chap9_mj.html">9</a>  <a href="chapBib_mj.html">Bib</a>  <a href="chapInd_mj.html">Ind</a>  </div>
 
 <hr />
-<p class="foot">generated by <a href="http://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>
+<p class="foot">generated by <a href="https://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>
 </body>
 </html>
