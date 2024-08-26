@@ -27,7 +27,7 @@ jobs:
           - master
           - stable-4.13
           - stable-4.12
-        ABI: [""]
+        ABI: ['']
         include:
           - gap-branch: master
             ABI: 32
@@ -61,8 +61,8 @@ jobs:
           GAP_PKGS_TO_BUILD: "io profiling orb"
       - uses: gap-actions/build-pkg-docs@v1
         with:
-          use-latex: "true"
-      - name: "Upload documentation"
+          use-latex: 'true'
+      - name: 'Upload documentation'
         uses: actions/upload-artifact@v4
         with:
           name: manual
