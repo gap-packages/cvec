@@ -1,5 +1,10 @@
 This file describes changes in the cvec package.
 
+2.8.2 (2024-08-27)
+  - Require GAP >= 4.12
+  - Don't attempt to read non-existing files
+  - Various janitorial changes
+
 2.8.1 (2023-03-28)
   - Adjust `CompanionMatrix`, `NewCompanionMatrix` output
     to match the GAP documentation (i.e., transpose it compared
