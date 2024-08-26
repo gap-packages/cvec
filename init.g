@@ -13,13 +13,21 @@
 ################################
 
 # load kernel function if it is installed:
-if (not IsBound(CVEC)) and ("cvec" in SHOW_STAT()) then
-  # try static module
-  LoadStaticModule("cvec");
-fi;
-if (not IsBound(CVEC)) and
-   (Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") <> fail) then
-  LoadDynamicModule(Filename(DirectoriesPackagePrograms("cvec"), "cvec.so"));
+if CompareVersionNumbers(GAPInfo.Version, "4.12") then
+  if not LoadKernelExtension("cvec") then
+    Error("failed to load the cvec package kernel extension");
+  fi;
+else
+  # TODO this clause can be removed once cvec requires GAP>=4.12.1
+  # load kernel function if it is installed:
+  if (not IsBound(CVEC)) and ("cvec" in SHOW_STAT()) then
+    # try static module
+    LoadStaticModule("cvec");
+  fi;
+  if (not IsBound(CVEC)) and
+    (Filename(DirectoriesPackagePrograms("cvec"), "cvec.so") <> fail) then
+    LoadDynamicModule(Filename(DirectoriesPackagePrograms("cvec"), "cvec.so"));
+  fi;
 fi;
 
 #
