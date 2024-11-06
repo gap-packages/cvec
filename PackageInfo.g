@@ -115,7 +115,7 @@ AvailabilityTest := function()
     LogPackageLoadingMessage(PACKAGE_WARNING,
                             ["the kernel module is not compiled, ",
                               "the package cannot be loaded."]);
-    return fail;
+    return false;
   fi;
   return true;
 end,
@@ -151,5 +151,3 @@ AutoDoc := rec(
 ),
 
 ));
-
-
