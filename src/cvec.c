@@ -4546,24 +4546,13 @@ static Int InitLibrary ( StructInitInfo *module )
 *F  InitInfopl()  . . . . . . . . . . . . . . . . . table of init functions
 */
 static StructInitInfo module = {
-#ifdef CVECSTATIC
-    .type = MODULE_STATIC,
-#else
     .type = MODULE_DYNAMIC,
-#endif
     .name = "cvec",
     .initKernel = InitKernel,
     .initLibrary = InitLibrary,
 };
 
-#ifndef CVECSTATIC
 StructInitInfo * Init__Dynamic ( void )
-{
-  return &module;
-}
-#endif
-
-StructInitInfo * Init__cvec ( void )
 {
   return &module;
 }
@@ -4617,6 +4606,3 @@ StructInitInfo * Init__cvec ( void )
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
-
-
-
