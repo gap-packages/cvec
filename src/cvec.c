@@ -156,7 +156,7 @@ static Obj OurErrorBreakQuit(char *msg)
     return 0L;
 }
 
-static Obj TEST_ASSUMPTIONS(Obj self)
+static Obj FuncCVEC_TEST_ASSUMPTIONS(Obj self)
 /* Result 0 is OK, otherwise something is wrong... */
 {
     /* Note in addition, that d * length of a vector must fit into a
@@ -177,7 +177,7 @@ static Obj TEST_ASSUMPTIONS(Obj self)
 #endif
 }
 
-static Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
+static Obj FuncCVEC_COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
 {
     /* po is a list of (small) GAP integers, s a GAP string. */
     Int l,i;
@@ -191,7 +191,7 @@ static Obj COEFF_LIST_TO_C(Obj self, Obj po, Obj s)
     return s;
 }
 
-static Obj FINALIZE_FIELDINFO(Obj self, Obj f)
+static Obj FuncCVEC_FINALIZE_FIELDINFO(Obj self, Obj f)
 {
     Obj s;
     Word *po;
@@ -223,7 +223,7 @@ static Obj FINALIZE_FIELDINFO(Obj self, Obj f)
     return f;
 }
 
-Obj INIT_SMALL_GFQ_TABS(Obj self, Obj pp, Obj cp, Obj tab1, Obj tab2)
+static Obj FuncCVEC_INIT_SMALL_GFQ_TABS(Obj self, Obj pp, Obj cp, Obj tab1, Obj tab2)
 {
     UInt p = INT_INTOBJ(pp);
     UInt d = LEN_PLIST(cp) - 1;
@@ -351,7 +351,7 @@ static inline void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
  /* Interfacing stuff for the objects to the GAP level: */
 /*******************************************************/
 
-static Obj NEW(Obj self, Obj cl, Obj type)
+static Obj FuncCVEC_NEW(Obj self, Obj cl, Obj type)
 {
     Obj v;
     Int si;
@@ -363,7 +363,7 @@ static Obj NEW(Obj self, Obj cl, Obj type)
     return v;
 }
 
-static Obj MAKEZERO(Obj self, Obj v)
+static Obj FuncCVEC_MAKEZERO(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_MAKEZERO: no cvec");
@@ -377,7 +377,7 @@ static Obj MAKEZERO(Obj self, Obj v)
     return 0L;
 }
     
-static Obj COPY(Obj self, Obj v, Obj w)
+static Obj FuncCVEC_COPY(Obj self, Obj v, Obj w)
 {
     if (!IS_CVEC(v) || !IS_CVEC(w)) {
         return OurErrorBreakQuit("CVEC_COPY: no cvec");
@@ -397,7 +397,7 @@ static Obj COPY(Obj self, Obj v, Obj w)
     }
 }
 
-static Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
+static Obj FuncCVEC_CVEC_TO_INTREP(Obj self,Obj v,Obj l)
 /* This function returns the vector in its integer representation. This
  * means, that for the case that q <= 65536 or d = 1 each integer
  * corresponds to one field entry (p-adic expansion for d>1). For bigger
@@ -474,7 +474,7 @@ static Obj CVEC_TO_INTREP(Obj self,Obj v,Obj l)
     return 0L;
 }
 
-static Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
+static Obj FuncCVEC_INTREP_TO_CVEC(Obj self,Obj l,Obj v)
 /* This function transfers data in integer representation to the vector. This
  * means, that for the case that q <= 65536 or d = 1, each integer
  * corresponds to one field entry (p-adic expansion for d > 1). For
@@ -591,7 +591,7 @@ static Obj INTREP_TO_CVEC(Obj self,Obj l,Obj v)
     return 0L;
 }
 
-Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
+static Obj FuncCVEC_INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
 /* Transforms a list of integers between 0 and q-1 into FFEs. */
 {
     if (!IS_PLIST(l)) {
@@ -637,7 +637,7 @@ Obj INTLI_TO_FFELI(Obj self,Obj fi, Obj l)
     return 0L;
 }
 
-Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
+static Obj FuncCVEC_FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
 /* Transforms a list of FFEs into integers between 0 and q-1. */
 {
     if (!IS_PLIST(l)) {
@@ -669,7 +669,7 @@ Obj FFELI_TO_INTLI(Obj self,Obj fi, Obj l)
     return 0L;
 }
 
-static Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
+static Obj FuncCVEC_CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_epw(fi);
@@ -701,7 +701,7 @@ static Obj CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
     return 0L;
 }
 
-static Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
+static Obj FuncCVEC_NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_epw(fi);
@@ -732,7 +732,7 @@ static Obj NUMBERFFLIST_TO_CVEC(Obj self, Obj l, Obj v, Obj split)
     return 0L;
 }
 
-static Obj GREASEPOS(Obj self, Obj v, Obj pivs)
+static Obj FuncCVEC_GREASEPOS(Obj self, Obj v, Obj pivs)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_p(fi);
@@ -1386,7 +1386,7 @@ static inline Int handle_hints(Obj cl, Obj fi, Obj fr, Obj to,
     return 1;
 }
 
-static Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
+static Obj FuncCVEC_ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_ADD2: no cvec");
@@ -1410,7 +1410,7 @@ static Obj ADD2(Obj self, Obj u, Obj v,Obj fr, Obj to)
     return 0L;
 }
 
-static Obj ADD3(Obj self, Obj u, Obj v,Obj w)
+static Obj FuncCVEC_ADD3(Obj self, Obj u, Obj v,Obj w)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v) || !IS_CVEC(w)) {
         return OurErrorBreakQuit("CVEC_ADD3: no cvec");
@@ -1548,7 +1548,7 @@ static inline void MUL1_INT(Obj u, Obj ucl, Obj ufi, Int d, Int *sc,
   } 
 }
 
-static Obj MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
+static Obj FuncCVEC_MUL1(Obj self, Obj u, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u)) {
         return OurErrorBreakQuit("CVEC_MUL1: no cvec");
@@ -1622,7 +1622,7 @@ static inline void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v,
   } 
 }
 
-static Obj MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
+static Obj FuncCVEC_MUL2(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_MUL1: no cvec");
@@ -1702,7 +1702,7 @@ static inline void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
   } 
 }
 
-static Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
+static Obj FuncCVEC_ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_ADDMUL: no cvec");
@@ -1737,7 +1737,7 @@ static Obj ADDMUL(Obj self, Obj u, Obj v, Obj s, Obj fr, Obj to)
     return 0L;
 }
 
-static Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
+static Obj FuncCVEC_ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
 {
     Int i;
     Int *sc;
@@ -1772,7 +1772,7 @@ static Obj ASS_CVEC(Obj self, Obj v, Obj pos, Obj s)
     return 0L;
 }
 
-static Obj ELM_CVEC(Obj self, Obj v, Obj pos)
+static Obj FuncCVEC_ELM_CVEC(Obj self, Obj v, Obj pos)
 {
     Int i;
     if (!IS_CVEC(v)) {
@@ -1835,7 +1835,7 @@ static Obj ELM_CVEC(Obj self, Obj v, Obj pos)
     return 0L;
 }
 
-static Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
+static Obj FuncCVEC_POSITION_NONZERO_CVEC(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_POSITION_NONZERO_CVEC: no cvec");
@@ -1854,7 +1854,7 @@ static Obj POSITION_NONZERO_CVEC(Obj self, Obj v)
     }
 }
 
-static Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
+static Obj FuncCVEC_POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
 {
     if (!IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_POSITION_LAST_NONZERO_CVEC: no cvec");
@@ -1873,7 +1873,7 @@ static Obj POSITION_LAST_NONZERO_CVEC(Obj self, Obj v)
     }
 }
     
-static Obj CVEC_LT(Obj self, Obj u, Obj v)
+static Obj FuncCVEC_CVEC_LT(Obj self, Obj u, Obj v)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_CVEC_LT: no cvecs");
@@ -1905,7 +1905,7 @@ static Obj CVEC_LT(Obj self, Obj u, Obj v)
     return 0L;
 }
 
-static Obj CVEC_EQ(Obj self, Obj u, Obj v)
+static Obj FuncCVEC_CVEC_EQ(Obj self, Obj u, Obj v)
 {
     if (!IS_CVEC(u) || !IS_CVEC(v)) {
         return OurErrorBreakQuit("CVEC_CVEC_EQ: no cvecs");
@@ -1936,7 +1936,7 @@ static Obj CVEC_EQ(Obj self, Obj u, Obj v)
     return 0L;
 }
 
-static Obj CVEC_ISZERO(Obj self, Obj u)
+static Obj FuncCVEC_CVEC_ISZERO(Obj self, Obj u)
 {
     if (!IS_CVEC(u)) {
         return OurErrorBreakQuit("CVEC_CVEC_EQ: no cvec");
@@ -1958,7 +1958,7 @@ static Obj CVEC_ISZERO(Obj self, Obj u)
     return 0L;
 }
 
-static Obj EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
+static Obj FuncCVEC_EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
 /* Extracts ll field elements from the vector self at position ii into
  * one Word in a convenient way, fitting to FILL_GREASE_TAB.
  * Here is an example with l = 3, d = 2:
@@ -2127,7 +2127,7 @@ static Word VecEx_Worker_ext_bad(const Word *data)
     return res;
 }
 
-static Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
+static Obj FuncCVEC_EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
 /* See comment of EXTRACT. This initializes the extraction routines.
  * Use Vector_Extract_Worker(Word *data) afterwards. */
 {
@@ -2195,13 +2195,13 @@ static Obj EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
     return 0L;  /* return nothing */
 }
 
-static Obj EXTRACT_DOIT(Obj self, Obj v)
+static Obj FuncCVEC_EXTRACT_DOIT(Obj self, Obj v)
 {
     /* Dereference the function pointer and call the worker routine: */
     return INTOBJ_INT( (Int) ( (*Vector_Extract_Worker)(CONST_DATA_CVEC(v)) ) );
 }
 
-static Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
+static Obj FuncCVEC_FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
                           Obj offset)
 /* This function does the precalculation for greasing. This is the internal
  * version to be called from GAP. tab must already be long enough, no
@@ -2287,7 +2287,7 @@ static Obj FILL_GREASE_TAB(Obj self, Obj li, Obj i, Obj l, Obj tab, Obj tablen,
     return 0L;
 }
 
-static Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
+static Obj FuncCVEC_PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
 /* Note that m is the list of vectors with first component unbound. */
 {
     PREPARE_clfi(u,ucl,ufi);
@@ -2315,7 +2315,7 @@ static Obj PROD_CVEC_CMAT_NOGREASE(Obj self, Obj u, Obj v, Obj m)
     return 0L;
 }
 
-static Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
+static Obj FuncCVEC_PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
                                   Obj spreadtab, Obj glev)
 {
     PREPARE_clfi(u,ucl,ufi);
@@ -2330,7 +2330,7 @@ static Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
     register Word val;
 
     for (i = 1,pos = 1;pos <= k;pos += lev,i++) {
-        val = INT_INTOBJ(EXTRACT(self, v, INTOBJ_INT(pos), glev));
+        val = INT_INTOBJ(FuncCVEC_EXTRACT(self, v, INTOBJ_INT(pos), glev));
         if (val != 0) {
             val = INT_INTOBJ(ELM_PLIST(spreadtab,val+1));
             w = ELM_PLIST(ELM_PLIST(mgreasetab,i),val);
@@ -2340,7 +2340,7 @@ static Obj PROD_CVEC_CMAT_GREASED(Obj self, Obj u, Obj v, Obj mgreasetab,
     return 0;
 }
 
-static Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab, 
+static Obj FuncCVEC_PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab, 
                                   Obj spreadtab, Obj len, Obj glev)
 {  /* See mult. routine "for two cmats, second one greased" in cvec.gi */
     Int k = INT_INTOBJ(len);
@@ -2357,7 +2357,7 @@ static Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab,
         PREPARE_clfi(v,cl,fi);
         Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
         for (i = 1,pos = 1;pos <= k;pos += lev,i++) {
-            EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
+            FuncCVEC_EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
             for (j = 2;j <= t+1;j++) {
                 val = (*Vector_Extract_Worker)(CONST_DATA_CVEC(ELM_PLIST(m,j)));
                 if (val != 0) {
@@ -2372,7 +2372,7 @@ static Obj PROD_CMAT_CMAT_GREASED(Obj self, Obj l, Obj m, Obj ngreasetab,
     return 0L;
 }
 
-static Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
+static Obj FuncCVEC_PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
                                      Obj greasetab, Obj spreadtab, Obj glev)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
@@ -2389,10 +2389,10 @@ static Obj PROD_CMAT_CMAT_WITHGREASE(Obj self, Obj l, Obj m, Obj n,
         Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
         for (pos = 1;pos <= k;pos += lev) {
             /* First fill the greasetab: */
-            FILL_GREASE_TAB(self,n,INTOBJ_INT(pos+1),glev,greasetab,
+            FuncCVEC_FILL_GREASE_TAB(self,n,INTOBJ_INT(pos+1),glev,greasetab,
                             INTOBJ_INT(LEN_PLIST(greasetab)-1-lev),
                             INTOBJ_INT(1));
-            EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
+            FuncCVEC_EXTRACT_INIT(self,ELM_PLIST(m,2),INTOBJ_INT(pos),glev);
             for (j = 2;j <= t+1;j++) {
                 val = (*Vector_Extract_Worker)(CONST_DATA_CVEC(ELM_PLIST(m,j)));
                 if (val != 0) {
@@ -2431,7 +2431,7 @@ static inline void st(Obj mat, WORD *reg,
     }
 }
 
-static Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
+static Obj FuncCVEC_PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
 {
     Int maxdim;
     PREPARE_cl(ELM_PLIST(m,2),clm);
@@ -2486,7 +2486,7 @@ static Obj PROD_CMAT_CMAT_GF2_SMALL(Obj self, Obj l, Obj m, Obj n, Obj maxd)
     return 0L;
 }
 
-static Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
+static Obj FuncCVEC_PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
     Int t = LEN_PLIST(l)-1;    /* dito */
@@ -2528,7 +2528,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE(Obj self, Obj l, Obj m, Obj n)
     return 0L;
 }
 
-static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
+static Obj FuncCVEC_PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
 {
     Int k = LEN_PLIST(n)-1;    /* the empty element in front! */
     Int t = LEN_PLIST(l)-1;    /* dito */
@@ -2552,7 +2552,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
             for (j = 2;j <= t+1;j++) {
                 u = ELM_PLIST(l,j);
                 v = ELM_PLIST(m,j);
-                CVEC_TO_INTREP(self,v,buf);
+                FuncCVEC_CVEC_TO_INTREP(self,v,buf);
                 for (pos = 1;pos <= k;pos++) {
                     val = INT_INTOBJ(ELM_PLIST(buf,pos));
                     if (val != 0) {
@@ -2570,7 +2570,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
                 for (j = 2;j <= t+1;j++) {
                     u = ELM_PLIST(l,j);
                     v = ELM_PLIST(m,j);
-                    CVEC_TO_INTREP(self,v,buf);
+                    FuncCVEC_CVEC_TO_INTREP(self,v,buf);
                     for (pos = 1;pos <= k;pos++) {
                         prepare_scalar(fi,ELM_PLIST(buf,pos));
                         if (sclen != 1 || scbuf[0] != 0) {
@@ -2587,7 +2587,7 @@ static Obj PROD_CMAT_CMAT_NOGREASE2(Obj self, Obj l, Obj m, Obj n)
                     register Int pos2;
                     u = ELM_PLIST(l,j);
                     v = ELM_PLIST(m,j);
-                    CVEC_TO_INTREP(self,v,buf);
+                    FuncCVEC_CVEC_TO_INTREP(self,v,buf);
                     for (pos = 1,pos2 = 1;pos <= k;pos++) {
                         register Int i;
                         for (i = 0,sclen = 1;i < d;i++) {
@@ -2728,7 +2728,7 @@ static void SLICE_INT(const Word *src, Word *dst, Int fr, Int le, Int to,
     }
 }
 
-static Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
+static Obj FuncCVEC_SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
 /* No checks are done at all. src and dst must be cvecs over the same field and
  * 1 <= srcpos <= srcpos+len-1 <= Length(src) and
  * 1 <= dstpos <= dstpos+len-1 <= Length(dst) must hold. */
@@ -2743,7 +2743,7 @@ static Obj SLICE(Obj self, Obj src, Obj dst, Obj srcpos, Obj len, Obj dstpos)
     return 0L;
 }
     
-static Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
+static Obj FuncCVEC_SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
 /* srcposs and dstposs may each be ranges or dense plain lists. src and
  * dst must be cvecs over the same field (this is not checked!).
  * srcposs and dstposs must be lists of integers within 
@@ -2916,7 +2916,7 @@ static Obj SLICE_LIST(Obj self, Obj src, Obj dst, Obj srcposs, Obj dstposs)
     return 0L;
 }
 
-static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst, 
+static Obj FuncCVEC_COPY_SUBMATRIX(Obj self, Obj src, Obj dst, 
      Obj srcrows, Obj dstrows, Obj srcposs, Obj dstposs)
 /* srcposs and dstposs may each be ranges or dense plain lists. src and
  * dst must be lists of cvecs over the same field (this is not checked!).
@@ -3121,7 +3121,7 @@ static Obj COPY_SUBMATRIX(Obj self, Obj src, Obj dst,
     return 0L;
 }
 
-static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
+static Obj FuncCVEC_CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_d(fi);
@@ -3251,7 +3251,7 @@ static Obj CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     return 0L;
 }
 
-static Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
+static Obj FuncCVEC_EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
 {
     PREPARE_clfi(v,cl,fi);
     PREPARE_d(fi);
@@ -3363,7 +3363,7 @@ static Obj EXTREP_TO_CVEC(Obj self, Obj s, Obj v)
     return 0L;
 }
 
-Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
+static Obj FuncCVEC_PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
 /* All four must be cvecs over the same (prime) field.
  * u is overwritten but has to be zero beforehand! 
  * u must have length len(v)+len(w)-1 */
@@ -3441,7 +3441,7 @@ Obj PROD_COEFFS_CVEC_PRIMEFIELD(Obj self, Obj u, Obj v, Obj w)
     return 0L;
 }
 
-static Obj TRANSPOSED_MAT(Obj self, Obj m, Obj n)
+static Obj FuncCVEC_TRANSPOSED_MAT(Obj self, Obj m, Obj n)
 {
     /* n is empty, correct size, >0 rows, >0 cols, right size, same field. */
     PREPARE_clfi(ELM_PLIST(m,2),cl,fi);
@@ -3524,7 +3524,7 @@ static inline void InternalClean(Obj mi, Obj mc, seqaccess *sa, Int row, Int j,
     }
 }
 
-static Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
+static Obj FuncCVEC_CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
 {
     PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We know that the length is >=2 */
     PREPARE_p(fi);
@@ -3596,7 +3596,7 @@ static Obj CMAT_INVERSE(Obj self, Obj mi, Obj mc, Obj helperfun, Obj helper)
     return True;
 }
     
-static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun, 
+static Obj FuncCVEC_CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun, 
                                Obj helper, Obj grease)
 {
     PREPARE_clfi(ELM_PLIST(mi,2),cl,fi);  /* We known that the length is >=3 */
@@ -3698,11 +3698,11 @@ static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
         /* We now have found cleaner rows col..blockend (inclusively) and
          * moved them to positions col..blockend. We can now fill the
          * greasetab and clean out rows 1..col-1 and startgreaseclean..dim: */
-        FILL_GREASE_TAB(self,mc,INTOBJ_INT(col+1),INTOBJ_INT(lev),greasetab1,
+        FuncCVEC_FILL_GREASE_TAB(self,mc,INTOBJ_INT(col+1),INTOBJ_INT(lev),greasetab1,
                         INTOBJ_INT(tablen),INTOBJ_INT(1));
-        FILL_GREASE_TAB(self,mi,INTOBJ_INT(col+1),INTOBJ_INT(lev),greasetab2,
+        FuncCVEC_FILL_GREASE_TAB(self,mi,INTOBJ_INT(col+1),INTOBJ_INT(lev),greasetab2,
                         INTOBJ_INT(tablen),INTOBJ_INT(1));
-        EXTRACT_INIT(self,ELM_PLIST(mc,2),INTOBJ_INT(col),INTOBJ_INT(lev));
+        FuncCVEC_EXTRACT_INIT(self,ELM_PLIST(mc,2),INTOBJ_INT(col),INTOBJ_INT(lev));
         if (startgreaseclean <= blockend) startgreaseclean = blockend+1;
         j = 1; if (j == col) j = startgreaseclean;
         while (j <= dim) {
@@ -3726,7 +3726,7 @@ static Obj CMAT_INVERSE_GREASE(Obj self, Obj mi, Obj mc, Obj helperfun,
     
 /* Cleaning vectors: */
 
-static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
+static Obj FuncCVEC_CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
 {
   /* INPUT:
      basis: record with fields
@@ -3881,12 +3881,7 @@ static Obj CLEANROWKERNEL( Obj self, Obj basis, Obj vec, Obj extend, Obj dec )
   }
 }
 
-static Obj CVEC_EQINT(Obj self, Obj a, Obj b)
-{
-    return (EQ( a, b ) ? True : False);
-}
-
-static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
+static Obj FuncCMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
 {
     /* m and n must be cmats over the same prime field with #cols(m)=#rows(n).
      * i must be a row number of m and j a row number of n. */
@@ -3969,7 +3964,7 @@ static Obj CMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
     return ELM_PLIST(tab2,res+1);
 }
 
-static Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
+static Obj FuncCVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
 {
     /* v and w must be cvecs over the same prime field with equal length! */
     if (!IS_CVEC(v) || !IS_CVEC(w)) {
@@ -4046,7 +4041,7 @@ static Obj CVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
 
 static UInt rnam_rows = 0;
 
-static Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
+static Obj FuncCMAT_ELM_LIST(Obj self, Obj m, Obj p)
 {
     if (!rnam_rows) {
        rnam_rows = RNamName("rows");
@@ -4056,7 +4051,7 @@ static Obj CMAT_ELM_LIST(Obj self, Obj m, Obj p)
 
 static UInt rnam_vecclass = 0;
 
-static Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
+static Obj FuncCMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
 /* m and n must have equal row length l */
 {
     Obj cl,fi;
@@ -4089,11 +4084,11 @@ static Obj CMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
     if (ll < 2) {   /* Empty cmats */
         return Fail;
     }
-    Obj sum = CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,2),ELM_PLIST(rowsn,2));
+    Obj sum = FuncCVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,2),ELM_PLIST(rowsn,2));
     for (i = 3;i <= ll;i++) {
-        /*sum = CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
+        /*sum = FuncCVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
                                                ELM_PLIST(rowsn,i));*/
-        sum = SUM(sum,CVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
+        sum = SUM(sum,FuncCVEC_SCALAR_PRODUCT(self,ELM_PLIST(rowsm,i),
                                                      ELM_PLIST(rowsn,i)));
     }
     return sum;
@@ -4105,7 +4100,7 @@ static UInt RNAM_rows = 0;
 static UInt RNAM_scaclass = 0;
 static UInt RNAM_vecclass = 0;
 
-static Obj CVEC_CMatMaker_C( Obj self, Obj l, Obj cl )
+static Obj FuncCVEC_CMatMaker_C(Obj self, Obj l, Obj cl)
 {
     /* Create a cmat object. This is internal, so no checks are done! */
     Obj m;
@@ -4151,7 +4146,7 @@ static Obj CVEC_CMatMaker_C( Obj self, Obj l, Obj cl )
     return m;
 }
 
-static Obj CVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
+static Obj FuncCVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
 {
     Int i;
     Obj cvectype;
@@ -4166,16 +4161,16 @@ static Obj CVEC_MAKE_ZERO_CMAT(Obj self, Obj nrrows, Obj cl)
     cvectype = ELM_PLIST(cl,IDX_type);
     for (i = 2;i <= len+1;i++) {
         /* GARBAGE COLLECTION POSSIBLE */
-        SET_ELM_PLIST(l,i,NEW(self,cl,cvectype));
+        SET_ELM_PLIST(l,i,FuncCVEC_NEW(self,cl,cvectype));
         CHANGED_BAG(l);
     }
     /* GARBAGE COLLECTION POSSIBLE */
-    return CVEC_CMatMaker_C(self,l,cl);
+    return FuncCVEC_CMatMaker_C(self,l,cl);
 }
 
 static Obj CVEC_PROD_CMAT_CMAT_BIG;
 
-static Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
+static Obj FuncCVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
 {
     /* This function is installed as the multiplication function for cmats.
      * It dispatches very quickly for small matrices and calls back
@@ -4208,9 +4203,9 @@ static Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
     fi = ELM_PLIST(clm,IDX_fieldinfo);
     q = ELM_PLIST(fi,IDX_q);
     if (IS_INTOBJ(q) && q == INTOBJ_INT(2) && max <= 512) {
-        res = CVEC_MAKE_ZERO_CMAT(self,INTOBJ_INT(dim),cln);
+        res = FuncCVEC_MAKE_ZERO_CMAT(self,INTOBJ_INT(dim),cln);
         if (dim > 0)   /* Otherwise there is nothing to do. */
-            PROD_CMAT_CMAT_GF2_SMALL(self,ElmPRec(res,RNAM_rows),
+            FuncCVEC_PROD_CMAT_CMAT_GF2_SMALL(self,ElmPRec(res,RNAM_rows),
                                           ElmPRec(m,RNAM_rows),
                                           ElmPRec(n,RNAM_rows),INTOBJ_INT(max));
         if (!(IS_MUTABLE_OBJ(m) || IS_MUTABLE_OBJ(n)))
@@ -4230,226 +4225,60 @@ static Obj CVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
 */
 static StructGVarFunc GVarFuncs [] = {
 
-  { "CVEC_TEST_ASSUMPTIONS", 0, "",
-    TEST_ASSUMPTIONS,
-    "cvec.c:TEST_ASSUMPTIONS" },
-
-  { "CVEC_COEFF_LIST_TO_C", 2, "coefflist, st",
-    COEFF_LIST_TO_C,
-    "cvec.c:COEFF_LIST_TO_C" },
-
-  { "CVEC_FINALIZE_FIELDINFO", 1, "fieldinfo",
-    FINALIZE_FIELDINFO,
-    "cvec.c:FINALIZE_FIELDINFO" },
-
-  { "CVEC_INIT_SMALL_GFQ_TABS", 4, "p, cp, tab1, tab2",
-    INIT_SMALL_GFQ_TABS,
-    "cvec.c:INIT_SMALL_GFQ_TABS" },
-
-  { "CVEC_NEW", 2, "class, type",
-    NEW,
-    "cvec.c:NEW" },
-
-  { "CVEC_MAKEZERO", 1, "v",
-    MAKEZERO,
-    "cvec.c:MAKEZERO" },
-
-  { "CVEC_COPY", 2, "v, w",
-    COPY,
-    "cvec.c:COPY" },
-
-  { "CVEC_CVEC_TO_INTREP", 2, "v, l",
-    CVEC_TO_INTREP,
-    "cvec.c:CVEC_TO_INTREP" },
-
-  { "CVEC_INTREP_TO_CVEC", 2, "l, v",
-    INTREP_TO_CVEC,
-    "cvec.c:INTREP_TO_CVEC" },
-
-  { "CVEC_INTLI_TO_FFELI", 2, "c, l",
-    INTLI_TO_FFELI,
-    "cvec.c:INTLI_TO_FFELI" },
-
-  { "CVEC_FFELI_TO_INTLI", 2, "c, l",
-    FFELI_TO_INTLI,
-    "cvec.c:FFELI_TO_INTLI" },
-
-  { "CVEC_CVEC_TO_NUMBERFFLIST", 3, "v, l, split",
-    CVEC_TO_NUMBERFFLIST,
-    "cvec.c:CVEC_TO_NUMBERFFLIST" },
-
-  { "CVEC_NUMBERFFLIST_TO_CVEC", 3, "l, v, split",
-    NUMBERFFLIST_TO_CVEC,
-    "cvec.c:NUMBERFFLIST_TO_CVEC" },
-
-  { "CVEC_ADD2", 4, "u, v, fr, to",
-    ADD2,
-    "cvec.c:ADD2" },
-
-  { "CVEC_ADD3", 3, "u, v, w",
-    ADD3,
-    "cvec.c:ADD3" },
-
-  { "CVEC_MUL1", 4, "u, s, fr, to",
-    MUL1,
-    "cvec.c:MUL1" },
-
-  { "CVEC_MUL2", 3, "u, v, s",
-    MUL2,
-    "cvec.c:MUL2" },
-
-  { "CVEC_ADDMUL", 5, "u, v, s, fr, to",
-    ADDMUL,
-    "cvec.c:ADDMUL" },
-
-  { "CVEC_ASS_CVEC", 3, "v, pos, s",
-    ASS_CVEC,
-    "cvec.c:ASS_CVEC" },
-
-  { "CVEC_ELM_CVEC", 2, "v, pos",
-    ELM_CVEC,
-    "cvec.c:ELM_CVEC" },
-
-  { "CVEC_POSITION_NONZERO_CVEC", 1, "v",
-    POSITION_NONZERO_CVEC,
-    "cvec.c:POSITION_NONZERO_CVEC" },
-
-  { "CVEC_POSITION_LAST_NONZERO_CVEC", 1, "v",
-    POSITION_LAST_NONZERO_CVEC,
-    "cvec.c:POSITION_LAST_NONZERO_CVEC" },
-
-  { "CVEC_CVEC_LT", 2, "u, v",
-    CVEC_LT,
-    "cvec.c:CVEC_LT" },
-
-  { "CVEC_CVEC_EQ", 2, "u, v",
-    CVEC_EQ,
-    "cvec.c:CVEC_EQ" },
-
-  { "CVEC_EQINT", 2, "u, v",
-    CVEC_EQINT,
-    "cvec.c:CVEC_EQINT" },
-
-  { "CVEC_CVEC_ISZERO", 1, "u",
-    CVEC_ISZERO,
-    "cvec.c:CVEC_ISZERO" },
-
-  { "CVEC_EXTRACT", 3, "v, i, l",
-    EXTRACT,
-    "cvec.c:EXTRACT" },
-
-  { "CVEC_EXTRACT_INIT", 3, "v, i, l",
-    EXTRACT_INIT,
-    "cvec.c:EXTRACT_INIT" },
-
-  { "CVEC_EXTRACT_DOIT", 1, "v",
-    EXTRACT_DOIT,
-    "cvec.c:EXTRACT_DOIT" },
-
-  { "CVEC_FILL_GREASE_TAB", 6, "li, i, l, tab, tablen, offset",
-     FILL_GREASE_TAB,
-     "cvec.c:FILL_GREASE_TAB" },
-
-  { "CVEC_PROD_CVEC_CMAT_NOGREASE", 3, "u, v, m",
-    PROD_CVEC_CMAT_NOGREASE,
-    "cvec.c:PROD_CVEC_CMAT_NOGREASE" },
-
-  { "CVEC_PROD_CVEC_CMAT_GREASED", 5, "u, v, mgreasetab, spreadtab, glev",
-    PROD_CVEC_CMAT_GREASED,
-    "cvec.c:PROD_CVEC_CMAT_GREASED" },
-
-  { "CVEC_PROD_CMAT_CMAT_GREASED", 6, "l, m, ngreasetab, spreadtab, len, glev",
-    PROD_CMAT_CMAT_GREASED,
-    "cvec.c:PROD_CMAT_CMAT_GREASED" },
-
-  { "CVEC_PROD_CMAT_CMAT_GF2_SMALL", 4, "l, m, n, maxdim",
-    PROD_CMAT_CMAT_GF2_SMALL,
-    "cvec.c:PROD_CMAT_CMAT_GF2_SMALL" },
-
-  { "CVEC_PROD_CMAT_CMAT_NOGREASE", 3, "l, m, n",
-    PROD_CMAT_CMAT_NOGREASE,
-    "cvec.c:PROD_CMAT_CMAT_NOGREASE" },
-
-  { "CVEC_PROD_CMAT_CMAT_NOGREASE2", 3, "l, m, n",
-    PROD_CMAT_CMAT_NOGREASE2,
-    "cvec.c:PROD_CMAT_CMAT_NOGREASE2" },
-
-  { "CVEC_PROD_CMAT_CMAT_WITHGREASE", 6, "l, m, n, greasetab, spreadtab, glev",
-    PROD_CMAT_CMAT_WITHGREASE,
-    "cvec.c:PROD_CMAT_CMAT_WITHGREASE" },
-
-  { "CVEC_SLICE", 5, "src, dst, srcpos, len, dstpos",
-    SLICE,
-    "cvec.c:SLICE" },
-
-  { "CVEC_SLICE_LIST", 4, "src, dst, srcposs, dstposs",
-    SLICE_LIST,
-    "cvec.c:SLICE_LIST" },
-
-  { "CVEC_COPY_SUBMATRIX", 6, "src, dst, srcrows, dstrows, srcposs, dstposs",
-    COPY_SUBMATRIX,
-    "cvec.c:COPY_SUBMATRIX" },
-
-  { "CVEC_CVEC_TO_EXTREP", 2, "v, s",
-    CVEC_TO_EXTREP,
-    "cvec.c:CVEC_TO_EXTREP" },
-
-  { "CVEC_EXTREP_TO_CVEC", 2, "s, v",
-    EXTREP_TO_CVEC,
-    "cvec.c:EXTREP_TO_CVEC" },
-
-  { "CVEC_PROD_COEFFS_CVEC_PRIMEFIELD", 3, "u, v, w",
-    PROD_COEFFS_CVEC_PRIMEFIELD,
-    "cvec.c:PROD_COEFFS_CVEC_PRIMEFIELD" },
-
-  { "CVEC_TRANSPOSED_MAT", 2, "m, n",
-    TRANSPOSED_MAT,
-    "cvec.c:TRANSPOSED_MAT" },
-
-  { "CVEC_CMAT_INVERSE", 4, "mi, mc, helperfun, helper",
-    CMAT_INVERSE,
-    "cvec.c:CMAT_INVERSE" },
-
-  { "CVEC_CMAT_INVERSE_GREASE", 5, "mi, mc, helperfun, helper, grease",
-    CMAT_INVERSE_GREASE,
-    "cvec.c:CMAT_INVERSE_GREASE" },
-
-  { "CVEC_GREASEPOS", 2, "v, pivs",
-    GREASEPOS,
-    "cvec.c:GREASEPOS" },
-
-  { "CVEC_CLEANROWKERNEL", 4, "basis, vec, extend, dec",
-    CLEANROWKERNEL, 
-    "cvec.c:CLEANROWKERNEL" },
-
-  { "CMAT_ENTRY_OF_MAT_PROD", 4, "m, n, i, j",
-    CMAT_ENTRY_OF_MAT_PROD,
-    "cvec.c:CMAT_ENTRY_OF_MAT_PROD" },
-
-  { "CVEC_SCALAR_PRODUCT", 2, "v, w",
-    CVEC_SCALAR_PRODUCT,
-    "cvec.c:CVEC_SCALAR_PRODUCT" },
-
-  { "CMAT_ELM_LIST", 2, "m, p",
-    CMAT_ELM_LIST,
-    "cvec.c:CMAT_ELM_LIST" },
-
-  { "CMATS_SCALAR_PRODUCTS_ROWS", 3, "m, n, l",
-    CMATS_SCALAR_PRODUCTS_ROWS,
-    "cvec.c:CMATS_SCALAR_PRODUCTS_ROWS" },
-
-  { "CVEC_CMatMaker_C", 2, "l, cl",
-    CVEC_CMatMaker_C,
-    "cvec.c:CVEC_CMatMaker_C" },
-
-  { "CVEC_MAKE_ZERO_CMAT", 2, "nrrows, cl",
-    CVEC_MAKE_ZERO_CMAT,
-    "cvec.c:CVEC_MAKE_ZERO_CMAT" },
-
-  { "CVEC_PROD_CMAT_CMAT_DISPATCH", 2, "m, n",
-    CVEC_PROD_CMAT_CMAT_DISPATCH,
-    "cvec.c:CVEC_PROD_CMAT_CMAT_DISPATCH" },
-
+  GVAR_FUNC(CVEC_TEST_ASSUMPTIONS, 0, ""),
+  GVAR_FUNC(CVEC_COEFF_LIST_TO_C, 2, "coefflist, st"),
+  GVAR_FUNC(CVEC_FINALIZE_FIELDINFO, 1, "fieldinfo"),
+  GVAR_FUNC(CVEC_INIT_SMALL_GFQ_TABS, 4, "p, cp, tab1, tab2"),
+  GVAR_FUNC(CVEC_NEW, 2, "class, type"),
+  GVAR_FUNC(CVEC_MAKEZERO, 1, "v"),
+  GVAR_FUNC(CVEC_COPY, 2, "v, w"),
+  GVAR_FUNC(CVEC_CVEC_TO_INTREP, 2, "v, l"),
+  GVAR_FUNC(CVEC_INTREP_TO_CVEC, 2, "l, v"),
+  GVAR_FUNC(CVEC_INTLI_TO_FFELI, 2, "c, l"),
+  GVAR_FUNC(CVEC_FFELI_TO_INTLI, 2, "c, l"),
+  GVAR_FUNC(CVEC_CVEC_TO_NUMBERFFLIST, 3, "v, l, split"),
+  GVAR_FUNC(CVEC_NUMBERFFLIST_TO_CVEC, 3, "l, v, split"),
+  GVAR_FUNC(CVEC_ADD2, 4, "u, v, fr, to"),
+  GVAR_FUNC(CVEC_ADD3, 3, "u, v, w"),
+  GVAR_FUNC(CVEC_MUL1, 4, "u, s, fr, to"),
+  GVAR_FUNC(CVEC_MUL2, 3, "u, v, s"),
+  GVAR_FUNC(CVEC_ADDMUL, 5, "u, v, s, fr, to"),
+  GVAR_FUNC(CVEC_ASS_CVEC, 3, "v, pos, s"),
+  GVAR_FUNC(CVEC_ELM_CVEC, 2, "v, pos"),
+  GVAR_FUNC(CVEC_POSITION_NONZERO_CVEC, 1, "v"),
+  GVAR_FUNC(CVEC_POSITION_LAST_NONZERO_CVEC, 1, "v"),
+  GVAR_FUNC(CVEC_CVEC_LT, 2, "u, v"),
+  GVAR_FUNC(CVEC_CVEC_EQ, 2, "u, v"),
+  GVAR_FUNC(CVEC_CVEC_ISZERO, 1, "u"),
+  GVAR_FUNC(CVEC_EXTRACT, 3, "v, i, l"),
+  GVAR_FUNC(CVEC_EXTRACT_INIT, 3, "v, i, l"),
+  GVAR_FUNC(CVEC_EXTRACT_DOIT, 1, "v"),
+  GVAR_FUNC(CVEC_FILL_GREASE_TAB, 6, "li, i, l, tab, tablen, offset"),
+  GVAR_FUNC(CVEC_PROD_CVEC_CMAT_NOGREASE, 3, "u, v, m"),
+  GVAR_FUNC(CVEC_PROD_CVEC_CMAT_GREASED, 5, "u, v, mgreasetab, spreadtab, glev"),
+  GVAR_FUNC(CVEC_PROD_CMAT_CMAT_GREASED, 6, "l, m, ngreasetab, spreadtab, len, glev"),
+  GVAR_FUNC(CVEC_PROD_CMAT_CMAT_GF2_SMALL, 4, "l, m, n, maxdim"),
+  GVAR_FUNC(CVEC_PROD_CMAT_CMAT_NOGREASE, 3, "l, m, n"),
+  GVAR_FUNC(CVEC_PROD_CMAT_CMAT_NOGREASE2, 3, "l, m, n"),
+  GVAR_FUNC(CVEC_PROD_CMAT_CMAT_WITHGREASE, 6, "l, m, n, greasetab, spreadtab, glev"),
+  GVAR_FUNC(CVEC_SLICE, 5, "src, dst, srcpos, len, dstpos"),
+  GVAR_FUNC(CVEC_SLICE_LIST, 4, "src, dst, srcposs, dstposs"),
+  GVAR_FUNC(CVEC_COPY_SUBMATRIX, 6, "src, dst, srcrows, dstrows, srcposs, dstposs"),
+  GVAR_FUNC(CVEC_CVEC_TO_EXTREP, 2, "v, s"),
+  GVAR_FUNC(CVEC_EXTREP_TO_CVEC, 2, "s, v"),
+  GVAR_FUNC(CVEC_PROD_COEFFS_CVEC_PRIMEFIELD, 3, "u, v, w"),
+  GVAR_FUNC(CVEC_TRANSPOSED_MAT, 2, "m, n"),
+  GVAR_FUNC(CVEC_CMAT_INVERSE, 4, "mi, mc, helperfun, helper"),
+  GVAR_FUNC(CVEC_CMAT_INVERSE_GREASE, 5, "mi, mc, helperfun, helper, grease"),
+  GVAR_FUNC(CVEC_GREASEPOS, 2, "v, pivs"),
+  GVAR_FUNC(CVEC_CLEANROWKERNEL, 4, "basis, vec, extend, dec"),
+  GVAR_FUNC(CMAT_ENTRY_OF_MAT_PROD, 4, "m, n, i, j"),
+  GVAR_FUNC(CVEC_SCALAR_PRODUCT, 2, "v, w"),
+  GVAR_FUNC(CMAT_ELM_LIST, 2, "m, p"),
+  GVAR_FUNC(CMATS_SCALAR_PRODUCTS_ROWS, 3, "m, n, l"),
+  GVAR_FUNC(CVEC_CMatMaker_C, 2, "l, cl"),
+  GVAR_FUNC(CVEC_MAKE_ZERO_CMAT, 2, "nrrows, cl"),
+  GVAR_FUNC(CVEC_PROD_CMAT_CMAT_DISPATCH, 2, "m, n"),
   { 0 }
 
 };
