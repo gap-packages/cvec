@@ -4220,7 +4220,8 @@ static Obj FuncCVEC_PROD_CMAT_CMAT_DISPATCH(Obj self, Obj m, Obj n)
 
 /*F * * * * * * * * * * * * * initialize package * * * * * * * * * * * * * * */
 
-/******************************************************************************
+/****************************************************************************
+**
 *V  GVarFuncs . . . . . . . . . . . . . . . . . . list of functions to export
 */
 static StructGVarFunc GVarFuncs [] = {
@@ -4283,7 +4284,8 @@ static StructGVarFunc GVarFuncs [] = {
 
 };
 
-/******************************************************************************
+/****************************************************************************
+**
 *F  InitKernel( <module> )  . . . . . . . . initialise kernel data structures
 */
 static Int InitKernel ( StructInitInfo *module )
@@ -4322,7 +4324,8 @@ static Int InitKernel ( StructInitInfo *module )
     AssGVar( gvar, INTOBJ_INT(nam)); MakeReadOnlyGVar(gvar)
 #endif
 
-/******************************************************************************
+/****************************************************************************
+**
 *F  InitLibrary( <module> ) . . . . . . .  initialise library data structures
 */
 static Int InitLibrary ( StructInitInfo *module )
@@ -4371,7 +4374,8 @@ static Int InitLibrary ( StructInitInfo *module )
     return 0;
 }
 
-/******************************************************************************
+/****************************************************************************
+**
 *F  InitInfopl()  . . . . . . . . . . . . . . . . . table of init functions
 */
 static StructInitInfo module = {
