@@ -30,8 +30,6 @@
 <#Include SYSTEM "examples.xml">
 </Body>
 
-<Bibliography Databases="cvec"/>
-
 <!--  And finally an index as well   -->
 <TheIndex/>
 
