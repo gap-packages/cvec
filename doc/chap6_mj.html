@@ -18,7 +18,7 @@
 <body class="chap6"  onload="jscontent()">
 
 
-<div class="chlinktop"><span class="chlink1">Goto Chapter: </span><a href="chap0_mj.html">Top</a>  <a href="chap1_mj.html">1</a>  <a href="chap2_mj.html">2</a>  <a href="chap3_mj.html">3</a>  <a href="chap4_mj.html">4</a>  <a href="chap5_mj.html">5</a>  <a href="chap6_mj.html">6</a>  <a href="chap7_mj.html">7</a>  <a href="chap8_mj.html">8</a>  <a href="chap9_mj.html">9</a>  <a href="chapBib_mj.html">Bib</a>  <a href="chapInd_mj.html">Ind</a>  </div>
+<div class="chlinktop"><span class="chlink1">Goto Chapter: </span><a href="chap0_mj.html">Top</a>  <a href="chap1_mj.html">1</a>  <a href="chap2_mj.html">2</a>  <a href="chap3_mj.html">3</a>  <a href="chap4_mj.html">4</a>  <a href="chap5_mj.html">5</a>  <a href="chap6_mj.html">6</a>  <a href="chap7_mj.html">7</a>  <a href="chap8_mj.html">8</a>  <a href="chap9_mj.html">9</a>  <a href="chapInd_mj.html">Ind</a>  </div>
 
 <div class="chlinkprevnexttop">&nbsp;<a href="chap0_mj.html">[Top of Book]</a>&nbsp;  <a href="chap0_mj.html#contents">[Contents]</a>&nbsp;  &nbsp;<a href="chap5_mj.html">[Previous Chapter]</a>&nbsp;  &nbsp;<a href="chap7_mj.html">[Next Chapter]</a>&nbsp;  </div>
 
@@ -32,7 +32,7 @@
 <span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X7D12102B824C97B4">6.1-2 Vectors</a></span>
 <span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X8464F2B87BCA3D34">6.1-3 Length</a></span>
 <span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X7F4EA39D7D18D9B7">6.1-4 CleanRow</a></span>
-<span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X82A37BC982B1D8CA">6.1-5 SemiEchelonBasisMutable</a></span>
+<span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X826541AA7FD12F9B">6.1-5 SemiEchelonBasisMutable</a></span>
 <span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X82A37BC982B1D8CA">6.1-6 SemiEchelonBasisMutable</a></span>
 <span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X839298477E3F7345">6.1-7 SemiEchelonBasisMutableX</a></span>
 <span class="ContSS"><br /><span class="nocss">&nbsp;&nbsp;</span><a href="chap6_mj.html#X8309FC85858FC96B">6.1-8 SemiEchelonBasisMutableT</a></span>
@@ -107,14 +107,14 @@
 
 <p>The argument <var class="Arg">dec</var> is either <code class="code">fail</code> in which case it is not used or a vector over the same field as <var class="Arg">v</var> that is at least as long as the number <span class="SimpleMath">\(n\)</span> of vectors in <var class="Arg">b</var> (plus one if <var class="Arg">extend</var> is <code class="code">true</code>). In this case, the first <span class="SimpleMath">\(n\)</span> components of <var class="Arg">dec</var> are changed such that <span class="SimpleMath">\(\sum_{{i=1}}^{n} \textit{dec}_i \textit{b}_i\)</span>. If <var class="Arg">extend</var> is <code class="code">true</code> and <var class="Arg">v</var> is not contained in the span of the vectors in <var class="Arg">b</var> and <var class="Arg">dec</var> is a vector, then the first <span class="SimpleMath">\(n+1\)</span> components of <var class="Arg">dec</var> are changed such that <span class="SimpleMath">\(\textit{v} = \sum_{{i=1}}^{n+1} \textit{dec}_i \textit{b}_i\)</span>.</p>
 
-<p><a id="X82A37BC982B1D8CA" name="X82A37BC982B1D8CA"></a></p>
+<p><a id="X826541AA7FD12F9B" name="X826541AA7FD12F9B"></a></p>
 
 <h5>6.1-5 SemiEchelonBasisMutable</h5>
 
 <div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; SemiEchelonBasisMutable</code>( <var class="Arg">b</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a semi echelonised basis</p>
 
-<p>Turns the output <var class="Arg">b</var> of <code class="func">SemiEchelonMat</code> (<a href="https://docs.gap-system.org/doc/ref/chap24_mj.html#X7D5D6BD07B7E981B"><span class="RefLink">Reference: SemiEchelonMat</span></a>) into a valid semi echelonised basis in the sense of the <strong class="pkg">cvec</strong> package. This means that the component <code class="code">pivots</code> is calculated from the component <code class="code">heads</code>. Use this function only if absolutely necessary. Instead, directly invoke <code class="func">SemiEchelonBasisMutable</code> on the original matrix.</p>
+<p>Turns the output <var class="Arg">b</var> of <code class="func">SemiEchelonMat</code> (<a href="https://docs.gap-system.org/doc/ref/chap24_mj.html#X7D5D6BD07B7E981B"><span class="RefLink">Reference: SemiEchelonMat</span></a>) into a valid semi echelonised basis in the sense of the <strong class="pkg">cvec</strong> package. This means that the component <code class="code">pivots</code> is calculated from the component <code class="code">heads</code>. Use this function only if absolutely necessary. Instead, directly invoke <code class="func">SemiEchelonBasisMutable</code> (<a href="chap6_mj.html#X82A37BC982B1D8CA"><span class="RefLink">6.1-6</span></a>) on the original matrix.</p>
 
 <p><a id="X82A37BC982B1D8CA" name="X82A37BC982B1D8CA"></a></p>
 
@@ -224,8 +224,7 @@
 
 <h5>6.2-1 CharacteristicPolynomialOfMatrix</h5>
 
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CharacteristicPolynomialOfMatrix</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CharacteristicPolynomialOfMatrix</code>( <var class="Arg">m</var>, <var class="Arg">indetnr</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
+<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CharacteristicPolynomialOfMatrix</code>( <var class="Arg">m</var>[, <var class="Arg">indetnr</var>] )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a record</p>
 
 <p>Calculates the characteristic polynomial of the <code class="code">cmat</code> <var class="Arg">m</var> over its base field. Because during the calculations the polynomial automatically comes as a product of some not necessarily irreducible factors, the result is returned in a record with two components. The <code class="code">poly</code> component contains the full characteristic polynomial. The <code class="code">factors</code> component contains a list of not necessarily irreducibly factors the product of which is the characteristic polynomial. If an indeterminate number is given as second argument, the polynomials are written in that indeterminate, otherwise in the first indeterminate over the base field.</p>
@@ -234,8 +233,7 @@
 
 <h5>6.2-2 FactorsOfCharacteristicPolynomial</h5>
 
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; FactorsOfCharacteristicPolynomial</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; FactorsOfCharacteristicPolynomial</code>( <var class="Arg">m</var>, <var class="Arg">indetnr</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
+<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; FactorsOfCharacteristicPolynomial</code>( <var class="Arg">m</var>[, <var class="Arg">indetnr</var>] )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a list</p>
 
 <p>Calculates the characteristic polynomial of the <code class="code">cmat</code> <var class="Arg">m</var> over its base field. The result is a list of irreducible factors of the characteristic polynomial of <var class="Arg">m</var>, the product of which is the characteristic polynomial. Because during the calculations the polynomial automatically comes as a product of some not necessarily irreducible factors, this is more efficient than just calculating the characteristic polynomial and then factoring it. If an indeterminate number is given as second argument, the polynomials are written in that indeterminate, otherwise in the first indeterminate over the base field.</p>
@@ -244,8 +242,7 @@
 
 <h5>6.2-3 MinimalPolynomialOfMatrix</h5>
 
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; MinimalPolynomialOfMatrix</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; MinimalPolynomialOfMatrix</code>( <var class="Arg">m</var>, <var class="Arg">indetnr</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
+<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; MinimalPolynomialOfMatrix</code>( <var class="Arg">m</var>[, <var class="Arg">indetnr</var>] )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a polynomial over the base field of <var class="Arg">m</var></p>
 
 <p>Calculates the minimal polynomial of the <code class="code">cmat</code> <var class="Arg">m</var> over its base field. The polynomial is returned. If an indeterminate number is given as second argument, the polynomials are written in that indeterminate, otherwise in the first indeterminate over the base field.</p>
@@ -254,8 +251,7 @@
 
 <h5>6.2-4 CharAndMinimalPolynomialOfMatrix</h5>
 
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CharAndMinimalPolynomialOfMatrix</code>( <var class="Arg">m</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
-<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CharAndMinimalPolynomialOfMatrix</code>( <var class="Arg">m</var>, <var class="Arg">indetnr</var> )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
+<div class="func"><table class="func" width="100%"><tr><td class="tdleft"><code class="func">&#8227; CharAndMinimalPolynomialOfMatrix</code>( <var class="Arg">m</var>[, <var class="Arg">indetnr</var>] )</td><td class="tdright">(&nbsp;method&nbsp;)</td></tr></table></div>
 <p>Returns: a record</p>
 
 <p>Calculates the characteristic and minimal polynomial of the <code class="code">cmat</code> <var class="Arg">m</var> over its base field. Because during the calculation of the minimal polynomial the characteristic polynomial is calculated anyway, the result is returned in a record with five components: The <code class="code">charpoly</code> component contains the full characteristic polynomial. The <code class="code">irreds</code> component contains the set of irreducible factors of the characteristic polynomial as a list. The <code class="code">mult</code> component contains a corresponding list of multiplicities, that is in position <span class="SimpleMath">\(i\)</span> is the multiplicity of the irreducible factor number <span class="SimpleMath">\(i\)</span> in the characteristic polynomial. The component <code class="code">minpoly</code> contains the minimal polynomial and the component <code class="code">multmin</code> the corresponding multiplicities of the irreducible factors of the characteristic polynomial in the minimal polynomial. If an indeterminate number is given as second argument, the polynomials are written in that indeterminate, otherwise in the first indeterminate over the base field.</p>
@@ -277,7 +273,7 @@
 <div class="chlinkprevnextbot">&nbsp;<a href="chap0_mj.html">[Top of Book]</a>&nbsp;  <a href="chap0_mj.html#contents">[Contents]</a>&nbsp;  &nbsp;<a href="chap5_mj.html">[Previous Chapter]</a>&nbsp;  &nbsp;<a href="chap7_mj.html">[Next Chapter]</a>&nbsp;  </div>
 
 
-<div class="chlinkbot"><span class="chlink1">Goto Chapter: </span><a href="chap0_mj.html">Top</a>  <a href="chap1_mj.html">1</a>  <a href="chap2_mj.html">2</a>  <a href="chap3_mj.html">3</a>  <a href="chap4_mj.html">4</a>  <a href="chap5_mj.html">5</a>  <a href="chap6_mj.html">6</a>  <a href="chap7_mj.html">7</a>  <a href="chap8_mj.html">8</a>  <a href="chap9_mj.html">9</a>  <a href="chapBib_mj.html">Bib</a>  <a href="chapInd_mj.html">Ind</a>  </div>
+<div class="chlinkbot"><span class="chlink1">Goto Chapter: </span><a href="chap0_mj.html">Top</a>  <a href="chap1_mj.html">1</a>  <a href="chap2_mj.html">2</a>  <a href="chap3_mj.html">3</a>  <a href="chap4_mj.html">4</a>  <a href="chap5_mj.html">5</a>  <a href="chap6_mj.html">6</a>  <a href="chap7_mj.html">7</a>  <a href="chap8_mj.html">8</a>  <a href="chap9_mj.html">9</a>  <a href="chapInd_mj.html">Ind</a>  </div>
 
 <hr />
 <p class="foot">generated by <a href="https://www.math.rwth-aachen.de/~Frank.Luebeck/GAPDoc">GAPDoc2HTML</a></p>

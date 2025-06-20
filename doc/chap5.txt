@@ -19,8 +19,7 @@
   
   [1X5.1-1 CMat[101X
   
-  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xcl[103X, [3Xdochecks[103X ) [32X method[133X
-  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xcl[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xcl[103X[, [3Xdochecks[103X] ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
   
   [33X[0;0YA  new  [10Xcmat[110X is created with rows being in the [10Xcvecclass[110X [3Xcl[103X. All elements of
@@ -30,8 +29,7 @@
   
   [1X5.1-2 CMat[101X
   
-  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X, [3Xdochecks[103X ) [32X method[133X
-  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XCMat[102X( [3Xl[103X[, [3Xdochecks[103X] ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya new [10Xcmat[110X[133X
   
   [33X[0;0YA  new [10Xcmat[110X is created with rows being in the [10Xcvecclass[110X of the vectors in [3Xl[103X.
@@ -375,8 +373,8 @@
   
   [33X[0;0YReturns  [10Xtrue[110X if the [10Xcmat[110X [3Xm[103X is smaller than [3Xn[103X. The matrices must be over the
   same  field  and  must  have  equal  dimensions.  The  method implements the
-  lexicographic  order  and uses [2XLT[102X for the ordering of vectors. Note that the
-  operation [10XLT[110X is the same as [10X\<[110X.[133X
+  lexicographic  order  and  uses [2XLT[102X ([14X4.4-2[114X) for the ordering of vectors. Note
+  that the operation [10XLT[110X is the same as [10X\<[110X.[133X
   
   [1X5.4-3 IsZero[101X
   
@@ -613,8 +611,7 @@
   
   [1X5.8-1 GreaseMat[101X
   
-  [33X[1;0Y[29X[2XGreaseMat[102X( [3Xm[103X, [3Xl[103X ) [32X operation[133X
-  [33X[1;0Y[29X[2XGreaseMat[102X( [3Xm[103X ) [32X operation[133X
+  [33X[1;0Y[29X[2XGreaseMat[102X( [3Xm[103X[, [3Xl[103X] ) [32X operation[133X
   [6XReturns:[106X  [33X[0;10Ynothing[133X
   
   [33X[0;0Y[3Xm[103X  must  be  a [10Xcmat[110X. It is pregreased with level [3Xl[103X. Without the argument [3Xl[103X a

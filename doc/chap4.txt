@@ -25,7 +25,7 @@
   
   [33X[0;0Y[3Xcvecclass[103X  must  be  a [10Xcvecclass[110X. Creates a new [10Xcvec[110X containing only zeroes.
   For  an  explanation  of  the  term  [10Xcvecclass[110X see Section [14X3.2[114X and [2XCVecClass[102X
-  ([14X4.1-12[114X).[133X
+  ([14X4.1-7[114X).[133X
   
   [1X4.1-3 CVec[101X
   
@@ -47,7 +47,7 @@
   larger,  then  [3Xcoeffs[103X  must  be a list of lists of length [22Xd[122X and contains for
   each  field element of [22XGF(p,d)[122X in the vector a list of its [22Xd[122X coefficients of
   the  representing  polynomial.  For an explanation of the term [10Xcvecclass[110X see
-  Section [14X3.2[114X and [2XCVecClass[102X ([14X4.1-12[114X). Of course, the length of the list [3Xcoeffs[103X
+  Section  [14X3.2[114X and [2XCVecClass[102X ([14X4.1-7[114X). Of course, the length of the list [3Xcoeffs[103X
   must match the length of the vector given in the [10Xcvecclass[110X.[133X
   
   [1X4.1-4 CVec[101X
@@ -121,7 +121,7 @@
   [33X[1;0Y[29X[2XCVecClass[102X( [3Xv[103X, [3Xl[103X ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya [10Xcvecclass[110X[133X
   
-  [33X[0;0YThe  argument  [3Xv[103X  must  be  a  [10Xcvec[110X.  The  method  returns the corresponding
+  [33X[0;0YThe  first  argument  [3Xv[103X must be a [10Xcvec[110X. The method returns the corresponding
   [10Xcvecclass[110X  for  vectors  over the same field as [3Xv[103X but with length [3Xl[103X. This is
   much  faster  than  producing  the  same  object  by  giving [22Xp[122X and [22Xd[122X. For an
   explanation of the term [10Xcvecclass[110X and its data structure see Section [14X3.2[114X.[133X

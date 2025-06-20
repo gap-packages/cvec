@@ -71,7 +71,7 @@
   valid  semi  echelonised  basis in the sense of the [5Xcvec[105X package. This means
   that  the  component [10Xpivots[110X is calculated from the component [10Xheads[110X. Use this
   function   only   if   absolutely   necessary.   Instead,   directly  invoke
-  [2XSemiEchelonBasisMutable[102X on the original matrix.[133X
+  [2XSemiEchelonBasisMutable[102X ([14X6.1-6[114X) on the original matrix.[133X
   
   [1X6.1-6 SemiEchelonBasisMutable[101X
   
@@ -177,8 +177,7 @@
   
   [1X6.2-1 CharacteristicPolynomialOfMatrix[101X
   
-  [33X[1;0Y[29X[2XCharacteristicPolynomialOfMatrix[102X( [3Xm[103X ) [32X method[133X
-  [33X[1;0Y[29X[2XCharacteristicPolynomialOfMatrix[102X( [3Xm[103X, [3Xindetnr[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XCharacteristicPolynomialOfMatrix[102X( [3Xm[103X[, [3Xindetnr[103X] ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya record[133X
   
   [33X[0;0YCalculates  the characteristic polynomial of the [10Xcmat[110X [3Xm[103X over its base field.
@@ -193,8 +192,7 @@
   
   [1X6.2-2 FactorsOfCharacteristicPolynomial[101X
   
-  [33X[1;0Y[29X[2XFactorsOfCharacteristicPolynomial[102X( [3Xm[103X ) [32X method[133X
-  [33X[1;0Y[29X[2XFactorsOfCharacteristicPolynomial[102X( [3Xm[103X, [3Xindetnr[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XFactorsOfCharacteristicPolynomial[102X( [3Xm[103X[, [3Xindetnr[103X] ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya list[133X
   
   [33X[0;0YCalculates  the characteristic polynomial of the [10Xcmat[110X [3Xm[103X over its base field.
@@ -209,8 +207,7 @@
   
   [1X6.2-3 MinimalPolynomialOfMatrix[101X
   
-  [33X[1;0Y[29X[2XMinimalPolynomialOfMatrix[102X( [3Xm[103X ) [32X method[133X
-  [33X[1;0Y[29X[2XMinimalPolynomialOfMatrix[102X( [3Xm[103X, [3Xindetnr[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XMinimalPolynomialOfMatrix[102X( [3Xm[103X[, [3Xindetnr[103X] ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya polynomial over the base field of [3Xm[103X[133X
   
   [33X[0;0YCalculates  the  minimal  polynomial  of the [10Xcmat[110X [3Xm[103X over its base field. The
@@ -220,8 +217,7 @@
   
   [1X6.2-4 CharAndMinimalPolynomialOfMatrix[101X
   
-  [33X[1;0Y[29X[2XCharAndMinimalPolynomialOfMatrix[102X( [3Xm[103X ) [32X method[133X
-  [33X[1;0Y[29X[2XCharAndMinimalPolynomialOfMatrix[102X( [3Xm[103X, [3Xindetnr[103X ) [32X method[133X
+  [33X[1;0Y[29X[2XCharAndMinimalPolynomialOfMatrix[102X( [3Xm[103X[, [3Xindetnr[103X] ) [32X method[133X
   [6XReturns:[106X  [33X[0;10Ya record[133X
   
   [33X[0;0YCalculates  the characteristic and minimal polynomial of the [10Xcmat[110X [3Xm[103X over its
