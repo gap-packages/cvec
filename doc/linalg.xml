@@ -90,7 +90,7 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="SemiEchelonBasisMutable" Arg="b"/>
+<Meth Name="SemiEchelonBasisMutable" Arg="b" Label="for a semi echelonised basis"/>
 <Returns> a semi echelonised basis </Returns>
 <Description>
     Turns the output <A>b</A> of <Ref Oper="SemiEchelonMat" BookName="Ref"/>
@@ -219,8 +219,7 @@ for that the pivot element is in column <M>i</M>.
     <Heading>Characteristic and minimal polynomial</Heading>
 
 <ManSection>
-<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m"/>
-<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m, indetnr"/>
+<Meth Name="CharacteristicPolynomialOfMatrix" Arg="m[, indetnr]"/>
 <Returns> a record </Returns>
 <Description>
     Calculates the characteristic polynomial of the <C>cmat</C> <A>m</A>
@@ -237,8 +236,7 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="FactorsOfCharacteristicPolynomial" Arg="m"/>
-<Meth Name="FactorsOfCharacteristicPolynomial" Arg="m, indetnr"/>
+<Meth Name="FactorsOfCharacteristicPolynomial" Arg="m[, indetnr]"/>
 <Returns> a list </Returns>
 <Description>
     Calculates the characteristic polynomial of the <C>cmat</C> <A>m</A>
@@ -256,8 +254,7 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="MinimalPolynomialOfMatrix" Arg="m"/>
-<Meth Name="MinimalPolynomialOfMatrix" Arg="m, indetnr"/>
+<Meth Name="MinimalPolynomialOfMatrix" Arg="m[, indetnr]"/>
 <Returns> a polynomial over the base field of <A>m</A> </Returns>
 <Description>
     Calculates the minimal polynomial of the <C>cmat</C> <A>m</A>
@@ -269,8 +266,7 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
 
 <ManSection>
-<Meth Name="CharAndMinimalPolynomialOfMatrix" Arg="m"/>
-<Meth Name="CharAndMinimalPolynomialOfMatrix" Arg="m, indetnr"/>
+<Meth Name="CharAndMinimalPolynomialOfMatrix" Arg="m[, indetnr]"/>
 <Returns> a record </Returns>
 <Description>
     Calculates the characteristic and minimal polynomial of the 
@@ -294,7 +290,7 @@ for that the pivot element is in column <M>i</M>.
 </ManSection>
  
 <ManSection>
-<Oper Name="MinimalPolynomialOfMatrixMC" Arg="m, prob [,indetnr]"/>
+<Oper Name="MinimalPolynomialOfMatrixMC" Arg="m, prob[, indetnr]"/>
 <Returns> a record </Returns>
 <Description>
 This method calculates the characteristic and minimal polynomials of the

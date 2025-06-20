@@ -30,8 +30,7 @@ The basic operation to create new <C>cmat</C>s is <F>CMat</F>, for which
 a variety of methods is available:
 
 <ManSection>
-<Meth Name="CMat" Arg="l, cl, dochecks"/>
-<Meth Name="CMat" Arg="l, cl"/>
+<Meth Name="CMat" Arg="l, cl[, dochecks]" Label="for a list and a cvec"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     A new <C>cmat</C> is created with rows being in the <C>cvecclass</C>
@@ -43,8 +42,7 @@ a variety of methods is available:
 </ManSection>
 
 <ManSection>
-<Meth Name="CMat" Arg="l, dochecks"/>
-<Meth Name="CMat" Arg="l"/>
+<Meth Name="CMat" Arg="l[, dochecks]" Label="for a list"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     A new <C>cmat</C> is created with rows being in the <C>cvecclass</C>
@@ -57,7 +55,7 @@ a variety of methods is available:
 </ManSection>
 
 <ManSection>
-<Meth Name="CMat" Arg="l, v"/>
+<Meth Name="CMat" Arg="l, v" Label="for an integer and a cvec"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     A new <C>cmat</C> is created with rows being in the <C>cvecclass</C>
@@ -68,7 +66,7 @@ a variety of methods is available:
 </ManSection>
 
 <ManSection>
-<Meth Name="CMat" Arg="m"/>
+<Meth Name="CMat" Arg="m" Label="for a cmat"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
 Creates a new <C>cmat</C> which is equal to <A>m</A>, which must be a
@@ -80,8 +78,8 @@ or the filter <F>Is8BitMatrixRep</F>.
 There are some methods to create <C>cmat</C>s of special form:
 
 <ManSection>
-<Func Name="CVEC_ZeroMat" Arg="rows, cl"/>
-<Func Name="CVEC_ZeroMat" Arg="rows, cols, p, d"/>
+<Func Name="CVEC_ZeroMat" Arg="rows, cl" Label="for an integer and a cvecclass"/>
+<Func Name="CVEC_ZeroMat" Arg="rows, cols, p, d" Label="for four integers"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     Creates a zero matrix with <A>rows</A> rows and <A>cols</A> columns
@@ -92,8 +90,8 @@ There are some methods to create <C>cmat</C>s of special form:
 </ManSection>
 
 <ManSection>
-<Func Name="CVEC_IdentityMat" Arg="cl"/>
-<Func Name="CVEC_IdentityMat" Arg="n, p, d"/>
+<Func Name="CVEC_IdentityMat" Arg="cl" Label="for a cvecclass"/>
+<Func Name="CVEC_IdentityMat" Arg="n, p, d" Label="for three integers"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     Creates an identity matrix with <A>n</A> rows and columns
@@ -104,8 +102,8 @@ There are some methods to create <C>cmat</C>s of special form:
 </ManSection>
 
 <ManSection>
-<Func Name="CVEC_RandomMat" Arg="rows, cl"/>
-<Func Name="CVEC_RandomMat" Arg="rows, cols, p, d"/>
+<Func Name="CVEC_RandomMat" Arg="rows, cl" Label="for an integer and a cvecclass"/>
+<Func Name="CVEC_RandomMat" Arg="rows, cols, p, d" Label="for four integers"/>
 <Returns> a new <C>cmat</C> </Returns>
 <Description>
     Creates a random matrix with <A>rows</A> rows and <A>cols</A> columns
@@ -165,7 +163,7 @@ Behaves exactly as expected. No holes can be made.
 </ManSection>
 
 <ManSection>
-<Meth Name="ELM_LIST" Arg="m, pos"/>
+<Meth Name="ELM_LIST" Arg="m, pos" Label="for matrices"/>
 <Returns> a <C>cvec</C> </Returns>
 <Description>
     Behaves exactly as expected. Note that this method is triggered when
@@ -174,7 +172,7 @@ Behaves exactly as expected. No holes can be made.
 </ManSection>
 
 <ManSection>
-<Meth Name="ASS_LIST" Arg="m, pos, v"/>
+<Meth Name="ASS_LIST" Arg="m, pos, v" Label="for matrices"/>
 <Returns> nothing </Returns>
 <Description>
     Behaves exactly as expected. Note that one can only assign to positions
@@ -184,7 +182,7 @@ Behaves exactly as expected. No holes can be made.
 </ManSection>
 
 <ManSection>
-<Meth Name="ELMS_LIST" Arg="m, poss"/>
+<Meth Name="ELMS_LIST" Arg="m, poss" Label="for matrices"/>
 <Returns> a sub <C>cmat</C></Returns>
 <Description>
     Behaves exactly as expected: A new matrix containing a subset of the
@@ -195,7 +193,7 @@ Behaves exactly as expected. No holes can be made.
 </ManSection>
 
 <ManSection>
-    <Meth Name="ASSS_LIST" Arg="m, poss, vals"/>
+    <Meth Name="ASSS_LIST" Arg="m, poss, vals" Label="for matrices"/>
 <Returns> nothing </Returns>
 <Description>
     Behaves exactly as expected. Of course all values in <A>vals</A>
@@ -206,7 +204,7 @@ Behaves exactly as expected. No holes can be made.
 </ManSection>
 
 <ManSection>
-<Meth Name="Length" Arg="m"/>
+<Meth Name="Length" Arg="m" Label="for matrices"/>
 <Returns> the number of rows of the <C>cmat</C> <A>m</A></Returns>
 <Description>
 Behaves exactly as expected.
@@ -440,7 +438,7 @@ For a <C>cmat</C> <A>m</A>. Works as expected.
 <Heading>Comparison of matrices and other information</Heading>
 
 <ManSection>
-<Meth Name="=" Arg="m, n"/>
+<Meth Name="=" Arg="m, n" Label="for matrices"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
     Returns <C>true</C> if the <C>cmat</C>s <A>m</A> and <A>n</A> are
@@ -450,19 +448,19 @@ For a <C>cmat</C> <A>m</A>. Works as expected.
 </ManSection>
 
 <ManSection>
-    <Meth Name="LT" Arg="m, n"/>
+    <Meth Name="LT" Arg="m, n" Label="for matrices"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
     Returns <C>true</C> if the <C>cmat</C> <A>m</A> is smaller than <A>n</A>.
     The matrices must be over the same field and must have equal
     dimensions. The method implements the lexicographic order and uses
-    <Ref Meth="LT"/> for the ordering of vectors.
+    <Ref Meth="LT" Label="for vectors"/> for the ordering of vectors.
     Note that the operation <C>LT</C> is the same as <C>&bslash;&lt;</C>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="IsZero" Arg="m"/>
+<Meth Name="IsZero" Arg="m" Label="for a matrix"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
     Returns <C>true</C> if the <C>cmat</C> <A>m</A> is equal to zero, meaning
@@ -518,7 +516,7 @@ is the number of bytes looked at in the <C>cvec</C>s in the matrices.
 </ManSection>
 
 <ManSection>
-<Meth Name="ChooseHashFunction" Arg="m, l"/>
+<Meth Name="ChooseHashFunction" Arg="m, l" Label="for matrices"/>
 <Returns> a record with entries <C>func</C> and <C>data</C>.</Returns>
 <Description>
     Chooses a hash function to be used for <C>cmat</C>s like <A>m</A>
@@ -761,8 +759,7 @@ pre-greasing.
 
 
 <ManSection>
-<Oper Name="GreaseMat" Arg="m, l"/>
-<Oper Name="GreaseMat" Arg="m"/>
+<Oper Name="GreaseMat" Arg="m[, l]"/>
 <Returns>nothing</Returns>
 <Description>
     <A>m</A> must be a <C>cmat</C>. It is pregreased with level <A>l</A>.

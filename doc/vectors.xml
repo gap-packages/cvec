@@ -127,7 +127,7 @@ Sect="cvecs"/>.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVecClass" Arg="p, d, l"/>
+<Meth Name="CVecClass" Arg="p, d, l" Label="for three integers"/>
 <Returns>a <C>cvecclass</C></Returns>
 <Description>
 All three arguments must be integers. The arguments <A>p</A> and <A>d</A>
@@ -141,7 +141,7 @@ see Section <Ref Sect="cvecs"/>.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVecClass" Arg="v"/>
+<Meth Name="CVecClass" Arg="v" Label="for a cvec"/>
 <Returns>a <C>cvecclass</C></Returns>
 <Description>
 The argument <A>v</A> must be a <C>cvec</C>.
@@ -152,10 +152,10 @@ see Section <Ref Sect="cvecs"/>.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVecClass" Arg="v, l"/>
+<Meth Name="CVecClass" Arg="v, l" Label="for a cvec and an integer"/>
 <Returns>a <C>cvecclass</C></Returns>
 <Description>
-The argument <A>v</A> must be a <C>cvec</C>.
+The first argument <A>v</A> must be a <C>cvec</C>.
 The method returns the corresponding <C>cvecclass</C> for vectors
 over the same field as <A>v</A> but with length <A>l</A>. This is
 much faster than producing the same object by giving <M>p</M> and
@@ -166,7 +166,7 @@ see Section <Ref Sect="cvecs"/>.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVecClass" Arg="c, l"/>
+<Meth Name="CVecClass" Arg="c, l" Label="for a cvecclass and an integer"/>
 <Returns>a <C>cvecclass</C></Returns>
 <Description>
 The argument <A>c</A> must be a <C>cvecclass</C>.
@@ -180,7 +180,7 @@ see Section <Ref Sect="cvecs"/>.
 </ManSection>
 
 <ManSection>
-<Meth Name="CVecClass" Arg="f, l"/>
+<Meth Name="CVecClass" Arg="f, l" Label="for a finite field and an integer"/>
 <Returns>a <C>cvecclass</C></Returns>
 <Description>
 The argument <A>f</A> must be a <C>finite field</C>.
@@ -377,7 +377,7 @@ highly optimised function to copy contiguous sections of <C>cvec</C>s
 into another <C>cvec</C>.
 
 <ManSection>
-<Meth Name="ELM_LIST" Arg="v, pos"/>
+<Meth Name="ELM_LIST" Arg="v, pos" Label="for vectors"/>
 <Returns>a finite field element</Returns>
 <Description>
 This is a method for (reading) element access of vectors. <A>v</A> must
@@ -386,12 +386,12 @@ than the length of <A>v</A>. The finite field element at position
 <A>pos</A> in <A>v</A> is returned.<P/>
 
 Note that the list access syntax <Q><A>v</A>[<A>pos</A>]</Q> triggers a call
-to the <Ref Meth="ELM_LIST"/> operation.
+to the <Ref Meth="ELM_LIST" Label="for vectors"/> operation.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="ASS_LIST" Arg="v, pos, s"/>
+<Meth Name="ASS_LIST" Arg="v, pos, s" Label="for vectors"/>
 <Returns>nothing</Returns>
 <Description>
 This is a method for (writing) element access of vectors. <A>v</A> must
@@ -405,12 +405,12 @@ The scalar <A>s</A> is treated exactly as described in Subsection
 
 Note that the list access syntax 
 <Q><A>v</A><C>[</C><A>pos</A><C>] := </C><A>s</A></Q>
-triggers a call to the <Ref Meth="ASS_LIST"/> operation.
+triggers a call to the <Ref Meth="ASS_LIST" Label="for vectors"/> operation.
 </Description>
 </ManSection>
 
 <ManSection>
-<Meth Name="ELMS_LIST" Arg="v, l"/>
+<Meth Name="ELMS_LIST" Arg="v, l" Label="for vectors"/>
 <Returns>a <C>cvec</C></Returns>
 <Description>
 This is a method for (reading) slice access of vectors. <A>v</A> must
@@ -422,7 +422,7 @@ length as <A>l</A> is created and returned. The finite field element at i
 positions <A>l</A> in <A>v</A> are copied into the new vector.<P/>
 
 Note that the list slice access syntax <Q><A>v</A>{<A>l</A>}</Q> triggers a 
-call to the <Ref Meth="ELMS_LIST"/> operation.
+call to the <Ref Meth="ELMS_LIST" Label="for vectors"/> operation.
 </Description>
 </ManSection>
 
@@ -480,7 +480,7 @@ base field. The result is a new <C>cvec</C>. A variable number of
 <Heading>Comparison of Vectors and other information</Heading>
 
 <ManSection>
-<Meth Name="=" Arg="v, w"/>
+<Meth Name="=" Arg="v, w" Label="for vectors"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
     Returns <C>true</C> if the <C>cvec</C>s <A>v</A> and <A>w</A> are
@@ -490,7 +490,7 @@ base field. The result is a new <C>cvec</C>. A variable number of
 </ManSection>
 
 <ManSection>
-    <Meth Name="LT" Arg="v, w"/>
+    <Meth Name="LT" Arg="v, w" Label="for vectors"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
     Returns <C>true</C> if the <C>cvec</C> <A>v</A> is smaller than <A>w</A>.
@@ -504,7 +504,7 @@ base field. The result is a new <C>cvec</C>. A variable number of
 </ManSection>
 
 <ManSection>
-<Meth Name="IsZero" Arg="v"/>
+<Meth Name="IsZero" Arg="v" Label="for a vector"/>
 <Returns><C>true</C> or <C>false</C></Returns>
 <Description>
     Returns <C>true</C> if the <C>cvec</C> <A>v</A> is equal to zero, meaning
@@ -580,13 +580,13 @@ base field. The result is a new <C>cvec</C>. A variable number of
     This implements the library operation <Ref Oper="NumberFFVector"
         BookName="Ref"/>. Note that only the case that <A>sz</A> is the
     number of elements in the base field of <A>v</A> is implemented.
-    There is an inverse operation called <Ref Oper="CVecNumber"/>.
+    There is an inverse operation called <Ref Oper="CVecNumber" Label="for an integer and a cvecclass"/>.
 </Description>
 </ManSection>
 
 <ManSection>
-<Oper Name="CVecNumber" Arg="nr, cl"/>
-<Oper Name="CVecNumber" Arg="nr, p, d, l"/>
+<Oper Name="CVecNumber" Arg="nr, cl" Label="for an integer and a cvecclass"/>
+<Oper Name="CVecNumber" Arg="nr, p, d, l" Label="for four integers"/>
 <Returns>a <C>cvec</C></Returns>
 <Description>
     This is the inverse operation to <Ref Oper="NumberFFVector" 
@@ -660,7 +660,7 @@ is the number of bytes looked at in the <C>cvec</C>.
 </ManSection>
 
 <ManSection>
-<Meth Name="ChooseHashFunction" Arg="v, hashlen"/>
+<Meth Name="ChooseHashFunction" Arg="v, hashlen" Label="for vectors"/>
 <Returns>a record describing a hash function</Returns>
 <Description>
 Chooses a hash function to store <C>cvec</C>s like <A>v</A> in a hash table
