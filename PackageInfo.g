@@ -45,24 +45,7 @@ Persons := [
   ),
 ],
 
-##  Status information. Currently the following cases are recognized:
-##    "accepted"      for successfully refereed packages
-##    "deposited"     for packages for which the GAP developers agreed 
-##                    to distribute them with the core GAP system
-##    "dev"           for development versions of packages 
-##    "other"         for all other packages
-##
-# Status := "accepted",
 Status := "deposited",
-
-##  You must provide the next two entries if and only if the status is 
-##  "accepted" because is was successfully refereed:
-# format: 'name (place)'
-# CommunicatedBy := "Mike Atkinson (St. Andrews)",
-#CommunicatedBy := "",
-# format: mm/yyyy
-# AcceptDate := "08/1999",
-#AcceptDate := "",
 
 SourceRepository := rec(
     Type := "git",
@@ -120,8 +103,6 @@ AvailabilityTest := function()
   return true;
 end,
 
-##  *Optional*, but recommended: path relative to package root to a file which 
-##  contains as many tests of the package functionality as sensible.
 TestFile := "tst/testall.g",
 
 ##  *Optional*: Here you can list some keyword related to the topic 
