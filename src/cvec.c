@@ -1,4 +1,3 @@
-    
 /***************************************************************************
  **
  *A  cvec.c               cvec-package                        Max Neunhoeffer
@@ -30,7 +29,7 @@ WORD *arenastart;
 
 /* Our basic unit is a C unsigned long: */
 typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
-#define Word32 UInt4
+typedef uint32_t Word32;
 
 #define WORDALLONE (~(0UL))
 #define BYTESPERWORD sizeof(Word)
