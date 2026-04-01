@@ -1026,7 +1026,7 @@ function( arg )
   #   indetnr is the number of an indeterminate, if omitted 1 is taken
   local A,B,S,coeffs,col,d,dec,eps,g,i,indetnr,irreds,j,l,lcm,lowbounds,m,bound,
         mm,mult,multmin,newBrow,nrunclear,opi,ordpol,ordpolsinv,p,pivs, est,
-        pr,prob,proof,res,rl,se,ti,ti2,veri,verify,w,wcopy,ww,zero, wred, c;
+        pr,prob,proof,res,rl,se,ti,ti2,veri,verify,w,wcopy,ww,zero, wred, c, fac;
   if Length(arg) < 2 or Length(arg) > 3 then
       Error("Usage: m, eps [,indetnr]"); 
   fi;
@@ -1115,7 +1115,7 @@ function( arg )
       coeffs := -dec{[d+1..l]};
       coeffs := Unpack(coeffs);
       Add(coeffs,opi.o);
-      ConvertToVectorRep(coeffs,Size(opi.f));
+      ConvertToVectorRep(coeffs,opi.f);
       Add(opi.rordpols,
           UnivariatePolynomialByCoefficients(opi.fam,coeffs,indetnr));
       Add(opi.d,l-d);  # the degree of the order polynomial
@@ -1283,6 +1283,19 @@ function( arg )
              proof := proof, prob := eps,
              A := A, B := B, S := S);
   res.iscyclic := Degree(res.minpoly) = Degree(res.charpoly);
+
+  fac := [];
+  for i in [1..Length(res.irreds)] do
+      Append(fac, ListWithIdenticalEntries(res.multmin[i], res.irreds[i]));
+  od;
+  StoreFactorsPol(opi.f, res.minpoly, fac);
+
+  fac := [];
+  for i in [1..Length(res.irreds)] do
+      Append(fac, ListWithIdenticalEntries(res.mult[i], res.irreds[i]));
+  od;
+  StoreFactorsPol(opi.f, res.charpoly, fac);
+
   return res;
 end );
 
