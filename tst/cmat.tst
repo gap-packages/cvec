@@ -20,6 +20,8 @@ gap> NewZeroMatrix(IsCMatRep, GF(3), 3, 2);
 #
 gap> m:=CMat(ImmutableMatrix(GF(3),[[1,0],[0,1]]*Z(3)));
 <cmat 2x2 over GF(3,1)>
+gap> CompatibleVectorFilter(m) = ConstructingFilter(CompatibleVector(m));
+true
 gap> ScalarProductsRows(m,m,1);
 Z(3)^0
 gap> ScalarProductsRows(m,m,2);
