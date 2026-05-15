@@ -20,6 +20,8 @@ gap> NewZeroMatrix(IsCMatRep, GF(3), 3, 2);
 #
 gap> m:=CMat(ImmutableMatrix(GF(3),[[1,0],[0,1]]*Z(3)));
 <cmat 2x2 over GF(3,1)>
+gap> CompatibleVectorFilter(m) = ConstructingFilter(CompatibleVector(m));
+true
 gap> ScalarProductsRows(m,m,1);
 Z(3)^0
 gap> ScalarProductsRows(m,m,2);
@@ -59,6 +61,12 @@ gap> Display(c9);
  [1.2]
  [.12]
 ]
+
+# moved to the cvec tests from GAP's testbugfix/2012-06-18-t00327.tst
+gap> mat:= [ [ Z(2) ] ];;
+gap> ConvertToMatrixRep( mat, 2 );
+2
+gap> cmat:= CMat( mat );;  cmat^1000;;
 
 #
 gap> STOP_TEST("cmat.tst", 0);

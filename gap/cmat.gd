@@ -18,6 +18,8 @@ DeclareRepresentation( "IsCMatRep",
   IsComponentObjectRep and IsMatrix and IsOrdinaryMatrix and HasLength and
   IsRowListMatrix, [] );
 
+InstallMethod( CompatibleVectorFilter, ["IsCMatRep"],
+  M -> IsCVecRep );
 
 #############################################################################
 # Making of matrices:
