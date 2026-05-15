@@ -1,5 +1,9 @@
 This file describes changes in the cvec package.
 
+2.8.5 (2026-05-15)
+  - Add `CompatibleVectorFilter` method for `IsCMatRep`
+  - Janitorial changes
+
 2.8.4 (2025-06-20)
   - Janitorial changes
 

@@ -2,7 +2,7 @@
 [![Code Coverage](https://codecov.io/github/gap-packages/cvec/coverage.svg?branch=master&token=)](https://codecov.io/gh/gap-packages/cvec)
 
 # README file for the 'CVEC' GAP4 package
-    
+
 To get the newest version of this GAP 4 package download the
 archive file
 
