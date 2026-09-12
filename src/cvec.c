@@ -9,6 +9,7 @@
 
 #include <stdlib.h>
 
+#include <stdint.h>
 #include "gap_all.h" // GAP headers
 
 #ifdef SYS_IS_64_BIT
@@ -27,11 +28,11 @@ WORD *arenastart;
 #include <cygwin/in.h>
 #endif
 
-/* Our basic unit is a C unsigned long: */
-typedef unsigned long Word;  /* Our basic unit for operations, 32 or 64 bits */
+/* Our basic unit is a pointer sized unsigned integer: */
+typedef uintptr_t Word;  /* Our basic unit for operations, pointer sized */
 typedef uint32_t Word32;
 
-#define WORDALLONE (~(0UL))
+#define WORDALLONE ((~(Word)0))
 #define BYTESPERWORD sizeof(Word)
 #define CACHESIZE (512L*1024L)
 #define CACHELINE 64
@@ -160,7 +161,7 @@ static Obj FuncCVEC_TEST_ASSUMPTIONS(Obj self)
 {
     /* Note in addition, that d * length of a vector must fit into a
      * C Int! */
-    if (0UL - 1UL != WORDALLONE) return INTOBJ_INT(1);
+    if (((Word)0) - ((Word)1) != WORDALLONE) return INTOBJ_INT(1);
     if ( WORDALLONE >> 0 != WORDALLONE ) return INTOBJ_INT(2);
     if ( sizeof(Word) != 8 && sizeof(Word) != 4) return INTOBJ_INT(3);
 #ifdef SYS_IS_64_BIT
@@ -205,11 +206,11 @@ static Obj FuncCVEC_FINALIZE_FIELDINFO(Obj self, Obj f)
     s = NEW_STRING(sizeof(Word) * 4);
     po = (Word *) CHARS_STRING(s);
     if (p & 1) {   /* Odd characteristic */
-        for (w = 1UL,j = 1;j < elsperword;j++)
-            w = (w << bitsperel)+1UL;
+        for (w = ((Word)1),j = 1;j < elsperword;j++)
+            w = (w << bitsperel)+((Word)1);
         po[OFF_mask] = w << (bitsperel-1);
         po[OFF_offset] = po[OFF_mask] - w * p;
-        po[OFF_maskp] = (1UL << bitsperel)-1;
+        po[OFF_maskp] = (((Word)1) << bitsperel)-1;
         po[OFF_cutmask] = w * po[OFF_maskp];
     } else {     /* Characteristic 2 */
         po[OFF_mask] = 0;
@@ -336,14 +337,14 @@ static inline void INIT_SEQ_ACCESS(seqaccess *sa, Obj v, Int pos)
     sa->pos = pos;
     sa->offset = d*((pos-1) / elsperword);
     sa->bitpos = ((pos-1)%elsperword) * bitsperel;
-    sa->mask = ((1UL << bitsperel)-1) << sa->bitpos;
+    sa->mask = ((((Word)1) << bitsperel)-1) << sa->bitpos;
 }
 
 /* Initializes the sequential access struct, v is a cvec: */
 #define MOVE_SEQ_ACCESS(sa,pos) \
     (sa)->offset = (sa)->d*(((pos)-1) / (sa)->elsperword); \
     (sa)->bitpos = (((pos)-1) % (sa)->elsperword) * (sa)->bitsperel; \
-    (sa)->mask = ((1UL << (sa)->bitsperel)-1) << (sa)->bitpos;
+    (sa)->mask = ((((Word)1) << (sa)->bitsperel)-1) << (sa)->bitpos;
 
 
   /*******************************************************/
@@ -690,7 +691,7 @@ static Obj FuncCVEC_CVEC_TO_NUMBERFFLIST(Obj self, Obj v, Obj l, Obj split)
             res = res * p + ((wo >> shift) & maskp);
         if (split == True) {
             SET_ELM_PLIST(l,2*i-1,
-                 INTOBJ_INT(res & ((1UL << (4*BYTESPERWORD)) - 1UL)));
+                 INTOBJ_INT(res & ((((Word)1) << (4*BYTESPERWORD)) - ((Word)1))));
             SET_ELM_PLIST(l,2*i,
                  INTOBJ_INT(res >> (4*BYTESPERWORD)));
         } else {
@@ -900,7 +901,7 @@ static inline Word MUL1_INL(Word wo,Obj f,Word s)
     /* Handle scalar 1: */
     if (s == 1) return wo;
     /* Handle scalar 0: */
-    else if (s == 0) return (Word) 0UL;
+    else if (s == 0) return (Word) ((Word)0);
     else if (s == p - 1) { 
         /* Here we can calculate p-x for all entries x. */
         PREPARE(f);
@@ -1537,7 +1538,7 @@ static inline void MUL1_INT(Obj u, Obj ucl, Obj ufi, Int d, Int *sc,
            * now. */
           wo = buf[d - 1];   /* Keep this one */
           for (j = d - 1; j > 0; j--) buf[j] = buf[j-1];
-          buf[0] = 0UL;
+          buf[0] = ((Word)0);
           for (j = 0,bb = buf;j < d;j++,bb++) {
               *bb = ADDMUL1_INL(*bb,wo,ufi,cp[j]);
           }
@@ -1611,7 +1612,7 @@ static inline void MUL2_INT(Obj u, Obj ucl, Obj ufi, Obj v,
            * now. */
           wo = buf[d - 1];   /* Keep this one */
           for (j = d - 1; j > 0; j--) buf[j] = buf[j-1];
-          buf[0] = 0UL;
+          buf[0] = ((Word)0);
           for (j = 0,bb = buf;j < d;j++,bb++) {
               *bb = ADDMUL1_INL(*bb,wo,ufi,cp[j]);
           }
@@ -1691,7 +1692,7 @@ static inline void ADDMUL_INT(Obj u, Obj ucl, Obj ufi, Obj v,
            * now. */
           wo = buf[d - 1];   /* Keep this one */
           for (j = d - 1; j > 0; j--) buf[j] = buf[j-1];
-          buf[0] = 0UL;
+          buf[0] = ((Word)0);
           for (j = 0,bb = buf;j < d;j++,bb++) {
               *bb = ADDMUL1_INL(*bb,wo,ufi,cp[j]);
           }
@@ -1987,7 +1988,7 @@ static Obj FuncCVEC_EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
     Int overflow = 0;      /* Set to 1 if we read over the end of the vector */
     Int i = INT_INTOBJ(ii)-1; /* we are 1-based in GAP, here we want 0-based */
     Int l = INT_INTOBJ(ll);
-    Word res = 0UL;
+    Word res = ((Word)0);
     const Word *p = CONST_DATA_CVEC(v) + (i / elsperword) * d;
     Int rest = i % elsperword;
     Int wordlen = INT_INTOBJ(ELM_PLIST(cl,IDX_wordlen));
@@ -2003,15 +2004,15 @@ static Obj FuncCVEC_EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
         if (rest + l <= elsperword) {
             /* Good luck, everything is in the same word! */
             Int s1 = rest * bitsperel;
-            Word mask1 = (1UL << (l * bitsperel)) - 1UL;
+            Word mask1 = (((Word)1) << (l * bitsperel)) - ((Word)1);
             res = (*p >> s1) & mask1;
         } else {
             /* Urgh! Field elements are distributed among two Words! */
             Int nrinfirstword = elsperword - i % elsperword;
             Int s1 = rest * bitsperel;
-            Word mask1 = (1UL << (bitsperel * nrinfirstword)) - 1UL;
+            Word mask1 = (((Word)1) << (bitsperel * nrinfirstword)) - ((Word)1);
             Int s2 = nrinfirstword * bitsperel;
-            Word mask2 = (1UL << (bitsperel * (l-nrinfirstword))) - 1UL;
+            Word mask2 = (((Word)1) << (bitsperel * (l-nrinfirstword))) - ((Word)1);
             if (overflow)
                 res = (p[0] >> s1) & mask1;
             else
@@ -2025,7 +2026,7 @@ static Obj FuncCVEC_EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
             Int pos = 0;
             Int inc = l * bitsperel;
             Int s1 = rest * bitsperel;
-            Word mask1 = (1UL << inc) - 1UL;
+            Word mask1 = (((Word)1) << inc) - ((Word)1);
             for (k = d;k > 0;k--) {
                 res |= ((*p++ >> s1) & mask1) << pos;
                 pos += inc;
@@ -2036,9 +2037,9 @@ static Obj FuncCVEC_EXTRACT(Obj self, Obj v, Obj ii, Obj ll)
             Int pos = 0;
             Int nrinfirstword = elsperword - i % elsperword;
             Int s1 = rest * bitsperel;
-            Word mask1 = (1UL << (bitsperel * nrinfirstword)) - 1UL;
+            Word mask1 = (((Word)1) << (bitsperel * nrinfirstword)) - ((Word)1);
             Int s2 = nrinfirstword * bitsperel;
-            Word mask2 = (1UL << (bitsperel * (l-nrinfirstword))) - 1UL;
+            Word mask2 = (((Word)1) << (bitsperel * (l-nrinfirstword))) - ((Word)1);
             if (overflow) {
                 for (k = d;k > 0;k--) {
                     res |= ((*p++ >> s1) & mask1) << pos;
@@ -2157,16 +2158,16 @@ static Obj FuncCVEC_EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
         if (rest + l <= elsperword) {
             /* Good luck, everything is in the same word! */
             VecEx_s1 = rest * bitsperel;
-            VecEx_mask1 = (1UL << (l * bitsperel)) - 1UL;
+            VecEx_mask1 = (((Word)1) << (l * bitsperel)) - ((Word)1);
             VecEx_offset = i / elsperword;
             Vector_Extract_Worker = VecEx_Worker_prime_simple;
         } else {
             /* Urgh! Field elements are distributed among two Words! */
             int nrinfirstword = elsperword - i % elsperword;
             VecEx_s1 = rest * bitsperel;
-            VecEx_mask1 = (1UL << (bitsperel * nrinfirstword)) - 1UL;
+            VecEx_mask1 = (((Word)1) << (bitsperel * nrinfirstword)) - ((Word)1);
             VecEx_s2 = nrinfirstword * bitsperel;
-            VecEx_mask2 = (1UL << (bitsperel * (l-nrinfirstword))) - 1UL;
+            VecEx_mask2 = (((Word)1) << (bitsperel * (l-nrinfirstword))) - ((Word)1);
             VecEx_offset = i / elsperword;
             Vector_Extract_Worker = VecEx_Worker_prime_bad;
         }
@@ -2176,7 +2177,7 @@ static Obj FuncCVEC_EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
             /* Good luck, everything is in the same word! */
             VecEx_inc = bitsperel * l;
             VecEx_s1 = rest * bitsperel;
-            VecEx_mask1 = (1UL << (l * bitsperel)) - 1UL;
+            VecEx_mask1 = (((Word)1) << (l * bitsperel)) - ((Word)1);
             VecEx_offset = (i / elsperword) * d;
             Vector_Extract_Worker = VecEx_Worker_ext_simple;
         } else {
@@ -2184,9 +2185,9 @@ static Obj FuncCVEC_EXTRACT_INIT(Obj self, Obj v, Obj ii, Obj ll)
             int nrinfirstword = elsperword - rest;
             VecEx_inc = l * bitsperel;
             VecEx_s1 = rest * bitsperel;
-            VecEx_mask1 = (1UL << (bitsperel * nrinfirstword)) - 1UL;
+            VecEx_mask1 = (((Word)1) << (bitsperel * nrinfirstword)) - ((Word)1);
             VecEx_s2 = nrinfirstword * bitsperel;
-            VecEx_mask2 = (1UL << (bitsperel * (l-nrinfirstword))) - 1UL;
+            VecEx_mask2 = (((Word)1) << (bitsperel * (l-nrinfirstword))) - ((Word)1);
             VecEx_offset = (i / elsperword) * d;
             Vector_Extract_Worker = VecEx_Worker_ext_bad;
         }
@@ -2414,7 +2415,7 @@ static inline void ld(WORD *reg, Obj mat,
     for (i = 2;i <= rowscp+1;i++) {
         data = (const WORD *)CONST_DATA_CVEC(ELM_PLIST(mat,i));
         for (j = wordscp; j > 0; j--) *reg++ = *data++;
-        for (j = wordscl; j > 0; j--) *reg++ = 0UL;
+        for (j = wordscl; j > 0; j--) *reg++ = ((Word)0);
     }
 }
 
@@ -2631,10 +2632,10 @@ static void SLICE_INT(const Word *src, Word *dst, Int fr, Int le, Int to,
         if (stanr*bitsperel == 8*BYTESPERWORD)
             stamask = WORDALLONE;
         else
-            stamask = ((1UL << (stanr*bitsperel))-1UL) 
+            stamask = ((((Word)1) << (stanr*bitsperel))-((Word)1)) 
                                   << ((fr % elsperword) * bitsperel);
         endnr = (fr+le) % elsperword;
-        endmask = (1UL << (endnr*bitsperel))-1UL;
+        endmask = (((Word)1) << (endnr*bitsperel))-((Word)1);
         {
             register const Word *v = src + (fr/elsperword)*d;
             register Word *w = dst + (to/elsperword)*d;
@@ -2661,20 +2662,20 @@ static void SLICE_INT(const Word *src, Word *dst, Int fr, Int le, Int to,
         shiftr = elsperword-shiftl;
         shiftl *= bitsperel;
         shiftr *= bitsperel;
-        kdomask = ((1UL << shiftl)-1UL);
+        kdomask = ((((Word)1) << shiftl)-((Word)1));
         upmask = kdomask << shiftr;
         kdomask = ~kdomask;
-        domask = (1UL << shiftr)-1UL;
+        domask = (((Word)1) << shiftr)-((Word)1);
         kupmask = ~(domask << shiftl);
         stanr = elsperword - (fr % elsperword);
         if (stanr > le) stanr = le;
         if (stanr*bitsperel == 8*BYTESPERWORD)
             stamask = WORDALLONE;
         else
-            stamask = ((1UL << (stanr*bitsperel))-1UL) 
+            stamask = ((((Word)1) << (stanr*bitsperel))-((Word)1)) 
                                   << ((fr % elsperword) * bitsperel);
         endnr = (fr+le) % elsperword;
-        endmask = (1UL << (endnr*bitsperel))-1UL;
+        endmask = (((Word)1) << (endnr*bitsperel))-((Word)1);
 
         {
             register const Word *v = src + (fr/elsperword)*d;
@@ -3166,7 +3167,7 @@ static Obj FuncCVEC_CVEC_TO_EXTREP(Obj self, Obj v, Obj s)
     Int elsperword32 = elsperword/2;
     /* note that elsperword is always even on 64bit machines! */
     Word wordlen32 = (len + elsperword32 - 1)/elsperword32;
-    Word mask = (1UL << (elsperword32 * bitsperel))-1UL;
+    Word mask = (((Word)1) << (elsperword32 * bitsperel))-((Word)1);
     register const Word *p;
     register Word wo;
     register int shift = elsperword32 * bitsperel;
@@ -3923,7 +3924,7 @@ static Obj FuncCMAT_ENTRY_OF_MAT_PROD(Obj self, Obj m, Obj n, Obj i, Obj j)
         return OurErrorBreakQuit("CMAT_ENTRY_OF_MAT_PROD: "
                                  "cmats not over same field");
     }
-    if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
+    if (d > 1 || p >= (((Word)1) << (BYTESPERWORD*4)) || size > 0) {
         return TRY_NEXT_METHOD;
     }
     INIT_SEQ_ACCESS( &sa, v, 1 );
@@ -4002,7 +4003,7 @@ static Obj FuncCVEC_SCALAR_PRODUCT(Obj self, Obj v, Obj w)
             w ^= (w >> 2);  w ^= (w >> 1); w &= 1L;
             return ELM_PLIST(tab2,(Int) w + 1);
         }
-        if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
+        if (d > 1 || p >= (((Word)1) << (BYTESPERWORD*4)) || size > 0) {
             return TRY_NEXT_METHOD;
         }
         INIT_SEQ_ACCESS( &sa, v, 1 );
@@ -4066,7 +4067,7 @@ static Obj FuncCMATS_SCALAR_PRODUCTS_ROWS(Obj self, Obj m, Obj n, Obj l)
 
     /* The following test has to be adjusted to the one in
      * CVEC_SCALAR_PRODUCT! */
-    if (d > 1 || p >= (1UL << (BYTESPERWORD*4)) || size > 0) {
+    if (d > 1 || p >= (((Word)1) << (BYTESPERWORD*4)) || size > 0) {
         return TRY_NEXT_METHOD;
     }
 
@@ -4293,8 +4294,8 @@ static Int InitKernel ( StructInitInfo *module )
     InitHdlrFuncsFromTable( GVarFuncs );
 
     /* Init gf2lib structures: */
-    arenastart = (WORD *) 
-        ((((unsigned long) myarena)+0x100000UL) & (~(0xfffffUL)));
+    arenastart = (WORD *)
+        ((((uintptr_t) myarena)+(uintptr_t)0x100000) & (~(uintptr_t)0xfffff));
 #ifdef SYS_IS_64_BIT
     gf2_usemem_512(arenastart,4096*1024);
     gf2_usemem_256(arenastart,4096*1024);
