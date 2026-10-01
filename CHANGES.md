@@ -1,225 +1,262 @@
 This file describes changes in the cvec package.
 
-2.8.5 (2026-05-15)
-  - Add `CompatibleVectorFilter` method for `IsCMatRep`
-  - Janitorial changes
+## 2.8.5 (2026-05-15)
 
-2.8.4 (2025-06-20)
-  - Janitorial changes
+- Add `CompatibleVectorFilter` method for `IsCMatRep`
+- Janitorial changes
 
-2.8.3 (2025-01-03)
-  - Fix compilation with GCC 15
-  - Various janitorial changes
+## 2.8.4 (2025-06-20)
 
-2.8.2 (2024-08-27)
-  - Require GAP >= 4.12
-  - Don't attempt to read non-existing files
-  - Various janitorial changes
+- Janitorial changes
 
-2.8.1 (2023-03-28)
-  - Adjust `CompanionMatrix`, `NewCompanionMatrix` output
-    to match the GAP documentation (i.e., transpose it compared
-    to what was returned before)
+## 2.8.3 (2025-01-03)
 
-2.8.0 (2023-03-22)
-  - Adjust to revised MatrixObj interface in GAP 4.13
-  - Various janitorial changes
+- Fix compilation with GCC 15
+- Various janitorial changes
 
-2.7.6 (2022-08-06)
-  - Fix a bug converting vectors defined over large (non-internal) finite
-    fields to cvec format
-  - Various janitorial changes
+## 2.8.2 (2024-08-27)
 
-2.7.5 (2021-09-06)
-  - Require GAP version >= 4.10
-  - Replace buildsystem with the "standard GAP package buildsystem"
-    based on Makefile.gappkg, for quicker and more robust compilation
-  - Various janitorial changes
+- Require GAP >= 4.12
+- Don't attempt to read non-existing files
+- Various janitorial changes
 
-2.7.4 (2019-07-17)
-  - Improve compatibility with upcoming GAP 4.11 (replace uses of
-    IsRowVectorObj by IsVectorObj, and of BaseField by BaseDomain)
+## 2.8.1 (2023-03-28)
 
-2.7.3 (2019-07-11)
-  - Rewrote build system to use gac, not autoconf/automake/libtool
-  - Improve compatibility with upcoming GAP 4.11
-  - Various janitorial changes
+- Adjust `CompanionMatrix`, `NewCompanionMatrix` output
+  to match the GAP documentation (i.e., transpose it compared
+  to what was returned before)
 
-2.7.2 (2019-03-20)
-  - Removed the (undocumented) Fold and Unfold method
-  - Clarify the licensing terms again
+## 2.8.0 (2023-03-22)
 
-2.7.1 (2019-02-23)
-  - Fixed an incompatibility with GAP version >= 4.11
+- Adjust to revised MatrixObj interface in GAP 4.13
+- Various janitorial changes
 
-2.7.0 (2019-02-19)
-  - Require GAP version >= 4.9
-  - Clarify that license is GPL 2 *or later* (as agreed with Max N.)
-  - Internal: stop using the GAP kernel variable PolsFF
-  - Fix error viewing empty semiechelon matrices (patch provided by Frank
-    Lübeck)
-  - Fix bug in MinimalPolynomialOfMatrixMC which could lead to an infinite
-    loop for certain inputs, in particular lower triangular matrices with
-    multiple eigenvalues (patch provided by Frank Lübeck)
-  - Add methods to allow access to cmats via  `mat[i,j]`
-  - Various janitorial changes
+## 2.7.6 (2022-08-06)
 
-2.6.1 (2018-06-07)
-  - Workaround a linker issue with GNU ld 2.30
-  - Improved build system when using GAP >= 4.9
+- Fix a bug converting vectors defined over large (non-internal) finite
+  fields to cvec format
+- Various janitorial changes
 
-2.6.0 (2018-03-20)
-  - Fix crash in CLEANROWKERNEL
-  - Fix link to issue tracker in manual
-  - Adapt to changes in GAP's MatrixObj interface (to appear in GAP 4.9)
-  - Convert README to markdown
-  - Various other internal fixes and improvements
+## 2.7.5 (2021-09-06)
 
-2.5.7 (2017-08-01)
-  - Remove CompatibleMatrix method (this *undocumented* API will be
-    removed in GAP 4.9)
-  - Fix several broken references in the manual
+- Require GAP version >= 4.10
+- Replace buildsystem with the "standard GAP package buildsystem"
+  based on Makefile.gappkg, for quicker and more robust compilation
+- Various janitorial changes
 
-2.5.6 (2016-11-08)
-  - Fix a bug reported by Jan De Beule which resulted in cvec incorrectly
-    converting certain GAP matrices to cvec matrices.
+## 2.7.4 (2019-07-17)
 
-2.5.5 (2016-03-08)
-  - Maintenance release
+- Improve compatibility with upcoming GAP 4.11 (replace uses of
+  IsRowVectorObj by IsVectorObj, and of BaseField by BaseDomain)
 
-2.5.4 (2015-12-18)
-  - Some functions accept slightly more general input. For example, it
-    is now in some cases acceptable to use finite field elements like
-    Z(4)^0 (which is equal, but not identical, to Z(2)^0) as input when
-    cvec is expecting elements of GF(2).
-  - Fix EmptySemiEchelonBasis: its documentation said it expects a
-    sample vector, but the implementation expected a sample matrix. Now
-    both are possible, and both are documented.
-  - Fix some errors in the manual.
-  - Move website to https://gap-packages.github.io/cvec/
-  - Stop using GenericHashFunc_C (formerly provided by the orb package)
+## 2.7.3 (2019-07-11)
 
-2.5.3 (2014-11-08)
-  - Tweak the build system to avoid potential issues when the source
-    code gets repackages by third parties (e.g. by the GAP team, when
-    creating their big package archives)
+- Rewrote build system to use gac, not autoconf/automake/libtool
+- Improve compatibility with upcoming GAP 4.11
+- Various janitorial changes
 
-2.5.2 (2014-09-24)
-  - Fix some minor issues in the documentation
-  - Remove some leftover GAP 4.4 compatibility code
-  - Update Max Neunhoeffer's contact data
-  - Use AutoDoc to generate title page of the manual from PackageInfo.g
-  - Add Max Horn as a maintainer
+## 2.7.2 (2019-03-20)
 
-2.5.1 (2014-04-04)
-  - Previous release had an invalid release date in
-    PackageInfo.g (2014-04-31 instead of 2014-03-31).
-  - Merge HISTORY and CHANGES files.
+- Removed the (undocumented) Fold and Unfold method
+- Clarify the licensing terms again
 
-2.5 (2014-03-31)
-  - Add methods for \^ for cvecs and Frobenius automorphisms
-  - Add methods for \^ for cmats and Frobenius automorphisms
-  - Fix a bug in unpickling semi echelonised bases
-  - Update and tweak the package build system
-  - Move package repository and website to GitHub
+## 2.7.1 (2019-02-23)
 
-2.4 (2012-09-14)
-  - Fix an ELMS_LIST bug for CMats reported by Felix Noeske
+- Fixed an incompatibility with GAP version >= 4.11
 
-2.3 (2012-07-13)
-  - Fix CMat bug: used to not ShallowCopy its first argument
-  - Fixed DuplicateFreeList and Filtered bug for CMats.
+## 2.7.0 (2019-02-19)
 
-2.2 (2012-05-28)
-  - Compile manual against GAP 4.5.4.
-  - Add script "configure_like_gap".
-  - Adjust README and installation instructions.
+- Require GAP version >= 4.9
+- Clarify that license is GPL 2 *or later* (as agreed with Max N.)
+- Internal: stop using the GAP kernel variable PolsFF
+- Fix error viewing empty semiechelon matrices (patch provided by Frank
+  Lübeck)
+- Fix bug in MinimalPolynomialOfMatrixMC which could lead to an infinite
+  loop for certain inputs, in particular lower triangular matrices with
+  multiple eigenvalues (patch provided by Frank Lübeck)
+- Add methods to allow access to cmats via  `mat[i,j]`
+- Various janitorial changes
 
-2.1 (2012-02-03)
-  - Fix a serious bug in MinimalPolynomialMC for matrices over finite
-    fields. WARNING: Wrong results were produced by version 2.0!
+## 2.6.1 (2018-06-07)
 
-2.0 (2012-01-31)
-  - Improve implementation of MinimalPolynomialOfMatrixMC and use it
-    as a method for MinimalPolynomial for row list matrices.
-    Document it for the first time.
-  - Completely change build setup to use automake/autoconf/libtool as
-    done in the IO package.
+- Workaround a linker issue with GNU ld 2.30
+- Improved build system when using GAP >= 4.9
 
-1.8 (2011-03-24)
-  - Slightly improved minimal polynomial routine by suggestion of
-    referee.
-  - Use C-Hashfunction of orb 3.0 if it is there.
-  - Many optimisations for GF2
-  - Faster ScalarProduct for GF2
-  - Fast EntryOfMatrixProduct for prime fields
-  - Fixed configure script to work with GAP 4.5 without breaking 4.4.
-  - Fixed a bug with zero length matrices introduced after 1.7
-  - Added a Length method for semi echelonised bases
-  - Documented the Vectors operation for semi echelonised bases
-  - Put revision 402 as version 1.8 on the web
+## 2.6.0 (2018-03-20)
 
-1.7 (2007-09-26)
-  - Introduce filters for cmats and cvecs to distinguish cases of q=p
-    and q <= MAXSIZE_GF_INTERNAL.
-  - Kernel method for cmat row access
-  - Operation ScalarProductsRows with kernel method for prime fields
-    used for condensation
-  - Fixed infinite recursion in matrix multiplication because of
-    Winograd method.
-  - Fixed problem of polynomial factorisation over "DefaultField"
-    instead of BaseDomain in Minimal and Characteristic polynomial
-    routines.
-  - New method for SumIntersectionMat for cmats. 
-  - Use constructors for new objects in new interface, implement them.
-  - Change all addresses to St Andrews.
-  - Require GAP >= 4.4.9
-  - Tune vector matrices interface and polish implementation.
-  - Added a pickling/unpickling method for semi echelon basis.
-  - Quite a few little changes to the vector/matrix interface
-    after discussions in Braunschweig.
-  - Make TraceMat compatible with GAP4R4.
-  - Added matobjplist.g* from the dev library for compatibility with 4r4.
-  - Put revision 324 as version 1.7 on the web.
+- Fix crash in CLEANROWKERNEL
+- Fix link to issue tracker in manual
+- Adapt to changes in GAP's MatrixObj interface (to appear in GAP 4.9)
+- Convert README to markdown
+- Various other internal fixes and improvements
 
-1.6 (2007-04-02)
-  - Improve MinimalPolynomialMC, change calling convention.
-  - Fixed a dangerous bug in matrix multiplication using the
-    memory-saving Winograd trick.
-  - Better Value method for CMats (do nothing a human would not also do)
-  - Put AddMatrix and MultMatrix into interface and implement it for cmats
-  - Put revision 298 as version 1.6 on the web.
+## 2.5.7 (2017-08-01)
 
-1.5 (2007-02-07)
-  - Improve usage of grease, in particular for level 1 for 2 < q < 257
-  - Improve FILL_GREASE_TAB by using trick coming from analysis: we only
-    have to multiply a few times by the primitive root, not by powers of it.
-  - Fixed a serious bug in SemiEchelonBasisMutableTX which occurred if
-    the first row of the matrix was zero.
-  - New operation CompanionMatrix (not yet documented)
-  - GreaseCalibration for different machines (not yet documented)
-  - Winograd trick for multiplication, corresponding calibration function
-  - Put copyright and licensing information in all files.
-  - Add version number to archive name, fixed some things in PackageInfo.g.
-  - Put revision 280 as version 1.5 on the web.
+- Remove CompatibleMatrix method (this *undocumented* API will be
+  removed in GAP 4.9)
+- Fix several broken references in the manual
 
-1.4 (2006-11-29)
-  - Adjust to new buffered I/O.
-  - New operation ChangeBaseDomain with methods for cvecs and cmats.
-  - Put revision 212 as version 1.4 on the web.
+## 2.5.6 (2016-11-08)
 
-1.3 (2006-09-01)
-  - change nearly everything to the new vector/matrix interface
-  - implement new Intersection functionality no longer using Zassenhaus
-  - allow for more than one package with a C-part
-  - added test/polynomials.g to check characteristic and minimal polynomials
-  - added Memory for cvecs and cmats and to interface
+- Fix a bug reported by Jan De Beule which resulted in cvec incorrectly
+  converting certain GAP matrices to cvec matrices.
 
-1.2 (2006-08-18)
-  - ?
+## 2.5.5 (2016-03-08)
 
-1.01 (2006-06-08)
-  - ?
+- Maintenance release
 
-1.0 (2005-06-28)
-  - Initial release
+## 2.5.4 (2015-12-18)
+
+- Some functions accept slightly more general input. For example, it
+  is now in some cases acceptable to use finite field elements like
+  Z(4)^0 (which is equal, but not identical, to Z(2)^0) as input when
+  cvec is expecting elements of GF(2).
+- Fix EmptySemiEchelonBasis: its documentation said it expects a
+  sample vector, but the implementation expected a sample matrix. Now
+  both are possible, and both are documented.
+- Fix some errors in the manual.
+- Move website to https://gap-packages.github.io/cvec/
+- Stop using GenericHashFunc_C (formerly provided by the orb package)
+
+## 2.5.3 (2014-11-08)
+
+- Tweak the build system to avoid potential issues when the source
+  code gets repackages by third parties (e.g. by the GAP team, when
+  creating their big package archives)
+
+## 2.5.2 (2014-09-24)
+
+- Fix some minor issues in the documentation
+- Remove some leftover GAP 4.4 compatibility code
+- Update Max Neunhoeffer's contact data
+- Use AutoDoc to generate title page of the manual from PackageInfo.g
+- Add Max Horn as a maintainer
+
+## 2.5.1 (2014-04-04)
+
+- Previous release had an invalid release date in
+  PackageInfo.g (2014-04-31 instead of 2014-03-31).
+- Merge HISTORY and CHANGES files.
+
+## 2.5 (2014-03-31)
+
+- Add methods for \^ for cvecs and Frobenius automorphisms
+- Add methods for \^ for cmats and Frobenius automorphisms
+- Fix a bug in unpickling semi echelonised bases
+- Update and tweak the package build system
+- Move package repository and website to GitHub
+
+## 2.4 (2012-09-14)
+
+- Fix an ELMS_LIST bug for CMats reported by Felix Noeske
+
+## 2.3 (2012-07-13)
+
+- Fix CMat bug: used to not ShallowCopy its first argument
+- Fixed DuplicateFreeList and Filtered bug for CMats.
+
+## 2.2 (2012-05-28)
+
+- Compile manual against GAP 4.5.4.
+- Add script "configure_like_gap".
+- Adjust README and installation instructions.
+
+## 2.1 (2012-02-03)
+
+- Fix a serious bug in MinimalPolynomialMC for matrices over finite
+  fields. WARNING: Wrong results were produced by version 2.0!
+
+## 2.0 (2012-01-31)
+
+- Improve implementation of MinimalPolynomialOfMatrixMC and use it
+  as a method for MinimalPolynomial for row list matrices.
+  Document it for the first time.
+- Completely change build setup to use automake/autoconf/libtool as
+  done in the IO package.
+
+## 1.8 (2011-03-24)
+
+- Slightly improved minimal polynomial routine by suggestion of
+  referee.
+- Use C-Hashfunction of orb 3.0 if it is there.
+- Many optimisations for GF2
+- Faster ScalarProduct for GF2
+- Fast EntryOfMatrixProduct for prime fields
+- Fixed configure script to work with GAP 4.5 without breaking 4.4.
+- Fixed a bug with zero length matrices introduced after 1.7
+- Added a Length method for semi echelonised bases
+- Documented the Vectors operation for semi echelonised bases
+- Put revision 402 as version 1.8 on the web
+
+## 1.7 (2007-09-26)
+
+- Introduce filters for cmats and cvecs to distinguish cases of q=p
+  and q <= MAXSIZE_GF_INTERNAL.
+- Kernel method for cmat row access
+- Operation ScalarProductsRows with kernel method for prime fields
+  used for condensation
+- Fixed infinite recursion in matrix multiplication because of
+  Winograd method.
+- Fixed problem of polynomial factorisation over "DefaultField"
+  instead of BaseDomain in Minimal and Characteristic polynomial
+  routines.
+- New method for SumIntersectionMat for cmats.
+- Use constructors for new objects in new interface, implement them.
+- Change all addresses to St Andrews.
+- Require GAP >= 4.4.9
+- Tune vector matrices interface and polish implementation.
+- Added a pickling/unpickling method for semi echelon basis.
+- Quite a few little changes to the vector/matrix interface
+  after discussions in Braunschweig.
+- Make TraceMat compatible with GAP4R4.
+- Added matobjplist.g* from the dev library for compatibility with 4r4.
+- Put revision 324 as version 1.7 on the web.
+
+## 1.6 (2007-04-02)
+
+- Improve MinimalPolynomialMC, change calling convention.
+- Fixed a dangerous bug in matrix multiplication using the
+  memory-saving Winograd trick.
+- Better Value method for CMats (do nothing a human would not also do)
+- Put AddMatrix and MultMatrix into interface and implement it for cmats
+- Put revision 298 as version 1.6 on the web.
+
+## 1.5 (2007-02-07)
+
+- Improve usage of grease, in particular for level 1 for 2 < q < 257
+- Improve FILL_GREASE_TAB by using trick coming from analysis: we only
+  have to multiply a few times by the primitive root, not by powers of it.
+- Fixed a serious bug in SemiEchelonBasisMutableTX which occurred if
+  the first row of the matrix was zero.
+- New operation CompanionMatrix (not yet documented)
+- GreaseCalibration for different machines (not yet documented)
+- Winograd trick for multiplication, corresponding calibration function
+- Put copyright and licensing information in all files.
+- Add version number to archive name, fixed some things in PackageInfo.g.
+- Put revision 280 as version 1.5 on the web.
+
+## 1.4 (2006-11-29)
+
+- Adjust to new buffered I/O.
+- New operation ChangeBaseDomain with methods for cvecs and cmats.
+- Put revision 212 as version 1.4 on the web.
+
+## 1.3 (2006-09-01)
+
+- change nearly everything to the new vector/matrix interface
+- implement new Intersection functionality no longer using Zassenhaus
+- allow for more than one package with a C-part
+- added test/polynomials.g to check characteristic and minimal polynomials
+- added Memory for cvecs and cmats and to interface
+
+## 1.2 (2006-08-18)
+
+- ?
+
+## 1.01 (2006-06-08)
+
+- ?
+
+## 1.0 (2005-06-28)
+
+- Initial release
